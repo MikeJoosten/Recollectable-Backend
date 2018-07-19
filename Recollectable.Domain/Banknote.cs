@@ -6,7 +6,7 @@ namespace Recollectable.Domain
 {
     public class Banknote : Currency
     {
-        private string Color { get; set; }
-        private string Watermark { get; set; }
+        public string Color { get; set; }
+        public string Watermark { get; set; }
     }
 }

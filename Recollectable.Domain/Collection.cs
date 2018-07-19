@@ -6,10 +6,9 @@ namespace Recollectable.Domain
 {
     public class Collection
     {
-        private Guid Id { get; set; }
-        private Guid OwnerId { get; set; }
-        private User Owner { get; set; }
-        private Guid CollectableId { get; set; }
-        private List<Collectable> Collectables { get; set; }
+        public Guid Id { get; set; }
+        public Guid OwnerId { get; set; }
+        public User Owner { get; set; }
+        public List<Collectable> Collectables { get; set; }
     }
 }

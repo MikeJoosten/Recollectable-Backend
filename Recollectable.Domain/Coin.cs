@@ -13,6 +13,6 @@ namespace Recollectable.Domain
         public string ObverseLegend { get; set; }
         public string ReverseLegend { get; set; }
         public string EdgeType { get; set; }
-        public string EdgeLegend { get; set }
+        public string EdgeLegend { get; set; }
     }
 }

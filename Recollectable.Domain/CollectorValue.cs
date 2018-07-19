@@ -6,16 +6,18 @@ namespace Recollectable.Domain
 {
     public class CollectorValue
     {
-        private Guid Id { get; set; }
-        private double G4Value { get; set; }
-        private double VG8Value { get; set; }
-        private double F12Value { get; set; }
-        private double VF20Value { get; set; }
-        private double XF40Value { get; set; }
-        private double AU50Value { get; set; }
-        private double MS60Value { get; set; }
-        private double MS65Value { get; set; }
-        private double PF63Value { get; set; }
-        private double PF65Value { get; set; }
+        public Guid Id { get; set; }
+        public double G4Value { get; set; }
+        public double VG8Value { get; set; }
+        public double F12Value { get; set; }
+        public double VF20Value { get; set; }
+        public double XF40Value { get; set; }
+        public double AU50Value { get; set; }
+        public double MS60Value { get; set; }
+        public double MS65Value { get; set; }
+        public double PF63Value { get; set; }
+        public double PF65Value { get; set; }
+        public Currency Currency { get; set; }
+        public Guid CurrencyId { get; set; }
     }
 }

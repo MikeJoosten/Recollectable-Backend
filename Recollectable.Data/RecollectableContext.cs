@@ -11,8 +11,7 @@ namespace Recollectable.Data
         DbSet<User> Users { get; set; }
         DbSet<Country> Countries { get; set; }
         DbSet<Collection> Collections { get; set; }
-        DbSet<Coin> Coins { get; set; }
-        DbSet<Banknote> Banknotes { get; set; }
+        DbSet<Collectable> Collectables { get; set; }
         DbSet<CollectorValue> CollectorValues { get; set; }
 
         public RecollectableContext(DbContextOptions<RecollectableContext> options) 
@@ -21,6 +20,14 @@ namespace Recollectable.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Currency>()
+                .HasOne(c => c.CollectorValue)
+                .WithOne(c => c.Currency)
+                .HasForeignKey<CollectorValue>(c => c.CurrencyId);
+
+            modelBuilder.Entity<Collection>()
+                .HasOne(c => c.Owner)
+                .WithOne(u => u.Collection);
         }
     }
 }
