@@ -13,5 +13,6 @@ namespace Recollectable.Domain
         public Country Country { get; set; }
         public Guid CollectionId { get; set; }
         public Collection Collection { get; set; }
+        public List<CollectableCondition> CollectableConditions { get; set; }
     }
 }

@@ -28,6 +28,9 @@ namespace Recollectable.Data
             modelBuilder.Entity<Collection>()
                 .HasOne(c => c.Owner)
                 .WithOne(u => u.Collection);
+
+            modelBuilder.Entity<CollectableCondition>()
+                .HasKey(c => new { c.ConditionId, c.CollectableId, c.CollectionId });
         }
     }
 }

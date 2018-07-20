@@ -4,12 +4,10 @@ using System.Text;
 
 namespace Recollectable.Domain
 {
-    public class Collection
+    public class Condition
     {
         public Guid Id { get; set; }
-        public Guid OwnerId { get; set; }
-        public User Owner { get; set; }
-        public List<Collectable> Collectables { get; set; }
+        public string Grade { get; set; }
         public List<CollectableCondition> CollectableConditions { get; set; }
     }
 }
