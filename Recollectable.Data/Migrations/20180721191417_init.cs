@@ -8,17 +8,6 @@ namespace Recollectable.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Collections",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Collections", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CollectorValues",
                 columns: table => new
                 {
@@ -40,7 +29,7 @@ namespace Recollectable.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Condition",
+                name: "Conditions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
@@ -48,7 +37,7 @@ namespace Recollectable.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Condition", x => x.Id);
+                    table.PrimaryKey("PK_Conditions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -71,18 +60,11 @@ namespace Recollectable.Data.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
-                    Email = table.Column<string>(nullable: true),
-                    CollectionId = table.Column<Guid>(nullable: false)
+                    Email = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Users_Collections_CollectionId",
-                        column: x => x.CollectionId,
-                        principalTable: "Collections",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -92,7 +74,6 @@ namespace Recollectable.Data.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     CountryId = table.Column<Guid>(nullable: false),
-                    CollectionId = table.Column<Guid>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     FaceValue = table.Column<int>(nullable: true),
                     Type = table.Column<string>(nullable: true),
@@ -108,12 +89,6 @@ namespace Recollectable.Data.Migrations
                 {
                     table.PrimaryKey("PK_Collectables", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Collectables_Collections_CollectionId",
-                        column: x => x.CollectionId,
-                        principalTable: "Collections",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Collectables_Countries_CountryId",
                         column: x => x.CountryId,
                         principalTable: "Countries",
@@ -128,16 +103,35 @@ namespace Recollectable.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CollectableCondition",
+                name: "Collections",
                 columns: table => new
                 {
-                    ConditionId = table.Column<Guid>(nullable: false),
-                    CollectableId = table.Column<Guid>(nullable: false),
-                    CollectionId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    Type = table.Column<string>(nullable: true),
+                    OwnerId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CollectableCondition", x => new { x.ConditionId, x.CollectableId, x.CollectionId });
+                    table.PrimaryKey("PK_Collections", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Collections_Users_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CollectableCondition",
+                columns: table => new
+                {
+                    CollectionId = table.Column<Guid>(nullable: false),
+                    CollectableId = table.Column<Guid>(nullable: false),
+                    ConditionId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CollectableCondition", x => new { x.CollectionId, x.CollectableId, x.ConditionId });
                     table.ForeignKey(
                         name: "FK_CollectableCondition_Collectables_CollectableId",
                         column: x => x.CollectableId,
@@ -151,9 +145,9 @@ namespace Recollectable.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CollectableCondition_Condition_ConditionId",
+                        name: "FK_CollectableCondition_Conditions_ConditionId",
                         column: x => x.ConditionId,
-                        principalTable: "Condition",
+                        principalTable: "Conditions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -164,14 +158,9 @@ namespace Recollectable.Data.Migrations
                 column: "CollectableId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CollectableCondition_CollectionId",
+                name: "IX_CollectableCondition_ConditionId",
                 table: "CollectableCondition",
-                column: "CollectionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Collectables_CollectionId",
-                table: "Collectables",
-                column: "CollectionId");
+                column: "ConditionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Collectables_CountryId",
@@ -184,10 +173,9 @@ namespace Recollectable.Data.Migrations
                 column: "CollectorValueId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_CollectionId",
-                table: "Users",
-                column: "CollectionId",
-                unique: true);
+                name: "IX_Collections_OwnerId",
+                table: "Collections",
+                column: "OwnerId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -196,22 +184,22 @@ namespace Recollectable.Data.Migrations
                 name: "CollectableCondition");
 
             migrationBuilder.DropTable(
-                name: "Users");
-
-            migrationBuilder.DropTable(
                 name: "Collectables");
 
             migrationBuilder.DropTable(
-                name: "Condition");
+                name: "Collections");
 
             migrationBuilder.DropTable(
-                name: "Collections");
+                name: "Conditions");
 
             migrationBuilder.DropTable(
                 name: "Countries");
 
             migrationBuilder.DropTable(
                 name: "CollectorValues");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }
