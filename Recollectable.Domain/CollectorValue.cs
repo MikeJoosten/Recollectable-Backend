@@ -17,7 +17,6 @@ namespace Recollectable.Domain
         public double MS65Value { get; set; }
         public double PF63Value { get; set; }
         public double PF65Value { get; set; }
-        public Currency Currency { get; set; }
-        public Guid CurrencyId { get; set; }
+        public List<Currency> Currencies { get; set; }
     }
 }

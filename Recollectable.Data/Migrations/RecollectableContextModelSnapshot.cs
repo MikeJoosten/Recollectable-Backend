@@ -66,12 +66,7 @@ namespace Recollectable.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid>("OwnerId");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("OwnerId")
-                        .IsUnique();
 
                     b.ToTable("Collections");
                 });
@@ -82,8 +77,6 @@ namespace Recollectable.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<double>("AU50Value");
-
-                    b.Property<Guid>("CurrencyId");
 
                     b.Property<double>("F12Value");
 
@@ -104,9 +97,6 @@ namespace Recollectable.Data.Migrations
                     b.Property<double>("XF40Value");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CurrencyId")
-                        .IsUnique();
 
                     b.ToTable("CollectorValues");
                 });
@@ -142,6 +132,8 @@ namespace Recollectable.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<Guid>("CollectionId");
+
                     b.Property<string>("Email");
 
                     b.Property<string>("FirstName");
@@ -149,6 +141,9 @@ namespace Recollectable.Data.Migrations
                     b.Property<string>("LastName");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CollectionId")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -158,6 +153,8 @@ namespace Recollectable.Data.Migrations
                     b.HasBaseType("Recollectable.Domain.Collectable");
 
                     b.Property<string>("BackImagePath");
+
+                    b.Property<Guid>("CollectorValueId");
 
                     b.Property<int>("FaceValue");
 
@@ -172,6 +169,8 @@ namespace Recollectable.Data.Migrations
                     b.Property<string>("Size");
 
                     b.Property<string>("Type");
+
+                    b.HasIndex("CollectorValueId");
 
                     b.ToTable("Currency");
 
@@ -209,19 +208,19 @@ namespace Recollectable.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Collection", b =>
+            modelBuilder.Entity("Recollectable.Domain.User", b =>
                 {
-                    b.HasOne("Recollectable.Domain.User", "Owner")
-                        .WithOne("Collection")
-                        .HasForeignKey("Recollectable.Domain.Collection", "OwnerId")
+                    b.HasOne("Recollectable.Domain.Collection", "Collection")
+                        .WithOne("Owner")
+                        .HasForeignKey("Recollectable.Domain.User", "CollectionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.CollectorValue", b =>
+            modelBuilder.Entity("Recollectable.Domain.Currency", b =>
                 {
-                    b.HasOne("Recollectable.Domain.Currency", "Currency")
-                        .WithOne("CollectorValue")
-                        .HasForeignKey("Recollectable.Domain.CollectorValue", "CurrencyId")
+                    b.HasOne("Recollectable.Domain.CollectorValue", "CollectorValue")
+                        .WithMany("Currencies")
+                        .HasForeignKey("CollectorValueId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

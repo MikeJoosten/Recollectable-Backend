@@ -20,14 +20,9 @@ namespace Recollectable.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Currency>()
-                .HasOne(c => c.CollectorValue)
-                .WithOne(c => c.Currency)
-                .HasForeignKey<CollectorValue>(c => c.CurrencyId);
-
-            modelBuilder.Entity<Collection>()
-                .HasOne(c => c.Owner)
-                .WithOne(u => u.Collection);
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Collection)
+                .WithOne(c => c.Owner);
 
             modelBuilder.Entity<CollectableCondition>()
                 .HasKey(c => new { c.ConditionId, c.CollectableId, c.CollectionId });
