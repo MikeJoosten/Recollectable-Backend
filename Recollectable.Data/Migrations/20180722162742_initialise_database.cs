@@ -82,7 +82,19 @@ namespace Recollectable.Data.Migrations
                     ObverseDescription = table.Column<string>(nullable: true),
                     ReverseDescription = table.Column<string>(nullable: true),
                     FrontImagePath = table.Column<string>(nullable: true),
-                    BackImagePath = table.Column<string>(nullable: true)
+                    BackImagePath = table.Column<string>(nullable: true),
+                    Color = table.Column<string>(nullable: true),
+                    Watermark = table.Column<string>(nullable: true),
+                    Mintage = table.Column<int>(nullable: true),
+                    Weight = table.Column<string>(nullable: true),
+                    Metal = table.Column<string>(nullable: true),
+                    Note = table.Column<string>(nullable: true),
+                    Subject = table.Column<string>(nullable: true),
+                    ObverseLegend = table.Column<string>(nullable: true),
+                    ReverseLegend = table.Column<string>(nullable: true),
+                    EdgeType = table.Column<string>(nullable: true),
+                    EdgeLegend = table.Column<string>(nullable: true),
+                    EdgeLettering = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

@@ -172,6 +172,48 @@ namespace Recollectable.Data.Migrations
                     b.HasDiscriminator().HasValue("Currency");
                 });
 
+            modelBuilder.Entity("Recollectable.Domain.Banknote", b =>
+                {
+                    b.HasBaseType("Recollectable.Domain.Currency");
+
+                    b.Property<string>("Color");
+
+                    b.Property<string>("Watermark");
+
+                    b.ToTable("Banknote");
+
+                    b.HasDiscriminator().HasValue("Banknote");
+                });
+
+            modelBuilder.Entity("Recollectable.Domain.Coin", b =>
+                {
+                    b.HasBaseType("Recollectable.Domain.Currency");
+
+                    b.Property<string>("EdgeLegend");
+
+                    b.Property<string>("EdgeLettering");
+
+                    b.Property<string>("EdgeType");
+
+                    b.Property<string>("Metal");
+
+                    b.Property<int>("Mintage");
+
+                    b.Property<string>("Note");
+
+                    b.Property<string>("ObverseLegend");
+
+                    b.Property<string>("ReverseLegend");
+
+                    b.Property<string>("Subject");
+
+                    b.Property<string>("Weight");
+
+                    b.ToTable("Coin");
+
+                    b.HasDiscriminator().HasValue("Coin");
+                });
+
             modelBuilder.Entity("Recollectable.Domain.Collectable", b =>
                 {
                     b.HasOne("Recollectable.Domain.Country", "Country")
