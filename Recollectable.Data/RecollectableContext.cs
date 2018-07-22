@@ -16,6 +16,7 @@ namespace Recollectable.Data
         public DbSet<Banknote> Banknotes { get; set; }
         public DbSet<Collectable> Collectables { get; set; }
         public DbSet<CollectorValue> CollectorValues { get; set; }
+        public DbSet<CollectionCollectable> CollectionCollectables { get; set; }
 
         public RecollectableContext(DbContextOptions<RecollectableContext> options) 
             : base(options)
@@ -24,22 +25,22 @@ namespace Recollectable.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Foreign Keys
-            modelBuilder.Entity<CollectableCondition>()
+            modelBuilder.Entity<CollectionCollectable>()
                 .HasKey(c => new { c.CollectionId, c.CollectableId, c.ConditionId });
 
-            modelBuilder.Entity<CollectableCondition>()
+            modelBuilder.Entity<CollectionCollectable>()
                .HasOne(c => c.Collection)
-               .WithMany(c => c.CollectableConditions)
+               .WithMany(c => c.CollectionCollectables)
                .HasForeignKey(c => c.CollectionId);
 
-            modelBuilder.Entity<CollectableCondition>()
+            modelBuilder.Entity<CollectionCollectable>()
                .HasOne(c => c.Collectable)
-               .WithMany(c => c.CollectableConditions)
+               .WithMany(c => c.CollectionCollectables)
                .HasForeignKey(c => c.CollectableId);
 
-            modelBuilder.Entity<CollectableCondition>()
+            modelBuilder.Entity<CollectionCollectable>()
                .HasOne(c => c.Condition)
-               .WithMany(c => c.CollectableConditions)
+               .WithMany(c => c.CollectionCollectables)
                .HasForeignKey(c => c.ConditionId);
 
             // Seeding Database
@@ -73,6 +74,18 @@ namespace Recollectable.Data
                     Id = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
                     Type = "Coin",
                     OwnerId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                },
+                new Collection
+                {
+                    Id = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"),
+                    Type = "Banknote",
+                    OwnerId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                },
+                new Collection
+                {
+                    Id = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"),
+                    Type = "Coin",
+                    OwnerId = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e")
                 }
             );
 
@@ -111,7 +124,7 @@ namespace Recollectable.Data
                     FaceValue = 5,
                     Type = "Pesos",
                     ReleaseDate = 1957,
-                    CollectorValueId = new Guid(),
+                    CollectorValueId = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"),
                     Size = "36 mm.",
                     ObverseDescription = "National arms, eagle left",
                     ReverseDescription = "Head left",
@@ -135,7 +148,7 @@ namespace Recollectable.Data
                     FaceValue = 6000,
                     Type = "Baht",
                     ReleaseDate = 1987,
-                    CollectorValueId = new Guid(),
+                    CollectorValueId = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"),
                     Size = "26 mm.",
                     ObverseDescription = "Kneeling and seated figures within circle",
                     ReverseDescription = "Emblem",
@@ -159,7 +172,7 @@ namespace Recollectable.Data
                     FaceValue = 1,
                     Type = "Dime",
                     ReleaseDate = 1924,
-                    CollectorValueId = new Guid(),
+                    CollectorValueId = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"),
                     Size = "17.8 mm.",
                     ObverseDescription = "",
                     ReverseDescription = "",
@@ -186,14 +199,15 @@ namespace Recollectable.Data
                     FaceValue = 50,
                     Type = "Dollars",
                     ReleaseDate = 1993,
-                    CollectorValueId = new Guid(),
+                    CollectorValueId = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"),
                     Size = "",
                     ObverseDescription = "Ulysses S. Grant at center",
                     ReverseDescription = "United States Capital Building",
                     FrontImagePath = "",
                     BackImagePath = "",
                     Color = "",
-                    Watermark = ""
+                    Watermark = "",
+                    Signature = ""
                 },
                 new Banknote
                 {
@@ -202,7 +216,7 @@ namespace Recollectable.Data
                     FaceValue = 1000,
                     Type = "Dollars",
                     ReleaseDate = 1988,
-                    CollectorValueId = new Guid(),
+                    CollectorValueId = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"),
                     Size = "",
                     ObverseDescription = "Queen Elizabeth II, Parliament Library at right, " +
                     "Optical device with denomination at upper left, Arms at upper left center",
@@ -210,7 +224,8 @@ namespace Recollectable.Data
                     FrontImagePath = "",
                     BackImagePath = "",
                     Color = "Pink on multicolor underprint",
-                    Watermark = ""
+                    Watermark = "",
+                    Signature = "Thiessen-Crow"
                 }
             );
 
@@ -225,6 +240,114 @@ namespace Recollectable.Data
                     XF40Value = 15,
                     MS60Value = 16,
                     MS63Value = 18
+                },
+                new CollectorValue
+                {
+                    Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"),
+                    G4Value = 50,
+                    VG8Value = 50,
+                    F12Value = 50,
+                    VF20Value = 50,
+                    XF40Value = 50,
+                    MS60Value = 200,
+                    MS63Value = 200
+                },
+                new CollectorValue
+                {
+                    Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"),
+                    G4Value = 544.61,
+                    VG8Value = 544.61,
+                    F12Value = 544.61,
+                    VF20Value = 544.61,
+                    XF40Value = 544.61,
+                    MS60Value = 825,
+                    MS63Value = 850,
+                    PF63Value = 900,
+                    PF65Value = 1000
+                },
+                new CollectorValue
+                {
+                    Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"),
+                    G4Value = 760,
+                    VG8Value = 760,
+                    F12Value = 760,
+                    VF20Value = 760,
+                    XF40Value = 760,
+                    MS60Value = 1650,
+                    MS63Value = 1650
+                },
+                new CollectorValue
+                {
+                    Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"),
+                    G4Value = 3,
+                    VG8Value = 3.50,
+                    F12Value = 4,
+                    VF20Value = 4.50,
+                    XF40Value = 13.50,
+                    MS60Value = 40,
+                    MS63Value = 165
+                }
+            );
+
+            modelBuilder.Entity<Condition>().HasData(
+                new Condition
+                {
+                    Id = new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca"),
+                    Grade = "MS62"
+                },
+                new Condition
+                {
+                    Id = new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a"),
+                    Grade = "VF24"
+                },
+                new Condition
+                {
+                    Id = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a"),
+                    Grade = "Uncirculated"
+                },
+                new Condition
+                {
+                    Id = new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d"),
+                    Grade = "Fine"
+                }
+            );
+
+            modelBuilder.Entity<CollectionCollectable>().HasData(
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
+                    CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
+                    ConditionId = new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"),
+                    CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"),
+                    ConditionId = new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
+                    CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"),
+                    ConditionId = new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"),
+                    CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
+                    ConditionId = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"),
+                    CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
+                    ConditionId = new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
+                    CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"),
+                    ConditionId = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a")
                 }
             );*/
         }

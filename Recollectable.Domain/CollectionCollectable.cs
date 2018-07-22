@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Recollectable.Domain
 {
-    public class CollectableCondition
+    public class CollectionCollectable
     {
         public Guid CollectionId { get; set; }
         public Collection Collection { get; set; }

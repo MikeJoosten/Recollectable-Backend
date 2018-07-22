@@ -10,6 +10,6 @@ namespace Recollectable.Domain
         public Guid Id { get; set; }
         public Guid CountryId { get; set; }
         public Country Country { get; set; }
-        public List<CollectableCondition> CollectableConditions { get; set; }
+        public List<CollectionCollectable> CollectionCollectables { get; set; }
     }
 }

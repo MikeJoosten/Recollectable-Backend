@@ -10,6 +10,6 @@ namespace Recollectable.Domain
         public string Type { get; set; }
         public Guid OwnerId { get; set; }
         public User Owner { get; set; }
-        public List<CollectableCondition> CollectableConditions { get; set; }
+        public List<CollectionCollectable> CollectionCollectables { get; set; }
     }
 }

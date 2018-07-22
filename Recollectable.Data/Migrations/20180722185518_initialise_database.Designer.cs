@@ -10,7 +10,7 @@ using Recollectable.Data;
 namespace Recollectable.Data.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20180722182412_initialise_database")]
+    [Migration("20180722185518_initialise_database")]
     partial class initialise_database
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,23 +40,6 @@ namespace Recollectable.Data.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("Collectable");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.CollectableCondition", b =>
-                {
-                    b.Property<Guid>("CollectionId");
-
-                    b.Property<Guid>("CollectableId");
-
-                    b.Property<Guid>("ConditionId");
-
-                    b.HasKey("CollectionId", "CollectableId", "ConditionId");
-
-                    b.HasIndex("CollectableId");
-
-                    b.HasIndex("ConditionId");
-
-                    b.ToTable("CollectableCondition");
-                });
-
             modelBuilder.Entity("Recollectable.Domain.Collection", b =>
                 {
                     b.Property<Guid>("Id")
@@ -73,30 +56,47 @@ namespace Recollectable.Data.Migrations
                     b.ToTable("Collections");
                 });
 
+            modelBuilder.Entity("Recollectable.Domain.CollectionCollectable", b =>
+                {
+                    b.Property<Guid>("CollectionId");
+
+                    b.Property<Guid>("CollectableId");
+
+                    b.Property<Guid>("ConditionId");
+
+                    b.HasKey("CollectionId", "CollectableId", "ConditionId");
+
+                    b.HasIndex("CollectableId");
+
+                    b.HasIndex("ConditionId");
+
+                    b.ToTable("CollectionCollectables");
+                });
+
             modelBuilder.Entity("Recollectable.Domain.CollectorValue", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<double>("AU50Value");
+                    b.Property<double?>("AU50Value");
 
-                    b.Property<double>("F12Value");
+                    b.Property<double?>("F12Value");
 
-                    b.Property<double>("G4Value");
+                    b.Property<double?>("G4Value");
 
-                    b.Property<double>("MS60Value");
+                    b.Property<double?>("MS60Value");
 
-                    b.Property<double>("MS63Value");
+                    b.Property<double?>("MS63Value");
 
-                    b.Property<double>("PF63Value");
+                    b.Property<double?>("PF63Value");
 
-                    b.Property<double>("PF65Value");
+                    b.Property<double?>("PF65Value");
 
-                    b.Property<double>("VF20Value");
+                    b.Property<double?>("VF20Value");
 
-                    b.Property<double>("VG8Value");
+                    b.Property<double?>("VG8Value");
 
-                    b.Property<double>("XF40Value");
+                    b.Property<double?>("XF40Value");
 
                     b.HasKey("Id");
 
@@ -226,29 +226,29 @@ namespace Recollectable.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.CollectableCondition", b =>
-                {
-                    b.HasOne("Recollectable.Domain.Collectable", "Collectable")
-                        .WithMany("CollectableConditions")
-                        .HasForeignKey("CollectableId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Recollectable.Domain.Collection", "Collection")
-                        .WithMany("CollectableConditions")
-                        .HasForeignKey("CollectionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Recollectable.Domain.Condition", "Condition")
-                        .WithMany("CollectableConditions")
-                        .HasForeignKey("ConditionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Recollectable.Domain.Collection", b =>
                 {
                     b.HasOne("Recollectable.Domain.User", "Owner")
                         .WithMany("Collections")
                         .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Recollectable.Domain.CollectionCollectable", b =>
+                {
+                    b.HasOne("Recollectable.Domain.Collectable", "Collectable")
+                        .WithMany("CollectionCollectables")
+                        .HasForeignKey("CollectableId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Recollectable.Domain.Collection", "Collection")
+                        .WithMany("CollectionCollectables")
+                        .HasForeignKey("CollectionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Recollectable.Domain.Condition", "Condition")
+                        .WithMany("CollectionCollectables")
+                        .HasForeignKey("ConditionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
