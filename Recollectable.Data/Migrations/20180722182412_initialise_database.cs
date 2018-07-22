@@ -19,7 +19,7 @@ namespace Recollectable.Data.Migrations
                     XF40Value = table.Column<double>(nullable: false),
                     AU50Value = table.Column<double>(nullable: false),
                     MS60Value = table.Column<double>(nullable: false),
-                    MS65Value = table.Column<double>(nullable: false),
+                    MS63Value = table.Column<double>(nullable: false),
                     PF63Value = table.Column<double>(nullable: false),
                     PF65Value = table.Column<double>(nullable: false)
                 },
@@ -85,6 +85,7 @@ namespace Recollectable.Data.Migrations
                     BackImagePath = table.Column<string>(nullable: true),
                     Color = table.Column<string>(nullable: true),
                     Watermark = table.Column<string>(nullable: true),
+                    Signature = table.Column<string>(nullable: true),
                     Mintage = table.Column<int>(nullable: true),
                     Weight = table.Column<string>(nullable: true),
                     Metal = table.Column<string>(nullable: true),

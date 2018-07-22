@@ -84,7 +84,7 @@ namespace Recollectable.Data.Migrations
 
                     b.Property<double>("MS60Value");
 
-                    b.Property<double>("MS65Value");
+                    b.Property<double>("MS63Value");
 
                     b.Property<double>("PF63Value");
 
@@ -177,6 +177,8 @@ namespace Recollectable.Data.Migrations
                     b.HasBaseType("Recollectable.Domain.Currency");
 
                     b.Property<string>("Color");
+
+                    b.Property<string>("Signature");
 
                     b.Property<string>("Watermark");
 

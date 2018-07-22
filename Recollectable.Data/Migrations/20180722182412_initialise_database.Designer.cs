@@ -10,7 +10,7 @@ using Recollectable.Data;
 namespace Recollectable.Data.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20180722164921_initialise_database")]
+    [Migration("20180722182412_initialise_database")]
     partial class initialise_database
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,7 +86,7 @@ namespace Recollectable.Data.Migrations
 
                     b.Property<double>("MS60Value");
 
-                    b.Property<double>("MS65Value");
+                    b.Property<double>("MS63Value");
 
                     b.Property<double>("PF63Value");
 
@@ -179,6 +179,8 @@ namespace Recollectable.Data.Migrations
                     b.HasBaseType("Recollectable.Domain.Currency");
 
                     b.Property<string>("Color");
+
+                    b.Property<string>("Signature");
 
                     b.Property<string>("Watermark");
 

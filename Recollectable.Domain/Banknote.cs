@@ -8,5 +8,6 @@ namespace Recollectable.Domain
     {
         public string Color { get; set; }
         public string Watermark { get; set; }
+        public string Signature { get; set; }
     }
 }
