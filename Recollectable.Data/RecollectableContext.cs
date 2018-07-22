@@ -44,7 +44,7 @@ namespace Recollectable.Data
                .HasForeignKey(c => c.ConditionId);
 
             // Seeding Database
-            /*modelBuilder.Entity<User>().HasData(
+            modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"),
@@ -194,7 +194,7 @@ namespace Recollectable.Data
             modelBuilder.Entity<Banknote>().HasData(
                 new Banknote
                 {
-                    Id = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
+                    Id = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"),
                     CountryId = new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"),
                     FaceValue = 50,
                     Type = "Dollars",
@@ -334,7 +334,7 @@ namespace Recollectable.Data
                 new CollectionCollectable
                 {
                     CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"),
-                    CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
+                    CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"),
                     ConditionId = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a")
                 },
                 new CollectionCollectable
@@ -349,7 +349,7 @@ namespace Recollectable.Data
                     CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"),
                     ConditionId = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a")
                 }
-            );*/
+            );
         }
     }
 }
