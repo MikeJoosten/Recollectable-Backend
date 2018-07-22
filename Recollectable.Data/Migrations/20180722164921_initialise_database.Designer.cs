@@ -10,7 +10,7 @@ using Recollectable.Data;
 namespace Recollectable.Data.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20180722162742_initialise_database")]
+    [Migration("20180722164921_initialise_database")]
     partial class initialise_database
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -191,9 +191,9 @@ namespace Recollectable.Data.Migrations
                 {
                     b.HasBaseType("Recollectable.Domain.Currency");
 
-                    b.Property<string>("EdgeLegend");
+                    b.Property<string>("Designer");
 
-                    b.Property<string>("EdgeLettering");
+                    b.Property<string>("EdgeLegend");
 
                     b.Property<string>("EdgeType");
 

@@ -189,9 +189,9 @@ namespace Recollectable.Data.Migrations
                 {
                     b.HasBaseType("Recollectable.Domain.Currency");
 
-                    b.Property<string>("EdgeLegend");
+                    b.Property<string>("Designer");
 
-                    b.Property<string>("EdgeLettering");
+                    b.Property<string>("EdgeLegend");
 
                     b.Property<string>("EdgeType");
 

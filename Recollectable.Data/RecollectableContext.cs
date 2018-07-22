@@ -104,7 +104,17 @@ namespace Recollectable.Data
                     ObverseDescription = "National arms, eagle left",
                     ReverseDescription = "Head left",
                     FrontImagePath = "",
-                    BackImagePath = ""
+                    BackImagePath = "",
+                    Mintage = 200000,
+                    Weight = "18.05 g.",
+                    Metal = "0.720 Silver 0.4151 oz. ASW",
+                    Note = "Mint mark Mo.",
+                    Subject = "100th Anniversary of Constitution",
+                    ObverseLegend = "",
+                    ReverseLegend = "",
+                    EdgeType = "",
+                    EdgeLegend = "INDEPENCIA Y LIBERTAD",
+                    Designer = "Manuel L. Negrete"
                 }
             );*/
         }

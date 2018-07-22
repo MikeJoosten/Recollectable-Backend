@@ -94,7 +94,7 @@ namespace Recollectable.Data.Migrations
                     ReverseLegend = table.Column<string>(nullable: true),
                     EdgeType = table.Column<string>(nullable: true),
                     EdgeLegend = table.Column<string>(nullable: true),
-                    EdgeLettering = table.Column<string>(nullable: true)
+                    Designer = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
