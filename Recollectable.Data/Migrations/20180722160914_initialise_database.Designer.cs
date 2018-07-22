@@ -10,8 +10,8 @@ using Recollectable.Data;
 namespace Recollectable.Data.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20180721191417_init")]
-    partial class init
+    [Migration("20180722160914_initialise_database")]
+    partial class initialise_database
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -27,8 +27,6 @@ namespace Recollectable.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<Guid>("CountryId");
-
-                    b.Property<string>("Description");
 
                     b.Property<string>("Discriminator")
                         .IsRequired();

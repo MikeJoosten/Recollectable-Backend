@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Recollectable.Data.Migrations
 {
-    public partial class init : Migration
+    public partial class initialise_database : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -72,7 +72,6 @@ namespace Recollectable.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
                     CountryId = table.Column<Guid>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     FaceValue = table.Column<int>(nullable: true),

@@ -8,12 +8,12 @@ namespace Recollectable.Data
 {
     public class RecollectableContext : DbContext
     {
-        DbSet<User> Users { get; set; }
-        DbSet<Country> Countries { get; set; }
-        DbSet<Condition> Conditions { get; set; }
-        DbSet<Collection> Collections { get; set; }
-        DbSet<Collectable> Collectables { get; set; }
-        DbSet<CollectorValue> CollectorValues { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<Condition> Conditions { get; set; }
+        public DbSet<Collection> Collections { get; set; }
+        public DbSet<Collectable> Collectables { get; set; }
+        public DbSet<CollectorValue> CollectorValues { get; set; }
 
         public RecollectableContext(DbContextOptions<RecollectableContext> options) 
             : base(options)
@@ -40,7 +40,47 @@ namespace Recollectable.Data
                .WithMany(c => c.CollectableConditions)
                .HasForeignKey(c => c.ConditionId);
 
-            // Seeding Data
+            // Seeding Database
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"),
+                    FirstName = "Ryan",
+                    LastName = "Haywood",
+                    Email = "ryan.haywood@gmail.com"
+                },
+                new User
+                {
+                    Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"),
+                    FirstName = "Jack",
+                    LastName = "Patillo",
+                    Email = "jack.patillo@gmail.com"
+                },
+                new User
+                {
+                    Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"),
+                    FirstName = "Geoff",
+                    LastName = "Ramsey",
+                    Email = "geoff.ramsey@gmail.com"
+                }
+            );
+
+            modelBuilder.Entity<Collection>().HasData(
+                new Collection
+                {
+                    Id = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
+                    Type = "Coin",
+                    OwnerId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                }
+            );
+
+            modelBuilder.Entity<Collectable>().HasData(
+                new Collectable
+                {
+                    Id = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
+                    
+                }
+            );
         }
     }
 }

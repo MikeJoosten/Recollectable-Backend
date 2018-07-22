@@ -26,8 +26,6 @@ namespace Recollectable.Data.Migrations
 
                     b.Property<Guid>("CountryId");
 
-                    b.Property<string>("Description");
-
                     b.Property<string>("Discriminator")
                         .IsRequired();
 
