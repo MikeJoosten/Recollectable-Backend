@@ -73,19 +73,19 @@ namespace Recollectable.Data
                 {
                     Id = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
                     Type = "Coin",
-                    OwnerId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                    UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
                 },
                 new Collection
                 {
                     Id = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"),
                     Type = "Banknote",
-                    OwnerId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                    UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
                 },
                 new Collection
                 {
                     Id = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"),
                     Type = "Coin",
-                    OwnerId = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e")
+                    UserId = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e")
                 }
             );
 

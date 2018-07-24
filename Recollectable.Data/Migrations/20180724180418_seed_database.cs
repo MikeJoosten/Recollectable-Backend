@@ -7,6 +7,20 @@ namespace Recollectable.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Collections_Users_OwnerId",
+                table: "Collections");
+
+            migrationBuilder.RenameColumn(
+                name: "OwnerId",
+                table: "Collections",
+                newName: "UserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Collections_OwnerId",
+                table: "Collections",
+                newName: "IX_Collections_UserId");
+
             migrationBuilder.InsertData(
                 table: "CollectorValues",
                 columns: new[] { "Id", "AU50Value", "F12Value", "G4Value", "MS60Value", "MS63Value", "PF63Value", "PF65Value", "VF20Value", "VG8Value", "XF40Value" },
@@ -78,12 +92,12 @@ namespace Recollectable.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Collections",
-                columns: new[] { "Id", "OwnerId", "Type" },
+                columns: new[] { "Id", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "Coin" },
-                    { new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "Banknote" },
-                    { new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "Coin" }
+                    { new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), "Coin", new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1") },
+                    { new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), "Banknote", new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1") },
+                    { new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), "Coin", new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e") }
                 });
 
             migrationBuilder.InsertData(
@@ -98,10 +112,22 @@ namespace Recollectable.Data.Migrations
                     { new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") },
                     { new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") }
                 });
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Collections_Users_UserId",
+                table: "Collections",
+                column: "UserId",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Collections_Users_UserId",
+                table: "Collections");
+
             migrationBuilder.DeleteData(
                 table: "CollectionCollectables",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
@@ -251,6 +277,24 @@ namespace Recollectable.Data.Migrations
                 table: "Users",
                 keyColumn: "Id",
                 keyValue: new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"));
+
+            migrationBuilder.RenameColumn(
+                name: "UserId",
+                table: "Collections",
+                newName: "OwnerId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Collections_UserId",
+                table: "Collections",
+                newName: "IX_Collections_OwnerId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Collections_Users_OwnerId",
+                table: "Collections",
+                column: "OwnerId",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }

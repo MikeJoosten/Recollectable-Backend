@@ -8,8 +8,8 @@ namespace Recollectable.Domain
     {
         public Guid Id { get; set; }
         public string Type { get; set; }
-        public Guid OwnerId { get; set; }
-        public User Owner { get; set; }
+        public Guid UserId { get; set; }
+        public User User { get; set; }
         public List<CollectionCollectable> CollectionCollectables { get; set; }
     }
 }
