@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Recollectable.Data.Migrations
 {
-    public partial class initial_database : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -73,11 +73,11 @@ namespace Recollectable.Data.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     CountryId = table.Column<Guid>(nullable: false),
+                    CollectorValueId = table.Column<Guid>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     FaceValue = table.Column<int>(nullable: true),
                     Type = table.Column<string>(nullable: true),
                     ReleaseDate = table.Column<int>(nullable: true),
-                    CollectorValueId = table.Column<Guid>(nullable: true),
                     Size = table.Column<string>(nullable: true),
                     ObverseDescription = table.Column<string>(nullable: true),
                     ReverseDescription = table.Column<string>(nullable: true),
@@ -86,6 +86,14 @@ namespace Recollectable.Data.Migrations
                     Color = table.Column<string>(nullable: true),
                     Watermark = table.Column<string>(nullable: true),
                     Signature = table.Column<string>(nullable: true),
+                    Coin_FaceValue = table.Column<int>(nullable: true),
+                    Coin_Type = table.Column<string>(nullable: true),
+                    Coin_ReleaseDate = table.Column<int>(nullable: true),
+                    Coin_Size = table.Column<string>(nullable: true),
+                    Coin_ObverseDescription = table.Column<string>(nullable: true),
+                    Coin_ReverseDescription = table.Column<string>(nullable: true),
+                    Coin_FrontImagePath = table.Column<string>(nullable: true),
+                    Coin_BackImagePath = table.Column<string>(nullable: true),
                     Mintage = table.Column<int>(nullable: true),
                     Weight = table.Column<string>(nullable: true),
                     Metal = table.Column<string>(nullable: true),
@@ -101,15 +109,15 @@ namespace Recollectable.Data.Migrations
                 {
                     table.PrimaryKey("PK_Collectables", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Collectables_Countries_CountryId",
-                        column: x => x.CountryId,
-                        principalTable: "Countries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Collectables_CollectorValues_CollectorValueId",
                         column: x => x.CollectorValueId,
                         principalTable: "CollectorValues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Collectables_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -120,14 +128,14 @@ namespace Recollectable.Data.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     Type = table.Column<string>(nullable: true),
-                    OwnerId = table.Column<Guid>(nullable: false)
+                    UserId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Collections", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Collections_Users_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_Collections_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -165,14 +173,14 @@ namespace Recollectable.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Collectables_CountryId",
-                table: "Collectables",
-                column: "CountryId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Collectables_CollectorValueId",
                 table: "Collectables",
                 column: "CollectorValueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Collectables_CountryId",
+                table: "Collectables",
+                column: "CountryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CollectionCollectables_CollectableId",
@@ -185,9 +193,9 @@ namespace Recollectable.Data.Migrations
                 column: "ConditionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Collections_OwnerId",
+                name: "IX_Collections_UserId",
                 table: "Collections",
-                column: "OwnerId");
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -205,10 +213,10 @@ namespace Recollectable.Data.Migrations
                 name: "Conditions");
 
             migrationBuilder.DropTable(
-                name: "Countries");
+                name: "CollectorValues");
 
             migrationBuilder.DropTable(
-                name: "CollectorValues");
+                name: "Countries");
 
             migrationBuilder.DropTable(
                 name: "Users");

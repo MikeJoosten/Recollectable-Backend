@@ -10,8 +10,8 @@ using Recollectable.Data;
 namespace Recollectable.Data.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20180722185806_initial_database")]
-    partial class initial_database
+    [Migration("20180725172548_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,12 +26,16 @@ namespace Recollectable.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<Guid>("CollectorValueId");
+
                     b.Property<Guid>("CountryId");
 
                     b.Property<string>("Discriminator")
                         .IsRequired();
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CollectorValueId");
 
                     b.HasIndex("CountryId");
 
@@ -45,13 +49,13 @@ namespace Recollectable.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid>("OwnerId");
-
                     b.Property<string>("Type");
+
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Collections");
                 });
@@ -145,13 +149,13 @@ namespace Recollectable.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Currency", b =>
+            modelBuilder.Entity("Recollectable.Domain.Banknote", b =>
                 {
                     b.HasBaseType("Recollectable.Domain.Collectable");
 
                     b.Property<string>("BackImagePath");
 
-                    b.Property<Guid>("CollectorValueId");
+                    b.Property<string>("Color");
 
                     b.Property<int>("FaceValue");
 
@@ -163,24 +167,11 @@ namespace Recollectable.Data.Migrations
 
                     b.Property<string>("ReverseDescription");
 
+                    b.Property<string>("Signature");
+
                     b.Property<string>("Size");
 
                     b.Property<string>("Type");
-
-                    b.HasIndex("CollectorValueId");
-
-                    b.ToTable("Currency");
-
-                    b.HasDiscriminator().HasValue("Currency");
-                });
-
-            modelBuilder.Entity("Recollectable.Domain.Banknote", b =>
-                {
-                    b.HasBaseType("Recollectable.Domain.Currency");
-
-                    b.Property<string>("Color");
-
-                    b.Property<string>("Signature");
 
                     b.Property<string>("Watermark");
 
@@ -191,7 +182,10 @@ namespace Recollectable.Data.Migrations
 
             modelBuilder.Entity("Recollectable.Domain.Coin", b =>
                 {
-                    b.HasBaseType("Recollectable.Domain.Currency");
+                    b.HasBaseType("Recollectable.Domain.Collectable");
+
+                    b.Property<string>("BackImagePath")
+                        .HasColumnName("Coin_BackImagePath");
 
                     b.Property<string>("Designer");
 
@@ -199,17 +193,38 @@ namespace Recollectable.Data.Migrations
 
                     b.Property<string>("EdgeType");
 
+                    b.Property<int>("FaceValue")
+                        .HasColumnName("Coin_FaceValue");
+
+                    b.Property<string>("FrontImagePath")
+                        .HasColumnName("Coin_FrontImagePath");
+
                     b.Property<string>("Metal");
 
                     b.Property<int>("Mintage");
 
                     b.Property<string>("Note");
 
+                    b.Property<string>("ObverseDescription")
+                        .HasColumnName("Coin_ObverseDescription");
+
                     b.Property<string>("ObverseLegend");
+
+                    b.Property<int>("ReleaseDate")
+                        .HasColumnName("Coin_ReleaseDate");
+
+                    b.Property<string>("ReverseDescription")
+                        .HasColumnName("Coin_ReverseDescription");
 
                     b.Property<string>("ReverseLegend");
 
+                    b.Property<string>("Size")
+                        .HasColumnName("Coin_Size");
+
                     b.Property<string>("Subject");
+
+                    b.Property<string>("Type")
+                        .HasColumnName("Coin_Type");
 
                     b.Property<string>("Weight");
 
@@ -220,6 +235,11 @@ namespace Recollectable.Data.Migrations
 
             modelBuilder.Entity("Recollectable.Domain.Collectable", b =>
                 {
+                    b.HasOne("Recollectable.Domain.CollectorValue", "CollectorValue")
+                        .WithMany("Collectables")
+                        .HasForeignKey("CollectorValueId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("Recollectable.Domain.Country", "Country")
                         .WithMany("Collectables")
                         .HasForeignKey("CountryId")
@@ -228,9 +248,9 @@ namespace Recollectable.Data.Migrations
 
             modelBuilder.Entity("Recollectable.Domain.Collection", b =>
                 {
-                    b.HasOne("Recollectable.Domain.User", "Owner")
+                    b.HasOne("Recollectable.Domain.User", "User")
                         .WithMany("Collections")
-                        .HasForeignKey("OwnerId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -249,14 +269,6 @@ namespace Recollectable.Data.Migrations
                     b.HasOne("Recollectable.Domain.Condition", "Condition")
                         .WithMany("CollectionCollectables")
                         .HasForeignKey("ConditionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Recollectable.Domain.Currency", b =>
-                {
-                    b.HasOne("Recollectable.Domain.CollectorValue", "CollectorValue")
-                        .WithMany("Currencies")
-                        .HasForeignKey("CollectorValueId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

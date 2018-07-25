@@ -10,6 +10,8 @@ namespace Recollectable.Domain
         public Guid Id { get; set; }
         public Guid CountryId { get; set; }
         public Country Country { get; set; }
+        public Guid CollectorValueId { get; set; }
+        public CollectorValue CollectorValue { get; set; }
         public List<CollectionCollectable> CollectionCollectables { get; set; }
     }
 }
