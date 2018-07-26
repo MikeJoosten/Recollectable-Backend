@@ -1,4 +1,5 @@
-﻿using Recollectable.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,15 @@ namespace Recollectable.Data.Repositories
         public Condition GetCondition(Guid conditionId)
         {
             return _context.Conditions.FirstOrDefault(c => c.Id == conditionId);
+        }
+
+        public Condition GetConditionByCollectable(Guid collectionId, Guid collectableId)
+        {
+            return _context.Conditions
+                .Include(c => c.CollectionCollectables)
+                .ThenInclude(cc => cc.CollectionId == collectionId && 
+                    cc.CollectableId == collectableId)
+                .FirstOrDefault();
         }
 
         public void AddCondition(Condition condition)
