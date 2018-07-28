@@ -20,7 +20,9 @@ namespace Recollectable.Data
 
         public RecollectableContext(DbContextOptions<RecollectableContext> options) 
             : base(options)
-        { }
+        {
+            Database.Migrate();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
