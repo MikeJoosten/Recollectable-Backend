@@ -45,6 +45,7 @@ namespace Recollectable.API
                 app.UseHsts();
             }
 
+            context.Database.Migrate();
             app.UseHttpsRedirection();
             app.UseMvc();
         }

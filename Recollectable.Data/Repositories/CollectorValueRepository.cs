@@ -17,7 +17,7 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<CollectorValue> GetCollectorValues()
         {
-            return _context.CollectorValues.ToList();
+            return _context.CollectorValues;
         }
 
         public CollectorValue GetCollectorValue(Guid collectorValueId)

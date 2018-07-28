@@ -18,15 +18,14 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Banknote> GetBanknotes()
         {
-            return _context.Banknotes.OrderBy(b => b.Country.Name).ToList();
+            return _context.Banknotes.OrderBy(b => b.Country.Name);
         }
 
         public IEnumerable<Banknote> GetBanknotesByCollection(Guid collectionId)
         {
             return _context.Banknotes
                 .Include(b => b.CollectionCollectables)
-                .ThenInclude(cc => cc.CollectionId == collectionId)
-                .ToList();
+                .ThenInclude(cc => cc.CollectionId == collectionId);
         }
 
         public Banknote GetBanknote(Guid banknoteId)

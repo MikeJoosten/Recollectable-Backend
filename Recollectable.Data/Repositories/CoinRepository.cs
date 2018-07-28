@@ -18,15 +18,14 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Coin> GetCoins()
         {
-            return _context.Coins.OrderBy(c => c.Country.Name).ToList();
+            return _context.Coins.OrderBy(c => c.Country.Name);
         }
 
         public IEnumerable<Coin> GetCoinsByCollection(Guid collectionId)
         {
             return _context.Coins
                 .Include(c => c.CollectionCollectables)
-                .ThenInclude(cc => cc.CollectionId == collectionId)
-                .ToList();
+                .ThenInclude(cc => cc.CollectionId == collectionId);
         }
 
         public Coin GetCoin(Guid coinId)

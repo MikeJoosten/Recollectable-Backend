@@ -20,15 +20,14 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Collection> GetCollections()
         {
-            return _context.Collections.OrderBy(c => c.Type).ToList();
+            return _context.Collections.OrderBy(c => c.Type);
         }
 
         public IEnumerable<Collection> GetCollectionsByUser(Guid userId)
         {
             return _context.Collections
                 .Where(c => c.UserId == userId)
-                .OrderBy(c => c.Type)
-                .ToList();
+                .OrderBy(c => c.Type);
         }
 
         public Collection GetCollection(Guid collectionId)

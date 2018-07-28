@@ -18,7 +18,7 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Condition> GetConditions()
         {
-            return _context.Conditions.OrderBy(c => c.Grade).ToList();
+            return _context.Conditions.OrderBy(c => c.Grade);
         }
 
         public Condition GetCondition(Guid conditionId)

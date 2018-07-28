@@ -19,8 +19,7 @@ namespace Recollectable.Data.Repositories
         {
             return _context.Users
                 .OrderBy(u => u.FirstName)
-                .ThenBy(u => u.LastName)
-                .ToList();
+                .ThenBy(u => u.LastName);
         }
 
         public User GetUser(Guid userId)

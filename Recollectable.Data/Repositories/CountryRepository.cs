@@ -17,7 +17,7 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Country> GetCountries()
         {
-            return _context.Countries.OrderBy(c => c.Name).ToList();
+            return _context.Countries.OrderBy(c => c.Name);
         }
 
         public Country GetCountry(Guid countryId)
