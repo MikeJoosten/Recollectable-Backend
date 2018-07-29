@@ -63,5 +63,10 @@ namespace Recollectable.Data.Repositories
         {
             _context.Coins.Remove(coin);
         }
+
+        public bool Save()
+        {
+            return (_context.SaveChanges() >= 0);
+        }
     }
 }

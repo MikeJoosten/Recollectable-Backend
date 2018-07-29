@@ -14,5 +14,6 @@ namespace Recollectable.Data.Repositories
         void AddCoin(Coin coin);
         void UpdateCoin(Coin coin);
         void DeleteCoin(Coin coin);
+        bool Save();
     }
 }

@@ -12,5 +12,6 @@ namespace Recollectable.Data.Repositories
         void AddUser(User user);
         void UpdateUser(User user);
         void DeleteUser(User user);
+        bool Save();
     }
 }

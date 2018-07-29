@@ -37,5 +37,10 @@ namespace Recollectable.Data.Repositories
         {
             _context.Countries.Remove(country);
         }
+
+        public bool Save()
+        {
+            return (_context.SaveChanges() >= 0);
+        }
     }
 }

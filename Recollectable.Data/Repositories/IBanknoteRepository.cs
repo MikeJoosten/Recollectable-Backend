@@ -14,5 +14,6 @@ namespace Recollectable.Data.Repositories
         void AddBanknote(Banknote banknote);
         void UpdateBanknote(Banknote banknote);
         void DeleteBanknote(Banknote banknote);
+        bool Save();
     }
 }

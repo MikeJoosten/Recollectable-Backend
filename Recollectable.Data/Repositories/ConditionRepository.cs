@@ -47,5 +47,10 @@ namespace Recollectable.Data.Repositories
         {
             _context.Conditions.Remove(condition);
         }
+
+        public bool Save()
+        {
+            return (_context.SaveChanges() >= 0);
+        }
     }
 }

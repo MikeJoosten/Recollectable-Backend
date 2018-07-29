@@ -14,5 +14,6 @@ namespace Recollectable.Data.Repositories
         void AddCollection(Guid userId, Collection collection);
         void UpdateCollection(Collection collection);
         void DeleteCollection(Collection collection);
+        bool Save();
     }
 }

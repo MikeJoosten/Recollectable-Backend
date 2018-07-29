@@ -63,5 +63,10 @@ namespace Recollectable.Data.Repositories
         {
             _context.Banknotes.Remove(banknote);
         }
+
+        public bool Save()
+        {
+            return (_context.SaveChanges() >= 0);
+        }
     }
 }

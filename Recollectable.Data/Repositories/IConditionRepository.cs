@@ -13,5 +13,6 @@ namespace Recollectable.Data.Repositories
         void AddCondition(Condition condition);
         void UpdateCondition(Condition condition);
         void DeleteCondition(Condition condition);
+        bool Save();
     }
 }

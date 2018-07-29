@@ -1,4 +1,5 @@
-﻿using Recollectable.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,15 +30,23 @@ namespace Recollectable.Data.Repositories
 
         public void AddUser(User user)
         {
-            user.Id = Guid.NewGuid();
+            user.Id = (user.Id == null) ? Guid.NewGuid() : user.Id;
             _context.Users.Add(user);
         }
 
-        public void UpdateUser(User user) { }
+        public void UpdateUser(User user)
+        {
+            _context.Users.Update(user);
+        }
 
         public void DeleteUser(User user)
         {
             _context.Users.Remove(user);
+        }
+
+        public bool Save()
+        {
+            return (_context.SaveChanges() >= 0);
         }
     }
 }
