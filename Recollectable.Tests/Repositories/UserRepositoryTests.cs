@@ -10,20 +10,13 @@ using Xunit;
 
 namespace Recollectable.Tests.Repositories
 {
-    public class UserRepositoryTests
+    public class UserRepositoryTests : RecollectableTestBase
     {
-        private RecollectableContext _context;
         private IUserRepository _repository;
 
         public UserRepositoryTests()
         {
-            var options = new DbContextOptionsBuilder<RecollectableContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-
-            _context = new RecollectableContext(options);
             _repository = new UserRepository(_context);
-            Seed();
         }
 
         [Fact]
@@ -110,52 +103,6 @@ namespace Recollectable.Tests.Repositories
 
             Assert.Equal(5, _repository.GetUsers().Count());
             Assert.Null(_repository.GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")));
-        }
-
-        private void Seed()
-        {
-            var users = new[]
-            {
-                new User
-                {
-                    Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"),
-                    FirstName = "Ryan",
-                    LastName = "Haywood"
-                },
-                new User
-                {
-                    Id = new Guid("c7304af2-e5cd-4186-83d9-77807c9512ec"),
-                    FirstName = "Michael",
-                    LastName = "Jones"
-                },
-                new User
-                {
-                    Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"),
-                    FirstName = "Geoff",
-                    LastName = "Ramsey"
-                },
-                new User
-                {
-                    Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"),
-                    FirstName = "Jack",
-                    LastName = "Pattillo"
-                },
-                new User
-                {
-                    Id = new Guid("ca26fdfb-46b3-4120-9e52-a07820bc0409"),
-                    FirstName = "Jeremy",
-                    LastName = "Dooley"
-                },
-                new User
-                {
-                    Id = new Guid("58ba1e18-46a2-44d5-8f88-51a8e6426a56"),
-                    FirstName = "Gavin",
-                    LastName = "Free"
-                }
-            };
-
-            _context.Users.AddRange(users);
-            _context.SaveChanges();
         }
     }
 }
