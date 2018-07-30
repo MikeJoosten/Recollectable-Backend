@@ -9,14 +9,14 @@ namespace Recollectable.Data.Migrations
         {
             migrationBuilder.InsertData(
                 table: "CollectorValues",
-                columns: new[] { "Id", "AU50Value", "F12Value", "G4Value", "MS60Value", "MS63Value", "PF63Value", "PF65Value", "VF20Value", "VG8Value", "XF40Value" },
+                columns: new[] { "Id", "AU50Value", "F12Value", "G4Value", "MS60Value", "MS63Value", "PF60Value", "PF63Value", "PF65Value", "VF20Value", "VG8Value", "XF40Value" },
                 values: new object[,]
                 {
-                    { new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), null, 6.48, 6.48, 16.0, 18.0, null, null, 6.48, 6.48, 15.0 },
-                    { new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), null, 50.0, 50.0, 200.0, 200.0, null, null, 50.0, 50.0, 50.0 },
-                    { new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), null, 544.61, 544.61, 825.0, 850.0, 900.0, 1000.0, 544.61, 544.61, 544.61 },
-                    { new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), null, 760.0, 760.0, 1650.0, 1650.0, null, null, 760.0, 760.0, 760.0 },
-                    { new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), null, 4.0, 3.0, 40.0, 165.0, null, null, 4.5, 3.5, 13.5 }
+                    { new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), null, 6.48, 6.48, 16.0, 18.0, null, null, null, 6.48, 6.48, 15.0 },
+                    { new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), null, 50.0, 50.0, 200.0, 200.0, null, null, null, 50.0, 50.0, 50.0 },
+                    { new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), null, null, null, null, null, 75.0, null, null, null, null, null },
+                    { new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), null, 760.0, 760.0, 1650.0, 1650.0, null, null, null, 760.0, 760.0, 760.0 },
+                    { new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), null, 4.0, 3.0, 40.0, 165.0, null, null, null, 4.5, 3.5, 13.5 }
                 });
 
             migrationBuilder.InsertData(
@@ -37,7 +37,7 @@ namespace Recollectable.Data.Migrations
                 {
                     { new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), "", "Mexico" },
                     { new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"), "", "Canada" },
-                    { new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "", "Thailand" },
+                    { new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "", "Ecuador" },
                     { new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), "", "United States of America" }
                 });
 
@@ -64,7 +64,7 @@ namespace Recollectable.Data.Migrations
             migrationBuilder.InsertData(
                 table: "Collectables",
                 columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "ObverseLegend", "Coin_ReleaseDate", "Coin_ReverseDescription", "ReverseLegend", "Coin_Size", "Subject", "Coin_Type", "Weight" },
-                values: new object[] { new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "Coin", "", "", "", "Reeded", 6000, "", "0.900 Gold 0.4312 oz. AGW", 700, "", "Kneeling and seated figures within circle", "", 1987, "Emblem", "", "26 mm.", "Asian Institute of Technology", "Baht", "15.00 g." });
+                values: new object[] { new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "Coin", "", "", "", "", 1, "", "0.999 Silver 0.9925 oz. ASW", 200, "", "", "", 2009, "", "", "39 mm.", "Independence 200th Anniversary", "Sucre", "31.10 g." });
 
             migrationBuilder.InsertData(
                 table: "Collectables",

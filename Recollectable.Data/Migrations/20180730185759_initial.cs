@@ -20,6 +20,7 @@ namespace Recollectable.Data.Migrations
                     AU50Value = table.Column<double>(nullable: true),
                     MS60Value = table.Column<double>(nullable: true),
                     MS63Value = table.Column<double>(nullable: true),
+                    PF60Value = table.Column<double>(nullable: true),
                     PF63Value = table.Column<double>(nullable: true),
                     PF65Value = table.Column<double>(nullable: true)
                 },

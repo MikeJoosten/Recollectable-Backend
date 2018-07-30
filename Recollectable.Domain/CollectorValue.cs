@@ -15,6 +15,7 @@ namespace Recollectable.Domain
         public double? AU50Value { get; set; }
         public double? MS60Value { get; set; }
         public double? MS63Value { get; set; }
+        public double? PF60Value { get; set; }
         public double? PF63Value { get; set; }
         public double? PF65Value { get; set; }
         public List<Collectable> Collectables { get; set; }

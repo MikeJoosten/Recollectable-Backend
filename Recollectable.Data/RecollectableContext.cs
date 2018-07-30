@@ -105,7 +105,7 @@ namespace Recollectable.Data
                 new Country
                 {
                     Id = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"),
-                    Name = "Thailand",
+                    Name = "Ecuador",
                     Description = ""
                 },
                 new Country
@@ -145,23 +145,23 @@ namespace Recollectable.Data
                 {
                     Id = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"),
                     CountryId = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"),
-                    FaceValue = 6000,
-                    Type = "Baht",
-                    ReleaseDate = 1987,
+                    FaceValue = 1,
+                    Type = "Sucre",
+                    ReleaseDate = 2009,
                     CollectorValueId = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"),
-                    Size = "26 mm.",
-                    ObverseDescription = "Kneeling and seated figures within circle",
-                    ReverseDescription = "Emblem",
+                    Size = "39 mm.",
+                    ObverseDescription = "",
+                    ReverseDescription = "",
                     FrontImagePath = "",
                     BackImagePath = "",
-                    Mintage = 700,
-                    Weight = "15.00 g.",
-                    Metal = "0.900 Gold 0.4312 oz. AGW",
+                    Mintage = 200,
+                    Weight = "31.10 g.",
+                    Metal = "0.999 Silver 0.9925 oz. ASW",
                     Note = "",
-                    Subject = "Asian Institute of Technology",
+                    Subject = "Independence 200th Anniversary",
                     ObverseLegend = "",
                     ReverseLegend = "",
-                    EdgeType = "Reeded",
+                    EdgeType = "",
                     EdgeLegend = "",
                     Designer = ""
                 },
@@ -255,15 +255,7 @@ namespace Recollectable.Data
                 new CollectorValue
                 {
                     Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"),
-                    G4Value = 544.61,
-                    VG8Value = 544.61,
-                    F12Value = 544.61,
-                    VF20Value = 544.61,
-                    XF40Value = 544.61,
-                    MS60Value = 825,
-                    MS63Value = 850,
-                    PF63Value = 900,
-                    PF65Value = 1000
+                    PF60Value = 75
                 },
                 new CollectorValue
                 {

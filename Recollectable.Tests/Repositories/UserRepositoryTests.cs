@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace Recollectable.Tests
+namespace Recollectable.Tests.Repositories
 {
     public class UserRepositoryTests
     {
@@ -109,6 +109,7 @@ namespace Recollectable.Tests
             _repository.Save();
 
             Assert.Equal(5, _repository.GetUsers().Count());
+            Assert.Null(_repository.GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")));
         }
 
         private void Seed()

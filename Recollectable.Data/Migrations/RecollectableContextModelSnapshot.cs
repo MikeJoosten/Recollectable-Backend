@@ -105,6 +105,8 @@ namespace Recollectable.Data.Migrations
 
                     b.Property<double?>("MS63Value");
 
+                    b.Property<double?>("PF60Value");
+
                     b.Property<double?>("PF63Value");
 
                     b.Property<double?>("PF65Value");
@@ -122,7 +124,7 @@ namespace Recollectable.Data.Migrations
                     b.HasData(
                         new { Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), F12Value = 6.48, G4Value = 6.48, MS60Value = 16.0, MS63Value = 18.0, VF20Value = 6.48, VG8Value = 6.48, XF40Value = 15.0 },
                         new { Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), F12Value = 50.0, G4Value = 50.0, MS60Value = 200.0, MS63Value = 200.0, VF20Value = 50.0, VG8Value = 50.0, XF40Value = 50.0 },
-                        new { Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), F12Value = 544.61, G4Value = 544.61, MS60Value = 825.0, MS63Value = 850.0, PF63Value = 900.0, PF65Value = 1000.0, VF20Value = 544.61, VG8Value = 544.61, XF40Value = 544.61 },
+                        new { Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), PF60Value = 75.0 },
                         new { Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), F12Value = 760.0, G4Value = 760.0, MS60Value = 1650.0, MS63Value = 1650.0, VF20Value = 760.0, VG8Value = 760.0, XF40Value = 760.0 },
                         new { Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), F12Value = 4.0, G4Value = 3.0, MS60Value = 40.0, MS63Value = 165.0, VF20Value = 4.5, VG8Value = 3.5, XF40Value = 13.5 }
                     );
@@ -163,7 +165,7 @@ namespace Recollectable.Data.Migrations
                     b.HasData(
                         new { Id = new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), Description = "", Name = "Mexico" },
                         new { Id = new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"), Description = "", Name = "Canada" },
-                        new { Id = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), Description = "", Name = "Thailand" },
+                        new { Id = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), Description = "", Name = "Ecuador" },
                         new { Id = new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), Description = "", Name = "United States of America" }
                     );
                 });
@@ -280,7 +282,7 @@ namespace Recollectable.Data.Migrations
 
                     b.HasData(
                         new { Id = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectorValueId = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), CountryId = new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), BackImagePath = "", Designer = "Manuel L. Negrete", EdgeLegend = "INDEPENCIA Y LIBERTAD", EdgeType = "", FaceValue = 5, FrontImagePath = "", Metal = "0.720 Silver 0.4151 oz. ASW", Mintage = 200000, Note = "Mint mark Mo.", ObverseDescription = "National arms, eagle left", ObverseLegend = "", ReleaseDate = 1957, ReverseDescription = "Head left", ReverseLegend = "", Size = "36 mm.", Subject = "100th Anniversary of Constitution", Type = "Pesos", Weight = "18.05 g." },
-                        new { Id = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectorValueId = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), CountryId = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), BackImagePath = "", Designer = "", EdgeLegend = "", EdgeType = "Reeded", FaceValue = 6000, FrontImagePath = "", Metal = "0.900 Gold 0.4312 oz. AGW", Mintage = 700, Note = "", ObverseDescription = "Kneeling and seated figures within circle", ObverseLegend = "", ReleaseDate = 1987, ReverseDescription = "Emblem", ReverseLegend = "", Size = "26 mm.", Subject = "Asian Institute of Technology", Type = "Baht", Weight = "15.00 g." },
+                        new { Id = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectorValueId = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), CountryId = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), BackImagePath = "", Designer = "", EdgeLegend = "", EdgeType = "", FaceValue = 1, FrontImagePath = "", Metal = "0.999 Silver 0.9925 oz. ASW", Mintage = 200, Note = "", ObverseDescription = "", ObverseLegend = "", ReleaseDate = 2009, ReverseDescription = "", ReverseLegend = "", Size = "39 mm.", Subject = "Independence 200th Anniversary", Type = "Sucre", Weight = "31.10 g." },
                         new { Id = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectorValueId = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), CountryId = new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), BackImagePath = "", Designer = "Adolph A. Weinman", EdgeLegend = "", EdgeType = "", FaceValue = 1, FrontImagePath = "", Metal = "0.900 Silver 0.0723 oz. ASW", Mintage = 24010000, Note = "", ObverseDescription = "", ObverseLegend = "", ReleaseDate = 1924, ReverseDescription = "", ReverseLegend = "", Size = "17.8 mm.", Subject = "", Type = "Dime", Weight = "2.5 g." }
                     );
                 });
