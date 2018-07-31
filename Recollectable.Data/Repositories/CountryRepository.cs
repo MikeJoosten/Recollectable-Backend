@@ -27,11 +27,14 @@ namespace Recollectable.Data.Repositories
 
         public void AddCountry(Country country)
         {
-            country.Id = Guid.NewGuid();
+            country.Id = (country.Id == null) ? Guid.NewGuid() : country.Id;
             _context.Countries.Add(country);
         }
 
-        public void UpdateCountry(Country country) { }
+        public void UpdateCountry(Country country)
+        {
+            _context.Countries.Update(country);
+        }
 
         public void DeleteCountry(Country country)
         {
