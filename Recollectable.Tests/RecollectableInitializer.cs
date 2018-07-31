@@ -61,6 +61,46 @@ namespace Recollectable.Tests
                 }
             };
 
+            var collections = new[]
+            {
+                new Collection
+                {
+                    Id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12"),
+                    Type = "Coin",
+                    UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                },
+                new Collection
+                {
+                    Id = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789"),
+                    Type = "Coin",
+                    UserId = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e")
+                },
+                new Collection
+                {
+                    Id = new Guid("80fa9706-2465-48cf-8933-932fdce18c89"),
+                    Type = "Banknote",
+                    UserId = new Guid("c7304af2-e5cd-4186-83d9-77807c9512ec")
+                },
+                new Collection
+                {
+                    Id = new Guid("528fc017-4289-492a-b942-bb34a2363d9d"),
+                    Type = "Coin",
+                    UserId = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158")
+                },
+                new Collection
+                {
+                    Id = new Guid("6ee10276-5cb7-4c9f-819d-9204274c088a"),
+                    Type = "Banknote",
+                    UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                },
+                new Collection
+                {
+                    Id = new Guid("ab76b149-09c9-40c8-9b35-e62e53e06c8a"),
+                    Type = "Coin",
+                    UserId = new Guid("c7304af2-e5cd-4186-83d9-77807c9512ec")
+                }
+            };
+
             var countries = new[]
             {
                 new Country
@@ -158,6 +198,7 @@ namespace Recollectable.Tests
             };
 
             context.Users.AddRange(users);
+            context.Collections.AddRange(collections);
             context.Countries.AddRange(countries);
             context.CollectorValues.AddRange(collectorValues);
             context.SaveChanges();

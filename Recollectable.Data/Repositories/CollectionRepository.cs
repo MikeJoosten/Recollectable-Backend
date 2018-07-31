@@ -25,9 +25,16 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Collection> GetCollectionsByUser(Guid userId)
         {
-            return _context.Collections
-                .Where(c => c.UserId == userId)
-                .OrderBy(c => c.Type);
+            if (_userRepository.GetUser(userId) == null)
+            {
+                return null;
+            }
+            else
+            {
+                return _context.Collections
+                    .Where(c => c.UserId == userId)
+                    .OrderBy(c => c.Type);
+            }
         }
 
         public Collection GetCollection(Guid collectionId)
@@ -56,7 +63,10 @@ namespace Recollectable.Data.Repositories
             }
         }
 
-        public void UpdateCollection(Collection collection) { }
+        public void UpdateCollection(Collection collection)
+        {
+            _context.Collections.Update(collection);
+        }
 
         public void DeleteCollection(Collection collection)
         {
