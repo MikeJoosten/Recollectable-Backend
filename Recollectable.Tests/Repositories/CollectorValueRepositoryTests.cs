@@ -56,7 +56,7 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void AddCollectorValue_CreatesNewCollectorValue()
+        public void AddCollectorValue_AddsNewCollectorValue()
         {
             CollectorValue newCollectorValue = new CollectorValue
             {

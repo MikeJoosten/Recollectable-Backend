@@ -57,7 +57,7 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void AddUser_CreatesNewUser()
+        public void AddUser_AddsNewUser()
         {
             User newUser = new User
             {

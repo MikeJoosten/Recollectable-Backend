@@ -57,7 +57,7 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void AddCountry_CreatesNewCountry()
+        public void AddCountry_AddsNewCountry()
         {
             Country newCountry = new Country
             {
