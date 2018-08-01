@@ -143,7 +143,7 @@ namespace Recollectable.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CollectionCollectables",
+                name: "CollectionCollectable",
                 columns: table => new
                 {
                     CollectionId = table.Column<Guid>(nullable: false),
@@ -152,21 +152,21 @@ namespace Recollectable.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CollectionCollectables", x => new { x.CollectionId, x.CollectableId, x.ConditionId });
+                    table.PrimaryKey("PK_CollectionCollectable", x => new { x.CollectionId, x.CollectableId, x.ConditionId });
                     table.ForeignKey(
-                        name: "FK_CollectionCollectables_Collectables_CollectableId",
+                        name: "FK_CollectionCollectable_Collectables_CollectableId",
                         column: x => x.CollectableId,
                         principalTable: "Collectables",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CollectionCollectables_Collections_CollectionId",
+                        name: "FK_CollectionCollectable_Collections_CollectionId",
                         column: x => x.CollectionId,
                         principalTable: "Collections",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CollectionCollectables_Conditions_ConditionId",
+                        name: "FK_CollectionCollectable_Conditions_ConditionId",
                         column: x => x.ConditionId,
                         principalTable: "Conditions",
                         principalColumn: "Id",
@@ -184,13 +184,13 @@ namespace Recollectable.Data.Migrations
                 column: "CountryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CollectionCollectables_CollectableId",
-                table: "CollectionCollectables",
+                name: "IX_CollectionCollectable_CollectableId",
+                table: "CollectionCollectable",
                 column: "CollectableId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CollectionCollectables_ConditionId",
-                table: "CollectionCollectables",
+                name: "IX_CollectionCollectable_ConditionId",
+                table: "CollectionCollectable",
                 column: "ConditionId");
 
             migrationBuilder.CreateIndex(
@@ -202,7 +202,7 @@ namespace Recollectable.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CollectionCollectables");
+                name: "CollectionCollectable");
 
             migrationBuilder.DropTable(
                 name: "Collectables");

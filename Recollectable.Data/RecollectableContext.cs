@@ -16,7 +16,6 @@ namespace Recollectable.Data
         public DbSet<Banknote> Banknotes { get; set; }
         public DbSet<Collectable> Collectables { get; set; }
         public DbSet<CollectorValue> CollectorValues { get; set; }
-        public DbSet<CollectionCollectable> CollectionCollectables { get; set; }
 
         public RecollectableContext(DbContextOptions<RecollectableContext> options) 
             : base(options)
@@ -93,26 +92,22 @@ namespace Recollectable.Data
                 new Country
                 {
                     Id = new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"),
-                    Name = "Mexico",
-                    Description = ""
+                    Name = "Mexico"
                 },
                 new Country
                 {
                     Id = new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"),
-                    Name = "Canada",
-                    Description = ""
+                    Name = "Canada"
                 },
                 new Country
                 {
                     Id = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"),
-                    Name = "Ecuador",
-                    Description = ""
+                    Name = "Ecuador"
                 },
                 new Country
                 {
                     Id = new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"),
-                    Name = "United States of America",
-                    Description = ""
+                    Name = "United States of America"
                 }
             );
 
@@ -128,16 +123,11 @@ namespace Recollectable.Data
                     Size = "36 mm.",
                     ObverseDescription = "National arms, eagle left",
                     ReverseDescription = "Head left",
-                    FrontImagePath = "",
-                    BackImagePath = "",
                     Mintage = 200000,
                     Weight = "18.05 g.",
                     Metal = "0.720 Silver 0.4151 oz. ASW",
                     Note = "Mint mark Mo.",
                     Subject = "100th Anniversary of Constitution",
-                    ObverseLegend = "",
-                    ReverseLegend = "",
-                    EdgeType = "",
                     EdgeLegend = "INDEPENCIA Y LIBERTAD",
                     Designer = "Manuel L. Negrete"
                 },
@@ -150,20 +140,10 @@ namespace Recollectable.Data
                     ReleaseDate = 2009,
                     CollectorValueId = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"),
                     Size = "39 mm.",
-                    ObverseDescription = "",
-                    ReverseDescription = "",
-                    FrontImagePath = "",
-                    BackImagePath = "",
                     Mintage = 200,
                     Weight = "31.10 g.",
                     Metal = "0.999 Silver 0.9925 oz. ASW",
-                    Note = "",
                     Subject = "Independence 200th Anniversary",
-                    ObverseLegend = "",
-                    ReverseLegend = "",
-                    EdgeType = "",
-                    EdgeLegend = "",
-                    Designer = ""
                 },
                 new Coin
                 {
@@ -174,19 +154,9 @@ namespace Recollectable.Data
                     ReleaseDate = 1924,
                     CollectorValueId = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"),
                     Size = "17.8 mm.",
-                    ObverseDescription = "",
-                    ReverseDescription = "",
-                    FrontImagePath = "",
-                    BackImagePath = "",
                     Mintage = 24010000,
                     Weight = "2.5 g.",
                     Metal = "0.900 Silver 0.0723 oz. ASW",
-                    Note = "",
-                    Subject = "",
-                    ObverseLegend = "",
-                    ReverseLegend = "",
-                    EdgeType = "",
-                    EdgeLegend = "",
                     Designer = "Adolph A. Weinman"
                 }
             );
@@ -200,14 +170,8 @@ namespace Recollectable.Data
                     Type = "Dollars",
                     ReleaseDate = 1993,
                     CollectorValueId = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"),
-                    Size = "",
                     ObverseDescription = "Ulysses S. Grant at center",
                     ReverseDescription = "United States Capital Building",
-                    FrontImagePath = "",
-                    BackImagePath = "",
-                    Color = "",
-                    Watermark = "",
-                    Signature = ""
                 },
                 new Banknote
                 {
@@ -217,14 +181,10 @@ namespace Recollectable.Data
                     Type = "Dollars",
                     ReleaseDate = 1988,
                     CollectorValueId = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"),
-                    Size = "",
                     ObverseDescription = "Queen Elizabeth II, Parliament Library at right, " +
                     "Optical device with denomination at upper left, Arms at upper left center",
                     ReverseDescription = "Pine grosbeak on branch at right",
-                    FrontImagePath = "",
-                    BackImagePath = "",
                     Color = "Pink on multicolor underprint",
-                    Watermark = "",
                     Signature = "Thiessen-Crow"
                 }
             );
@@ -290,17 +250,17 @@ namespace Recollectable.Data
                 new Condition
                 {
                     Id = new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a"),
-                    Grade = "VF24"
+                    Grade = "Fine"
                 },
                 new Condition
                 {
                     Id = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a"),
-                    Grade = "Uncirculated"
+                    Grade = "VF24"
                 },
                 new Condition
                 {
                     Id = new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d"),
-                    Grade = "Fine"
+                    Grade = "Uncirculated"
                 }
             );
 

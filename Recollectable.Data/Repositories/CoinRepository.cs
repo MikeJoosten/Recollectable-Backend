@@ -21,24 +21,22 @@ namespace Recollectable.Data.Repositories
             return _context.Coins.OrderBy(c => c.Country.Name);
         }
 
+        public IEnumerable<Coin> GetCoinsByCountry(Guid countryId)
+        {
+            return _context.Coins.Where(c => c.CountryId == countryId);
+        }
+
         public IEnumerable<Coin> GetCoinsByCollection(Guid collectionId)
         {
             return _context.Coins
                 .Include(c => c.CollectionCollectables)
-                .ThenInclude(cc => cc.CollectionId == collectionId);
+                .ThenInclude(cc => cc.CollectionId == collectionId)
+                .OrderBy(c => c.Country.Name);
         }
 
         public Coin GetCoin(Guid coinId)
         {
             return _context.Coins.FirstOrDefault(c => c.Id == coinId);
-        }
-
-        public Coin GetCoinByCollection(Guid collectionId, Guid coinId)
-        {
-            return _context.Coins
-                .Include(c => c.CollectionCollectables)
-                .ThenInclude(cc => cc.CollectionId == collectionId)
-                .FirstOrDefault(c => c.Id == coinId);
         }
 
         public void AddCoin(Coin coin)

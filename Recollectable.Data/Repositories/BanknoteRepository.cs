@@ -21,11 +21,17 @@ namespace Recollectable.Data.Repositories
             return _context.Banknotes.OrderBy(b => b.Country.Name);
         }
 
+        public IEnumerable<Banknote> GetBanknotesByCountry(Guid countryId)
+        {
+            return _context.Banknotes.Where(b => b.CountryId == countryId);
+        }
+
         public IEnumerable<Banknote> GetBanknotesByCollection(Guid collectionId)
         {
             return _context.Banknotes
                 .Include(b => b.CollectionCollectables)
-                .ThenInclude(cc => cc.CollectionId == collectionId);
+                .ThenInclude(cc => cc.CollectionId == collectionId)
+                .OrderBy(b => b.Country.Name);
         }
 
         public Banknote GetBanknote(Guid banknoteId)

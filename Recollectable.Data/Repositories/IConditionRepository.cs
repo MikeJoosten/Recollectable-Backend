@@ -8,8 +8,9 @@ namespace Recollectable.Data.Repositories
     public interface IConditionRepository
     {
         IEnumerable<Condition> GetConditions();
+        IEnumerable<Condition> GetConditionsByCollectable
+            (Guid collectionId, Guid collectableId);
         Condition GetCondition(Guid conditionId);
-        Condition GetConditionByCollectable(Guid collectionId, Guid collectableId);
         void AddCondition(Condition condition);
         void UpdateCondition(Condition condition);
         void DeleteCondition(Condition condition);

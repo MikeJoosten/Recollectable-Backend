@@ -42,13 +42,6 @@ namespace Recollectable.Data.Repositories
             return _context.Collections.FirstOrDefault(c => c.Id == collectionId);
         }
 
-        public Collection GetCollectionByUser(Guid userId, Guid collectionId)
-        {
-            return _context.Collections
-                .Where(c => c.UserId == userId && c.Id == collectionId)
-                .FirstOrDefault();
-        }
-
         public void AddCollection(Guid userId, Collection collection)
         {
             var user = _userRepository.GetUser(userId);

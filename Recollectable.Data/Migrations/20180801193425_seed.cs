@@ -25,9 +25,9 @@ namespace Recollectable.Data.Migrations
                 values: new object[,]
                 {
                     { new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca"), "MS62" },
-                    { new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a"), "VF24" },
-                    { new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a"), "Uncirculated" },
-                    { new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d"), "Fine" }
+                    { new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a"), "Fine" },
+                    { new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a"), "VF24" },
+                    { new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d"), "Uncirculated" }
                 });
 
             migrationBuilder.InsertData(
@@ -35,10 +35,10 @@ namespace Recollectable.Data.Migrations
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), "", "Mexico" },
-                    { new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"), "", "Canada" },
-                    { new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "", "Ecuador" },
-                    { new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), "", "United States of America" }
+                    { new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), null, "Mexico" },
+                    { new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"), null, "Canada" },
+                    { new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), null, "Ecuador" },
+                    { new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), null, "United States of America" }
                 });
 
             migrationBuilder.InsertData(
@@ -54,27 +54,27 @@ namespace Recollectable.Data.Migrations
             migrationBuilder.InsertData(
                 table: "Collectables",
                 columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "ObverseLegend", "Coin_ReleaseDate", "Coin_ReverseDescription", "ReverseLegend", "Coin_Size", "Subject", "Coin_Type", "Weight" },
-                values: new object[] { new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), "Coin", "", "Manuel L. Negrete", "INDEPENCIA Y LIBERTAD", "", 5, "", "0.720 Silver 0.4151 oz. ASW", 200000, "Mint mark Mo.", "National arms, eagle left", "", 1957, "Head left", "", "36 mm.", "100th Anniversary of Constitution", "Pesos", "18.05 g." });
+                values: new object[] { new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), "Coin", null, "Manuel L. Negrete", "INDEPENCIA Y LIBERTAD", null, 5, null, "0.720 Silver 0.4151 oz. ASW", 200000, "Mint mark Mo.", "National arms, eagle left", null, 1957, "Head left", null, "36 mm.", "100th Anniversary of Constitution", "Pesos", "18.05 g." });
 
             migrationBuilder.InsertData(
                 table: "Collectables",
                 columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "BackImagePath", "Color", "FaceValue", "FrontImagePath", "ObverseDescription", "ReleaseDate", "ReverseDescription", "Signature", "Size", "Type", "Watermark" },
-                values: new object[] { new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"), "Banknote", "", "Pink on multicolor underprint", 1000, "", "Queen Elizabeth II, Parliament Library at right, Optical device with denomination at upper left, Arms at upper left center", 1988, "Pine grosbeak on branch at right", "Thiessen-Crow", "", "Dollars", "" });
+                values: new object[] { new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"), "Banknote", null, "Pink on multicolor underprint", 1000, null, "Queen Elizabeth II, Parliament Library at right, Optical device with denomination at upper left, Arms at upper left center", 1988, "Pine grosbeak on branch at right", "Thiessen-Crow", null, "Dollars", null });
 
             migrationBuilder.InsertData(
                 table: "Collectables",
                 columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "ObverseLegend", "Coin_ReleaseDate", "Coin_ReverseDescription", "ReverseLegend", "Coin_Size", "Subject", "Coin_Type", "Weight" },
-                values: new object[] { new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "Coin", "", "", "", "", 1, "", "0.999 Silver 0.9925 oz. ASW", 200, "", "", "", 2009, "", "", "39 mm.", "Independence 200th Anniversary", "Sucre", "31.10 g." });
+                values: new object[] { new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "Coin", null, null, null, null, 1, null, "0.999 Silver 0.9925 oz. ASW", 200, null, null, null, 2009, null, null, "39 mm.", "Independence 200th Anniversary", "Sucre", "31.10 g." });
 
             migrationBuilder.InsertData(
                 table: "Collectables",
                 columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "BackImagePath", "Color", "FaceValue", "FrontImagePath", "ObverseDescription", "ReleaseDate", "ReverseDescription", "Signature", "Size", "Type", "Watermark" },
-                values: new object[] { new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), "Banknote", "", "", 50, "", "Ulysses S. Grant at center", 1993, "United States Capital Building", "", "", "Dollars", "" });
+                values: new object[] { new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), "Banknote", null, null, 50, null, "Ulysses S. Grant at center", 1993, "United States Capital Building", null, null, "Dollars", null });
 
             migrationBuilder.InsertData(
                 table: "Collectables",
                 columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "ObverseLegend", "Coin_ReleaseDate", "Coin_ReverseDescription", "ReverseLegend", "Coin_Size", "Subject", "Coin_Type", "Weight" },
-                values: new object[] { new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), "Coin", "", "Adolph A. Weinman", "", "", 1, "", "0.900 Silver 0.0723 oz. ASW", 24010000, "", "", "", 1924, "", "", "17.8 mm.", "", "Dime", "2.5 g." });
+                values: new object[] { new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), "Coin", null, "Adolph A. Weinman", null, null, 1, null, "0.900 Silver 0.0723 oz. ASW", 24010000, null, null, null, 1924, null, null, "17.8 mm.", null, "Dime", "2.5 g." });
 
             migrationBuilder.InsertData(
                 table: "Collections",
@@ -87,7 +87,7 @@ namespace Recollectable.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "CollectionCollectables",
+                table: "CollectionCollectable",
                 columns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 values: new object[,]
                 {
@@ -103,32 +103,32 @@ namespace Recollectable.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
-                table: "CollectionCollectables",
+                table: "CollectionCollectable",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectables",
+                table: "CollectionCollectable",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectables",
+                table: "CollectionCollectable",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectables",
+                table: "CollectionCollectable",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectables",
+                table: "CollectionCollectable",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectables",
+                table: "CollectionCollectable",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") });
 

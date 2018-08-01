@@ -92,36 +92,6 @@ namespace Recollectable.Tests.Repositories
             Assert.Null(result);
         }
 
-        [Theory]
-        [InlineData("4a9522da-66f9-4dfb-88b8-f92b950d1df1", 
-            "03a6907d-4e93-4863-bdaf-1d05140dec12", "Coin", "Ryan")]
-        [InlineData("c7304af2-e5cd-4186-83d9-77807c9512ec", 
-            "80fa9706-2465-48cf-8933-932fdce18c89", "Banknote", "Michael")]
-        [InlineData("c7304af2-e5cd-4186-83d9-77807c9512ec", 
-            "ab76b149-09c9-40c8-9b35-e62e53e06c8a", "Coin", "Michael")]
-        public void GetCollectionByUser_ReturnsCollectionOfUser_GivenValidIds
-            (string userId, string collectionId, string expectedType, string expectedName)
-        {
-            var result = _collectionRepository
-                .GetCollectionByUser(new Guid(userId), new Guid(collectionId));
-            Assert.NotNull(result);
-            Assert.Equal(collectionId, result.Id.ToString());
-            Assert.Equal(expectedType, result.Type);
-            Assert.Equal(expectedName, result.User.FirstName);
-        }
-
-        [Theory]
-        [InlineData("2e80bc43-ff19-429a-882a-0d8cacb6bfe3", "03a6907d-4e93-4863-bdaf-1d05140dec12")]
-        [InlineData("4a9522da-66f9-4dfb-88b8-f92b950d1df1", "ca4e2623-304b-49a5-80e4-1f7c7246aac6")]
-        [InlineData("2e80bc43-ff19-429a-882a-0d8cacb6bfe3", "ca4e2623-304b-49a5-80e4-1f7c7246aac6")]
-        public void GetCollectionByUser_ReturnsNull_GivenInvalidIds
-            (string userId, string collectionId)
-        {
-            var result = _collectionRepository
-                .GetCollectionByUser(new Guid(userId), new Guid(collectionId));
-            Assert.Null(result);
-        }
-
         [Fact]
         public void AddCollection_AddsNewCollection_GivenValidUserId()
         {

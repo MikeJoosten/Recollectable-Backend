@@ -21,18 +21,19 @@ namespace Recollectable.Data.Repositories
             return _context.Conditions.OrderBy(c => c.Grade);
         }
 
-        public Condition GetCondition(Guid conditionId)
-        {
-            return _context.Conditions.FirstOrDefault(c => c.Id == conditionId);
-        }
-
-        public Condition GetConditionByCollectable(Guid collectionId, Guid collectableId)
+        public IEnumerable<Condition> GetConditionsByCollectable
+            (Guid collectionId, Guid collectableId)
         {
             return _context.Conditions
                 .Include(c => c.CollectionCollectables)
-                .ThenInclude(cc => cc.CollectionId == collectionId && 
+                .ThenInclude(cc => cc.CollectionId == collectionId &&
                     cc.CollectableId == collectableId)
-                .FirstOrDefault();
+                .OrderBy(c => c.Grade);
+        }
+
+        public Condition GetCondition(Guid conditionId)
+        {
+            return _context.Conditions.FirstOrDefault(c => c.Id == conditionId);
         }
 
         public void AddCondition(Condition condition)

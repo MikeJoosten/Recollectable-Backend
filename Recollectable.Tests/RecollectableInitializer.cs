@@ -101,6 +101,108 @@ namespace Recollectable.Tests
                 }
             };
 
+            var coins = new[]
+            {
+                new Coin
+                {
+                    Id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
+                    Type = "Dollars"
+                },
+                new Coin
+                {
+                    Id = new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"),
+                    Type = "Pesos"
+                },
+                new Coin
+                {
+                    Id = new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"),
+                    Type = "Pounds"
+                },
+                new Coin
+                {
+                    Id = new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48"),
+                    Type = "Euros"
+                },
+                new Coin
+                {
+                    Id = new Guid("db14f24e-aceb-4315-bfcf-6ace1f9b3613"),
+                    Type = "Yen"
+                },
+                new Coin
+                {
+                    Id = new Guid("30a24244-ca29-40a8-95a6-8f68f5de2f78"),
+                    Type = "Nickel"
+                }
+            };
+
+            var banknotes = new[]
+            {
+                new Banknote
+                {
+                    Id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f"),
+                    Type = "Dollars"
+                },
+                new Banknote
+                {
+                    Id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4"),
+                    Type = "Pesos"
+                },
+                new Banknote
+                {
+                    Id = new Guid("51d91016-54f5-44f0-a1d8-e87f72d4bcc4"),
+                    Type = "Yen"
+                },
+                new Banknote
+                {
+                    Id = new Guid("48d9049b-04f0-4c24-a1c3-c3668878013e"),
+                    Type = "Euros"
+                },
+                new Banknote
+                {
+                    Id = new Guid("3da0c34f-dbfb-41a3-801f-97b7f4cdde89"),
+                    Type = "Pounds"
+                },
+                new Banknote
+                {
+                    Id = new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c"),
+                    Type = "Dinars"
+                }
+            };
+
+            var conditions = new[]
+            {
+                new Condition
+                {
+                    Id = new Guid("515af021-e46b-4b01-994f-b5f1a2db0c35"),
+                    Grade = "MS68"
+                },
+                new Condition
+                {
+                    Id = new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f"),
+                    Grade = "Fine"
+                },
+                new Condition
+                {
+                    Id = new Guid("0a8d0c2b-1e7f-40b1-980f-eec355e2aca4"),
+                    Grade = "XF45"
+                },
+                new Condition
+                {
+                    Id = new Guid("ef147683-5fa1-48b5-b31f-a95e7264245b"),
+                    Grade = "AU52"
+                },
+                new Condition
+                {
+                    Id = new Guid("3afc28eb-9af9-4a0a-8033-080954a9f55d"),
+                    Grade = "Good"
+                },
+                new Condition
+                {
+                    Id = new Guid("c2e4d849-c9bf-418d-9269-168a038edcd9"),
+                    Grade = "VG10"
+                }
+            };
+
             var countries = new[]
             {
                 new Country
@@ -197,10 +299,54 @@ namespace Recollectable.Tests
                 }
             };
 
+            var collectionCollectables = new[]
+            {
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789"),
+                    CollectableId = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
+                    ConditionId = new Guid("0a8d0c2b-1e7f-40b1-980f-eec355e2aca4")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("6ee10276-5cb7-4c9f-819d-9204274c088a"),
+                    CollectableId = new Guid("51d91016-54f5-44f0-a1d8-e87f72d4bcc4"),
+                    ConditionId = new Guid("515af021-e46b-4b01-994f-b5f1a2db0c35")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("528fc017-4289-492a-b942-bb34a2363d9d"),
+                    CollectableId = new Guid("30a24244-ca29-40a8-95a6-8f68f5de2f78"),
+                    ConditionId = new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("ab76b149-09c9-40c8-9b35-e62e53e06c8a"),
+                    CollectableId = new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"),
+                    ConditionId = new Guid("3afc28eb-9af9-4a0a-8033-080954a9f55d")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("80fa9706-2465-48cf-8933-932fdce18c89"),
+                    CollectableId = new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c"),
+                    ConditionId = new Guid("ef147683-5fa1-48b5-b31f-a95e7264245b")
+                },
+                new CollectionCollectable
+                {
+                    CollectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789"),
+                    CollectableId = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
+                    ConditionId = new Guid("c2e4d849-c9bf-418d-9269-168a038edcd9")
+                }
+            };
+
             context.Users.AddRange(users);
             context.Collections.AddRange(collections);
+            context.Coins.AddRange(coins);
+            context.Banknotes.AddRange(banknotes);
+            context.Conditions.AddRange(conditions);
             context.Countries.AddRange(countries);
             context.CollectorValues.AddRange(collectorValues);
+            context.AddRange(collectionCollectables);
             context.SaveChanges();
         }
     }

@@ -10,7 +10,6 @@ namespace Recollectable.Data.Repositories
         IEnumerable<Collection> GetCollections();
         IEnumerable<Collection> GetCollectionsByUser(Guid userId);
         Collection GetCollection(Guid collectionId);
-        Collection GetCollectionByUser(Guid userId, Guid collectionId);
         void AddCollection(Guid userId, Collection collection);
         void UpdateCollection(Collection collection);
         void DeleteCollection(Collection collection);
