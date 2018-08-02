@@ -38,7 +38,7 @@ namespace Recollectable.Tests.Repositories
         [InlineData("4a9522da-66f9-4dfb-88b8-f92b950d1df1", 2, "Ryan")]
         [InlineData("e640b01f-9eb8-407f-a8f9-68197a7fe48e", 1, "Geoff")]
         [InlineData("c7304af2-e5cd-4186-83d9-77807c9512ec", 2, "Michael")]
-        public void GetCollectionsByUser_ReturnsCollectionsOfUser_GivenValidUserId
+        public void GetCollectionsByUser_ReturnsAllCollectionsOfUser_GivenValidUserId
             (string userId, int expectedCount, string expectedName)
         {
             var result = _collectionRepository

@@ -49,18 +49,12 @@ namespace Recollectable.Data.Repositories
 
         public void AddBanknote(Banknote banknote)
         {
-            banknote.Id = Guid.NewGuid();
+            if (banknote.Id == Guid.Empty)
+            {
+                banknote.Id = Guid.NewGuid();
+            }
+
             _context.Banknotes.Add(banknote);
-
-            if (banknote.Country.Id == Guid.Empty)
-            {
-                banknote.Country.Id = Guid.NewGuid();
-            }
-
-            if (banknote.CollectorValue.Id == Guid.Empty)
-            {
-                banknote.CollectorValue.Id = Guid.NewGuid();
-            }
         }
 
         public void UpdateBanknote(Banknote banknote) { }

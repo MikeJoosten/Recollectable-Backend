@@ -27,7 +27,11 @@ namespace Recollectable.Data.Repositories
 
         public void AddCollectorValue(CollectorValue collectorValue)
         {
-            collectorValue.Id = (collectorValue.Id == null) ? Guid.NewGuid() : collectorValue.Id;
+            if (collectorValue.Id == Guid.Empty)
+            {
+                collectorValue.Id = Guid.NewGuid();
+            }
+
             _context.CollectorValues.Add(collectorValue);
         }
 

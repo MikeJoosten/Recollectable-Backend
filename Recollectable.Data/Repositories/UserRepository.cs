@@ -30,7 +30,11 @@ namespace Recollectable.Data.Repositories
 
         public void AddUser(User user)
         {
-            user.Id = (user.Id == null) ? Guid.NewGuid() : user.Id;
+            if (user.Id == Guid.Empty)
+            {
+                user.Id = Guid.NewGuid();
+            }
+
             _context.Users.Add(user);
         }
 

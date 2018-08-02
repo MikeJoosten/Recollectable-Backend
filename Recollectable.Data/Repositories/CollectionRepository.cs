@@ -29,12 +29,10 @@ namespace Recollectable.Data.Repositories
             {
                 return null;
             }
-            else
-            {
-                return _context.Collections
-                    .Where(c => c.UserId == userId)
-                    .OrderBy(c => c.Type);
-            }
+
+            return _context.Collections
+                .Where(c => c.UserId == userId)
+                .OrderBy(c => c.Type);
         }
 
         public Collection GetCollection(Guid collectionId)

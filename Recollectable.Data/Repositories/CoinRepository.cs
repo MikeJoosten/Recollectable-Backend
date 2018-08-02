@@ -10,10 +10,13 @@ namespace Recollectable.Data.Repositories
     public class CoinRepository : ICoinRepository
     {
         private RecollectableContext _context;
+        private ICountryRepository _countryRepository;
 
-        public CoinRepository(RecollectableContext context)
+        public CoinRepository(RecollectableContext context, 
+            ICountryRepository countryRepository)
         {
             _context = context;
+            _countryRepository = countryRepository;
         }
 
         public IEnumerable<Coin> GetCoins()
@@ -23,7 +26,14 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Coin> GetCoinsByCountry(Guid countryId)
         {
-            return _context.Coins.Where(c => c.CountryId == countryId);
+            if (_countryRepository.GetCountry(countryId) == null)
+            {
+                return null;
+            }
+
+            return _context.Coins
+                .Where(c => c.CountryId == countryId)
+                .OrderBy(c => c.Type);
         }
 
         public IEnumerable<Coin> GetCoinsByCollection(Guid collectionId)
@@ -41,18 +51,12 @@ namespace Recollectable.Data.Repositories
 
         public void AddCoin(Coin coin)
         {
-            coin.Id = Guid.NewGuid();
+            if (coin.Id == Guid.Empty)
+            {
+                coin.Id = Guid.NewGuid();
+            }
+
             _context.Coins.Add(coin);
-
-            if (coin.Country.Id == Guid.Empty)
-            {
-                coin.Country.Id = Guid.NewGuid();
-            }
-
-            if (coin.CollectorValue.Id == Guid.Empty)
-            {
-                coin.CollectorValue.Id = Guid.NewGuid();
-            }
         }
 
         public void UpdateCoin(Coin coin) { }

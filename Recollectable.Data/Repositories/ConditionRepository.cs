@@ -38,7 +38,11 @@ namespace Recollectable.Data.Repositories
 
         public void AddCondition(Condition condition)
         {
-            condition.Id = Guid.NewGuid();
+            if (condition.Id == Guid.Empty)
+            {
+                condition.Id = Guid.NewGuid();
+            }
+
             _context.Conditions.Add(condition);
         }
 

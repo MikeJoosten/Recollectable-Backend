@@ -106,32 +106,38 @@ namespace Recollectable.Tests
                 new Coin
                 {
                     Id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
-                    Type = "Dollars"
+                    Type = "Dollars",
+                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
                 },
                 new Coin
                 {
                     Id = new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"),
-                    Type = "Pesos"
+                    Type = "Pesos",
+                    CountryId = new Guid("8c29c8a2-93ae-483d-8235-b0c728d3a034")
                 },
                 new Coin
                 {
                     Id = new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"),
-                    Type = "Pounds"
+                    Type = "Pounds",
+                    CountryId = new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0")
                 },
                 new Coin
                 {
                     Id = new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48"),
-                    Type = "Euros"
+                    Type = "Euros",
+                    CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367")
                 },
                 new Coin
                 {
                     Id = new Guid("db14f24e-aceb-4315-bfcf-6ace1f9b3613"),
-                    Type = "Yen"
+                    Type = "Yen",
+                    CountryId = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4")
                 },
                 new Coin
                 {
                     Id = new Guid("30a24244-ca29-40a8-95a6-8f68f5de2f78"),
-                    Type = "Nickel"
+                    Type = "Dime",
+                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
                 }
             };
 
@@ -140,32 +146,38 @@ namespace Recollectable.Tests
                 new Banknote
                 {
                     Id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f"),
-                    Type = "Dollars"
+                    Type = "Dollars",
+                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
                 },
                 new Banknote
                 {
                     Id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4"),
-                    Type = "Pesos"
+                    Type = "Pesos",
+                    CountryId = new Guid("8c29c8a2-93ae-483d-8235-b0c728d3a034")
                 },
                 new Banknote
                 {
                     Id = new Guid("51d91016-54f5-44f0-a1d8-e87f72d4bcc4"),
-                    Type = "Yen"
+                    Type = "Yen",
+                    CountryId = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4")
                 },
                 new Banknote
                 {
                     Id = new Guid("48d9049b-04f0-4c24-a1c3-c3668878013e"),
-                    Type = "Euros"
+                    Type = "Dollars",
+                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
                 },
                 new Banknote
                 {
                     Id = new Guid("3da0c34f-dbfb-41a3-801f-97b7f4cdde89"),
-                    Type = "Pounds"
+                    Type = "Pounds",
+                    CountryId = new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0")
                 },
                 new Banknote
                 {
                     Id = new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c"),
-                    Type = "Dinars"
+                    Type = "Dinars",
+                    CountryId = new Guid("1e6a79fa-f216-41a4-8efe-0b87e58d2b33")
                 }
             };
 
@@ -213,7 +225,7 @@ namespace Recollectable.Tests
                 new Country
                 {
                     Id = new Guid("1e6a79fa-f216-41a4-8efe-0b87e58d2b33"),
-                    Name = "Ecuador"
+                    Name = "Kuwait"
                 },
                 new Country
                 {
@@ -228,12 +240,12 @@ namespace Recollectable.Tests
                 new Country
                 {
                     Id = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
-                    Name = "Cuba"
+                    Name = "France"
                 },
                 new Country
                 {
                     Id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4"),
-                    Name = "Brazil"
+                    Name = "Japan"
                 }
             };
 

@@ -31,13 +31,13 @@ namespace Recollectable.Tests.Repositories
         public void GetCountries_OrdersCountriesByName()
         {
             var result = _repository.GetCountries();
-            Assert.Equal("Brazil", result.First().Name);
+            Assert.Equal("Canada", result.First().Name);
         }
 
         [Theory]
-        [InlineData("1e6a79fa-f216-41a4-8efe-0b87e58d2b33", "Ecuador")]
+        [InlineData("74619fd9-898c-4250-b5c9-833ce2d599c0", "Canada")]
         [InlineData("8c29c8a2-93ae-483d-8235-b0c728d3a034", "Mexico")]
-        [InlineData("1b38bfce-567c-4d49-9dd2-e0fbef480367", "Cuba")]
+        [InlineData("8cef5964-01a4-40c7-9f16-28af109094d4", "Japan")]
         public void GetCountry_ReturnsCountry_GivenValidId(string countryId, string expected)
         {
             var result = _repository.GetCountry(new Guid(countryId));
