@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20180725172548_initial.cs" />
+    <Compile Remove="Migrations\20180725172614_seed.cs" />
+    <Compile Remove="Migrations\20180730185759_initial.cs" />
+    <Compile Remove="Migrations\20180730185830_seed.cs" />
+    <Compile Remove="Migrations\20180801185723_seed.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Recollectable.Domain\Recollectable.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
