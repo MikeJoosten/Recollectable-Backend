@@ -84,7 +84,7 @@ namespace Recollectable.Tests
                 new Collection
                 {
                     Id = new Guid("528fc017-4289-492a-b942-bb34a2363d9d"),
-                    Type = "Coin",
+                    Type = "Banknote",
                     UserId = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158")
                 },
                 new Collection
@@ -327,14 +327,14 @@ namespace Recollectable.Tests
                 },
                 new CollectionCollectable
                 {
-                    CollectionId = new Guid("528fc017-4289-492a-b942-bb34a2363d9d"),
-                    CollectableId = new Guid("30a24244-ca29-40a8-95a6-8f68f5de2f78"),
+                    CollectionId = new Guid("80fa9706-2465-48cf-8933-932fdce18c89"),
+                    CollectableId = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4"),
                     ConditionId = new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f")
                 },
                 new CollectionCollectable
                 {
                     CollectionId = new Guid("ab76b149-09c9-40c8-9b35-e62e53e06c8a"),
-                    CollectableId = new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"),
+                    CollectableId = new Guid("db14f24e-aceb-4315-bfcf-6ace1f9b3613"),
                     ConditionId = new Guid("3afc28eb-9af9-4a0a-8033-080954a9f55d")
                 },
                 new CollectionCollectable

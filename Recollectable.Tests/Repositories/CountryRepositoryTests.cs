@@ -34,25 +34,21 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal("Canada", result.First().Name);
         }
 
-        [Theory]
-        [InlineData("74619fd9-898c-4250-b5c9-833ce2d599c0", "Canada")]
-        [InlineData("8c29c8a2-93ae-483d-8235-b0c728d3a034", "Mexico")]
-        [InlineData("8cef5964-01a4-40c7-9f16-28af109094d4", "Japan")]
-        public void GetCountry_ReturnsCountry_GivenValidId(string countryId, string expected)
+        [Fact]
+        public void GetCountry_ReturnsCountry_GivenValidId()
         {
-            var result = _repository.GetCountry(new Guid(countryId));
+            var result = _repository
+                .GetCountry(new Guid("8cef5964-01a4-40c7-9f16-28af109094d4"));
             Assert.NotNull(result);
-            Assert.Equal(countryId, result.Id.ToString());
-            Assert.Equal(expected, result.Name);
+            Assert.Equal("8cef5964-01a4-40c7-9f16-28af109094d4", result.Id.ToString());
+            Assert.Equal("Japan", result.Name);
         }
 
-        [Theory]
-        [InlineData("c798a076-6080-4d40-9b3a-76bf75dc02e9")]
-        [InlineData("433c33f0-fa1c-443e-9259-0f24057a7127")]
-        [InlineData("8eb32be5-1d34-48d6-92ca-9049ef6ab0bc")]
-        public void GetCountry_ReturnsNull_GivenInvalidId(string countryId)
+        [Fact]
+        public void GetCountry_ReturnsNull_GivenInvalidId()
         {
-            var result = _repository.GetCountry(new Guid(countryId));
+            var result = _repository
+                .GetCountry(new Guid("8eb32be5-1d34-48d6-92ca-9049ef6ab0bc"));
             Assert.Null(result);
         }
 
@@ -74,21 +70,19 @@ namespace Recollectable.Tests.Repositories
                 .Name);
         }
 
-        [Theory]
-        [InlineData("c8f2031e-c780-4d27-bf13-1ee48a7207a3", "United Kingdom")]
-        [InlineData("74619fd9-898c-4250-b5c9-833ce2d599c0", "China")]
-        [InlineData("8cef5964-01a4-40c7-9f16-28af109094d4", "Japan")]
-        public void UpdateCountry_UpdatesExistingCountry(string countryId, string updatedName)
+        [Fact]
+        public void UpdateCountry_UpdatesExistingCountry()
         {
-            Country updatedCountry = _repository.GetCountry(new Guid(countryId));
-            updatedCountry.Name = updatedName;
+            Country updatedCountry = _repository
+                .GetCountry(new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0"));
+            updatedCountry.Name = "China";
 
             _repository.UpdateCountry(updatedCountry);
             _repository.Save();
 
             Assert.Equal(6, _repository.GetCountries().Count());
-            Assert.Equal(updatedName, _repository
-                .GetCountry(new Guid(countryId))
+            Assert.Equal("China", _repository
+                .GetCountry(new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0"))
                 .Name);
         }
 

@@ -34,25 +34,21 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal("Gavin", result.First().FirstName);
         }
 
-        [Theory]
-        [InlineData("4a9522da-66f9-4dfb-88b8-f92b950d1df1", "Ryan")]
-        [InlineData("ca26fdfb-46b3-4120-9e52-a07820bc0409", "Jeremy")]
-        [InlineData("c7304af2-e5cd-4186-83d9-77807c9512ec", "Michael")]
-        public void GetUser_ReturnsUser_GivenValidId(string userId, string expected)
+        [Fact]
+        public void GetUser_ReturnsUser_GivenValidId()
         {
-            var result = _repository.GetUser(new Guid(userId));
+            var result = _repository
+                .GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"));
             Assert.NotNull(result);
-            Assert.Equal(userId, result.Id.ToString());
-            Assert.Equal(expected, result.FirstName);
+            Assert.Equal("4a9522da-66f9-4dfb-88b8-f92b950d1df1", result.Id.ToString());
+            Assert.Equal("Ryan", result.FirstName);
         }
 
-        [Theory]
-        [InlineData("c798a076-6080-4d40-9b3a-76bf75dc02e9")]
-        [InlineData("433c33f0-fa1c-443e-9259-0f24057a7127")]
-        [InlineData("8eb32be5-1d34-48d6-92ca-9049ef6ab0bc")]
-        public void GetUser_ReturnsNull_GivenInvalidId(string userId)
+        [Fact]
+        public void GetUser_ReturnsNull_GivenInvalidId()
         {
-            var result = _repository.GetUser(new Guid(userId));
+            var result = _repository
+                .GetUser(new Guid("433c33f0-fa1c-443e-9259-0f24057a7127"));
             Assert.Null(result);
         }
 
@@ -75,21 +71,19 @@ namespace Recollectable.Tests.Repositories
                 .FirstName);
         }
 
-        [Theory]
-        [InlineData("4a9522da-66f9-4dfb-88b8-f92b950d1df1", "Alfredo")]
-        [InlineData("ca26fdfb-46b3-4120-9e52-a07820bc0409", "Matt")]
-        [InlineData("c7304af2-e5cd-4186-83d9-77807c9512ec", "Miles")]
-        public void UpdateUser_UpdatesExistingUser(string userId, string updatedName)
+        [Fact]
+        public void UpdateUser_UpdatesExistingUser()
         {
-            User updatedUser = _repository.GetUser(new Guid(userId));
-            updatedUser.FirstName = updatedName;
+            User updatedUser = _repository
+                .GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"));
+            updatedUser.FirstName = "Alfredo";
 
             _repository.UpdateUser(updatedUser);
             _repository.Save();
 
             Assert.Equal(6, _repository.GetUsers().Count());
-            Assert.Equal(updatedName, _repository
-                .GetUser(new Guid(userId))
+            Assert.Equal("Alfredo", _repository
+                .GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"))
                 .FirstName);
         }
 

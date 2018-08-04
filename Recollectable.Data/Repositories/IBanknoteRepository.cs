@@ -12,8 +12,10 @@ namespace Recollectable.Data.Repositories
         IEnumerable<Banknote> GetBanknotesByCollection(Guid collectionId);
         Banknote GetBanknote(Guid banknoteId);
         void AddBanknote(Banknote banknote);
+        void AddBanknoteToCollection(CollectionCollectable collectionCollectable);
         void UpdateBanknote(Banknote banknote);
         void DeleteBanknote(Banknote banknote);
+        void DeleteBanknoteFromCollection(CollectionCollectable collectionCollectable);
         bool Save();
     }
 }

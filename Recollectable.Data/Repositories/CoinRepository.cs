@@ -11,12 +11,18 @@ namespace Recollectable.Data.Repositories
     {
         private RecollectableContext _context;
         private ICountryRepository _countryRepository;
+        private ICollectionRepository _collectionRepository;
+        private IConditionRepository _conditionRepository;
 
         public CoinRepository(RecollectableContext context, 
-            ICountryRepository countryRepository)
+            ICountryRepository countryRepository, 
+            ICollectionRepository collectionRepository,
+            IConditionRepository conditionRepository)
         {
             _context = context;
             _countryRepository = countryRepository;
+            _collectionRepository = collectionRepository;
+            _conditionRepository = conditionRepository;
         }
 
         public IEnumerable<Coin> GetCoins()
@@ -38,9 +44,17 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Coin> GetCoinsByCollection(Guid collectionId)
         {
-            return _context.Coins
-                .Include(c => c.CollectionCollectables)
-                .ThenInclude(cc => cc.CollectionId == collectionId)
+            Collection collection = _collectionRepository.GetCollection(collectionId);
+
+            if (collection == null || collection.Type != "Coin")
+            {
+                return null;
+            }
+
+            return _context.CollectionCollectables
+                .Include(cc => cc.Collectable)
+                .Where(cc => cc.CollectionId == collectionId)
+                .Select(cc => (Coin)cc.Collectable)
                 .OrderBy(c => c.Country.Name);
         }
 
@@ -59,11 +73,34 @@ namespace Recollectable.Data.Repositories
             _context.Coins.Add(coin);
         }
 
-        public void UpdateCoin(Coin coin) { }
+        public void AddCoinToCollection(CollectionCollectable collectionCollectable)
+        {
+            Collection collection = _collectionRepository
+                .GetCollection(collectionCollectable.CollectionId);
+            Condition condition = _conditionRepository
+                .GetCondition(collectionCollectable.ConditionId);
+            Coin coin = GetCoin(collectionCollectable.CollectableId);
+
+            if (collection != null && coin != null && 
+                condition != null && collection.Type == "Coin")
+            {
+                _context.Add(collectionCollectable);
+            }
+        }
+
+        public void UpdateCoin(Coin coin)
+        {
+            _context.Coins.Update(coin);
+        }
 
         public void DeleteCoin(Coin coin)
         {
             _context.Coins.Remove(coin);
+        }
+
+        public void DeleteCoinFromCollection(CollectionCollectable collectionCollectable)
+        {
+            _context.Remove(collectionCollectable);
         }
 
         public bool Save()

@@ -16,6 +16,7 @@ namespace Recollectable.Data
         public DbSet<Banknote> Banknotes { get; set; }
         public DbSet<Collectable> Collectables { get; set; }
         public DbSet<CollectorValue> CollectorValues { get; set; }
+        public DbSet<CollectionCollectable> CollectionCollectables { get; set; }
 
         public RecollectableContext(DbContextOptions<RecollectableContext> options) 
             : base(options)
