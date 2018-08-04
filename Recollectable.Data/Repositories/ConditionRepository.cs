@@ -24,10 +24,11 @@ namespace Recollectable.Data.Repositories
         public IEnumerable<Condition> GetConditionsByCollectable
             (Guid collectionId, Guid collectableId)
         {
-            return _context.Conditions
-                .Include(c => c.CollectionCollectables)
-                .ThenInclude(cc => cc.CollectionId == collectionId &&
+            return _context.CollectionCollectables
+                .Include(cc => cc.Condition)
+                .Where(cc => cc.CollectionId == collectionId && 
                     cc.CollectableId == collectableId)
+                .Select(cc => cc.Condition)
                 .OrderBy(c => c.Grade);
         }
 
