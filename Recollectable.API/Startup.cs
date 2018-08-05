@@ -75,6 +75,10 @@ namespace Recollectable.API
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
+                cfg.CreateMap<Condition, ConditionDto>();
+                cfg.CreateMap<ConditionCreationDto, Condition>();
+                cfg.CreateMap<ConditionUpdateDto, Condition>();
+                cfg.CreateMap<Condition, ConditionUpdateDto>();
                 cfg.CreateMap<Country, CountryDto>();
                 cfg.CreateMap<CountryCreationDto, Country>();
                 cfg.CreateMap<CountryUpdateDto, Country>();

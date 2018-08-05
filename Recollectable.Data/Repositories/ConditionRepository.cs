@@ -58,5 +58,10 @@ namespace Recollectable.Data.Repositories
         {
             return (_context.SaveChanges() >= 0);
         }
+
+        public bool ConditionExists(Guid conditionId)
+        {
+            return _context.Conditions.Any(c => c.Id == conditionId);
+        }
     }
 }
