@@ -9,7 +9,7 @@ namespace Recollectable.Data.Migrations
         {
             migrationBuilder.InsertData(
                 table: "CollectorValues",
-                columns: new[] { "Id", "AU50Value", "F12Value", "G4Value", "MS60Value", "MS63Value", "PF60Value", "PF63Value", "PF65Value", "VF20Value", "VG8Value", "XF40Value" },
+                columns: new[] { "Id", "AU50", "F12", "G4", "MS60", "MS63", "PF60", "PF63", "PF65", "VF20", "VG8", "XF40" },
                 values: new object[,]
                 {
                     { new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), null, 6.48, 6.48, 16.0, 18.0, null, null, null, 6.48, 6.48, 15.0 },
@@ -87,7 +87,7 @@ namespace Recollectable.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "CollectionCollectable",
+                table: "CollectionCollectables",
                 columns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 values: new object[,]
                 {
@@ -103,32 +103,32 @@ namespace Recollectable.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
-                table: "CollectionCollectable",
+                table: "CollectionCollectables",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectable",
+                table: "CollectionCollectables",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectable",
+                table: "CollectionCollectables",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectable",
+                table: "CollectionCollectables",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectable",
+                table: "CollectionCollectables",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") });
 
             migrationBuilder.DeleteData(
-                table: "CollectionCollectable",
+                table: "CollectionCollectables",
                 keyColumns: new[] { "CollectionId", "CollectableId", "ConditionId" },
                 keyValues: new object[] { new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") });
 

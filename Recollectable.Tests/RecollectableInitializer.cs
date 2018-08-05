@@ -254,60 +254,60 @@ namespace Recollectable.Tests
                 new CollectorValue
                 {
                     Id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5"),
-                    G4Value = 15.54,
-                    VG8Value = 15.54,
-                    F12Value = 15.54,
-                    VF20Value = 15.54,
-                    XF40Value = 25,
-                    MS60Value = 28,
-                    MS63Value = 32
+                    G4 = 15.54,
+                    VG8 = 15.54,
+                    F12 = 15.54,
+                    VF20 = 15.54,
+                    XF40 = 25,
+                    MS60 = 28,
+                    MS63 = 32
                 },
                 new CollectorValue
                 {
                     Id = new Guid("46bac791-8afc-420f-975e-3f3b5f3778fb"),
-                    PF60Value = 50,
-                    PF63Value = 65,
-                    PF65Value = 85
+                    PF60 = 50,
+                    PF63 = 65,
+                    PF65 = 85
                 },
                 new CollectorValue
                 {
                     Id = new Guid("2c716f5b-6792-4753-9f1a-fa8bcd4eabfb"),
-                    G4Value = 3,
-                    VG8Value = 3.50,
-                    F12Value = 4,
-                    VF20Value = 4.50,
-                    XF40Value = 13.50,
-                    MS60Value = 40,
-                    MS63Value = 165
+                    G4 = 3,
+                    VG8 = 3.50,
+                    F12 = 4,
+                    VF20 = 4.50,
+                    XF40 = 13.50,
+                    MS60 = 40,
+                    MS63 = 165
                 },
                 new CollectorValue
                 {
                     Id = new Guid("64246e79-c3fe-4020-a222-32c0f329a643"),
-                    G4Value = 10,
-                    VG8Value = 25,
-                    F12Value = 32,
-                    VF20Value = 55,
-                    XF40Value = 125,
-                    MS60Value = 200,
-                    MS63Value = 250
+                    G4 = 10,
+                    VG8 = 25,
+                    F12 = 32,
+                    VF20 = 55,
+                    XF40 = 125,
+                    MS60 = 200,
+                    MS63 = 250
                 },
                 new CollectorValue
                 {
                     Id = new Guid("2037c78d-81cd-45c6-b447-476cc1ba90a4"),
-                    PF60Value = 350,
-                    PF63Value = 375,
-                    PF65Value = 425
+                    PF60 = 350,
+                    PF63 = 375,
+                    PF65 = 425
                 },
                 new CollectorValue
                 {
                     Id = new Guid("5e9cb33b-b12c-4e20-8113-d8e002aeb38d"),
-                    G4Value = 760,
-                    VG8Value = 760,
-                    F12Value = 760,
-                    VF20Value = 760,
-                    XF40Value = 760,
-                    MS60Value = 1650,
-                    MS63Value = 1650
+                    G4 = 760,
+                    VG8 = 760,
+                    F12 = 760,
+                    VF20 = 760,
+                    XF40 = 760,
+                    MS60 = 1650,
+                    MS63 = 1650
                 }
             };
 

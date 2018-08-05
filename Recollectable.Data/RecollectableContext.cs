@@ -194,51 +194,51 @@ namespace Recollectable.Data
                 new CollectorValue
                 {
                     Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"),
-                    G4Value = 6.48,
-                    VG8Value = 6.48,
-                    F12Value = 6.48,
-                    VF20Value = 6.48,
-                    XF40Value = 15,
-                    MS60Value = 16,
-                    MS63Value = 18
+                    G4 = 6.48,
+                    VG8 = 6.48,
+                    F12 = 6.48,
+                    VF20 = 6.48,
+                    XF40 = 15,
+                    MS60 = 16,
+                    MS63 = 18
                 },
                 new CollectorValue
                 {
                     Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"),
-                    G4Value = 50,
-                    VG8Value = 50,
-                    F12Value = 50,
-                    VF20Value = 50,
-                    XF40Value = 50,
-                    MS60Value = 200,
-                    MS63Value = 200
+                    G4 = 50,
+                    VG8 = 50,
+                    F12 = 50,
+                    VF20 = 50,
+                    XF40 = 50,
+                    MS60 = 200,
+                    MS63 = 200
                 },
                 new CollectorValue
                 {
                     Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"),
-                    PF60Value = 75
+                    PF60 = 75
                 },
                 new CollectorValue
                 {
                     Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"),
-                    G4Value = 760,
-                    VG8Value = 760,
-                    F12Value = 760,
-                    VF20Value = 760,
-                    XF40Value = 760,
-                    MS60Value = 1650,
-                    MS63Value = 1650
+                    G4 = 760,
+                    VG8 = 760,
+                    F12 = 760,
+                    VF20 = 760,
+                    XF40 = 760,
+                    MS60 = 1650,
+                    MS63 = 1650
                 },
                 new CollectorValue
                 {
                     Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"),
-                    G4Value = 3,
-                    VG8Value = 3.50,
-                    F12Value = 4,
-                    VF20Value = 4.50,
-                    XF40Value = 13.50,
-                    MS60Value = 40,
-                    MS63Value = 165
+                    G4 = 3,
+                    VG8 = 3.50,
+                    F12 = 4,
+                    VF20 = 4.50,
+                    XF40 = 13.50,
+                    MS60 = 40,
+                    MS63 = 165
                 }
             );
 

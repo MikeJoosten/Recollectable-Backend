@@ -79,6 +79,10 @@ namespace Recollectable.API
                 cfg.CreateMap<CountryCreationDto, Country>();
                 cfg.CreateMap<CountryUpdateDto, Country>();
                 cfg.CreateMap<Country, CountryUpdateDto>();
+                cfg.CreateMap<CollectorValue, CollectorValueDto>();
+                cfg.CreateMap<CollectorValueCreationDto, CollectorValue>();
+                cfg.CreateMap<CollectorValueUpdateDto, CollectorValue>();
+                cfg.CreateMap<CollectorValue, CollectorValueUpdateDto>();
             });
 
             recollectableContext.Database.Migrate();

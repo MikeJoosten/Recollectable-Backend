@@ -13,5 +13,6 @@ namespace Recollectable.Data.Repositories
         void UpdateCollectorValue(CollectorValue collectorValue);
         void DeleteCollectorValue(CollectorValue collectorValue);
         bool Save();
+        bool CollectorValueExists(Guid collectorValueId);
     }
 }

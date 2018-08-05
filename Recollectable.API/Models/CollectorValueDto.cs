@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Recollectable.Domain
+namespace Recollectable.API.Models
 {
-    public class CollectorValue
+    public class CollectorValueDto
     {
         public Guid Id { get; set; }
         public double? G4 { get; set; }
@@ -18,6 +19,5 @@ namespace Recollectable.Domain
         public double? PF60 { get; set; }
         public double? PF63 { get; set; }
         public double? PF65 { get; set; }
-        public List<Collectable> Collectables { get; set; }
     }
 }

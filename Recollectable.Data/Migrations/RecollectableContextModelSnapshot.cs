@@ -78,7 +78,7 @@ namespace Recollectable.Data.Migrations
 
                     b.HasIndex("ConditionId");
 
-                    b.ToTable("CollectionCollectable");
+                    b.ToTable("CollectionCollectables");
 
                     b.HasData(
                         new { CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), ConditionId = new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca") },
@@ -95,38 +95,38 @@ namespace Recollectable.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<double?>("AU50Value");
+                    b.Property<double?>("AU50");
 
-                    b.Property<double?>("F12Value");
+                    b.Property<double?>("F12");
 
-                    b.Property<double?>("G4Value");
+                    b.Property<double?>("G4");
 
-                    b.Property<double?>("MS60Value");
+                    b.Property<double?>("MS60");
 
-                    b.Property<double?>("MS63Value");
+                    b.Property<double?>("MS63");
 
-                    b.Property<double?>("PF60Value");
+                    b.Property<double?>("PF60");
 
-                    b.Property<double?>("PF63Value");
+                    b.Property<double?>("PF63");
 
-                    b.Property<double?>("PF65Value");
+                    b.Property<double?>("PF65");
 
-                    b.Property<double?>("VF20Value");
+                    b.Property<double?>("VF20");
 
-                    b.Property<double?>("VG8Value");
+                    b.Property<double?>("VG8");
 
-                    b.Property<double?>("XF40Value");
+                    b.Property<double?>("XF40");
 
                     b.HasKey("Id");
 
                     b.ToTable("CollectorValues");
 
                     b.HasData(
-                        new { Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), F12Value = 6.48, G4Value = 6.48, MS60Value = 16.0, MS63Value = 18.0, VF20Value = 6.48, VG8Value = 6.48, XF40Value = 15.0 },
-                        new { Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), F12Value = 50.0, G4Value = 50.0, MS60Value = 200.0, MS63Value = 200.0, VF20Value = 50.0, VG8Value = 50.0, XF40Value = 50.0 },
-                        new { Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), PF60Value = 75.0 },
-                        new { Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), F12Value = 760.0, G4Value = 760.0, MS60Value = 1650.0, MS63Value = 1650.0, VF20Value = 760.0, VG8Value = 760.0, XF40Value = 760.0 },
-                        new { Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), F12Value = 4.0, G4Value = 3.0, MS60Value = 40.0, MS63Value = 165.0, VF20Value = 4.5, VG8Value = 3.5, XF40Value = 13.5 }
+                        new { Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), F12 = 6.48, G4 = 6.48, MS60 = 16.0, MS63 = 18.0, VF20 = 6.48, VG8 = 6.48, XF40 = 15.0 },
+                        new { Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), F12 = 50.0, G4 = 50.0, MS60 = 200.0, MS63 = 200.0, VF20 = 50.0, VG8 = 50.0, XF40 = 50.0 },
+                        new { Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), PF60 = 75.0 },
+                        new { Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), F12 = 760.0, G4 = 760.0, MS60 = 1650.0, MS63 = 1650.0, VF20 = 760.0, VG8 = 760.0, XF40 = 760.0 },
+                        new { Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), F12 = 4.0, G4 = 3.0, MS60 = 40.0, MS63 = 165.0, VF20 = 4.5, VG8 = 3.5, XF40 = 13.5 }
                     );
                 });
 

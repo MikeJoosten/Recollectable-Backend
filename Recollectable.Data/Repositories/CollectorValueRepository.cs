@@ -46,5 +46,10 @@ namespace Recollectable.Data.Repositories
         {
             return (_context.SaveChanges() >= 0);
         }
+
+        public bool CollectorValueExists(Guid collectorValueId)
+        {
+            return _context.CollectorValues.Any(c => c.Id == collectorValueId);
+        }
     }
 }

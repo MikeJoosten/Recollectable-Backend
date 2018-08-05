@@ -29,7 +29,7 @@ namespace Recollectable.Tests.Repositories
         public void GetCollectorValues_OrdersCollectorValueById()
         {
             var result = _repository.GetCollectorValues();
-            Assert.Equal(15.54, result.First().G4Value);
+            Assert.Equal(15.54, result.First().G4);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace Recollectable.Tests.Repositories
                 .GetCollectorValue(new Guid("5e9cb33b-b12c-4e20-8113-d8e002aeb38d"));
             Assert.NotNull(result);
             Assert.Equal("5e9cb33b-b12c-4e20-8113-d8e002aeb38d", result.Id.ToString());
-            Assert.Equal(760, result.G4Value);
+            Assert.Equal(760, result.G4);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Recollectable.Tests.Repositories
             CollectorValue newCollectorValue = new CollectorValue
             {
                 Id = new Guid("3265cf70-f323-4021-932b-08813b1d3d5c"),
-                PF60Value = 52.15
+                PF60 = 52.15
             };
 
             _repository.AddCollectorValue(newCollectorValue);
@@ -65,7 +65,7 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(7, _repository.GetCollectorValues().Count());
             Assert.Equal(52.15, _repository
                 .GetCollectorValue(new Guid("3265cf70-f323-4021-932b-08813b1d3d5c"))
-                .PF60Value);
+                .PF60);
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace Recollectable.Tests.Repositories
         {
             CollectorValue updatedCollectorValue = 
                 _repository.GetCollectorValue(new Guid("2c716f5b-6792-4753-9f1a-fa8bcd4eabfb"));
-            updatedCollectorValue.G4Value = 17.50;
+            updatedCollectorValue.G4 = 17.50;
 
             _repository.UpdateCollectorValue(updatedCollectorValue);
             _repository.Save();
@@ -81,7 +81,7 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(6, _repository.GetCollectorValues().Count());
             Assert.Equal(17.50, _repository
                 .GetCollectorValue(new Guid("2c716f5b-6792-4753-9f1a-fa8bcd4eabfb"))
-                .G4Value);
+                .G4);
         }
 
         [Fact]

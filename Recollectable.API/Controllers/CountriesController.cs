@@ -125,7 +125,21 @@ namespace Recollectable.API.Controllers
 
             if (countryFromRepo == null)
             {
-                return NotFound();
+                var countryDto = new CountryUpdateDto();
+                patchDoc.ApplyTo(countryDto);
+
+                var newCountry = Mapper.Map<Country>(countryDto);
+                newCountry.Id = id;
+
+                _countryRepository.AddCountry(newCountry);
+
+                if (!_countryRepository.Save())
+                {
+                    throw new Exception($"Upserting country {id} failed on save.");
+                }
+
+                var returnedCountry = Mapper.Map<CountryDto>(newCountry);
+                return CreatedAtRoute("GetCountry", new { id = returnedCountry.Id }, returnedCountry);
             }
 
             var patchedCountry = Mapper.Map<CountryUpdateDto>(countryFromRepo);
