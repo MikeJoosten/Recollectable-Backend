@@ -54,10 +54,7 @@ namespace Recollectable.Data.Repositories
             }
         }
 
-        public void UpdateCollection(Collection collection)
-        {
-            _context.Collections.Update(collection);
-        }
+        public void UpdateCollection(Collection collection) { }
 
         public void DeleteCollection(Collection collection)
         {

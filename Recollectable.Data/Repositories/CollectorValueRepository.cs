@@ -35,10 +35,7 @@ namespace Recollectable.Data.Repositories
             _context.CollectorValues.Add(collectorValue);
         }
 
-        public void UpdateCollectorValue(CollectorValue collectorValue)
-        {
-            _context.CollectorValues.Update(collectorValue);
-        }
+        public void UpdateCollectorValue(CollectorValue collectorValue) { }
 
         public void DeleteCollectorValue(CollectorValue collectorValue)
         {

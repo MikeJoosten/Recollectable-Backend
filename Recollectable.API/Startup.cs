@@ -4,37 +4,57 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Recollectable.API.Models;
 using Recollectable.Data;
+using Recollectable.Data.Repositories;
+using Recollectable.Domain;
 
 namespace Recollectable.API
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(options => {
+                options.ReturnHttpNotAcceptable = true;
+                options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter(options));
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            // Register DbContext
             services.AddDbContext<RecollectableContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
+
+            // Register repositories
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICollectionRepository, CollectionRepository>();
+            services.AddScoped<ICoinRepository, CoinRepository>();
+            services.AddScoped<IBanknoteRepository, BanknoteRepository>();
+            services.AddScoped<IConditionRepository, ConditionRepository>();
+            services.AddScoped<ICountryRepository, CountryRepository>();
+            services.AddScoped<ICollectorValueRepository, CollectorValueRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, 
-            RecollectableContext context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env,
+            ILoggerFactory loggerFactory, RecollectableContext recollectableContext)
         {
             if (env.IsDevelopment())
             {
@@ -42,10 +62,26 @@ namespace Recollectable.API
             }
             else
             {
-                app.UseHsts();
+                app.UseExceptionHandler(appBuilder =>
+                {
+                    appBuilder.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("An unexpected server error occurred. " +
+                            "Try again later.");
+                    });
+                });
             }
 
-            context.Database.Migrate();
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<Country, CountryDto>();
+                cfg.CreateMap<CountryCreationDto, Country>();
+                cfg.CreateMap<CountryUpdateDto, Country>();
+                cfg.CreateMap<Country, CountryUpdateDto>();
+            });
+
+            recollectableContext.Database.Migrate();
             app.UseHttpsRedirection();
             app.UseMvc();
         }

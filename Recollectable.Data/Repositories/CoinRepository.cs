@@ -88,10 +88,7 @@ namespace Recollectable.Data.Repositories
             }
         }
 
-        public void UpdateCoin(Coin coin)
-        {
-            _context.Coins.Update(coin);
-        }
+        public void UpdateCoin(Coin coin) { }
 
         public void DeleteCoin(Coin coin)
         {

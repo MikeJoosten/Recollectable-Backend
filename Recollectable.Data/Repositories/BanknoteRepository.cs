@@ -86,10 +86,7 @@ namespace Recollectable.Data.Repositories
             }
         }
 
-        public void UpdateBanknote(Banknote banknote)
-        {
-            _context.Banknotes.Update(banknote);
-        }
+        public void UpdateBanknote(Banknote banknote) { }
 
         public void DeleteBanknote(Banknote banknote)
         {

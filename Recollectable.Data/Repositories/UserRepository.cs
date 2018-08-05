@@ -38,10 +38,7 @@ namespace Recollectable.Data.Repositories
             _context.Users.Add(user);
         }
 
-        public void UpdateUser(User user)
-        {
-            _context.Users.Update(user);
-        }
+        public void UpdateUser(User user) { }
 
         public void DeleteUser(User user)
         {
