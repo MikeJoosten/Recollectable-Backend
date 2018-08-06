@@ -100,8 +100,6 @@ namespace Recollectable.Data.Migrations
                     Metal = table.Column<string>(nullable: true),
                     Note = table.Column<string>(nullable: true),
                     Subject = table.Column<string>(nullable: true),
-                    ObverseLegend = table.Column<string>(nullable: true),
-                    ReverseLegend = table.Column<string>(nullable: true),
                     EdgeType = table.Column<string>(nullable: true),
                     EdgeLegend = table.Column<string>(nullable: true),
                     Designer = table.Column<string>(nullable: true)

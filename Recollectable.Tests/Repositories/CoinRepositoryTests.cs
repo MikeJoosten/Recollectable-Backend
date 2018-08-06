@@ -125,7 +125,8 @@ namespace Recollectable.Tests.Repositories
             {
                 Id = new Guid("60e55387-ee18-4e5c-866f-7ca1d2d09c0f"),
                 Type = "Cent",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValueId = new Guid("2c716f5b-6792-4753-9f1a-fa8bcd4eabfb")
             };
 
             _coinRepository.AddCoin(newCoin);

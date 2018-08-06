@@ -34,8 +34,8 @@ namespace Recollectable.API
         {
             services.AddMvc(options => {
                 options.ReturnHttpNotAcceptable = true;
-                options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
-                options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter(options));
+                options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+                options.InputFormatters.Add(new XmlSerializerInputFormatter(options));
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Register DbContext
@@ -75,6 +75,8 @@ namespace Recollectable.API
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
+                cfg.CreateMap<Coin, CoinDto>();
+                cfg.CreateMap<CoinCreationDto, Coin>();
                 cfg.CreateMap<Condition, ConditionDto>();
                 cfg.CreateMap<ConditionCreationDto, Condition>();
                 cfg.CreateMap<ConditionUpdateDto, Condition>();

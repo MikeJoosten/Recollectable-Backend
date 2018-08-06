@@ -11,8 +11,6 @@ namespace Recollectable.Domain
         public string Metal { get; set; }
         public string Note { get; set; }
         public string Subject { get; set; }
-        public string ObverseLegend { get; set; }
-        public string ReverseLegend { get; set; }
         public string EdgeType { get; set; }
         public string EdgeLegend { get; set; }
         public string Designer { get; set; }

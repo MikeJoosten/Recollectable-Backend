@@ -17,7 +17,7 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<CollectorValue> GetCollectorValues()
         {
-            return _context.CollectorValues;
+            return _context.CollectorValues.OrderBy(c => c.Id);
         }
 
         public CollectorValue GetCollectorValue(Guid collectorValueId)

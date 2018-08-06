@@ -27,7 +27,10 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Coin> GetCoins()
         {
-            return _context.Coins.OrderBy(c => c.Country.Name);
+            return _context.Coins
+                .Include(c => c.Country)
+                .Include(c => c.CollectorValue)
+                .OrderBy(c => c.Country.Name);
         }
 
         public IEnumerable<Coin> GetCoinsByCountry(Guid countryId)
@@ -38,6 +41,8 @@ namespace Recollectable.Data.Repositories
             }
 
             return _context.Coins
+                .Include(c => c.Country)
+                .Include(c => c.CollectorValue)
                 .Where(c => c.CountryId == countryId)
                 .OrderBy(c => c.Type);
         }
@@ -55,12 +60,17 @@ namespace Recollectable.Data.Repositories
                 .Include(cc => cc.Collectable)
                 .Where(cc => cc.CollectionId == collectionId)
                 .Select(cc => (Coin)cc.Collectable)
+                .Include(c => c.Country)
+                .Include(c => c.CollectorValue)
                 .OrderBy(c => c.Country.Name);
         }
 
         public Coin GetCoin(Guid coinId)
         {
-            return _context.Coins.FirstOrDefault(c => c.Id == coinId);
+            return _context.Coins
+                .Include(c => c.Country)
+                .Include(c => c.CollectorValue)
+                .FirstOrDefault(c => c.Id == coinId);
         }
 
         public void AddCoin(Coin coin)
@@ -68,6 +78,11 @@ namespace Recollectable.Data.Repositories
             if (coin.Id == Guid.Empty)
             {
                 coin.Id = Guid.NewGuid();
+            }
+
+            if (coin.CollectorValue != null)
+            {
+                coin.CollectorValue.Id = Guid.NewGuid();
             }
 
             _context.Coins.Add(coin);

@@ -101,46 +101,6 @@ namespace Recollectable.Tests
                 }
             };
 
-            var coins = new[]
-            {
-                new Coin
-                {
-                    Id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
-                    Type = "Dollars",
-                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
-                },
-                new Coin
-                {
-                    Id = new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"),
-                    Type = "Pesos",
-                    CountryId = new Guid("8c29c8a2-93ae-483d-8235-b0c728d3a034")
-                },
-                new Coin
-                {
-                    Id = new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"),
-                    Type = "Pounds",
-                    CountryId = new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0")
-                },
-                new Coin
-                {
-                    Id = new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48"),
-                    Type = "Euros",
-                    CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367")
-                },
-                new Coin
-                {
-                    Id = new Guid("db14f24e-aceb-4315-bfcf-6ace1f9b3613"),
-                    Type = "Yen",
-                    CountryId = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4")
-                },
-                new Coin
-                {
-                    Id = new Guid("30a24244-ca29-40a8-95a6-8f68f5de2f78"),
-                    Type = "Dime",
-                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
-                }
-            };
-
             var banknotes = new[]
             {
                 new Banknote
@@ -294,6 +254,13 @@ namespace Recollectable.Tests
                 new CollectorValue
                 {
                     Id = new Guid("2037c78d-81cd-45c6-b447-476cc1ba90a4"),
+                    G4 = 125.48,
+                    VG8 = 25,
+                    F12 = 32,
+                    VF20 = 55,
+                    XF40 = 125,
+                    MS60 = 285,
+                    MS63 = 320,
                     PF60 = 350,
                     PF63 = 375,
                     PF65 = 425
@@ -308,6 +275,64 @@ namespace Recollectable.Tests
                     XF40 = 760,
                     MS60 = 1650,
                     MS63 = 1650
+                }
+            };
+
+            var coins = new[]
+            {
+                new Coin
+                {
+                    Id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
+                    Type = "Dollars",
+                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                    Country = countries[0],
+                    CollectorValueId = new Guid("2c716f5b-6792-4753-9f1a-fa8bcd4eabfb"),
+                    CollectorValue = collectorValues[2]
+                },
+                new Coin
+                {
+                    Id = new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"),
+                    Type = "Pesos",
+                    CountryId = new Guid("8c29c8a2-93ae-483d-8235-b0c728d3a034"),
+                    Country = countries[3],
+                    CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5"),
+                    CollectorValue = collectorValues[0]
+                },
+                new Coin
+                {
+                    Id = new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"),
+                    Type = "Pounds",
+                    CountryId = new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0"),
+                    Country = countries[2],
+                    CollectorValueId = new Guid("64246e79-c3fe-4020-a222-32c0f329a643"),
+                    CollectorValue = collectorValues[3]
+                },
+                new Coin
+                {
+                    Id = new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48"),
+                    Type = "Euros",
+                    CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
+                    Country = countries[4],
+                    CollectorValueId = new Guid("46bac791-8afc-420f-975e-3f3b5f3778fb"),
+                    CollectorValue = collectorValues[1]
+                },
+                new Coin
+                {
+                    Id = new Guid("db14f24e-aceb-4315-bfcf-6ace1f9b3613"),
+                    Type = "Yen",
+                    CountryId = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4"),
+                    Country = countries[5],
+                    CollectorValueId = new Guid("2c716f5b-6792-4753-9f1a-fa8bcd4eabfb"),
+                    CollectorValue = collectorValues[2]
+                },
+                new Coin
+                {
+                    Id = new Guid("30a24244-ca29-40a8-95a6-8f68f5de2f78"),
+                    Type = "Dime",
+                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                    Country = countries[0],
+                    CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5"),
+                    CollectorValue = collectorValues[0]
                 }
             };
 

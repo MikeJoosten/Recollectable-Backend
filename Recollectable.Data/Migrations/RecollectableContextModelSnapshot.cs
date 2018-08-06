@@ -256,15 +256,11 @@ namespace Recollectable.Data.Migrations
                     b.Property<string>("ObverseDescription")
                         .HasColumnName("Coin_ObverseDescription");
 
-                    b.Property<string>("ObverseLegend");
-
                     b.Property<int>("ReleaseDate")
                         .HasColumnName("Coin_ReleaseDate");
 
                     b.Property<string>("ReverseDescription")
                         .HasColumnName("Coin_ReverseDescription");
-
-                    b.Property<string>("ReverseLegend");
 
                     b.Property<string>("Size")
                         .HasColumnName("Coin_Size");

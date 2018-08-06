@@ -53,8 +53,8 @@ namespace Recollectable.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Collectables",
-                columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "ObverseLegend", "Coin_ReleaseDate", "Coin_ReverseDescription", "ReverseLegend", "Coin_Size", "Subject", "Coin_Type", "Weight" },
-                values: new object[] { new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), "Coin", null, "Manuel L. Negrete", "INDEPENCIA Y LIBERTAD", null, 5, null, "0.720 Silver 0.4151 oz. ASW", 200000, "Mint mark Mo.", "National arms, eagle left", null, 1957, "Head left", null, "36 mm.", "100th Anniversary of Constitution", "Pesos", "18.05 g." });
+                columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "Coin_ReleaseDate", "Coin_ReverseDescription", "Coin_Size", "Subject", "Coin_Type", "Weight" },
+                values: new object[] { new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"), "Coin", null, "Manuel L. Negrete", "INDEPENCIA Y LIBERTAD", null, 5, null, "0.720 Silver 0.4151 oz. ASW", 200000, "Mint mark Mo.", "National arms, eagle left", 1957, "Head left", "36 mm.", "100th Anniversary of Constitution", "Pesos", "18.05 g." });
 
             migrationBuilder.InsertData(
                 table: "Collectables",
@@ -63,8 +63,8 @@ namespace Recollectable.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Collectables",
-                columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "ObverseLegend", "Coin_ReleaseDate", "Coin_ReverseDescription", "ReverseLegend", "Coin_Size", "Subject", "Coin_Type", "Weight" },
-                values: new object[] { new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "Coin", null, null, null, null, 1, null, "0.999 Silver 0.9925 oz. ASW", 200, null, null, null, 2009, null, null, "39 mm.", "Independence 200th Anniversary", "Sucre", "31.10 g." });
+                columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "Coin_ReleaseDate", "Coin_ReverseDescription", "Coin_Size", "Subject", "Coin_Type", "Weight" },
+                values: new object[] { new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), "Coin", null, null, null, null, 1, null, "0.999 Silver 0.9925 oz. ASW", 200, null, null, 2009, null, "39 mm.", "Independence 200th Anniversary", "Sucre", "31.10 g." });
 
             migrationBuilder.InsertData(
                 table: "Collectables",
@@ -73,8 +73,8 @@ namespace Recollectable.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Collectables",
-                columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "ObverseLegend", "Coin_ReleaseDate", "Coin_ReverseDescription", "ReverseLegend", "Coin_Size", "Subject", "Coin_Type", "Weight" },
-                values: new object[] { new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), "Coin", null, "Adolph A. Weinman", null, null, 1, null, "0.900 Silver 0.0723 oz. ASW", 24010000, null, null, null, 1924, null, null, "17.8 mm.", null, "Dime", "2.5 g." });
+                columns: new[] { "Id", "CollectorValueId", "CountryId", "Discriminator", "Coin_BackImagePath", "Designer", "EdgeLegend", "EdgeType", "Coin_FaceValue", "Coin_FrontImagePath", "Metal", "Mintage", "Note", "Coin_ObverseDescription", "Coin_ReleaseDate", "Coin_ReverseDescription", "Coin_Size", "Subject", "Coin_Type", "Weight" },
+                values: new object[] { new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), "Coin", null, "Adolph A. Weinman", null, null, 1, null, "0.900 Silver 0.0723 oz. ASW", 24010000, null, null, 1924, null, "17.8 mm.", null, "Dime", "2.5 g." });
 
             migrationBuilder.InsertData(
                 table: "Collections",

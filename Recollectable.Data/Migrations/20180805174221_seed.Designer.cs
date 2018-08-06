@@ -10,7 +10,7 @@ using Recollectable.Data;
 namespace Recollectable.Data.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20180805142032_seed")]
+    [Migration("20180805174221_seed")]
     partial class seed
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -258,15 +258,11 @@ namespace Recollectable.Data.Migrations
                     b.Property<string>("ObverseDescription")
                         .HasColumnName("Coin_ObverseDescription");
 
-                    b.Property<string>("ObverseLegend");
-
                     b.Property<int>("ReleaseDate")
                         .HasColumnName("Coin_ReleaseDate");
 
                     b.Property<string>("ReverseDescription")
                         .HasColumnName("Coin_ReverseDescription");
-
-                    b.Property<string>("ReverseLegend");
 
                     b.Property<string>("Size")
                         .HasColumnName("Coin_Size");

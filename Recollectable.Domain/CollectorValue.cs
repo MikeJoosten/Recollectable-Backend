@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Xml.Serialization;
 
 namespace Recollectable.Domain
 {
@@ -18,6 +19,9 @@ namespace Recollectable.Domain
         public double? PF60 { get; set; }
         public double? PF63 { get; set; }
         public double? PF65 { get; set; }
+
+        [XmlIgnore]
+        [JsonIgnore]
         public List<Collectable> Collectables { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace Recollectable.Tests.Repositories
         public void GetCollectorValues_OrdersCollectorValueById()
         {
             var result = _repository.GetCollectorValues();
-            Assert.Equal(15.54, result.First().G4);
+            Assert.Equal(125.48, result.First().G4);
         }
 
         [Fact]
