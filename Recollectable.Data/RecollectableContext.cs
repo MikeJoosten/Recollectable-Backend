@@ -119,7 +119,7 @@ namespace Recollectable.Data
                     CountryId = new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"),
                     FaceValue = 5,
                     Type = "Pesos",
-                    ReleaseDate = 1957,
+                    ReleaseDate = "1957",
                     CollectorValueId = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"),
                     Size = "36 mm.",
                     ObverseDescription = "National arms, eagle left",
@@ -127,10 +127,11 @@ namespace Recollectable.Data
                     Mintage = 200000,
                     Weight = "18.05 g.",
                     Metal = "0.720 Silver 0.4151 oz. ASW",
-                    Note = "Mint mark Mo.",
                     Subject = "100th Anniversary of Constitution",
                     EdgeLegend = "INDEPENCIA Y LIBERTAD",
-                    Designer = "Manuel L. Negrete"
+                    Designer = "Manuel L. Negrete",
+                    HeadOfState = "Adolfo Ruiz Cortines",
+                    MintMark = "Mo."
                 },
                 new Coin
                 {
@@ -138,13 +139,14 @@ namespace Recollectable.Data
                     CountryId = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"),
                     FaceValue = 1,
                     Type = "Sucre",
-                    ReleaseDate = 2009,
+                    ReleaseDate = "2009",
                     CollectorValueId = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"),
                     Size = "39 mm.",
                     Mintage = 200,
                     Weight = "31.10 g.",
                     Metal = "0.999 Silver 0.9925 oz. ASW",
                     Subject = "Independence 200th Anniversary",
+                    HeadOfState = "Rafael Correa"
                 },
                 new Coin
                 {
@@ -152,13 +154,14 @@ namespace Recollectable.Data
                     CountryId = new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"),
                     FaceValue = 1,
                     Type = "Dime",
-                    ReleaseDate = 1924,
+                    ReleaseDate = "1924",
                     CollectorValueId = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"),
                     Size = "17.8 mm.",
                     Mintage = 24010000,
                     Weight = "2.5 g.",
                     Metal = "0.900 Silver 0.0723 oz. ASW",
-                    Designer = "Adolph A. Weinman"
+                    Designer = "Adolph A. Weinman",
+                    HeadOfState = "Calvin Coolidge"
                 }
             );
 
@@ -169,10 +172,11 @@ namespace Recollectable.Data
                     CountryId = new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"),
                     FaceValue = 50,
                     Type = "Dollars",
-                    ReleaseDate = 1993,
+                    ReleaseDate = "1993",
                     CollectorValueId = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"),
                     ObverseDescription = "Ulysses S. Grant at center",
                     ReverseDescription = "United States Capital Building",
+                    HeadOfState = "Bill Clinton"
                 },
                 new Banknote
                 {
@@ -180,13 +184,14 @@ namespace Recollectable.Data
                     CountryId = new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"),
                     FaceValue = 1000,
                     Type = "Dollars",
-                    ReleaseDate = 1988,
+                    ReleaseDate = "1988",
                     CollectorValueId = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"),
                     ObverseDescription = "Queen Elizabeth II, Parliament Library at right, " +
                     "Optical device with denomination at upper left, Arms at upper left center",
                     ReverseDescription = "Pine grosbeak on branch at right",
                     Color = "Pink on multicolor underprint",
-                    Signature = "Thiessen-Crow"
+                    Signature = "Thiessen-Crow",
+                    HeadOfState = "Queen Elizabeth II"
                 }
             );
 

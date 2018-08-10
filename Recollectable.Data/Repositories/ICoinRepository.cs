@@ -17,5 +17,6 @@ namespace Recollectable.Data.Repositories
         void DeleteCoin(Coin coin);
         void DeleteCoinFromCollection(CollectionCollectable collectionCollectable);
         bool Save();
+        bool CoinExists(Guid coinId);
     }
 }

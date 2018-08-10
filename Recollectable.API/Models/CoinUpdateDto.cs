@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Recollectable.API.Models
 {
-    public class CoinCreationDto
+    public class CoinUpdateDto
     {
         public int FaceValue { get; set; }
         public string Type { get; set; }
@@ -28,7 +28,7 @@ namespace Recollectable.API.Models
         public string Designer { get; set; }
         public string HeadOfState { get; set; }
         public string MintMark { get; set; }
-        public Country Country { get; set; }
-        public CollectorValue CollectorValue { get; set; }
+        public Guid CountryId { get; set; }
+        public Guid CollectorValueId { get; set; }
     }
 }

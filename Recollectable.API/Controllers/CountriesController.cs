@@ -87,18 +87,7 @@ namespace Recollectable.API.Controllers
 
             if (countryFromRepo == null)
             {
-                var newCountry = Mapper.Map<Country>(country);
-                newCountry.Id = id;
-
-                _countryRepository.AddCountry(newCountry);
-
-                if (!_countryRepository.Save())
-                {
-                    throw new Exception($"Upserting country {id} failed on save.");
-                }
-
-                var returnedCountry = Mapper.Map<CountryDto>(newCountry);
-                return CreatedAtRoute("GetCountry", new { id = returnedCountry.Id }, returnedCountry);
+                return NotFound();
             }
 
             Mapper.Map(country, countryFromRepo);
@@ -125,21 +114,7 @@ namespace Recollectable.API.Controllers
 
             if (countryFromRepo == null)
             {
-                var countryDto = new CountryUpdateDto();
-                patchDoc.ApplyTo(countryDto);
-
-                var newCountry = Mapper.Map<Country>(countryDto);
-                newCountry.Id = id;
-
-                _countryRepository.AddCountry(newCountry);
-
-                if (!_countryRepository.Save())
-                {
-                    throw new Exception($"Upserting country {id} failed on save.");
-                }
-
-                var returnedCountry = Mapper.Map<CountryDto>(newCountry);
-                return CreatedAtRoute("GetCountry", new { id = returnedCountry.Id }, returnedCountry);
+                return NotFound();
             }
 
             var patchedCountry = Mapper.Map<CountryUpdateDto>(countryFromRepo);

@@ -89,20 +89,7 @@ namespace Recollectable.API.Controllers
 
             if (conditionFromRepo == null)
             {
-                var newCondition = Mapper.Map<Condition>(condition);
-                newCondition.Id = id;
-
-                _conditionRepository.AddCondition(newCondition);
-
-                if (!_conditionRepository.Save())
-                {
-                    throw new Exception($"Upserting condition {id} failed on save.");
-                }
-
-                var returnedCondition = Mapper.Map<ConditionDto>(newCondition);
-                return CreatedAtRoute("GetCondition",
-                    new { id = returnedCondition.Id },
-                    returnedCondition);
+                return NotFound();
             }
 
             Mapper.Map(condition, conditionFromRepo);
@@ -129,23 +116,7 @@ namespace Recollectable.API.Controllers
 
             if (conditionFromRepo == null)
             {
-                var conditionDto = new ConditionUpdateDto();
-                patchDoc.ApplyTo(conditionDto);
-
-                var newCondition = Mapper.Map<Condition>(conditionDto);
-                newCondition.Id = id;
-
-                _conditionRepository.AddCondition(newCondition);
-
-                if (!_conditionRepository.Save())
-                {
-                    throw new Exception($"Upserting condition {id} failed on save.");
-                }
-
-                var returnedCondition = Mapper.Map<ConditionDto>(newCondition);
-                return CreatedAtRoute("GetCondition",
-                    new { id = returnedCondition.Id },
-                    returnedCondition);
+                return NotFound();
             }
 
             var patchedCondition = Mapper.Map<ConditionUpdateDto>(conditionFromRepo);

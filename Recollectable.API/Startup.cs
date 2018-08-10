@@ -77,6 +77,8 @@ namespace Recollectable.API
             {
                 cfg.CreateMap<Coin, CoinDto>();
                 cfg.CreateMap<CoinCreationDto, Coin>();
+                cfg.CreateMap<CoinUpdateDto, Coin>();
+                cfg.CreateMap<Coin, CoinUpdateDto>();
                 cfg.CreateMap<Condition, ConditionDto>();
                 cfg.CreateMap<ConditionCreationDto, Condition>();
                 cfg.CreateMap<ConditionUpdateDto, Condition>();

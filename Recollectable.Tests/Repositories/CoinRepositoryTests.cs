@@ -36,7 +36,7 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void GetCoins_OrdersCollectionsByCountry()
+        public void GetCoins_OrdersCoinsByCountry()
         {
             var result = _coinRepository.GetCoins();
             Assert.Equal("Canada", result.First().Country.Name);

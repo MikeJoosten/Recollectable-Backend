@@ -90,20 +90,7 @@ namespace Recollectable.API.Controllers
 
             if (collectorValueFromRepo == null)
             {
-                var newCollectorValue = Mapper.Map<CollectorValue>(collectorValue);
-                newCollectorValue.Id = id;
-
-                _collectorValueRepository.AddCollectorValue(newCollectorValue);
-
-                if (!_collectorValueRepository.Save())
-                {
-                    throw new Exception($"Upserting collector value {id} failed on save.");
-                }
-
-                var returnedCollectorValue = Mapper.Map<CollectorValueDto>(newCollectorValue);
-                return CreatedAtRoute("GetCollectorValue", 
-                    new { id = returnedCollectorValue.Id }, 
-                    returnedCollectorValue);
+                return NotFound();
             }
 
             Mapper.Map(collectorValue, collectorValueFromRepo);
@@ -130,23 +117,7 @@ namespace Recollectable.API.Controllers
 
             if (collectorValueFromRepo == null)
             {
-                var collectorValueDto = new CollectorValueUpdateDto();
-                patchDoc.ApplyTo(collectorValueDto);
-
-                var newCollectorValue = Mapper.Map<CollectorValue>(collectorValueDto);
-                newCollectorValue.Id = id;
-
-                _collectorValueRepository.AddCollectorValue(newCollectorValue);
-
-                if (!_collectorValueRepository.Save())
-                {
-                    throw new Exception($"Upserting collector value {id} failed on save.");
-                }
-
-                var returnedCollectorValue = Mapper.Map<CollectorValueDto>(newCollectorValue);
-                return CreatedAtRoute("GetCollectorValue",
-                    new { id = returnedCollectorValue.Id },
-                    returnedCollectorValue);
+                return NotFound();
             }
 
             var patchedCollectorValue = Mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);

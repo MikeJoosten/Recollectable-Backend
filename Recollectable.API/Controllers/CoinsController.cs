@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Recollectable.API.Models;
 using Recollectable.Data.Repositories;
@@ -15,12 +17,15 @@ namespace Recollectable.API.Controllers
     {
         private ICoinRepository _coinRepository;
         private ICountryRepository _countryRepository;
+        private ICollectorValueRepository _collectorValueRepository;
 
         public CoinsController(ICoinRepository coinRepository, 
+            ICollectorValueRepository collectorValueRepository, 
             ICountryRepository countryRepository)
         {
             _coinRepository = coinRepository;
             _countryRepository = countryRepository;
+            _collectorValueRepository = collectorValueRepository;
         }
 
         [HttpGet]
@@ -48,7 +53,30 @@ namespace Recollectable.API.Controllers
         [HttpPost]
         public IActionResult CreateCoin([FromBody] CoinCreationDto coin)
         {
-            if (coin == null || !_countryRepository.CountryExists(coin.CountryId))
+            if (coin == null)
+            {
+                return BadRequest();
+            }
+
+            var country = _countryRepository.GetCountry(coin.Country.Id);
+
+            if (country != null)
+            {
+                coin.Country = country;
+            }
+            else if (coin.Country.Id != Guid.Empty)
+            {
+                return BadRequest();
+            }
+
+            var collectorValue = _collectorValueRepository
+                .GetCollectorValue(coin.CollectorValue.Id);
+
+            if (collectorValue != null)
+            {
+                coin.CollectorValue = collectorValue;
+            }
+            else if (coin.CollectorValue.Id != Guid.Empty)
             {
                 return BadRequest();
             }
@@ -63,6 +91,124 @@ namespace Recollectable.API.Controllers
 
             var returnedCoin = Mapper.Map<CoinDto>(newCoin);
             return CreatedAtRoute("GetCoin", new { id = returnedCoin.Id }, returnedCoin);
+        }
+
+        [HttpPost("{id}")]
+        public IActionResult BlockCoinCreation(Guid id)
+        {
+            if (_coinRepository.CoinExists(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status409Conflict);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateCoin(Guid id, [FromBody] CoinUpdateDto coin)
+        {
+            if (coin == null)
+            {
+                return BadRequest();
+            }
+
+            if (!_countryRepository.CountryExists(coin.CountryId))
+            {
+                return BadRequest();
+            }
+
+            if (!_collectorValueRepository.CollectorValueExists(coin.CollectorValueId))
+            {
+                return BadRequest();
+            }
+
+            var coinFromRepo = _coinRepository.GetCoin(id);
+
+            if (coinFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            coinFromRepo.CountryId = coin.CountryId;
+            coinFromRepo.CollectorValueId = coin.CollectorValueId;
+
+            Mapper.Map(coin, coinFromRepo);
+            _coinRepository.UpdateCoin(coinFromRepo);
+
+            if (!_coinRepository.Save())
+            {
+                throw new Exception($"Updating coin {id} failed on save.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult PartiallyUpdateCoin(Guid id,
+            [FromBody] JsonPatchDocument<CoinUpdateDto> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return BadRequest();
+            }
+
+            var coinFromRepo = _coinRepository.GetCoin(id);
+
+            if (coinFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var patchedCoin = Mapper.Map<CoinUpdateDto>(coinFromRepo);
+            patchDoc.ApplyTo(patchedCoin);
+
+            var country = _countryRepository.GetCountry(patchedCoin.CountryId);
+
+            if (country == null)
+            {
+                return BadRequest();
+            }
+
+            var collectorValue = _collectorValueRepository
+                .GetCollectorValue(patchedCoin.CollectorValueId);
+
+            if (collectorValue == null)
+            {
+                return BadRequest();
+            }
+
+            coinFromRepo.Country = country;
+            coinFromRepo.CollectorValue = collectorValue;
+
+            Mapper.Map(patchedCoin, coinFromRepo);
+            _coinRepository.UpdateCoin(coinFromRepo);
+
+            if (!_coinRepository.Save())
+            {
+                throw new Exception($"Patching coin {id} failed on save.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteCoin(Guid id)
+        {
+            var coinFromRepo = _coinRepository.GetCoin(id);
+
+            if (coinFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            _coinRepository.DeleteCoin(coinFromRepo);
+
+            if (!_coinRepository.Save())
+            {
+                throw new Exception($"Deleting coin {id} failed on save.");
+            }
+
+            return NoContent();
         }
     }
 }

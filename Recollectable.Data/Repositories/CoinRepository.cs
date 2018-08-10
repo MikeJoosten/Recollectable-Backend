@@ -30,7 +30,9 @@ namespace Recollectable.Data.Repositories
             return _context.Coins
                 .Include(c => c.Country)
                 .Include(c => c.CollectorValue)
-                .OrderBy(c => c.Country.Name);
+                .OrderBy(c => c.Country.Name)
+                .ThenBy(c => (c.FaceValue + " " + c.Type))
+                .ThenBy(c => c.ReleaseDate);
         }
 
         public IEnumerable<Coin> GetCoinsByCountry(Guid countryId)
@@ -44,7 +46,8 @@ namespace Recollectable.Data.Repositories
                 .Include(c => c.Country)
                 .Include(c => c.CollectorValue)
                 .Where(c => c.CountryId == countryId)
-                .OrderBy(c => c.Type);
+                .OrderBy(c => (c.FaceValue + " " + c.Type))
+                .ThenBy(c => c.ReleaseDate);
         }
 
         public IEnumerable<Coin> GetCoinsByCollection(Guid collectionId)
@@ -62,7 +65,9 @@ namespace Recollectable.Data.Repositories
                 .Select(cc => (Coin)cc.Collectable)
                 .Include(c => c.Country)
                 .Include(c => c.CollectorValue)
-                .OrderBy(c => c.Country.Name);
+                .OrderBy(c => c.Country.Name)
+                .ThenBy(c => (c.FaceValue + " " + c.Type))
+                .ThenBy(c => c.ReleaseDate);
         }
 
         public Coin GetCoin(Guid coinId)
@@ -80,9 +85,14 @@ namespace Recollectable.Data.Repositories
                 coin.Id = Guid.NewGuid();
             }
 
-            if (coin.CollectorValue != null)
+            if (coin.CountryId == Guid.Empty)
             {
-                coin.CollectorValue.Id = Guid.NewGuid();
+                coin.CountryId = Guid.NewGuid();
+            }
+
+            if (coin.CollectorValueId == Guid.Empty)
+            {
+                coin.CollectorValueId = Guid.NewGuid();
             }
 
             _context.Coins.Add(coin);
@@ -118,6 +128,11 @@ namespace Recollectable.Data.Repositories
         public bool Save()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public bool CoinExists(Guid coinId)
+        {
+            return _context.Coins.Any(c => c.Id == coinId);
         }
     }
 }

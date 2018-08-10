@@ -73,13 +73,14 @@ namespace Recollectable.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    ReleaseDate = table.Column<string>(nullable: true),
                     CountryId = table.Column<Guid>(nullable: false),
                     CollectorValueId = table.Column<Guid>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     FaceValue = table.Column<int>(nullable: true),
                     Type = table.Column<string>(nullable: true),
-                    ReleaseDate = table.Column<int>(nullable: true),
                     Size = table.Column<string>(nullable: true),
+                    HeadOfState = table.Column<string>(nullable: true),
                     ObverseDescription = table.Column<string>(nullable: true),
                     ReverseDescription = table.Column<string>(nullable: true),
                     FrontImagePath = table.Column<string>(nullable: true),
@@ -89,8 +90,8 @@ namespace Recollectable.Data.Migrations
                     Signature = table.Column<string>(nullable: true),
                     Coin_FaceValue = table.Column<int>(nullable: true),
                     Coin_Type = table.Column<string>(nullable: true),
-                    Coin_ReleaseDate = table.Column<int>(nullable: true),
                     Coin_Size = table.Column<string>(nullable: true),
+                    Coin_HeadOfState = table.Column<string>(nullable: true),
                     Coin_ObverseDescription = table.Column<string>(nullable: true),
                     Coin_ReverseDescription = table.Column<string>(nullable: true),
                     Coin_FrontImagePath = table.Column<string>(nullable: true),
@@ -100,9 +101,14 @@ namespace Recollectable.Data.Migrations
                     Metal = table.Column<string>(nullable: true),
                     Note = table.Column<string>(nullable: true),
                     Subject = table.Column<string>(nullable: true),
+                    ObverseInscription = table.Column<string>(nullable: true),
+                    ObverseLegend = table.Column<string>(nullable: true),
+                    ReverseInscription = table.Column<string>(nullable: true),
+                    ReverseLegend = table.Column<string>(nullable: true),
                     EdgeType = table.Column<string>(nullable: true),
                     EdgeLegend = table.Column<string>(nullable: true),
-                    Designer = table.Column<string>(nullable: true)
+                    Designer = table.Column<string>(nullable: true),
+                    MintMark = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
