@@ -124,7 +124,8 @@ namespace Recollectable.Tests.Repositories
             {
                 Id = new Guid("86dbe5cf-df75-41a5-af56-6e2f2de181a4"),
                 Type = "Euros",
-                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367")
+                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
+                CollectorValueId = new Guid("5e9cb33b-b12c-4e20-8113-d8e002aeb38d")
             };
 
             _banknoteRepository.AddBanknote(newBanknote);

@@ -13,5 +13,6 @@ namespace Recollectable.Data.Repositories
         void UpdateUser(User user);
         void DeleteUser(User user);
         bool Save();
+        bool UserExists(Guid userId);
     }
 }

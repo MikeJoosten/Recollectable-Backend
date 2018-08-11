@@ -14,6 +14,7 @@ namespace Recollectable.Data
         public DbSet<Collection> Collections { get; set; }
         public DbSet<Coin> Coins { get; set; }
         public DbSet<Banknote> Banknotes { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
         public DbSet<Collectable> Collectables { get; set; }
         public DbSet<CollectorValue> CollectorValues { get; set; }
         public DbSet<CollectionCollectable> CollectionCollectables { get; set; }

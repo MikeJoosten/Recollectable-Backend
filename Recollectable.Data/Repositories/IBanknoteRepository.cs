@@ -17,5 +17,6 @@ namespace Recollectable.Data.Repositories
         void DeleteBanknote(Banknote banknote);
         void DeleteBanknoteFromCollection(CollectionCollectable collectionCollectable);
         bool Save();
+        bool BanknoteExists(Guid banknoteId);
     }
 }

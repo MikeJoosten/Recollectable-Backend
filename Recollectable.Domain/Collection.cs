@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace Recollectable.Domain
 {
@@ -8,8 +10,13 @@ namespace Recollectable.Domain
     {
         public Guid Id { get; set; }
         public string Type { get; set; }
+
+        [XmlIgnore]
+        [JsonIgnore]
         public Guid UserId { get; set; }
-        public User User { get; set; }
+
+        [XmlIgnore]
+        [JsonIgnore]
         public List<CollectionCollectable> CollectionCollectables { get; set; }
     }
 }

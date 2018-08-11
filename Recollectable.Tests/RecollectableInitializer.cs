@@ -101,46 +101,6 @@ namespace Recollectable.Tests
                 }
             };
 
-            var banknotes = new[]
-            {
-                new Banknote
-                {
-                    Id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f"),
-                    Type = "Dollars",
-                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
-                },
-                new Banknote
-                {
-                    Id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4"),
-                    Type = "Pesos",
-                    CountryId = new Guid("8c29c8a2-93ae-483d-8235-b0c728d3a034")
-                },
-                new Banknote
-                {
-                    Id = new Guid("51d91016-54f5-44f0-a1d8-e87f72d4bcc4"),
-                    Type = "Yen",
-                    CountryId = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4")
-                },
-                new Banknote
-                {
-                    Id = new Guid("48d9049b-04f0-4c24-a1c3-c3668878013e"),
-                    Type = "Dollars",
-                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
-                },
-                new Banknote
-                {
-                    Id = new Guid("3da0c34f-dbfb-41a3-801f-97b7f4cdde89"),
-                    Type = "Pounds",
-                    CountryId = new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0")
-                },
-                new Banknote
-                {
-                    Id = new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c"),
-                    Type = "Dinars",
-                    CountryId = new Guid("1e6a79fa-f216-41a4-8efe-0b87e58d2b33")
-                }
-            };
-
             var conditions = new[]
             {
                 new Condition
@@ -333,6 +293,64 @@ namespace Recollectable.Tests
                     Country = countries[0],
                     CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5"),
                     CollectorValue = collectorValues[0]
+                }
+            };
+
+            var banknotes = new[]
+{
+                new Banknote
+                {
+                    Id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f"),
+                    Type = "Dollars",
+                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                    Country = countries[0],
+                    CollectorValueId = new Guid("2037c78d-81cd-45c6-b447-476cc1ba90a4"),
+                    CollectorValue = collectorValues[4]
+                },
+                new Banknote
+                {
+                    Id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4"),
+                    Type = "Pesos",
+                    CountryId = new Guid("8c29c8a2-93ae-483d-8235-b0c728d3a034"),
+                    Country = countries[3],
+                    CollectorValueId = new Guid("46bac791-8afc-420f-975e-3f3b5f3778fb"),
+                    CollectorValue = collectorValues[1]
+                },
+                new Banknote
+                {
+                    Id = new Guid("51d91016-54f5-44f0-a1d8-e87f72d4bcc4"),
+                    Type = "Yen",
+                    CountryId = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4"),
+                    Country = countries[5],
+                    CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5"),
+                    CollectorValue = collectorValues[0]
+                },
+                new Banknote
+                {
+                    Id = new Guid("48d9049b-04f0-4c24-a1c3-c3668878013e"),
+                    Type = "Dollars",
+                    CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                    Country = countries[0],
+                    CollectorValueId = new Guid("46bac791-8afc-420f-975e-3f3b5f3778fb"),
+                    CollectorValue = collectorValues[1]
+                },
+                new Banknote
+                {
+                    Id = new Guid("3da0c34f-dbfb-41a3-801f-97b7f4cdde89"),
+                    Type = "Pounds",
+                    CountryId = new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0"),
+                    Country = countries[2],
+                    CollectorValueId = new Guid("5e9cb33b-b12c-4e20-8113-d8e002aeb38d"),
+                    CollectorValue = collectorValues[5]
+                },
+                new Banknote
+                {
+                    Id = new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c"),
+                    Type = "Dinars",
+                    CountryId = new Guid("1e6a79fa-f216-41a4-8efe-0b87e58d2b33"),
+                    Country = countries[1],
+                    CollectorValueId = new Guid("64246e79-c3fe-4020-a222-32c0f329a643"),
+                    CollectorValue = collectorValues[3]
                 }
             };
 

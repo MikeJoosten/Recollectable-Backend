@@ -39,7 +39,7 @@ namespace Recollectable.API
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Register DbContext
-            services.AddDbContext<RecollectableContext>(options =>
+            services.AddDbContext<RecollectableContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
             // Register repositories
@@ -75,10 +75,18 @@ namespace Recollectable.API
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
+                cfg.CreateMap<User, UserDto>();
+                cfg.CreateMap<UserCreationDto, User>();
+                cfg.CreateMap<UserUpdateDto, User>();
+                cfg.CreateMap<User, UserUpdateDto>();
                 cfg.CreateMap<Coin, CoinDto>();
                 cfg.CreateMap<CoinCreationDto, Coin>();
                 cfg.CreateMap<CoinUpdateDto, Coin>();
                 cfg.CreateMap<Coin, CoinUpdateDto>();
+                cfg.CreateMap<Banknote, BanknoteDto>();
+                cfg.CreateMap<BanknoteCreationDto, Banknote>();
+                cfg.CreateMap<BanknoteUpdateDto, Banknote>();
+                cfg.CreateMap<Banknote, BanknoteUpdateDto>();
                 cfg.CreateMap<Condition, ConditionDto>();
                 cfg.CreateMap<ConditionCreationDto, Condition>();
                 cfg.CreateMap<ConditionUpdateDto, Condition>();

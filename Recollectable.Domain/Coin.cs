@@ -17,7 +17,6 @@ namespace Recollectable.Domain
         public string ReverseLegend { get; set; }
         public string EdgeType { get; set; }
         public string EdgeLegend { get; set; }
-        public string Designer { get; set; }
         public string MintMark { get; set; }
     }
 }

@@ -27,7 +27,12 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<Banknote> GetBanknotes()
         {
-            return _context.Banknotes.OrderBy(b => b.Country.Name);
+            return _context.Banknotes
+                .Include(b => b.Country)
+                .Include(b => b.CollectorValue)
+                .OrderBy(b => b.Country.Name)
+                .ThenBy(b => (b.FaceValue + " " + b.Type))
+                .ThenBy(b => b.ReleaseDate);
         }
 
         public IEnumerable<Banknote> GetBanknotesByCountry(Guid countryId)
@@ -37,7 +42,12 @@ namespace Recollectable.Data.Repositories
                 return null;
             }
 
-            return _context.Banknotes.Where(b => b.CountryId == countryId);
+            return _context.Banknotes
+                .Include(b => b.Country)
+                .Include(b => b.CollectorValue)
+                .Where(b => b.CountryId == countryId)
+                .OrderBy(b => (b.FaceValue + " " + b.Type))
+                .ThenBy(b => b.ReleaseDate);
         }
 
         public IEnumerable<Banknote> GetBanknotesByCollection(Guid collectionId)
@@ -53,12 +63,19 @@ namespace Recollectable.Data.Repositories
                 .Include(cc => cc.Collectable)
                 .Where(cc => cc.CollectionId == collectionId)
                 .Select(cc => (Banknote)cc.Collectable)
-                .OrderBy(c => c.Country.Name);
+                .Include(b => b.Country)
+                .Include(b => b.CollectorValue)
+                .OrderBy(b => b.Country.Name)
+                .ThenBy(b => (b.FaceValue + " " + b.Type))
+                .ThenBy(b => b.ReleaseDate);
         }
 
         public Banknote GetBanknote(Guid banknoteId)
         {
-            return _context.Banknotes.FirstOrDefault(b => b.Id == banknoteId);
+            return _context.Banknotes
+                .Include(b => b.Country)
+                .Include(b => b.CollectorValue)
+                .FirstOrDefault(b => b.Id == banknoteId);
         }
 
         public void AddBanknote(Banknote banknote)
@@ -66,6 +83,16 @@ namespace Recollectable.Data.Repositories
             if (banknote.Id == Guid.Empty)
             {
                 banknote.Id = Guid.NewGuid();
+            }
+
+            if (banknote.CountryId == Guid.Empty)
+            {
+                banknote.CountryId = Guid.NewGuid();
+            }
+
+            if (banknote.CollectorValueId == Guid.Empty)
+            {
+                banknote.CollectorValueId = Guid.NewGuid();
             }
 
             _context.Banknotes.Add(banknote);
@@ -101,6 +128,11 @@ namespace Recollectable.Data.Repositories
         public bool Save()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public bool BanknoteExists(Guid banknoteId)
+        {
+            return _context.Banknotes.Any(b => b.Id == banknoteId);
         }
     }
 }
