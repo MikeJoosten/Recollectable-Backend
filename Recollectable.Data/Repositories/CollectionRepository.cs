@@ -1,4 +1,5 @@
-﻿using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +19,14 @@ namespace Recollectable.Data.Repositories
             _userRepository = userRepository;
         }
 
-        public IEnumerable<Collection> GetCollections()
+        public PagedList<Collection> GetCollections
+            (CollectionsResourceParameters resourceParameters)
         {
-            return _context.Collections.OrderBy(c => c.Type);
+            var collections = _context.Collections.OrderBy(c => c.Type);
+
+            return PagedList<Collection>.Create(collections,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public Collection GetCollection(Guid collectionId)

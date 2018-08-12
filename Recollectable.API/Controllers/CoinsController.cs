@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.API.Models;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Domain;
 using System;
@@ -18,20 +21,43 @@ namespace Recollectable.API.Controllers
         private ICoinRepository _coinRepository;
         private ICountryRepository _countryRepository;
         private ICollectorValueRepository _collectorValueRepository;
+        private IUrlHelper _urlHelper;
 
         public CoinsController(ICoinRepository coinRepository, 
             ICollectorValueRepository collectorValueRepository, 
-            ICountryRepository countryRepository)
+            ICountryRepository countryRepository, IUrlHelper urlHelper)
         {
             _coinRepository = coinRepository;
             _countryRepository = countryRepository;
             _collectorValueRepository = collectorValueRepository;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet]
-        public IActionResult GetCoins()
+        [HttpGet(Name = "GetCoins")]
+        public IActionResult GetCoins(CollectablesResourceParameters resourceParameters)
         {
-            var coinsFromRepo = _coinRepository.GetCoins();
+            var coinsFromRepo = _coinRepository.GetCoins(resourceParameters);
+
+            var previousPageLink = coinsFromRepo.HasPrevious ?
+                CreateCoinsResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = coinsFromRepo.HasNext ?
+                CreateCoinsResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = coinsFromRepo.TotalCount,
+                pageSize = coinsFromRepo.PageSize,
+                currentPage = coinsFromRepo.CurrentPage,
+                totalPages = coinsFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
             return Ok(coins);
         }
@@ -206,6 +232,32 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateCoinsResourceUri(CollectablesResourceParameters resourceParameters, 
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetCoins", new
+                    {
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetCoins", new
+                    {
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetCoins", new
+                    {
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

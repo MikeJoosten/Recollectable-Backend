@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Data.Helpers;
 using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
@@ -25,14 +26,18 @@ namespace Recollectable.Data.Repositories
             _conditionRepository = conditionRepository;
         }
 
-        public IEnumerable<Coin> GetCoins()
+        public PagedList<Coin> GetCoins(CollectablesResourceParameters resourceParameters)
         {
-            return _context.Coins
+            var coins = _context.Coins
                 .Include(c => c.Country)
                 .Include(c => c.CollectorValue)
                 .OrderBy(c => c.Country.Name)
                 .ThenBy(c => (c.FaceValue + " " + c.Type))
                 .ThenBy(c => c.ReleaseDate);
+
+            return PagedList<Coin>.Create(coins,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public IEnumerable<Coin> GetCoinsByCountry(Guid countryId)

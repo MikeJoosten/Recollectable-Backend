@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Data.Helpers;
 using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
@@ -19,14 +20,15 @@ namespace Recollectable.Data.Repositories
             _collectionRepository = collectionRepository;
         }
 
-        public IEnumerable<CollectionCollectable> GetCollectables(Guid collectionId)
+        public PagedList<CollectionCollectable> GetCollectables(Guid collectionId,
+            CollectablesResourceParameters resourceParameters)
         {
             if (!_collectionRepository.CollectionExists(collectionId))
             {
                 return null;
             }
 
-            return _context.CollectionCollectables
+            var collectables = _context.CollectionCollectables
                 .Include(cc => cc.Condition)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.Country)
@@ -35,6 +37,10 @@ namespace Recollectable.Data.Repositories
                 .Where(cc => cc.CollectionId == collectionId)
                 .OrderBy(cc => cc.Collectable.Country)
                 .ThenBy(cc => cc.Collectable.ReleaseDate);
+
+            return PagedList<CollectionCollectable>.Create(collectables,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public Collectable GetCollectable(Guid collectableId)

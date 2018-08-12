@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Data.Helpers;
 using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,16 @@ namespace Recollectable.Data.Repositories
             _context = context;
         }
 
-        public IEnumerable<User> GetUsers()
+        public PagedList<User> GetUsers(UsersResourceParameters resourceParameters)
         {
-            return _context.Users
+            var users = _context.Users
                 .Include(u => u.Collections)
                 .OrderBy(u => u.FirstName)
                 .ThenBy(u => u.LastName);
+
+            return PagedList<User>.Create(users,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public User GetUser(Guid userId)

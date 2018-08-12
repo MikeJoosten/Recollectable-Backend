@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.API.Models;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Domain;
 using System;
@@ -18,20 +21,43 @@ namespace Recollectable.API.Controllers
         private IBanknoteRepository _banknoteRepository;
         private ICountryRepository _countryRepository;
         private ICollectorValueRepository _collectorValueRepository;
+        private IUrlHelper _urlHelper;
 
         public BanknotesController(IBanknoteRepository banknoteRepository,
             ICollectorValueRepository collectorValueRepository,
-            ICountryRepository countryRepository)
+            ICountryRepository countryRepository, IUrlHelper urlHelper)
         {
             _banknoteRepository = banknoteRepository;
             _countryRepository = countryRepository;
             _collectorValueRepository = collectorValueRepository;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet]
-        public IActionResult GetBanknotes()
+        [HttpGet(Name = "GetBanknotes")]
+        public IActionResult GetBanknotes(CollectablesResourceParameters resourceParameters)
         {
-            var banknotesFromRepo = _banknoteRepository.GetBanknotes();
+            var banknotesFromRepo = _banknoteRepository.GetBanknotes(resourceParameters);
+
+            var previousPageLink = banknotesFromRepo.HasPrevious ?
+                CreateBanknotesResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = banknotesFromRepo.HasNext ?
+                CreateBanknotesResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = banknotesFromRepo.TotalCount,
+                pageSize = banknotesFromRepo.PageSize,
+                currentPage = banknotesFromRepo.CurrentPage,
+                totalPages = banknotesFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var banknotes = Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
             return Ok(banknotes);
         }
@@ -208,6 +234,32 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateBanknotesResourceUri(CollectablesResourceParameters resourceParameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetBanknotes", new
+                    {
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetBanknotes", new
+                    {
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetBanknotes", new
+                    {
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

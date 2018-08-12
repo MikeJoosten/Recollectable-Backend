@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.API.Models;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Domain;
 using System;
@@ -17,18 +20,41 @@ namespace Recollectable.API.Controllers
     {
         private ICollectionRepository _collectionRepository;
         private IUserRepository _userRepository;
+        private IUrlHelper _urlHelper;
 
         public CollectionsController(ICollectionRepository collectionRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository, IUrlHelper urlHelper)
         {
             _collectionRepository = collectionRepository;
             _userRepository = userRepository;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet]
-        public IActionResult GetCollections()
+        [HttpGet(Name = "GetCollections")]
+        public IActionResult GetCollections(CollectionsResourceParameters resourceParameters)
         {
-            var collectionsFromRepo = _collectionRepository.GetCollections();
+            var collectionsFromRepo = _collectionRepository.GetCollections(resourceParameters);
+
+            var previousPageLink = collectionsFromRepo.HasPrevious ?
+                CreateCollectionsResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = collectionsFromRepo.HasNext ?
+                CreateCollectionsResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = collectionsFromRepo.TotalCount,
+                pageSize = collectionsFromRepo.PageSize,
+                currentPage = collectionsFromRepo.CurrentPage,
+                totalPages = collectionsFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var collections = Mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
             return Ok(collections);
         }
@@ -177,6 +203,32 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateCollectionsResourceUri(CollectionsResourceParameters resourceParameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetCollections", new
+                    {
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetCollections", new
+                    {
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetCollections", new
+                    {
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

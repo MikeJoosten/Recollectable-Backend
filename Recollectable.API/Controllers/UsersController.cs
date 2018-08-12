@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.API.Models;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Domain;
 using System;
@@ -16,16 +19,39 @@ namespace Recollectable.API.Controllers
     public class UsersController : Controller
     {
         private IUserRepository _userRepository;
+        private IUrlHelper _urlHelper;
 
-        public UsersController(IUserRepository userRepository)
+        public UsersController(IUserRepository userRepository, IUrlHelper urlHelper)
         {
             _userRepository = userRepository;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet]
-        public IActionResult GetUsers()
+        [HttpGet(Name = "GetUsers")]
+        public IActionResult GetUsers(UsersResourceParameters resourceParameters)
         {
-            var usersFromRepo = _userRepository.GetUsers();
+            var usersFromRepo = _userRepository.GetUsers(resourceParameters);
+
+            var previousPageLink = usersFromRepo.HasPrevious ?
+                CreateUsersResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = usersFromRepo.HasNext ?
+                CreateUsersResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = usersFromRepo.TotalCount,
+                pageSize = usersFromRepo.PageSize,
+                currentPage = usersFromRepo.CurrentPage,
+                totalPages = usersFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var users = Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
             return Ok(users);
         }
@@ -149,6 +175,32 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateUsersResourceUri(UsersResourceParameters resourceParameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetUsers", new
+                    {
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetUsers", new
+                    {
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetUsers", new
+                    {
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

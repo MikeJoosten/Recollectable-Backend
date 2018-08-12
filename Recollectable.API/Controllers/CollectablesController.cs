@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.API.Models;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Domain;
 using System;
@@ -18,24 +21,49 @@ namespace Recollectable.API.Controllers
         private ICollectableRepository _collectableRepository;
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
+        private IUrlHelper _urlHelper;
 
         public CollectablesController(ICollectableRepository collectableRepository,
-            ICollectionRepository collectionRepository, IConditionRepository conditionRepository)
+            ICollectionRepository collectionRepository, IConditionRepository conditionRepository,
+            IUrlHelper urlHelper)
         {
             _collectableRepository = collectableRepository;
             _collectionRepository = collectionRepository;
             _conditionRepository = conditionRepository;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet]
-        public IActionResult GetCollectables(Guid collectionId)
+        [HttpGet(Name = "GetCollectables")]
+        public IActionResult GetCollectables(Guid collectionId, 
+            CollectablesResourceParameters resourceParameters)
         {
-            var collectablesFromRepo = _collectableRepository.GetCollectables(collectionId);
+            var collectablesFromRepo = _collectableRepository
+                .GetCollectables(collectionId, resourceParameters);
 
             if (collectablesFromRepo == null)
             {
                 return BadRequest();
             }
+
+            var previousPageLink = collectablesFromRepo.HasPrevious ?
+                CreateCollectablesResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = collectablesFromRepo.HasNext ?
+                CreateCollectablesResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = collectablesFromRepo.TotalCount,
+                pageSize = collectablesFromRepo.PageSize,
+                currentPage = collectablesFromRepo.CurrentPage,
+                totalPages = collectablesFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var collectables = Mapper.Map<IEnumerable<CollectableDto>>(collectablesFromRepo);
             return Ok(collectables);
@@ -234,6 +262,32 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateCollectablesResourceUri
+            (CollectablesResourceParameters resourceParameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetCollectables", new
+                    {
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetCollectables", new
+                    {
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetCollectables", new
+                    {
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

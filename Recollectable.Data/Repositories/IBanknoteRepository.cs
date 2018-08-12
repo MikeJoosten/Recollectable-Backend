@@ -1,4 +1,5 @@
-﻿using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +8,7 @@ namespace Recollectable.Data.Repositories
 {
     public interface IBanknoteRepository
     {
-        IEnumerable<Banknote> GetBanknotes();
+        PagedList<Banknote> GetBanknotes(CollectablesResourceParameters resourceParameters);
         IEnumerable<Banknote> GetBanknotesByCountry(Guid countryId);
         Banknote GetBanknote(Guid banknoteId);
         void AddBanknote(Banknote banknote);
