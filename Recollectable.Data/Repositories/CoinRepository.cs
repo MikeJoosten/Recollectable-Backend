@@ -50,26 +50,6 @@ namespace Recollectable.Data.Repositories
                 .ThenBy(c => c.ReleaseDate);
         }
 
-        public IEnumerable<Coin> GetCoinsByCollection(Guid collectionId)
-        {
-            Collection collection = _collectionRepository.GetCollection(collectionId);
-
-            if (collection == null || collection.Type != "Coin")
-            {
-                return null;
-            }
-
-            return _context.CollectionCollectables
-                .Include(cc => cc.Collectable)
-                .Where(cc => cc.CollectionId == collectionId)
-                .Select(cc => (Coin)cc.Collectable)
-                .Include(c => c.Country)
-                .Include(c => c.CollectorValue)
-                .OrderBy(c => c.Country.Name)
-                .ThenBy(c => (c.FaceValue + " " + c.Type))
-                .ThenBy(c => c.ReleaseDate);
-        }
-
         public Coin GetCoin(Guid coinId)
         {
             return _context.Coins
@@ -98,31 +78,11 @@ namespace Recollectable.Data.Repositories
             _context.Coins.Add(coin);
         }
 
-        public void AddCoinToCollection(CollectionCollectable collectionCollectable)
-        {
-            Collection collection = _collectionRepository
-                .GetCollection(collectionCollectable.CollectionId);
-            Condition condition = _conditionRepository
-                .GetCondition(collectionCollectable.ConditionId);
-            Coin coin = GetCoin(collectionCollectable.CollectableId);
-
-            if (collection != null && coin != null && 
-                condition != null && collection.Type == "Coin")
-            {
-                _context.Add(collectionCollectable);
-            }
-        }
-
         public void UpdateCoin(Coin coin) { }
 
         public void DeleteCoin(Coin coin)
         {
             _context.Coins.Remove(coin);
-        }
-
-        public void DeleteCoinFromCollection(CollectionCollectable collectionCollectable)
-        {
-            _context.Remove(collectionCollectable);
         }
 
         public bool Save()

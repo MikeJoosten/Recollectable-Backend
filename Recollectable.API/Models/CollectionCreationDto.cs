@@ -12,9 +12,5 @@ namespace Recollectable.API.Models
     {
         public string Type { get; set; }
         public Guid UserId { get; set; }
-
-        [XmlIgnore]
-        [JsonIgnore]
-        public User User { get; set; }
     }
 }

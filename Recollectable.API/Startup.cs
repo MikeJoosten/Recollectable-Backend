@@ -45,6 +45,7 @@ namespace Recollectable.API
             // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICollectionRepository, CollectionRepository>();
+            services.AddScoped<ICollectableRepository, CollectableRepository>();
             services.AddScoped<ICoinRepository, CoinRepository>();
             services.AddScoped<IBanknoteRepository, BanknoteRepository>();
             services.AddScoped<IConditionRepository, ConditionRepository>();
@@ -83,6 +84,10 @@ namespace Recollectable.API
                 cfg.CreateMap<CollectionCreationDto, Collection>();
                 cfg.CreateMap<CollectionUpdateDto, Collection>();
                 cfg.CreateMap<Collection, CollectionUpdateDto>();
+                cfg.CreateMap<CollectionCollectable, CollectableDto>();
+                cfg.CreateMap<CollectableCreationDto, CollectionCollectable>();
+                cfg.CreateMap<CollectableUpdateDto, CollectionCollectable>();
+                cfg.CreateMap<CollectionCollectable, CollectableUpdateDto>();
                 cfg.CreateMap<Coin, CoinDto>();
                 cfg.CreateMap<CoinCreationDto, Coin>();
                 cfg.CreateMap<CoinUpdateDto, Coin>();

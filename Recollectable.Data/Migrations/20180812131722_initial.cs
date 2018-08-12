@@ -142,13 +142,14 @@ namespace Recollectable.Data.Migrations
                 name: "CollectionCollectables",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(nullable: false),
                     CollectionId = table.Column<Guid>(nullable: false),
                     CollectableId = table.Column<Guid>(nullable: false),
                     ConditionId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CollectionCollectables", x => new { x.CollectionId, x.CollectableId, x.ConditionId });
+                    table.PrimaryKey("PK_CollectionCollectables", x => x.Id);
                     table.ForeignKey(
                         name: "FK_CollectionCollectables_Collectables_CollectableId",
                         column: x => x.CollectableId,
@@ -183,6 +184,11 @@ namespace Recollectable.Data.Migrations
                 name: "IX_CollectionCollectables_CollectableId",
                 table: "CollectionCollectables",
                 column: "CollectableId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CollectionCollectables_CollectionId",
+                table: "CollectionCollectables",
+                column: "CollectionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CollectionCollectables_ConditionId",

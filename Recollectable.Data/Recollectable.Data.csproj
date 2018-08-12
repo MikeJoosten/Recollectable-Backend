@@ -33,6 +33,7 @@
     <Compile Remove="Migrations\20180809112201_seed.cs" />
     <Compile Remove="Migrations\20180810195838_initial.cs" />
     <Compile Remove="Migrations\20180810195900_seed.cs" />
+    <Compile Remove="Migrations\20180810202556_initial.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -50,26 +50,6 @@ namespace Recollectable.Data.Repositories
                 .ThenBy(b => b.ReleaseDate);
         }
 
-        public IEnumerable<Banknote> GetBanknotesByCollection(Guid collectionId)
-        {
-            Collection collection = _collectionRepository.GetCollection(collectionId);
-
-            if (collection == null || collection.Type != "Banknote")
-            {
-                return null;
-            }
-
-            return _context.CollectionCollectables
-                .Include(cc => cc.Collectable)
-                .Where(cc => cc.CollectionId == collectionId)
-                .Select(cc => (Banknote)cc.Collectable)
-                .Include(b => b.Country)
-                .Include(b => b.CollectorValue)
-                .OrderBy(b => b.Country.Name)
-                .ThenBy(b => (b.FaceValue + " " + b.Type))
-                .ThenBy(b => b.ReleaseDate);
-        }
-
         public Banknote GetBanknote(Guid banknoteId)
         {
             return _context.Banknotes
@@ -98,31 +78,11 @@ namespace Recollectable.Data.Repositories
             _context.Banknotes.Add(banknote);
         }
 
-        public void AddBanknoteToCollection(CollectionCollectable collectionCollectable)
-        {
-            Collection collection = _collectionRepository
-                .GetCollection(collectionCollectable.CollectionId);
-            Condition condition = _conditionRepository
-                .GetCondition(collectionCollectable.ConditionId);
-            Banknote banknote = GetBanknote(collectionCollectable.CollectableId);
-
-            if (collection != null && banknote != null &&
-                condition != null && collection.Type == "Banknote")
-            {
-                _context.Add(collectionCollectable);
-            }
-        }
-
         public void UpdateBanknote(Banknote banknote) { }
 
         public void DeleteBanknote(Banknote banknote)
         {
             _context.Banknotes.Remove(banknote);
-        }
-
-        public void DeleteBanknoteFromCollection(CollectionCollectable collectionCollectable)
-        {
-            _context.Remove(collectionCollectable);
         }
 
         public bool Save()

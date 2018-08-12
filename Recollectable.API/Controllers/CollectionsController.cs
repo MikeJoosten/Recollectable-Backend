@@ -57,16 +57,14 @@ namespace Recollectable.API.Controllers
 
             var user = _userRepository.GetUser(collection.UserId);
 
-            if (user != null)
-            {
-                collection.User = user;
-            }
-            else if (collection.UserId != Guid.Empty)
+            if (user == null)
             {
                 return BadRequest();
             }
 
             var newCollection = Mapper.Map<Collection>(collection);
+            newCollection.User = user;
+
             _collectionRepository.AddCollection(newCollection);
 
             if (!_collectionRepository.Save())

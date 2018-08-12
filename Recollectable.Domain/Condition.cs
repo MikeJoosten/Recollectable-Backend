@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace Recollectable.Domain
 {
@@ -8,6 +10,9 @@ namespace Recollectable.Domain
     {
         public Guid Id { get; set; }
         public string Grade { get; set; }
+
+        [XmlIgnore]
+        [JsonIgnore]
         public List<CollectionCollectable> CollectionCollectables { get; set; }
     }
 }

@@ -68,27 +68,32 @@ namespace Recollectable.Data.Migrations
 
             modelBuilder.Entity("Recollectable.Domain.CollectionCollectable", b =>
                 {
-                    b.Property<Guid>("CollectionId");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<Guid>("CollectableId");
 
+                    b.Property<Guid>("CollectionId");
+
                     b.Property<Guid>("ConditionId");
 
-                    b.HasKey("CollectionId", "CollectableId", "ConditionId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CollectableId");
+
+                    b.HasIndex("CollectionId");
 
                     b.HasIndex("ConditionId");
 
                     b.ToTable("CollectionCollectables");
 
                     b.HasData(
-                        new { CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), ConditionId = new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca") },
-                        new { CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), ConditionId = new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") },
-                        new { CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), ConditionId = new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d") },
-                        new { CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), ConditionId = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") },
-                        new { CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), ConditionId = new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") },
-                        new { CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), ConditionId = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") }
+                        new { Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca") },
+                        new { Id = new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), ConditionId = new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") },
+                        new { Id = new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d") },
+                        new { Id = new Guid("583a957b-124f-49cb-955c-87d758819e87"), CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), ConditionId = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") },
+                        new { Id = new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), ConditionId = new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") },
+                        new { Id = new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") }
                     );
                 });
 
