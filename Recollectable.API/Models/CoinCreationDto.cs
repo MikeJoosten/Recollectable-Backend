@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Recollectable.API.Models
 {
@@ -28,7 +29,9 @@ namespace Recollectable.API.Models
         public string Designer { get; set; }
         public string HeadOfState { get; set; }
         public string MintMark { get; set; }
+        public Guid CountryId { get; set; }
         public Country Country { get; set; }
+        public Guid CollectorValueId { get; set; }
         public CollectorValue CollectorValue { get; set; }
     }
 }

@@ -58,25 +58,27 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var country = _countryRepository.GetCountry(banknote.Country.Id);
+            var country = _countryRepository.GetCountry(banknote.CountryId);
 
-            if (country != null)
+            if (country != null && banknote.Country == null)
             {
                 banknote.Country = country;
             }
-            else if (banknote.Country.Id != Guid.Empty)
+            else if (banknote.CountryId != Guid.Empty || 
+                banknote.Country.Id != Guid.Empty)
             {
                 return BadRequest();
             }
 
             var collectorValue = _collectorValueRepository
-                .GetCollectorValue(banknote.CollectorValue.Id);
+                .GetCollectorValue(banknote.CollectorValueId);
 
-            if (collectorValue != null)
+            if (collectorValue != null && banknote.CollectorValue == null)
             {
                 banknote.CollectorValue = collectorValue;
             }
-            else if (banknote.CollectorValue.Id != Guid.Empty)
+            else if (banknote.CollectorValueId != Guid.Empty || 
+                banknote.CollectorValue.Id != Guid.Empty)
             {
                 return BadRequest();
             }
@@ -161,28 +163,23 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCoin = Mapper.Map<BanknoteUpdateDto>(banknoteFromRepo);
-            patchDoc.ApplyTo(patchedCoin);
+            var patchedBanknote = Mapper.Map<BanknoteUpdateDto>(banknoteFromRepo);
+            patchDoc.ApplyTo(patchedBanknote);
 
-            var country = _countryRepository.GetCountry(patchedCoin.CountryId);
-
-            if (country == null)
+            if (!_countryRepository.CountryExists(patchedBanknote.CountryId))
             {
                 return BadRequest();
             }
 
-            var collectorValue = _collectorValueRepository
-                .GetCollectorValue(patchedCoin.CollectorValueId);
-
-            if (collectorValue == null)
+            if (!_collectorValueRepository.CollectorValueExists(patchedBanknote.CollectorValueId))
             {
                 return BadRequest();
             }
 
-            banknoteFromRepo.Country = country;
-            banknoteFromRepo.CollectorValue = collectorValue;
+            banknoteFromRepo.CountryId = patchedBanknote.CountryId;
+            banknoteFromRepo.CollectorValueId = patchedBanknote.CollectorValueId;
 
-            Mapper.Map(patchedCoin, banknoteFromRepo);
+            Mapper.Map(patchedBanknote, banknoteFromRepo);
             _banknoteRepository.UpdateBanknote(banknoteFromRepo);
 
             if (!_banknoteRepository.Save())

@@ -79,6 +79,10 @@ namespace Recollectable.API
                 cfg.CreateMap<UserCreationDto, User>();
                 cfg.CreateMap<UserUpdateDto, User>();
                 cfg.CreateMap<User, UserUpdateDto>();
+                cfg.CreateMap<Collection, CollectionDto>();
+                cfg.CreateMap<CollectionCreationDto, Collection>();
+                cfg.CreateMap<CollectionUpdateDto, Collection>();
+                cfg.CreateMap<Collection, CollectionUpdateDto>();
                 cfg.CreateMap<Coin, CoinDto>();
                 cfg.CreateMap<CoinCreationDto, Coin>();
                 cfg.CreateMap<CoinUpdateDto, Coin>();

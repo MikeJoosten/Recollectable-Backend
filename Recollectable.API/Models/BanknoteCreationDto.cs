@@ -19,7 +19,9 @@ namespace Recollectable.API.Models
         public string ReverseDescription { get; set; }
         public string Designer { get; set; }
         public string HeadOfState { get; set; }
+        public Guid CountryId { get; set; }
         public Country Country { get; set; }
+        public Guid CollectorValueId { get; set; }
         public CollectorValue CollectorValue { get; set; }
     }
 }

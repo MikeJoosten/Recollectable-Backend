@@ -23,35 +23,19 @@ namespace Recollectable.Data.Repositories
             return _context.Collections.OrderBy(c => c.Type);
         }
 
-        public IEnumerable<Collection> GetCollectionsByUser(Guid userId)
-        {
-            if (_userRepository.GetUser(userId) == null)
-            {
-                return null;
-            }
-
-            return _context.Collections
-                .Where(c => c.UserId == userId)
-                .OrderBy(c => c.Type);
-        }
-
         public Collection GetCollection(Guid collectionId)
         {
             return _context.Collections.FirstOrDefault(c => c.Id == collectionId);
         }
 
-        public void AddCollection(Guid userId, Collection collection)
+        public void AddCollection(Collection collection)
         {
-            var user = _userRepository.GetUser(userId);
-
-            if (user != null)
+            if (collection.Id == Guid.Empty)
             {
-                if (collection.Id == Guid.Empty)
-                {
-                    collection.Id = Guid.NewGuid();
-                }
-                user.Collections.Add(collection);
+                collection.Id = Guid.NewGuid();
             }
+
+            _context.Collections.Add(collection);
         }
 
         public void UpdateCollection(Collection collection) { }
@@ -64,6 +48,11 @@ namespace Recollectable.Data.Repositories
         public bool Save()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public bool CollectionExists(Guid collectionId)
+        {
+            return _context.Collections.Any(c => c.Id == collectionId);
         }
     }
 }

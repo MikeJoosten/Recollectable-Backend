@@ -58,25 +58,27 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var country = _countryRepository.GetCountry(coin.Country.Id);
+            var country = _countryRepository.GetCountry(coin.CountryId);
 
-            if (country != null)
+            if (country != null && coin.Country == null)
             {
                 coin.Country = country;
             }
-            else if (coin.Country.Id != Guid.Empty)
+            else if (coin.CountryId != Guid.Empty || 
+                coin.Country.Id != Guid.Empty)
             {
                 return BadRequest();
             }
 
             var collectorValue = _collectorValueRepository
-                .GetCollectorValue(coin.CollectorValue.Id);
+                .GetCollectorValue(coin.CollectorValueId);
 
-            if (collectorValue != null)
+            if (collectorValue != null && coin.CollectorValue == null)
             {
                 coin.CollectorValue = collectorValue;
             }
-            else if (coin.CollectorValue.Id != Guid.Empty)
+            else if (coin.CollectorValueId != Guid.Empty || 
+                coin.CollectorValue.Id != Guid.Empty)
             {
                 return BadRequest();
             }
@@ -162,23 +164,18 @@ namespace Recollectable.API.Controllers
             var patchedCoin = Mapper.Map<CoinUpdateDto>(coinFromRepo);
             patchDoc.ApplyTo(patchedCoin);
 
-            var country = _countryRepository.GetCountry(patchedCoin.CountryId);
-
-            if (country == null)
+            if (!_countryRepository.CountryExists(patchedCoin.CountryId))
             {
                 return BadRequest();
             }
 
-            var collectorValue = _collectorValueRepository
-                .GetCollectorValue(patchedCoin.CollectorValueId);
-
-            if (collectorValue == null)
+            if (!_collectorValueRepository.CollectorValueExists(patchedCoin.CollectorValueId))
             {
                 return BadRequest();
             }
 
-            coinFromRepo.Country = country;
-            coinFromRepo.CollectorValue = collectorValue;
+            coinFromRepo.CountryId = patchedCoin.CountryId;
+            coinFromRepo.CollectorValueId = patchedCoin.CollectorValueId;
 
             Mapper.Map(patchedCoin, coinFromRepo);
             _coinRepository.UpdateCoin(coinFromRepo);
