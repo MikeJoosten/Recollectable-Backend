@@ -5,17 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="7.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Recollectable.Data\Recollectable.Data.csproj" />
-    <ProjectReference Include="..\Recollectable.Domain\Recollectable.Domain.csproj" />
   </ItemGroup>
 
 </Project>

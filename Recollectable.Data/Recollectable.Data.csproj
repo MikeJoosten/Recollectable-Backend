@@ -10,6 +10,30 @@
     <Compile Remove="Migrations\20180730185759_initial.cs" />
     <Compile Remove="Migrations\20180730185830_seed.cs" />
     <Compile Remove="Migrations\20180801185723_seed.cs" />
+    <Compile Remove="Migrations\20180801193337_initial.cs" />
+    <Compile Remove="Migrations\20180801193425_seed.cs" />
+    <Compile Remove="Migrations\20180805142004_initial.cs" />
+    <Compile Remove="Migrations\20180805142032_seed.cs" />
+    <Compile Remove="Migrations\20180805170817_initial.cs" />
+    <Compile Remove="Migrations\20180805170844_seed.cs" />
+    <Compile Remove="Migrations\20180805174115_initial.cs" />
+    <Compile Remove="Migrations\20180805174221_seed.cs" />
+    <Compile Remove="Migrations\20180808213015_initial.cs" />
+    <Compile Remove="Migrations\20180808213118_initial.cs" />
+    <Compile Remove="Migrations\20180808213145_seed.cs" />
+    <Compile Remove="Migrations\20180808214218_initial.cs" />
+    <Compile Remove="Migrations\20180808214513_initial.cs" />
+    <Compile Remove="Migrations\20180808214532_seed.cs" />
+    <Compile Remove="Migrations\20180808215427_seed.cs" />
+    <Compile Remove="Migrations\20180808215901_initial.cs" />
+    <Compile Remove="Migrations\20180808215925_seed.cs" />
+    <Compile Remove="Migrations\20180808221241_initial.cs" />
+    <Compile Remove="Migrations\20180808221307_seed.cs" />
+    <Compile Remove="Migrations\20180809112139_initial.cs" />
+    <Compile Remove="Migrations\20180809112201_seed.cs" />
+    <Compile Remove="Migrations\20180810195838_initial.cs" />
+    <Compile Remove="Migrations\20180810195900_seed.cs" />
+    <Compile Remove="Migrations\20180810202556_initial.cs" />
   </ItemGroup>
 
   <ItemGroup>

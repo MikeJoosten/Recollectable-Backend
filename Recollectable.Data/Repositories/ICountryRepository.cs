@@ -13,5 +13,6 @@ namespace Recollectable.Data.Repositories
         void UpdateCountry(Country country);
         void DeleteCountry(Country country);
         bool Save();
+        bool CountryExists(Guid countryId);
     }
 }

@@ -15,5 +15,6 @@ namespace Recollectable.Data.Repositories
         void UpdateCondition(Condition condition);
         void DeleteCondition(Condition condition);
         bool Save();
+        bool ConditionExists(Guid conditionId);
     }
 }

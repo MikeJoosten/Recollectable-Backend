@@ -8,11 +8,11 @@ namespace Recollectable.Data.Repositories
     public interface ICollectionRepository
     {
         IEnumerable<Collection> GetCollections();
-        IEnumerable<Collection> GetCollectionsByUser(Guid userId);
         Collection GetCollection(Guid collectionId);
-        void AddCollection(Guid userId, Collection collection);
+        void AddCollection(Collection collection);
         void UpdateCollection(Collection collection);
         void DeleteCollection(Collection collection);
         bool Save();
+        bool CollectionExists(Guid collectionId);
     }
 }

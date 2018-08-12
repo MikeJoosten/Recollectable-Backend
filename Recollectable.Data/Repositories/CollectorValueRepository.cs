@@ -17,7 +17,7 @@ namespace Recollectable.Data.Repositories
 
         public IEnumerable<CollectorValue> GetCollectorValues()
         {
-            return _context.CollectorValues;
+            return _context.CollectorValues.OrderBy(c => c.Id);
         }
 
         public CollectorValue GetCollectorValue(Guid collectorValueId)
@@ -35,10 +35,7 @@ namespace Recollectable.Data.Repositories
             _context.CollectorValues.Add(collectorValue);
         }
 
-        public void UpdateCollectorValue(CollectorValue collectorValue)
-        {
-            _context.CollectorValues.Update(collectorValue);
-        }
+        public void UpdateCollectorValue(CollectorValue collectorValue) { }
 
         public void DeleteCollectorValue(CollectorValue collectorValue)
         {
@@ -48,6 +45,11 @@ namespace Recollectable.Data.Repositories
         public bool Save()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public bool CollectorValueExists(Guid collectorValueId)
+        {
+            return _context.CollectorValues.Any(c => c.Id == collectorValueId);
         }
     }
 }

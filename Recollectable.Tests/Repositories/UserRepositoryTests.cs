@@ -59,7 +59,8 @@ namespace Recollectable.Tests.Repositories
             {
                 Id = new Guid("21ced530-0488-4c40-9543-986c1970e66f"),
                 FirstName = "Burnie",
-                LastName = "Burns"
+                LastName = "Burns",
+                Collections = new List<Collection>()
             };
 
             _repository.AddUser(newUser);

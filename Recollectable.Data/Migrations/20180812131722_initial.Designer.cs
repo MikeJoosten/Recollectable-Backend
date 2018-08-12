@@ -10,7 +10,7 @@ using Recollectable.Data;
 namespace Recollectable.Data.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20180801193337_initial")]
+    [Migration("20180812131722_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,8 @@ namespace Recollectable.Data.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired();
+
+                    b.Property<string>("ReleaseDate");
 
                     b.HasKey("Id");
 
@@ -62,19 +64,24 @@ namespace Recollectable.Data.Migrations
 
             modelBuilder.Entity("Recollectable.Domain.CollectionCollectable", b =>
                 {
-                    b.Property<Guid>("CollectionId");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<Guid>("CollectableId");
 
+                    b.Property<Guid>("CollectionId");
+
                     b.Property<Guid>("ConditionId");
 
-                    b.HasKey("CollectionId", "CollectableId", "ConditionId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CollectableId");
 
+                    b.HasIndex("CollectionId");
+
                     b.HasIndex("ConditionId");
 
-                    b.ToTable("CollectionCollectable");
+                    b.ToTable("CollectionCollectables");
                 });
 
             modelBuilder.Entity("Recollectable.Domain.CollectorValue", b =>
@@ -82,27 +89,27 @@ namespace Recollectable.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<double?>("AU50Value");
+                    b.Property<double?>("AU50");
 
-                    b.Property<double?>("F12Value");
+                    b.Property<double?>("F12");
 
-                    b.Property<double?>("G4Value");
+                    b.Property<double?>("G4");
 
-                    b.Property<double?>("MS60Value");
+                    b.Property<double?>("MS60");
 
-                    b.Property<double?>("MS63Value");
+                    b.Property<double?>("MS63");
 
-                    b.Property<double?>("PF60Value");
+                    b.Property<double?>("PF60");
 
-                    b.Property<double?>("PF63Value");
+                    b.Property<double?>("PF63");
 
-                    b.Property<double?>("PF65Value");
+                    b.Property<double?>("PF65");
 
-                    b.Property<double?>("VF20Value");
+                    b.Property<double?>("VF20");
 
-                    b.Property<double?>("VG8Value");
+                    b.Property<double?>("VG8");
 
-                    b.Property<double?>("XF40Value");
+                    b.Property<double?>("XF40");
 
                     b.HasKey("Id");
 
@@ -151,29 +158,40 @@ namespace Recollectable.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Banknote", b =>
+            modelBuilder.Entity("Recollectable.Domain.Currency", b =>
                 {
                     b.HasBaseType("Recollectable.Domain.Collectable");
 
                     b.Property<string>("BackImagePath");
 
-                    b.Property<string>("Color");
+                    b.Property<string>("Designer");
 
                     b.Property<int>("FaceValue");
 
                     b.Property<string>("FrontImagePath");
 
+                    b.Property<string>("HeadOfState");
+
                     b.Property<string>("ObverseDescription");
 
-                    b.Property<int>("ReleaseDate");
-
                     b.Property<string>("ReverseDescription");
-
-                    b.Property<string>("Signature");
 
                     b.Property<string>("Size");
 
                     b.Property<string>("Type");
+
+                    b.ToTable("Currency");
+
+                    b.HasDiscriminator().HasValue("Currency");
+                });
+
+            modelBuilder.Entity("Recollectable.Domain.Banknote", b =>
+                {
+                    b.HasBaseType("Recollectable.Domain.Currency");
+
+                    b.Property<string>("Color");
+
+                    b.Property<string>("Signature");
 
                     b.Property<string>("Watermark");
 
@@ -184,49 +202,29 @@ namespace Recollectable.Data.Migrations
 
             modelBuilder.Entity("Recollectable.Domain.Coin", b =>
                 {
-                    b.HasBaseType("Recollectable.Domain.Collectable");
-
-                    b.Property<string>("BackImagePath")
-                        .HasColumnName("Coin_BackImagePath");
-
-                    b.Property<string>("Designer");
+                    b.HasBaseType("Recollectable.Domain.Currency");
 
                     b.Property<string>("EdgeLegend");
 
                     b.Property<string>("EdgeType");
 
-                    b.Property<int>("FaceValue")
-                        .HasColumnName("Coin_FaceValue");
-
-                    b.Property<string>("FrontImagePath")
-                        .HasColumnName("Coin_FrontImagePath");
-
                     b.Property<string>("Metal");
+
+                    b.Property<string>("MintMark");
 
                     b.Property<int>("Mintage");
 
                     b.Property<string>("Note");
 
-                    b.Property<string>("ObverseDescription")
-                        .HasColumnName("Coin_ObverseDescription");
+                    b.Property<string>("ObverseInscription");
 
                     b.Property<string>("ObverseLegend");
 
-                    b.Property<int>("ReleaseDate")
-                        .HasColumnName("Coin_ReleaseDate");
-
-                    b.Property<string>("ReverseDescription")
-                        .HasColumnName("Coin_ReverseDescription");
+                    b.Property<string>("ReverseInscription");
 
                     b.Property<string>("ReverseLegend");
 
-                    b.Property<string>("Size")
-                        .HasColumnName("Coin_Size");
-
                     b.Property<string>("Subject");
-
-                    b.Property<string>("Type")
-                        .HasColumnName("Coin_Type");
 
                     b.Property<string>("Weight");
 

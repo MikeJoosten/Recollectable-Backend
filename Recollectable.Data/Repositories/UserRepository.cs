@@ -19,13 +19,16 @@ namespace Recollectable.Data.Repositories
         public IEnumerable<User> GetUsers()
         {
             return _context.Users
+                .Include(u => u.Collections)
                 .OrderBy(u => u.FirstName)
                 .ThenBy(u => u.LastName);
         }
 
         public User GetUser(Guid userId)
         {
-            return _context.Users.FirstOrDefault(u => u.Id == userId);
+            return _context.Users
+                .Include(u => u.Collections)
+                .FirstOrDefault(u => u.Id == userId);
         }
 
         public void AddUser(User user)
@@ -35,13 +38,18 @@ namespace Recollectable.Data.Repositories
                 user.Id = Guid.NewGuid();
             }
 
+            if (user.Collections.Any())
+            {
+                foreach (var collection in user.Collections)
+                {
+                    collection.Id = Guid.NewGuid();
+                }
+            }
+
             _context.Users.Add(user);
         }
 
-        public void UpdateUser(User user)
-        {
-            _context.Users.Update(user);
-        }
+        public void UpdateUser(User user) { }
 
         public void DeleteUser(User user)
         {
@@ -51,6 +59,11 @@ namespace Recollectable.Data.Repositories
         public bool Save()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public bool UserExists(Guid userId)
+        {
+            return _context.Users.Any(u => u.Id == userId);
         }
     }
 }

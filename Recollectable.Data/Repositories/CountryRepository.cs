@@ -35,10 +35,7 @@ namespace Recollectable.Data.Repositories
             _context.Countries.Add(country);
         }
 
-        public void UpdateCountry(Country country)
-        {
-            _context.Countries.Update(country);
-        }
+        public void UpdateCountry(Country country) { }
 
         public void DeleteCountry(Country country)
         {
@@ -48,6 +45,11 @@ namespace Recollectable.Data.Repositories
         public bool Save()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public bool CountryExists(Guid countryId)
+        {
+            return _context.Countries.Any(c => c.Id == countryId);
         }
     }
 }
