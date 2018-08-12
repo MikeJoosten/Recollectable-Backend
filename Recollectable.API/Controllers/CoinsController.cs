@@ -242,18 +242,27 @@ namespace Recollectable.API.Controllers
                 case ResourceUriType.PreviousPage:
                     return _urlHelper.Link("GetCoins", new
                     {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        releaseDate = resourceParameters.ReleaseDate,
                         page = resourceParameters.Page - 1,
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
                     return _urlHelper.Link("GetCoins", new
                     {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        releaseDate = resourceParameters.ReleaseDate,
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
                 default:
                     return _urlHelper.Link("GetCoins", new
                     {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        releaseDate = resourceParameters.ReleaseDate,
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     });

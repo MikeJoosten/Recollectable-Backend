@@ -22,7 +22,15 @@ namespace Recollectable.Data.Repositories
         public PagedList<Collection> GetCollections
             (CollectionsResourceParameters resourceParameters)
         {
-            var collections = _context.Collections.OrderBy(c => c.Type);
+            var collections = _context.Collections
+                .OrderBy(c => c.Type)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            {
+                var type = resourceParameters.Type.Trim().ToLowerInvariant();
+                collections = collections.Where(c => c.Type.ToLowerInvariant() == type);
+            }
 
             return PagedList<Collection>.Create(collections,
                 resourceParameters.Page,

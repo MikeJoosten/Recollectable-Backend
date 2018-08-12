@@ -36,7 +36,22 @@ namespace Recollectable.Data.Repositories
                 .ThenInclude(c => c.CollectorValue)
                 .Where(cc => cc.CollectionId == collectionId)
                 .OrderBy(cc => cc.Collectable.Country)
-                .ThenBy(cc => cc.Collectable.ReleaseDate);
+                .ThenBy(cc => cc.Collectable.ReleaseDate)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(resourceParameters.Country))
+            {
+                var country = resourceParameters.Country.Trim().ToLowerInvariant();
+                collectables = collectables.Where(c => 
+                    c.Collectable.Country.Name.ToLowerInvariant() == country);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.ReleaseDate))
+            {
+                var releaseDate = resourceParameters.ReleaseDate.Trim().ToLowerInvariant();
+                collectables = collectables.Where(c => 
+                    c.Collectable.ReleaseDate.ToLowerInvariant() == releaseDate);
+            }
 
             return PagedList<CollectionCollectable>.Create(collectables,
                 resourceParameters.Page,

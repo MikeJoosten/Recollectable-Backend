@@ -15,5 +15,9 @@ namespace Recollectable.Data.Helpers
             get => _pageSize;
             set => _pageSize = (value > maxPageSize) ? maxPageSize : value;
         }
+
+        public string Type { get; set; }
+        public string Country { get; set; }
+        public string ReleaseDate { get; set; }
     }
 }

@@ -26,7 +26,7 @@ namespace Recollectable.Tests.Repositories
                 _collectionRepository, _conditionRepository);
         }
 
-        [Fact]
+        /*[Fact]
         public void GetBanknotes_ReturnsAllBanknotes()
         {
             var result = _banknoteRepository.GetBanknotes();
@@ -136,6 +136,6 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(5, _banknoteRepository.GetBanknotes().Count());
             Assert.Null(_banknoteRepository
                 .GetBanknote(new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c")));
-        }
+        }*/
     }
 }

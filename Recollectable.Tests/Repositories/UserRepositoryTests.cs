@@ -19,7 +19,7 @@ namespace Recollectable.Tests.Repositories
             _repository = new UserRepository(_context);
         }
 
-        [Fact]
+        /*[Fact]
         public void GetUsers_ReturnsAllUsers()
         {
             var result = _repository.GetUsers();
@@ -98,6 +98,6 @@ namespace Recollectable.Tests.Repositories
 
             Assert.Equal(5, _repository.GetUsers().Count());
             Assert.Null(_repository.GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")));
-        }
+        }*/
     }
 }

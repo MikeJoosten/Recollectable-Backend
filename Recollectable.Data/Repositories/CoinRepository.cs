@@ -33,7 +33,26 @@ namespace Recollectable.Data.Repositories
                 .Include(c => c.CollectorValue)
                 .OrderBy(c => c.Country.Name)
                 .ThenBy(c => (c.FaceValue + " " + c.Type))
-                .ThenBy(c => c.ReleaseDate);
+                .ThenBy(c => c.ReleaseDate)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            {
+                var type = resourceParameters.Type.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Type.ToLowerInvariant() == type);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Country))
+            {
+                var country = resourceParameters.Country.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Country.Name.ToLowerInvariant() == country);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.ReleaseDate))
+            {
+                var releaseDate = resourceParameters.ReleaseDate.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.ReleaseDate.ToLowerInvariant() == releaseDate);
+            }
 
             return PagedList<Coin>.Create(coins,
                 resourceParameters.Page,

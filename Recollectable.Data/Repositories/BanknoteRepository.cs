@@ -34,7 +34,26 @@ namespace Recollectable.Data.Repositories
                 .Include(b => b.CollectorValue)
                 .OrderBy(b => b.Country.Name)
                 .ThenBy(b => (b.FaceValue + " " + b.Type))
-                .ThenBy(b => b.ReleaseDate);
+                .ThenBy(b => b.ReleaseDate)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            {
+                var type = resourceParameters.Type.Trim().ToLowerInvariant();
+                banknotes = banknotes.Where(b => b.Type.ToLowerInvariant() == type);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Country))
+            {
+                var country = resourceParameters.Country.Trim().ToLowerInvariant();
+                banknotes = banknotes.Where(b => b.Country.Name.ToLowerInvariant() == country);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.ReleaseDate))
+            {
+                var releaseDate = resourceParameters.ReleaseDate.Trim().ToLowerInvariant();
+                banknotes = banknotes.Where(b => b.ReleaseDate.ToLowerInvariant() == releaseDate);
+            }
 
             return PagedList<Banknote>.Create(banknotes,
                 resourceParameters.Page,
