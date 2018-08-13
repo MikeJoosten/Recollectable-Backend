@@ -1,10 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Data.Helpers;
-using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -14,11 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Recollectable.API.Models;
 using Recollectable.Data;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 
 namespace Recollectable.API
 {
@@ -61,6 +56,7 @@ namespace Recollectable.API
                     .GetService<IActionContextAccessor>().ActionContext;
                 return new UrlHelper(actionContext);
             });
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,7 +82,8 @@ namespace Recollectable.API
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
-                cfg.CreateMap<User, UserDto>();
+                cfg.CreateMap<User, UserDto>().ForMember(dest => dest.Name, 
+                    opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
                 cfg.CreateMap<UserCreationDto, User>();
                 cfg.CreateMap<UserUpdateDto, User>();
                 cfg.CreateMap<User, UserUpdateDto>();

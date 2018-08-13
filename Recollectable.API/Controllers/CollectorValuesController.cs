@@ -2,13 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Recollectable.API.Models;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {

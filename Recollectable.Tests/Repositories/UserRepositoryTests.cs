@@ -14,12 +14,12 @@ namespace Recollectable.Tests.Repositories
     {
         private IUserRepository _repository;
 
-        public UserRepositoryTests()
+        /*public UserRepositoryTests()
         {
             _repository = new UserRepository(_context);
         }
 
-        /*[Fact]
+        [Fact]
         public void GetUsers_ReturnsAllUsers()
         {
             var result = _repository.GetUsers();

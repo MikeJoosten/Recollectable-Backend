@@ -17,5 +17,6 @@ namespace Recollectable.Data.Helpers
         }
 
         public string Search { get; set; }
+        public string OrderBy { get; set; } = "Name";
     }
 }

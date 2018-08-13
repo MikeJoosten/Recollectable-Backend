@@ -1,9 +1,7 @@
 ﻿using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Domain.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories

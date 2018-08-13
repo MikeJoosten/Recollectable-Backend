@@ -3,15 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Helpers;
-using Recollectable.API.Models;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -87,6 +84,11 @@ namespace Recollectable.API.Controllers
         public IActionResult CreateCollectable(Guid collectionId, 
             [FromBody] CollectableCreationDto collectable)
         {
+            if (collectable == null)
+            {
+                return BadRequest();
+            }
+
             var collection = _collectionRepository.GetCollection(collectionId);
 
             if (collection == null)

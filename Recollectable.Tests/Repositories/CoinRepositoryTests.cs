@@ -17,7 +17,7 @@ namespace Recollectable.Tests.Repositories
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
 
-        public CoinRepositoryTests()
+        /*public CoinRepositoryTests()
         {
             _countryRepository = new CountryRepository(_context);
             _collectionRepository = new CollectionRepository
@@ -27,7 +27,7 @@ namespace Recollectable.Tests.Repositories
                 _collectionRepository, _conditionRepository);
         }
 
-        /*[Fact]
+        [Fact]
         public void GetCoins_ReturnsAllCoins()
         {
             var result = _coinRepository.GetCoins();

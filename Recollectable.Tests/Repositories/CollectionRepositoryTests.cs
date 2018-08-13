@@ -13,13 +13,13 @@ namespace Recollectable.Tests.Repositories
         private IUserRepository _userRepository;
         private ICollectionRepository _collectionRepository;
 
-        public CollectionRepositoryTests()
+        /*public CollectionRepositoryTests()
         {
             _userRepository = new UserRepository(_context);
             _collectionRepository = new CollectionRepository(_context, _userRepository);
         }
 
-        /*[Fact]
+        [Fact]
         public void GetCollections_ReturnsAllCollections()
         {
             var result = _collectionRepository.GetCollections();

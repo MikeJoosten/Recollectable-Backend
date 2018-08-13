@@ -3,15 +3,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Helpers;
-using Recollectable.API.Models;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -20,16 +18,25 @@ namespace Recollectable.API.Controllers
     {
         private IUserRepository _userRepository;
         private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
 
-        public UsersController(IUserRepository userRepository, IUrlHelper urlHelper)
+        public UsersController(IUserRepository userRepository, 
+            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService)
         {
             _userRepository = userRepository;
             _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet(Name = "GetUsers")]
         public IActionResult GetUsers(UsersResourceParameters resourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var usersFromRepo = _userRepository.GetUsers(resourceParameters);
 
             var previousPageLink = usersFromRepo.HasPrevious ?

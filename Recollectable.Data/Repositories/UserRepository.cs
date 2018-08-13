@@ -1,29 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Recollectable.Data.Helpers;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public UserRepository(RecollectableContext context)
+        public UserRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
         public PagedList<User> GetUsers(UsersResourceParameters resourceParameters)
         {
-            var users = _context.Users
-                .Include(u => u.Collections)
-                .OrderBy(u => u.FirstName)
-                .ThenBy(u => u.LastName)
-                .AsQueryable();
+            var users = _context.Users.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<UserDto, User>());
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {

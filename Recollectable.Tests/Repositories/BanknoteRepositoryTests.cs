@@ -1,11 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Data.Repositories;
-using Recollectable.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xunit;
+﻿using Recollectable.Data.Repositories;
 
 namespace Recollectable.Tests.Repositories
 {
@@ -16,7 +9,7 @@ namespace Recollectable.Tests.Repositories
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
 
-        public BanknoteRepositoryTests()
+        /*public BanknoteRepositoryTests()
         {
             _countryRepository = new CountryRepository(_context);
             _collectionRepository = new CollectionRepository
@@ -26,7 +19,7 @@ namespace Recollectable.Tests.Repositories
                 _collectionRepository, _conditionRepository);
         }
 
-        /*[Fact]
+        [Fact]
         public void GetBanknotes_ReturnsAllBanknotes()
         {
             var result = _banknoteRepository.GetBanknotes();
