@@ -244,7 +244,7 @@ namespace Recollectable.API.Controllers
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
-                        releaseDate = resourceParameters.ReleaseDate,
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page - 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -253,7 +253,7 @@ namespace Recollectable.API.Controllers
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
-                        releaseDate = resourceParameters.ReleaseDate,
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -262,7 +262,7 @@ namespace Recollectable.API.Controllers
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
-                        releaseDate = resourceParameters.ReleaseDate,
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     });

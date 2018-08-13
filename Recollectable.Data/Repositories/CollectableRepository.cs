@@ -46,11 +46,11 @@ namespace Recollectable.Data.Repositories
                     c.Collectable.Country.Name.ToLowerInvariant() == country);
             }
 
-            if (!string.IsNullOrEmpty(resourceParameters.ReleaseDate))
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                var releaseDate = resourceParameters.ReleaseDate.Trim().ToLowerInvariant();
-                collectables = collectables.Where(c => 
-                    c.Collectable.ReleaseDate.ToLowerInvariant() == releaseDate);
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                collectables = collectables.Where(c => c.Collectable.Country.Name.ToLowerInvariant().Contains(search)
+                    || c.Collectable.ReleaseDate.ToLowerInvariant().Contains(search));
             }
 
             return PagedList<CollectionCollectable>.Create(collectables,

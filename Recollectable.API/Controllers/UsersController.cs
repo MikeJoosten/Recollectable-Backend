@@ -185,18 +185,21 @@ namespace Recollectable.API.Controllers
                 case ResourceUriType.PreviousPage:
                     return _urlHelper.Link("GetUsers", new
                     {
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page - 1,
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
                     return _urlHelper.Link("GetUsers", new
                     {
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
                 default:
                     return _urlHelper.Link("GetUsers", new
                     {
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     });

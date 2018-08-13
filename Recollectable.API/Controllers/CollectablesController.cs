@@ -273,7 +273,7 @@ namespace Recollectable.API.Controllers
                     return _urlHelper.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
-                        releaseDate = resourceParameters.ReleaseDate,
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page - 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -281,7 +281,7 @@ namespace Recollectable.API.Controllers
                     return _urlHelper.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
-                        releaseDate = resourceParameters.ReleaseDate,
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -289,7 +289,7 @@ namespace Recollectable.API.Controllers
                     return _urlHelper.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
-                        releaseDate = resourceParameters.ReleaseDate,
+                        search = resourceParameters.Search,
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     });

@@ -18,6 +18,6 @@ namespace Recollectable.Data.Helpers
 
         public string Type { get; set; }
         public string Country { get; set; }
-        public string ReleaseDate { get; set; }
+        public string Search { get; set; }
     }
 }

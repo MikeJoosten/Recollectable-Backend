@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Recollectable.API.Models;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Domain;
 using System;
@@ -23,9 +25,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCountries()
+        public IActionResult GetCountries(CountriesResourceParameters resourceParameters)
         {
-            var countriesFromRepo = _countryRepository.GetCountries();
+            var countriesFromRepo = _countryRepository.GetCountries(resourceParameters);
             var countries = Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
             return Ok(countries);
         }

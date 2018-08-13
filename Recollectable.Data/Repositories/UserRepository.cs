@@ -22,7 +22,16 @@ namespace Recollectable.Data.Repositories
             var users = _context.Users
                 .Include(u => u.Collections)
                 .OrderBy(u => u.FirstName)
-                .ThenBy(u => u.LastName);
+                .ThenBy(u => u.LastName)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                users = users.Where(u => u.FirstName.ToLowerInvariant().Contains(search)
+                    || u.LastName.ToLowerInvariant().Contains(search)
+                    || u.Email.ToLowerInvariant().Contains(search));
+            }
 
             return PagedList<User>.Create(users,
                 resourceParameters.Page,

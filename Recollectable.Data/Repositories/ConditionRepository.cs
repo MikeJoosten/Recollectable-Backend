@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Data.Helpers;
 using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
@@ -16,20 +17,26 @@ namespace Recollectable.Data.Repositories
             _context = context;
         }
 
-        public IEnumerable<Condition> GetConditions()
+        public IEnumerable<Condition> GetConditions
+            (ConditionsResourceParameters resourceParameters)
         {
-            return _context.Conditions.OrderBy(c => c.Grade);
-        }
+            var conditions = _context.Conditions
+                .OrderBy(c => c.Grade)
+                .AsQueryable();
 
-        public IEnumerable<Condition> GetConditionsByCollectable
-            (Guid collectionId, Guid collectableId)
-        {
-            return _context.CollectionCollectables
-                .Include(cc => cc.Condition)
-                .Where(cc => cc.CollectionId == collectionId && 
-                    cc.CollectableId == collectableId)
-                .Select(cc => cc.Condition)
-                .OrderBy(c => c.Grade);
+            if (!string.IsNullOrEmpty(resourceParameters.Grade))
+            {
+                var grade = resourceParameters.Grade.Trim().ToLowerInvariant();
+                conditions = conditions.Where(c => c.Grade.ToLowerInvariant() == grade);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                conditions = conditions.Where(c => c.Grade.ToLowerInvariant().Contains(search));
+            }
+
+            return conditions;
         }
 
         public Condition GetCondition(Guid conditionId)

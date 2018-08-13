@@ -32,6 +32,12 @@ namespace Recollectable.Data.Repositories
                 collections = collections.Where(c => c.Type.ToLowerInvariant() == type);
             }
 
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                collections = collections.Where(c => c.Type.ToLowerInvariant().Contains(search));
+            }
+
             return PagedList<Collection>.Create(collections,
                 resourceParameters.Page,
                 resourceParameters.PageSize);

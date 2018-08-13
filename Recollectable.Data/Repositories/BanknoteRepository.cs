@@ -49,10 +49,13 @@ namespace Recollectable.Data.Repositories
                 banknotes = banknotes.Where(b => b.Country.Name.ToLowerInvariant() == country);
             }
 
-            if (!string.IsNullOrEmpty(resourceParameters.ReleaseDate))
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                var releaseDate = resourceParameters.ReleaseDate.Trim().ToLowerInvariant();
-                banknotes = banknotes.Where(b => b.ReleaseDate.ToLowerInvariant() == releaseDate);
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                banknotes = banknotes.Where(b => b.Country.Name.ToLowerInvariant().Contains(search)
+                    || b.Type.ToLowerInvariant().Contains(search)
+                    || b.ReleaseDate.ToLowerInvariant().Contains(search)
+                    || b.Color.ToLowerInvariant().Contains(search));
             }
 
             return PagedList<Banknote>.Create(banknotes,

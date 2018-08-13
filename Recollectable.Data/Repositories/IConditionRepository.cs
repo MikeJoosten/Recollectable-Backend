@@ -1,4 +1,5 @@
-﻿using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,9 +8,8 @@ namespace Recollectable.Data.Repositories
 {
     public interface IConditionRepository
     {
-        IEnumerable<Condition> GetConditions();
-        IEnumerable<Condition> GetConditionsByCollectable
-            (Guid collectionId, Guid collectableId);
+        IEnumerable<Condition> GetConditions
+            (ConditionsResourceParameters resourceParameters);
         Condition GetCondition(Guid conditionId);
         void AddCondition(Condition condition);
         void UpdateCondition(Condition condition);

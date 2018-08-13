@@ -17,7 +17,7 @@ namespace Recollectable.Tests.Repositories
             _repository = new ConditionRepository(_context);
         }
 
-        [Fact]
+        /*[Fact]
         public void GetConditions_ReturnsAllConditions()
         {
             var result = _repository.GetConditions();
@@ -111,6 +111,6 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(5, _repository.GetConditions().Count());
             Assert.Null(_repository
                 .GetCondition(new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f")));
-        }
+        }*/
     }
 }

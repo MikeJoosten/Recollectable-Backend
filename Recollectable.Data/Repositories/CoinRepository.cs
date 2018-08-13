@@ -48,10 +48,13 @@ namespace Recollectable.Data.Repositories
                 coins = coins.Where(c => c.Country.Name.ToLowerInvariant() == country);
             }
 
-            if (!string.IsNullOrEmpty(resourceParameters.ReleaseDate))
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                var releaseDate = resourceParameters.ReleaseDate.Trim().ToLowerInvariant();
-                coins = coins.Where(c => c.ReleaseDate.ToLowerInvariant() == releaseDate);
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Country.Name.ToLowerInvariant().Contains(search)
+                    || c.Type.ToLowerInvariant().Contains(search)
+                    || c.ReleaseDate.ToLowerInvariant().Contains(search)
+                    || c.Metal.ToLowerInvariant().Contains(search));
             }
 
             return PagedList<Coin>.Create(coins,

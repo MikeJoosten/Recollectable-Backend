@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Recollectable.API.Models;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Domain;
 using System;
@@ -23,9 +24,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetConditions()
+        public IActionResult GetConditions(ConditionsResourceParameters resourceParameters)
         {
-            var conditionsFromRepo = _conditionRepository.GetConditions();
+            var conditionsFromRepo = _conditionRepository.GetConditions(resourceParameters);
             var conditions = Mapper.Map<IEnumerable<ConditionDto>>(conditionsFromRepo);
             return Ok(conditions);
         }

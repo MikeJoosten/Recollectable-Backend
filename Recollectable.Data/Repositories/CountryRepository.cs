@@ -1,4 +1,5 @@
-﻿using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,26 @@ namespace Recollectable.Data.Repositories
             _context = context;
         }
 
-        public IEnumerable<Country> GetCountries()
+        public IEnumerable<Country> GetCountries
+            (CountriesResourceParameters resourceParameters)
         {
-            return _context.Countries.OrderBy(c => c.Name);
+            var countries = _context.Countries
+                .OrderBy(c => c.Name)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(resourceParameters.Name))
+            {
+                var name = resourceParameters.Name.Trim().ToLowerInvariant();
+                countries = countries.Where(c => c.Name.ToLowerInvariant() == name);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                countries = countries.Where(c => c.Name.ToLowerInvariant().Contains(search));
+            }
+
+            return countries;
         }
 
         public Country GetCountry(Guid countryId)
