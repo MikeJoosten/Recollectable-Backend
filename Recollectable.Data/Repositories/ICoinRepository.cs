@@ -7,7 +7,7 @@ namespace Recollectable.Data.Repositories
 {
     public interface ICoinRepository
     {
-        PagedList<Coin> GetCoins(CollectablesResourceParameters resourceParameters);
+        PagedList<Coin> GetCoins(CurrenciesResourceParameters resourceParameters);
         IEnumerable<Coin> GetCoinsByCountry(Guid countryId);
         Coin GetCoin(Guid coinId);
         void AddCoin(Coin coin);

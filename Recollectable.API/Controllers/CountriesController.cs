@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
@@ -15,15 +16,24 @@ namespace Recollectable.API.Controllers
     public class CountriesController : Controller
     {
         private ICountryRepository _countryRepository;
+        private IPropertyMappingService _propertyMappingService;
 
-        public CountriesController(ICountryRepository countryRepository)
+        public CountriesController(ICountryRepository countryRepository,
+            IPropertyMappingService propertyMappingService)
         {
             _countryRepository = countryRepository;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet]
         public IActionResult GetCountries(CountriesResourceParameters resourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<CountryDto, Country>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var countriesFromRepo = _countryRepository.GetCountries(resourceParameters);
             var countries = Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
             return Ok(countries);

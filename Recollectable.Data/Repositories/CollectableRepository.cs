@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Linq;
 
@@ -10,12 +12,15 @@ namespace Recollectable.Data.Repositories
     {
         private RecollectableContext _context;
         private ICollectionRepository _collectionRepository;
+        private IPropertyMappingService _propertyMappingService;
 
         public CollectableRepository(RecollectableContext context, 
-            ICollectionRepository collectionRepository)
+            ICollectionRepository collectionRepository,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _collectionRepository = collectionRepository;
+            _propertyMappingService = propertyMappingService;
         }
 
         public PagedList<CollectionCollectable> GetCollectables(Guid collectionId,
@@ -33,9 +38,8 @@ namespace Recollectable.Data.Repositories
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.CollectorValue)
                 .Where(cc => cc.CollectionId == collectionId)
-                .OrderBy(cc => cc.Collectable.Country)
-                .ThenBy(cc => cc.Collectable.ReleaseDate)
-                .AsQueryable();
+                .ApplySort(resourceParameters.OrderBy,
+                    _propertyMappingService.GetPropertyMapping<CollectableDto, Collectable>());
 
             if (!string.IsNullOrEmpty(resourceParameters.Country))
             {

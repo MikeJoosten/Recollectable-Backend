@@ -22,8 +22,10 @@ namespace Recollectable.Data.Repositories
 
         public PagedList<User> GetUsers(UsersResourceParameters resourceParameters)
         {
-            var users = _context.Users.ApplySort(resourceParameters.OrderBy,
-                _propertyMappingService.GetPropertyMapping<UserDto, User>());
+            var users = _context.Users
+                .Include(u => u.Collections)
+                .ApplySort(resourceParameters.OrderBy,
+                    _propertyMappingService.GetPropertyMapping<UserDto, User>());
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {

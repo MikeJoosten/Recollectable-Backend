@@ -1,5 +1,7 @@
 ﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +11,20 @@ namespace Recollectable.Data.Repositories
     public class CountryRepository : ICountryRepository
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public CountryRepository(RecollectableContext context)
+        public CountryRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
         public IEnumerable<Country> GetCountries
             (CountriesResourceParameters resourceParameters)
         {
-            var countries = _context.Countries
-                .OrderBy(c => c.Name)
-                .AsQueryable();
+            var countries = _context.Countries.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<CountryDto, Country>());
 
             if (!string.IsNullOrEmpty(resourceParameters.Name))
             {

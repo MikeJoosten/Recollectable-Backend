@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
@@ -19,20 +20,29 @@ namespace Recollectable.API.Controllers
         private ICountryRepository _countryRepository;
         private ICollectorValueRepository _collectorValueRepository;
         private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
 
         public CoinsController(ICoinRepository coinRepository, 
             ICollectorValueRepository collectorValueRepository, 
-            ICountryRepository countryRepository, IUrlHelper urlHelper)
+            ICountryRepository countryRepository, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService)
         {
             _coinRepository = coinRepository;
             _countryRepository = countryRepository;
             _collectorValueRepository = collectorValueRepository;
             _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet(Name = "GetCoins")]
-        public IActionResult GetCoins(CollectablesResourceParameters resourceParameters)
+        public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<CoinDto, Coin>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var coinsFromRepo = _coinRepository.GetCoins(resourceParameters);
 
             var previousPageLink = coinsFromRepo.HasPrevious ?
@@ -231,7 +241,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        private string CreateCoinsResourceUri(CollectablesResourceParameters resourceParameters, 
+        private string CreateCoinsResourceUri(CurrenciesResourceParameters resourceParameters, 
             ResourceUriType type)
         {
             switch (type)

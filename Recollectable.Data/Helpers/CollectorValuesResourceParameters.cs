@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Recollectable.Data.Helpers
 {
-    public class CollectionsResourceParameters
+    public class CollectorValuesResourceParameters
     {
-        private int _pageSize = 10;
-        const int maxPageSize = 25;
+        private int _pageSize = 25;
+        const int maxPageSize = 50;
 
         public int Page { get; set; } = 1;
         public int PageSize
@@ -16,8 +16,6 @@ namespace Recollectable.Data.Helpers
             set => _pageSize = (value > maxPageSize) ? maxPageSize : value;
         }
 
-        public string Type { get; set; }
-        public string Search { get; set; }
-        public string OrderBy { get; set; } = "Type";
+        public string OrderBy { get; set; } = "Id";
     }
 }

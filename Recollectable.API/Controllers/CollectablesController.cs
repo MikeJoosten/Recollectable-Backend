@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
@@ -19,21 +20,29 @@ namespace Recollectable.API.Controllers
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
         private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
 
         public CollectablesController(ICollectableRepository collectableRepository,
             ICollectionRepository collectionRepository, IConditionRepository conditionRepository,
-            IUrlHelper urlHelper)
+            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService)
         {
             _collectableRepository = collectableRepository;
             _collectionRepository = collectionRepository;
             _conditionRepository = conditionRepository;
             _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet(Name = "GetCollectables")]
         public IActionResult GetCollectables(Guid collectionId, 
             CollectablesResourceParameters resourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<CollectableDto, Collectable>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var collectablesFromRepo = _collectableRepository
                 .GetCollectables(collectionId, resourceParameters);
 

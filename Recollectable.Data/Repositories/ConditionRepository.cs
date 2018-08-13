@@ -1,5 +1,7 @@
 ﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +11,20 @@ namespace Recollectable.Data.Repositories
     public class ConditionRepository : IConditionRepository
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public ConditionRepository(RecollectableContext context)
+        public ConditionRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
         public IEnumerable<Condition> GetConditions
             (ConditionsResourceParameters resourceParameters)
         {
-            var conditions = _context.Conditions
-                .OrderBy(c => c.Grade)
-                .AsQueryable();
+            var conditions = _context.Conditions.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<ConditionDto, Condition>());
 
             if (!string.IsNullOrEmpty(resourceParameters.Grade))
             {

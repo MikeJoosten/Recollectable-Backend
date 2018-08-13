@@ -1,5 +1,7 @@
 ﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Linq;
 
@@ -9,20 +11,22 @@ namespace Recollectable.Data.Repositories
     {
         private RecollectableContext _context;
         private IUserRepository _userRepository;
+        private IPropertyMappingService _propertyMappingService;
 
         public CollectionRepository(RecollectableContext context, 
-            IUserRepository userRepository)
+            IUserRepository userRepository, 
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _userRepository = userRepository;
+            _propertyMappingService = propertyMappingService;
         }
 
         public PagedList<Collection> GetCollections
             (CollectionsResourceParameters resourceParameters)
         {
-            var collections = _context.Collections
-                .OrderBy(c => c.Type)
-                .AsQueryable();
+            var collections = _context.Collections.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>());
 
             if (!string.IsNullOrEmpty(resourceParameters.Type))
             {

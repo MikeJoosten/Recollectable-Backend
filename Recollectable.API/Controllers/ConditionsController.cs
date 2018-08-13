@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
@@ -15,15 +16,24 @@ namespace Recollectable.API.Controllers
     public class ConditionsController : Controller
     {
         private IConditionRepository _conditionRepository;
+        private IPropertyMappingService _propertyMappingService;
 
-        public ConditionsController(IConditionRepository conditionRepository)
+        public ConditionsController(IConditionRepository conditionRepository,
+            IPropertyMappingService propertyMappingService)
         {
             _conditionRepository = conditionRepository;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet]
         public IActionResult GetConditions(ConditionsResourceParameters resourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<ConditionDto, Condition>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var conditionsFromRepo = _conditionRepository.GetConditions(resourceParameters);
             var conditions = Mapper.Map<IEnumerable<ConditionDto>>(conditionsFromRepo);
             return Ok(conditions);

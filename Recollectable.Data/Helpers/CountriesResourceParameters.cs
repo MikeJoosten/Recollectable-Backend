@@ -8,5 +8,6 @@ namespace Recollectable.Data.Helpers
     {
         public string Name { get; set; }
         public string Search { get; set; }
+        public string OrderBy { get; set; } = "Name";
     }
 }

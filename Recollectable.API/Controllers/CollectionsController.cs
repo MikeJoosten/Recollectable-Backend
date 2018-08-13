@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
@@ -18,18 +19,27 @@ namespace Recollectable.API.Controllers
         private ICollectionRepository _collectionRepository;
         private IUserRepository _userRepository;
         private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
 
         public CollectionsController(ICollectionRepository collectionRepository,
-            IUserRepository userRepository, IUrlHelper urlHelper)
+            IUserRepository userRepository, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService)
         {
             _collectionRepository = collectionRepository;
             _userRepository = userRepository;
             _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet(Name = "GetCollections")]
         public IActionResult GetCollections(CollectionsResourceParameters resourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<CollectionDto, Collection>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var collectionsFromRepo = _collectionRepository.GetCollections(resourceParameters);
 
             var previousPageLink = collectionsFromRepo.HasPrevious ?

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
@@ -19,20 +20,29 @@ namespace Recollectable.API.Controllers
         private ICountryRepository _countryRepository;
         private ICollectorValueRepository _collectorValueRepository;
         private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
 
         public BanknotesController(IBanknoteRepository banknoteRepository,
             ICollectorValueRepository collectorValueRepository,
-            ICountryRepository countryRepository, IUrlHelper urlHelper)
+            ICountryRepository countryRepository, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService)
         {
             _banknoteRepository = banknoteRepository;
             _countryRepository = countryRepository;
             _collectorValueRepository = collectorValueRepository;
             _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet(Name = "GetBanknotes")]
-        public IActionResult GetBanknotes(CollectablesResourceParameters resourceParameters)
+        public IActionResult GetBanknotes(CurrenciesResourceParameters resourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<BanknoteDto, Banknote>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var banknotesFromRepo = _banknoteRepository.GetBanknotes(resourceParameters);
 
             var previousPageLink = banknotesFromRepo.HasPrevious ?
@@ -233,7 +243,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        private string CreateBanknotesResourceUri(CollectablesResourceParameters resourceParameters,
+        private string CreateBanknotesResourceUri(CurrenciesResourceParameters resourceParameters,
             ResourceUriType type)
         {
             switch (type)

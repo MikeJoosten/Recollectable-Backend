@@ -7,7 +7,7 @@ namespace Recollectable.Data.Repositories
 {
     public interface IBanknoteRepository
     {
-        PagedList<Banknote> GetBanknotes(CollectablesResourceParameters resourceParameters);
+        PagedList<Banknote> GetBanknotes(CurrenciesResourceParameters resourceParameters);
         IEnumerable<Banknote> GetBanknotesByCountry(Guid countryId);
         Banknote GetBanknote(Guid banknoteId);
         void AddBanknote(Banknote banknote);

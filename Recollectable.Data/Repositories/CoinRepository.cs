@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,27 +15,28 @@ namespace Recollectable.Data.Repositories
         private ICountryRepository _countryRepository;
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
+        private IPropertyMappingService _propertyMappingService;
 
         public CoinRepository(RecollectableContext context, 
             ICountryRepository countryRepository, 
             ICollectionRepository collectionRepository,
-            IConditionRepository conditionRepository)
+            IConditionRepository conditionRepository,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _countryRepository = countryRepository;
             _collectionRepository = collectionRepository;
             _conditionRepository = conditionRepository;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Coin> GetCoins(CollectablesResourceParameters resourceParameters)
+        public PagedList<Coin> GetCoins(CurrenciesResourceParameters resourceParameters)
         {
             var coins = _context.Coins
                 .Include(c => c.Country)
                 .Include(c => c.CollectorValue)
-                .OrderBy(c => c.Country.Name)
-                .ThenBy(c => (c.FaceValue + " " + c.Type))
-                .ThenBy(c => c.ReleaseDate)
-                .AsQueryable();
+                .ApplySort(resourceParameters.OrderBy,
+                    _propertyMappingService.GetPropertyMapping<CoinDto, Coin>());
 
             if (!string.IsNullOrEmpty(resourceParameters.Type))
             {
