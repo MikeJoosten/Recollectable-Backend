@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Recollectable.Domain.Models
 {
-    public class CollectorValueDto
+    public class CollectorValueDto : LinkedResourceBaseDto
     {
         public Guid Id { get; set; }
         public double? G4 { get; set; }

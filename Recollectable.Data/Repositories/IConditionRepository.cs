@@ -8,7 +8,7 @@ namespace Recollectable.Data.Repositories
 {
     public interface IConditionRepository
     {
-        IEnumerable<Condition> GetConditions
+        PagedList<Condition> GetConditions
             (ConditionsResourceParameters resourceParameters);
         Condition GetCondition(Guid conditionId);
         void AddCondition(Condition condition);

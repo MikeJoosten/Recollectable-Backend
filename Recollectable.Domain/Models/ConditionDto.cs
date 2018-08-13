@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Recollectable.Domain.Models
 {
-    public class ConditionDto
+    public class ConditionDto : LinkedResourceBaseDto
     {
         public Guid Id { get; set; }
         public string Grade { get; set; }

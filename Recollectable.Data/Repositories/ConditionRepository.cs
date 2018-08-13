@@ -20,7 +20,7 @@ namespace Recollectable.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public IEnumerable<Condition> GetConditions
+        public PagedList<Condition> GetConditions
             (ConditionsResourceParameters resourceParameters)
         {
             var conditions = _context.Conditions.ApplySort(resourceParameters.OrderBy,
@@ -38,7 +38,9 @@ namespace Recollectable.Data.Repositories
                 conditions = conditions.Where(c => c.Grade.ToLowerInvariant().Contains(search));
             }
 
-            return conditions;
+            return PagedList<Condition>.Create(conditions,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public Condition GetCondition(Guid conditionId)

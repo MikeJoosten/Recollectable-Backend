@@ -10,6 +10,7 @@ using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
@@ -54,28 +55,39 @@ namespace Recollectable.API.Controllers
 
             var banknotesFromRepo = _banknoteRepository.GetBanknotes(resourceParameters);
 
-            var previousPageLink = banknotesFromRepo.HasPrevious ?
-                CreateBanknotesResourceUri(resourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = banknotesFromRepo.HasNext ?
-                CreateBanknotesResourceUri(resourceParameters,
-                ResourceUriType.NextPage) : null;
-
             var paginationMetadata = new
             {
                 totalCount = banknotesFromRepo.TotalCount,
                 pageSize = banknotesFromRepo.PageSize,
                 currentPage = banknotesFromRepo.CurrentPage,
-                totalPages = banknotesFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
+                totalPages = banknotesFromRepo.TotalPages
             };
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var banknotes = Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
-            return Ok(banknotes.ShapeData(resourceParameters.Fields));
+            var links = CreateBanknotesLinks(resourceParameters, banknotesFromRepo.HasNext,
+                banknotesFromRepo.HasPrevious);
+            var shapedBanknotes = banknotes.ShapeData(resourceParameters.Fields);
+
+            var linkedBanknotes = shapedBanknotes.Select(banknote =>
+            {
+                var banknoteAsDictionary = banknote as IDictionary<string, object>;
+                var banknoteLinks = CreateBanknoteLinks((Guid)banknoteAsDictionary["Id"],
+                    resourceParameters.Fields);
+
+                banknoteAsDictionary.Add("links", banknoteLinks);
+
+                return banknoteAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                value = linkedBanknotes,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
         }
 
         [HttpGet("{id}", Name = "GetBanknote")]
@@ -94,10 +106,16 @@ namespace Recollectable.API.Controllers
             }
 
             var banknote = Mapper.Map<BanknoteDto>(banknoteFromRepo);
-            return Ok(banknote.ShapeData(fields));
+            var links = CreateBanknoteLinks(id, fields);
+            var linkedResource = banknote.ShapeData(fields)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
+            return Ok(linkedResource);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateBanknote")]
         public IActionResult CreateBanknote([FromBody] BanknoteCreationDto banknote)
         {
             if (banknote == null)
@@ -139,9 +157,15 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedBanknote = Mapper.Map<BanknoteDto>(newBanknote);
+            var links = CreateBanknoteLinks(returnedBanknote.Id, null);
+            var linkedResource = returnedBanknote.ShapeData(null)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
             return CreatedAtRoute("GetBanknote", 
-                new { id = returnedBanknote.Id }, 
-                returnedBanknote);
+                new { id = returnedBanknote.Id },
+                linkedResource);
         }
 
         [HttpPost("{id}")]
@@ -155,7 +179,7 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateBanknote")]
         public IActionResult UpdateBanknote(Guid id, [FromBody] BanknoteUpdateDto banknote)
         {
             if (banknote == null)
@@ -194,7 +218,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateBanknote")]
         public IActionResult PartiallyUpdateBanknote(Guid id,
             [FromBody] JsonPatchDocument<BanknoteUpdateDto> patchDoc)
         {
@@ -237,7 +261,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteBanknote")]
         public IActionResult DeleteBanknote(Guid id)
         {
             var banknoteFromRepo = _banknoteRepository.GetBanknote(id);
@@ -296,6 +320,55 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateBanknoteLinks(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(new LinkDto(_urlHelper.Link("GetBanknote",
+                    new { id }), "self", "GET"));
+
+                links.Add(new LinkDto(_urlHelper.Link("CreateBanknote",
+                    new { }), "create_banknote", "POST"));
+
+                links.Add(new LinkDto(_urlHelper.Link("UpdateBanknote",
+                    new { id }), "update_banknote", "PUT"));
+
+                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateBanknote",
+                    new { id }), "partially_update_banknote", "PATCH"));
+
+                links.Add(new LinkDto(_urlHelper.Link("DeleteBanknote",
+                    new { id }), "delete_banknote", "DELETE"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateBanknotesLinks
+            (CurrenciesResourceParameters resourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(new LinkDto(CreateBanknotesResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(new LinkDto(CreateBanknotesResourceUri(resourceParameters,
+                    ResourceUriType.NextPage), "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkDto(CreateBanknotesResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage), "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }

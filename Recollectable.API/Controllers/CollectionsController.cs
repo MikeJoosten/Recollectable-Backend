@@ -10,6 +10,7 @@ using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
@@ -51,28 +52,39 @@ namespace Recollectable.API.Controllers
 
             var collectionsFromRepo = _collectionRepository.GetCollections(resourceParameters);
 
-            var previousPageLink = collectionsFromRepo.HasPrevious ?
-                CreateCollectionsResourceUri(resourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = collectionsFromRepo.HasNext ?
-                CreateCollectionsResourceUri(resourceParameters,
-                ResourceUriType.NextPage) : null;
-
             var paginationMetadata = new
             {
                 totalCount = collectionsFromRepo.TotalCount,
                 pageSize = collectionsFromRepo.PageSize,
                 currentPage = collectionsFromRepo.CurrentPage,
-                totalPages = collectionsFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
+                totalPages = collectionsFromRepo.TotalPages
             };
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var collections = Mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
-            return Ok(collections.ShapeData(resourceParameters.Fields));
+            var links = CreateCollectionsLinks(resourceParameters, collectionsFromRepo.HasNext,
+                collectionsFromRepo.HasPrevious);
+            var shapedCollections = collections.ShapeData(resourceParameters.Fields);
+
+            var linkedCollections = shapedCollections.Select(collection =>
+            {
+                var collectionAsDictionary = collection as IDictionary<string, object>;
+                var collectionLinks = CreateCollectionLinks((Guid)collectionAsDictionary["Id"],
+                    resourceParameters.Fields);
+
+                collectionAsDictionary.Add("links", collectionLinks);
+
+                return collectionAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                value = linkedCollections,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
         }
 
         [HttpGet("{id}", Name = "GetCollection")]
@@ -91,10 +103,16 @@ namespace Recollectable.API.Controllers
             }
 
             var collection = Mapper.Map<CollectionDto>(collectionFromRepo);
-            return Ok(collection.ShapeData(fields));
+            var links = CreateCollectionLinks(id, fields);
+            var linkedResource = collection.ShapeData(fields)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
+            return Ok(linkedResource);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateCollection")]
         public IActionResult CreateCollections([FromBody] CollectionCreationDto collection)
         {
             if (collection == null)
@@ -120,9 +138,15 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCollection = Mapper.Map<CollectionDto>(newCollection);
+            var links = CreateCollectionLinks(returnedCollection.Id, null);
+            var linkedResource = returnedCollection.ShapeData(null)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
             return CreatedAtRoute("GetCollection",
                 new { id = returnedCollection.Id },
-                returnedCollection);
+                linkedResource);
         }
 
         [HttpPost("{id}")]
@@ -136,7 +160,7 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateCollection")]
         public IActionResult UpdateCollection(Guid id, [FromBody] CollectionUpdateDto collection)
         {
             if (collection == null)
@@ -169,7 +193,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateCollection")]
         public IActionResult PartiallyUpdateCollection(Guid id,
             [FromBody] JsonPatchDocument<CollectionUpdateDto> patchDoc)
         {
@@ -206,7 +230,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteCollection")]
         public IActionResult DeleteCollection(Guid id)
         {
             var collectionFromRepo = _collectionRepository.GetCollection(id);
@@ -262,6 +286,55 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateCollectionLinks(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(new LinkDto(_urlHelper.Link("GetCollection",
+                    new { id }), "self", "GET"));
+
+                links.Add(new LinkDto(_urlHelper.Link("CreateCollection",
+                    new { }), "create_collection", "POST"));
+
+                links.Add(new LinkDto(_urlHelper.Link("UpdateCollection",
+                    new { id }), "update_collection", "PUT"));
+
+                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCollection",
+                    new { id }), "partially_update_collection", "PATCH"));
+
+                links.Add(new LinkDto(_urlHelper.Link("DeleteCollection",
+                    new { id }), "delete_collection", "DELETE"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateCollectionsLinks
+            (CollectionsResourceParameters resourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(new LinkDto(CreateCollectionsResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(new LinkDto(CreateCollectionsResourceUri(resourceParameters,
+                    ResourceUriType.NextPage), "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkDto(CreateCollectionsResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage), "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }

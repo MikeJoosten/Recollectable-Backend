@@ -10,6 +10,7 @@ using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
@@ -60,28 +61,39 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var previousPageLink = collectablesFromRepo.HasPrevious ?
-                CreateCollectablesResourceUri(resourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = collectablesFromRepo.HasNext ?
-                CreateCollectablesResourceUri(resourceParameters,
-                ResourceUriType.NextPage) : null;
-
             var paginationMetadata = new
             {
                 totalCount = collectablesFromRepo.TotalCount,
                 pageSize = collectablesFromRepo.PageSize,
                 currentPage = collectablesFromRepo.CurrentPage,
-                totalPages = collectablesFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
+                totalPages = collectablesFromRepo.TotalPages
             };
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var collectables = Mapper.Map<IEnumerable<CollectableDto>>(collectablesFromRepo);
-            return Ok(collectables.ShapeData(resourceParameters.Fields));
+            var links = CreateCollectablesLinks(resourceParameters, collectablesFromRepo.HasNext,
+                collectablesFromRepo.HasPrevious);
+            var shapedCollectables = collectables.ShapeData(resourceParameters.Fields);
+
+            var linkedCollectables = shapedCollectables.Select(collectable =>
+            {
+                var collectableAsDictionary = collectable as IDictionary<string, object>;
+                var collectableLinks = CreateCollectableLinks((Guid)collectableAsDictionary["Id"],
+                    resourceParameters.Fields);
+
+                collectableAsDictionary.Add("links", collectableLinks);
+
+                return collectableAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                value = linkedCollectables,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
         }
 
         [HttpGet("{id}", Name = "GetCollectable")]
@@ -100,10 +112,16 @@ namespace Recollectable.API.Controllers
             }
 
             var collectable = Mapper.Map<CollectableDto>(collectableFromRepo);
-            return Ok(collectable.ShapeData(fields));
+            var links = CreateCollectableLinks(id, fields);
+            var linkedResource = collectable.ShapeData(fields)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
+            return Ok(linkedResource);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateCollectable")]
         public IActionResult CreateCollectable(Guid collectionId, 
             [FromBody] CollectableCreationDto collectable)
         {
@@ -148,9 +166,15 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCollectable = Mapper.Map<CollectableDto>(newCollectable);
+            var links = CreateCollectableLinks(returnedCollectable.Id, null);
+            var linkedResource = returnedCollectable.ShapeData(null)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
             return CreatedAtRoute("GetCollectable",
                 new { id = returnedCollectable.Id },
-                returnedCollectable);
+                linkedResource);
         }
 
         [HttpPost("{id}")]
@@ -164,7 +188,7 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateCollectable")]
         public IActionResult UpdateCoin(Guid collectionId, Guid id,
             [FromBody] CollectableUpdateDto collectable)
         {
@@ -215,7 +239,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateCollectable")]
         public IActionResult PartiallyUpdateCoin(Guid collectionId, Guid id,
             [FromBody] JsonPatchDocument<CollectableUpdateDto> patchDoc)
         {
@@ -269,7 +293,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteCollectable")]
         public IActionResult DeleteCoin(Guid collectionId, Guid id)
         {
             var collectableFromRepo = _collectableRepository.GetCollectable(collectionId, id);
@@ -289,8 +313,8 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        private string CreateCollectablesResourceUri
-            (CollectablesResourceParameters resourceParameters, ResourceUriType type)
+        private string CreateCollectablesResourceUri(CollectablesResourceParameters resourceParameters, 
+            ResourceUriType type)
         {
             switch (type)
             {
@@ -325,6 +349,55 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateCollectableLinks(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(new LinkDto(_urlHelper.Link("GetCollectable",
+                    new { id }), "self", "GET"));
+
+                links.Add(new LinkDto(_urlHelper.Link("CreateCollectable",
+                    new { }), "create_collectable", "POST"));
+
+                links.Add(new LinkDto(_urlHelper.Link("UpdateCollectable",
+                    new { id }), "update_collectable", "PUT"));
+
+                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCollectable",
+                    new { id }), "partially_update_collectable", "PATCH"));
+
+                links.Add(new LinkDto(_urlHelper.Link("DeleteCollectable",
+                    new { id }), "delete_collectable", "DELETE"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateCollectablesLinks
+            (CollectablesResourceParameters resourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(new LinkDto(CreateCollectablesResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(new LinkDto(CreateCollectablesResourceUri(resourceParameters,
+                    ResourceUriType.NextPage), "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkDto(CreateCollectablesResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage), "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }

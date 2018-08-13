@@ -10,6 +10,7 @@ using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
@@ -54,28 +55,39 @@ namespace Recollectable.API.Controllers
 
             var coinsFromRepo = _coinRepository.GetCoins(resourceParameters);
 
-            var previousPageLink = coinsFromRepo.HasPrevious ?
-                CreateCoinsResourceUri(resourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = coinsFromRepo.HasNext ?
-                CreateCoinsResourceUri(resourceParameters,
-                ResourceUriType.NextPage) : null;
-
             var paginationMetadata = new
             {
                 totalCount = coinsFromRepo.TotalCount,
                 pageSize = coinsFromRepo.PageSize,
                 currentPage = coinsFromRepo.CurrentPage,
-                totalPages = coinsFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
+                totalPages = coinsFromRepo.TotalPages
             };
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
-            return Ok(coins.ShapeData(resourceParameters.Fields));
+            var links = CreateCoinsLinks(resourceParameters, coinsFromRepo.HasNext,
+                coinsFromRepo.HasPrevious);
+            var shapedCoins = coins.ShapeData(resourceParameters.Fields);
+
+            var linkedCoins = shapedCoins.Select(coin =>
+            {
+                var coinAsDictionary = coin as IDictionary<string, object>;
+                var coinLinks = CreateCoinLinks((Guid)coinAsDictionary["Id"],
+                    resourceParameters.Fields);
+
+                coinAsDictionary.Add("links", coinLinks);
+
+                return coinAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                value = linkedCoins,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
         }
 
         [HttpGet("{id}", Name = "GetCoin")]
@@ -94,10 +106,16 @@ namespace Recollectable.API.Controllers
             }
 
             var coin = Mapper.Map<CoinDto>(coinFromRepo);
-            return Ok(coin.ShapeData(fields));
+            var links = CreateCoinLinks(id, fields);
+            var linkedResource = coin.ShapeData(fields)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
+            return Ok(linkedResource);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateCoin")]
         public IActionResult CreateCoin([FromBody] CoinCreationDto coin)
         {
             if (coin == null)
@@ -139,7 +157,13 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCoin = Mapper.Map<CoinDto>(newCoin);
-            return CreatedAtRoute("GetCoin", new { id = returnedCoin.Id }, returnedCoin);
+            var links = CreateCoinLinks(returnedCoin.Id, null);
+            var linkedResource = returnedCoin.ShapeData(null)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
+            return CreatedAtRoute("GetCoin", new { id = returnedCoin.Id }, linkedResource);
         }
 
         [HttpPost("{id}")]
@@ -153,7 +177,7 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateCoin")]
         public IActionResult UpdateCoin(Guid id, [FromBody] CoinUpdateDto coin)
         {
             if (coin == null)
@@ -192,7 +216,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateCoin")]
         public IActionResult PartiallyUpdateCoin(Guid id,
             [FromBody] JsonPatchDocument<CoinUpdateDto> patchDoc)
         {
@@ -235,7 +259,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteCoin")]
         public IActionResult DeleteCoin(Guid id)
         {
             var coinFromRepo = _coinRepository.GetCoin(id);
@@ -294,6 +318,55 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateCoinLinks(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(new LinkDto(_urlHelper.Link("GetCoins",
+                    new { id }), "self", "GET"));
+
+                links.Add(new LinkDto(_urlHelper.Link("CreateCoins",
+                    new { }), "create_coins", "POST"));
+
+                links.Add(new LinkDto(_urlHelper.Link("UpdateCoins",
+                    new { id }), "update_coins", "PUT"));
+
+                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCoins",
+                    new { id }), "partially_update_coins", "PATCH"));
+
+                links.Add(new LinkDto(_urlHelper.Link("DeleteCoins",
+                    new { id }), "delete_coins", "DELETE"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateCoinsLinks
+            (CurrenciesResourceParameters resourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(new LinkDto(CreateCoinsResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(new LinkDto(CreateCoinsResourceUri(resourceParameters,
+                    ResourceUriType.NextPage), "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkDto(CreateCoinsResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage), "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }

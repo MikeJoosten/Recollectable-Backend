@@ -7,6 +7,7 @@ namespace Recollectable.Data.Helpers
     public enum ResourceUriType
     {
         PreviousPage,
-        NextPage
+        NextPage,
+        Current
     }
 }

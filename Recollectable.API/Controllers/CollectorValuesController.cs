@@ -10,6 +10,7 @@ using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
@@ -48,28 +49,39 @@ namespace Recollectable.API.Controllers
 
             var collectorValuesFromRepo = _collectorValueRepository.GetCollectorValues(resourceParameters);
 
-            var previousPageLink = collectorValuesFromRepo.HasPrevious ?
-                CreateCollectorValuesResourceUri(resourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = collectorValuesFromRepo.HasNext ?
-                CreateCollectorValuesResourceUri(resourceParameters,
-                ResourceUriType.NextPage) : null;
-
             var paginationMetadata = new
             {
                 totalCount = collectorValuesFromRepo.TotalCount,
                 pageSize = collectorValuesFromRepo.PageSize,
                 currentPage = collectorValuesFromRepo.CurrentPage,
                 totalPages = collectorValuesFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
             };
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var collectorValues = Mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
-            return Ok(collectorValues.ShapeData(resourceParameters.Fields));
+            var links = CreateCollectorValuesLinks(resourceParameters, collectorValuesFromRepo.HasNext,
+                collectorValuesFromRepo.HasPrevious);
+            var shapedCollectorValues = collectorValues.ShapeData(resourceParameters.Fields);
+
+            var linkedCollectorValues = shapedCollectorValues.Select(collectorValue =>
+            {
+                var collectorValueAsDictionary = collectorValue as IDictionary<string, object>;
+                var collectorValueLinks = CreateCollectorValueLinks
+                    ((Guid)collectorValueAsDictionary["Id"], resourceParameters.Fields);
+
+                collectorValueAsDictionary.Add("links", collectorValueLinks);
+
+                return collectorValueAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                value = linkedCollectorValues,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
         }
 
         [HttpGet("{id}", Name = "GetCollectorValue")]
@@ -88,10 +100,16 @@ namespace Recollectable.API.Controllers
             }
 
             var collectorValue = Mapper.Map<CollectorValueDto>(collectorValueFromRepo);
-            return Ok(collectorValue.ShapeData(fields));
+            var links = CreateCollectorValueLinks(id, fields);
+            var linkedResource = collectorValue.ShapeData(fields)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
+            return Ok(linkedResource);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateCollectorValue")]
         public IActionResult CreateCollectorValue([FromBody] CollectorValueCreationDto collectorValue)
         {
             if (collectorValue == null)
@@ -108,9 +126,15 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCollectorValue = Mapper.Map<CollectorValueDto>(newCollectorValue);
+            var links = CreateCollectorValueLinks(returnedCollectorValue.Id, null);
+            var linkedResource = returnedCollectorValue.ShapeData(null)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
             return CreatedAtRoute("GetCollectorValue", 
-                new { id = returnedCollectorValue.Id }, 
-                returnedCollectorValue);
+                new { id = returnedCollectorValue.Id },
+                linkedResource);
         }
 
         [HttpPost("{id}")]
@@ -124,7 +148,7 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateCollectorValue")]
         public IActionResult UpdateCollectorValue
             (Guid id, [FromBody] CollectorValueUpdateDto collectorValue)
         {
@@ -151,7 +175,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateCollectorValue")]
         public IActionResult PartiallyUpdateCollectorValue(Guid id,
             [FromBody] JsonPatchDocument<CollectorValueUpdateDto> patchDoc)
         {
@@ -181,7 +205,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteCollectorValue")]
         public IActionResult DeleteCollectorValue(Guid id)
         {
             var collectorValueFromRepo = _collectorValueRepository.GetCollectorValue(id);
@@ -231,6 +255,58 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateCollectorValueLinks(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(new LinkDto(_urlHelper.Link("GetCollectorValue",
+                    new { id }), "self", "GET"));
+
+                links.Add(new LinkDto(_urlHelper.Link("CreateCollectorValue",
+                    new { }), "create_collector_value", "POST"));
+
+                links.Add(new LinkDto(_urlHelper.Link("UpdateCollectorValue",
+                    new { id }), "update_collector_value", "PUT"));
+
+                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCollectorValue",
+                    new { id }), "partially_update_collector_value", "PATCH"));
+
+                links.Add(new LinkDto(_urlHelper.Link("DeleteCollectorValue",
+                    new { id }), "delete_collector_value", "DELETE"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateCollectorValuesLinks
+            (CollectorValuesResourceParameters resourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(new LinkDto(CreateCollectorValuesResourceUri
+                (resourceParameters, ResourceUriType.Current), 
+                "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(new LinkDto(CreateCollectorValuesResourceUri
+                    (resourceParameters, ResourceUriType.NextPage), 
+                    "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkDto(CreateCollectorValuesResourceUri
+                    (resourceParameters, ResourceUriType.PreviousPage), 
+                    "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }

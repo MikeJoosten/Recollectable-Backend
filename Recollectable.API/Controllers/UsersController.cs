@@ -10,6 +10,7 @@ using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
@@ -48,28 +49,39 @@ namespace Recollectable.API.Controllers
 
             var usersFromRepo = _userRepository.GetUsers(resourceParameters);
 
-            var previousPageLink = usersFromRepo.HasPrevious ?
-                CreateUsersResourceUri(resourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = usersFromRepo.HasNext ?
-                CreateUsersResourceUri(resourceParameters,
-                ResourceUriType.NextPage) : null;
-
             var paginationMetadata = new
             {
                 totalCount = usersFromRepo.TotalCount,
                 pageSize = usersFromRepo.PageSize,
                 currentPage = usersFromRepo.CurrentPage,
-                totalPages = usersFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
+                totalPages = usersFromRepo.TotalPages
             };
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var users = Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
-            return Ok(users.ShapeData(resourceParameters.Fields));
+            var links = CreateUsersLinks(resourceParameters, usersFromRepo.HasNext, 
+                usersFromRepo.HasPrevious);
+            var shapedUsers = users.ShapeData(resourceParameters.Fields);
+
+            var linkedUsers = shapedUsers.Select(user =>
+            {
+                var userAsDictionary = user as IDictionary<string, object>;
+                var userLinks = CreateUserLinks((Guid)userAsDictionary["Id"],
+                    resourceParameters.Fields);
+
+                userAsDictionary.Add("links", userLinks);
+
+                return userAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                value = linkedUsers,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
         }
 
         [HttpGet("{id}", Name = "GetUser")]
@@ -88,10 +100,16 @@ namespace Recollectable.API.Controllers
             }
 
             var user = Mapper.Map<UserDto>(userFromRepo);
-            return Ok(user.ShapeData(fields));
+            var links = CreateUserLinks(id, fields);
+            var linkedResource = user.ShapeData(fields) 
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
+            return Ok(linkedResource);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateUser")]
         public IActionResult CreateUser([FromBody] UserCreationDto user)
         {
             if (user == null)
@@ -108,7 +126,13 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedUser = Mapper.Map<UserDto>(newUser);
-            return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, returnedUser);
+            var links = CreateUserLinks(returnedUser.Id, null);
+            var linkedResource = returnedUser.ShapeData(null)
+                as IDictionary<string, object>;
+
+            linkedResource.Add("links", links);
+
+            return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, linkedResource);
         }
 
         [HttpPost("{id}")]
@@ -122,7 +146,7 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateUser")]
         public IActionResult UpdateUser(Guid id, [FromBody] UserUpdateDto user)
         {
             if (user == null)
@@ -148,7 +172,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateUser")]
         public IActionResult PartiallyUpdateUser(Guid id,
             [FromBody] JsonPatchDocument<UserUpdateDto> patchDoc)
         {
@@ -178,7 +202,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteUser")]
         public IActionResult DeleteUser(Guid id)
         {
             var userFromRepo = _userRepository.GetUser(id);
@@ -221,6 +245,7 @@ namespace Recollectable.API.Controllers
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
+                case ResourceUriType.Current:
                 default:
                     return _urlHelper.Link("GetUsers", new
                     {
@@ -231,6 +256,55 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateUserLinks(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(new LinkDto(_urlHelper.Link("GetUser",
+                    new { id }), "self", "GET"));
+
+                links.Add(new LinkDto(_urlHelper.Link("CreateUser", 
+                    new { }), "create_user", "POST"));
+
+                links.Add(new LinkDto(_urlHelper.Link("UpdateUser",
+                    new { id }), "update_user", "PUT"));
+
+                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateUser",
+                    new { id }), "partially_update_user", "PATCH"));
+
+                links.Add(new LinkDto(_urlHelper.Link("DeleteUser",
+                    new { id }), "delete_user", "DELETE"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateUsersLinks
+            (UsersResourceParameters resourceParameters, 
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(new LinkDto(CreateUsersResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(new LinkDto(CreateUsersResourceUri(resourceParameters,
+                    ResourceUriType.NextPage), "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkDto(CreateUsersResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage), "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }
