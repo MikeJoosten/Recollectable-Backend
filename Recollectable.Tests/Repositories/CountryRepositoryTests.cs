@@ -12,7 +12,7 @@ namespace Recollectable.Tests.Repositories
 {
     public class CountryRepositoryTests : RecollectableTestBase
     {
-        private ICountryRepository _repository;
+        /*private ICountryRepository _repository;
 
         public CountryRepositoryTests()
         {
@@ -96,6 +96,6 @@ namespace Recollectable.Tests.Repositories
 
             Assert.Equal(5, _repository.GetCountries().Count());
             Assert.Null(_repository.GetCountry(new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")));
-        }
+        }*/
     }
 }

@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Domain;
+using Recollectable.Domain.Entities;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Recollectable.Data
 {

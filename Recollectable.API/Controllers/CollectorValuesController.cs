@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Recollectable.API.Models;
+using Newtonsoft.Json;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -16,23 +17,69 @@ namespace Recollectable.API.Controllers
     public class CollectorValuesController : Controller
     {
         private ICollectorValueRepository _collectorValueRepository;
+        private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
-        public CollectorValuesController(ICollectorValueRepository collectorValueRepository)
+        public CollectorValuesController(ICollectorValueRepository collectorValueRepository,
+            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _collectorValueRepository = collectorValueRepository;
+            _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
-        [HttpGet]
-        public IActionResult GetCollectorValues()
+        [HttpGet(Name = "GetCollectorValues")]
+        public IActionResult GetCollectorValues(CollectorValuesResourceParameters resourceParameters)
         {
-            var collectorValuesFromRepo = _collectorValueRepository.GetCollectorValues();
+            if (!_propertyMappingService.ValidMappingExistsFor<CollectorValueDto, CollectorValue>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<CollectorValueDto>
+                (resourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
+            var collectorValuesFromRepo = _collectorValueRepository.GetCollectorValues(resourceParameters);
+
+            var previousPageLink = collectorValuesFromRepo.HasPrevious ?
+                CreateCollectorValuesResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = collectorValuesFromRepo.HasNext ?
+                CreateCollectorValuesResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = collectorValuesFromRepo.TotalCount,
+                pageSize = collectorValuesFromRepo.PageSize,
+                currentPage = collectorValuesFromRepo.CurrentPage,
+                totalPages = collectorValuesFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var collectorValues = Mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
-            return Ok(collectorValues);
+            return Ok(collectorValues.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCollectorValue")]
-        public IActionResult GetCollectorValue(Guid id)
+        public IActionResult GetCollectorValue(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<CollectorValueDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var collectorValueFromRepo = _collectorValueRepository.GetCollectorValue(id);
 
             if (collectorValueFromRepo == null)
@@ -41,7 +88,7 @@ namespace Recollectable.API.Controllers
             }
 
             var collectorValue = Mapper.Map<CollectorValueDto>(collectorValueFromRepo);
-            return Ok(collectorValue);
+            return Ok(collectorValue.ShapeData(fields));
         }
 
         [HttpPost]
@@ -152,6 +199,38 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateCollectorValuesResourceUri(CollectorValuesResourceParameters resourceParameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetCollectorValues", new
+                    {
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetCollectorValues", new
+                    {
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetCollectorValues", new
+                    {
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Recollectable.API.Models;
+using Newtonsoft.Json;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -18,27 +19,73 @@ namespace Recollectable.API.Controllers
         private ICoinRepository _coinRepository;
         private ICountryRepository _countryRepository;
         private ICollectorValueRepository _collectorValueRepository;
+        private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
         public CoinsController(ICoinRepository coinRepository, 
             ICollectorValueRepository collectorValueRepository, 
-            ICountryRepository countryRepository)
+            ICountryRepository countryRepository, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService, 
+            ITypeHelperService typeHelperService)
         {
             _coinRepository = coinRepository;
             _countryRepository = countryRepository;
             _collectorValueRepository = collectorValueRepository;
+            _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
-        [HttpGet]
-        public IActionResult GetCoins()
+        [HttpGet(Name = "GetCoins")]
+        public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters)
         {
-            var coinsFromRepo = _coinRepository.GetCoins();
+            if (!_propertyMappingService.ValidMappingExistsFor<CoinDto, Coin>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<CoinDto>
+                (resourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
+            var coinsFromRepo = _coinRepository.GetCoins(resourceParameters);
+
+            var previousPageLink = coinsFromRepo.HasPrevious ?
+                CreateCoinsResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = coinsFromRepo.HasNext ?
+                CreateCoinsResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = coinsFromRepo.TotalCount,
+                pageSize = coinsFromRepo.PageSize,
+                currentPage = coinsFromRepo.CurrentPage,
+                totalPages = coinsFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
-            return Ok(coins);
+            return Ok(coins.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCoin")]
-        public IActionResult GetCoin(Guid id)
+        public IActionResult GetCoin(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<CoinDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var coinFromRepo = _coinRepository.GetCoin(id);
 
             if (coinFromRepo == null)
@@ -47,7 +94,7 @@ namespace Recollectable.API.Controllers
             }
 
             var coin = Mapper.Map<CoinDto>(coinFromRepo);
-            return Ok(coin);
+            return Ok(coin.ShapeData(fields));
         }
 
         [HttpPost]
@@ -206,6 +253,47 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateCoinsResourceUri(CurrenciesResourceParameters resourceParameters, 
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetCoins", new
+                    {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetCoins", new
+                    {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetCoins", new
+                    {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

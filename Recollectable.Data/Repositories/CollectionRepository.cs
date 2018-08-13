@@ -1,8 +1,9 @@
-﻿using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
@@ -10,17 +11,38 @@ namespace Recollectable.Data.Repositories
     {
         private RecollectableContext _context;
         private IUserRepository _userRepository;
+        private IPropertyMappingService _propertyMappingService;
 
         public CollectionRepository(RecollectableContext context, 
-            IUserRepository userRepository)
+            IUserRepository userRepository, 
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _userRepository = userRepository;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public IEnumerable<Collection> GetCollections()
+        public PagedList<Collection> GetCollections
+            (CollectionsResourceParameters resourceParameters)
         {
-            return _context.Collections.OrderBy(c => c.Type);
+            var collections = _context.Collections.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>());
+
+            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            {
+                var type = resourceParameters.Type.Trim().ToLowerInvariant();
+                collections = collections.Where(c => c.Type.ToLowerInvariant() == type);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                collections = collections.Where(c => c.Type.ToLowerInvariant().Contains(search));
+            }
+
+            return PagedList<Collection>.Create(collections,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public Collection GetCollection(Guid collectionId)

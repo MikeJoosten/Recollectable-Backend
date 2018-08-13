@@ -1,27 +1,43 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Domain;
+using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public UserRepository(RecollectableContext context)
+        public UserRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public IEnumerable<User> GetUsers()
+        public PagedList<User> GetUsers(UsersResourceParameters resourceParameters)
         {
-            return _context.Users
+            var users = _context.Users
                 .Include(u => u.Collections)
-                .OrderBy(u => u.FirstName)
-                .ThenBy(u => u.LastName);
+                .ApplySort(resourceParameters.OrderBy,
+                    _propertyMappingService.GetPropertyMapping<UserDto, User>());
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                users = users.Where(u => u.FirstName.ToLowerInvariant().Contains(search)
+                    || u.LastName.ToLowerInvariant().Contains(search)
+                    || u.Email.ToLowerInvariant().Contains(search));
+            }
+
+            return PagedList<User>.Create(users,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public User GetUser(Guid userId)

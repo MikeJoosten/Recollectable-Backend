@@ -1,13 +1,13 @@
-﻿using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Domain.Entities;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
     public interface ICoinRepository
     {
-        IEnumerable<Coin> GetCoins();
+        PagedList<Coin> GetCoins(CurrenciesResourceParameters resourceParameters);
         IEnumerable<Coin> GetCoinsByCountry(Guid countryId);
         Coin GetCoin(Guid coinId);
         void AddCoin(Coin coin);

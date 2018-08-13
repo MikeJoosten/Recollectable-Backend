@@ -1,23 +1,34 @@
-﻿using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
     public class CollectorValueRepository : ICollectorValueRepository
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public CollectorValueRepository(RecollectableContext context)
+        public CollectorValueRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public IEnumerable<CollectorValue> GetCollectorValues()
+        public PagedList<CollectorValue> GetCollectorValues
+            (CollectorValuesResourceParameters resourceParameters)
         {
-            return _context.CollectorValues.OrderBy(c => c.Id);
+            var collectorValues = _context.CollectorValues.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<CollectorValueDto, CollectorValue>());
+
+            return PagedList<CollectorValue>.Create(collectorValues,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public CollectorValue GetCollectorValue(Guid collectorValueId)

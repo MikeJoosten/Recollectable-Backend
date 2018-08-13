@@ -1,16 +1,14 @@
 ﻿using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Domain.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories
 {
     public class CollectorValueRepositoryTests : RecollectableTestBase
     {
-        private ICollectorValueRepository _repository;
+        /*private ICollectorValueRepository _repository;
 
         public CollectorValueRepositoryTests()
         {
@@ -96,6 +94,6 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(5, _repository.GetCollectorValues().Count());
             Assert.Null(_repository
                 .GetCollectorValue(new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")));
-        }
+        }*/
     }
 }

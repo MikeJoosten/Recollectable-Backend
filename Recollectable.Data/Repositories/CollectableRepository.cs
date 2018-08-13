@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Domain;
+using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
@@ -11,30 +12,52 @@ namespace Recollectable.Data.Repositories
     {
         private RecollectableContext _context;
         private ICollectionRepository _collectionRepository;
+        private IPropertyMappingService _propertyMappingService;
 
         public CollectableRepository(RecollectableContext context, 
-            ICollectionRepository collectionRepository)
+            ICollectionRepository collectionRepository,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _collectionRepository = collectionRepository;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public IEnumerable<CollectionCollectable> GetCollectables(Guid collectionId)
+        public PagedList<CollectionCollectable> GetCollectables(Guid collectionId,
+            CollectablesResourceParameters resourceParameters)
         {
             if (!_collectionRepository.CollectionExists(collectionId))
             {
                 return null;
             }
 
-            return _context.CollectionCollectables
+            var collectables = _context.CollectionCollectables
                 .Include(cc => cc.Condition)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.Country)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.CollectorValue)
                 .Where(cc => cc.CollectionId == collectionId)
-                .OrderBy(cc => cc.Collectable.Country)
-                .ThenBy(cc => cc.Collectable.ReleaseDate);
+                .ApplySort(resourceParameters.OrderBy,
+                    _propertyMappingService.GetPropertyMapping<CollectableDto, Collectable>());
+
+            if (!string.IsNullOrEmpty(resourceParameters.Country))
+            {
+                var country = resourceParameters.Country.Trim().ToLowerInvariant();
+                collectables = collectables.Where(c => 
+                    c.Collectable.Country.Name.ToLowerInvariant() == country);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                collectables = collectables.Where(c => c.Collectable.Country.Name.ToLowerInvariant().Contains(search)
+                    || c.Collectable.ReleaseDate.ToLowerInvariant().Contains(search));
+            }
+
+            return PagedList<CollectionCollectable>.Create(collectables,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public Collectable GetCollectable(Guid collectableId)

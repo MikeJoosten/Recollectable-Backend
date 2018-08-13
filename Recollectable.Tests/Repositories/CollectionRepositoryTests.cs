@@ -10,7 +10,7 @@ namespace Recollectable.Tests.Repositories
 {
     public class CollectionRepositoryTests : RecollectableTestBase
     {
-        private IUserRepository _userRepository;
+        /*private IUserRepository _userRepository;
         private ICollectionRepository _collectionRepository;
 
         public CollectionRepositoryTests()
@@ -80,6 +80,6 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(5, _collectionRepository.GetCollections().Count());
             Assert.Null(_collectionRepository
                 .GetCollection(new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12")));
-        }
+        }*/
     }
 }

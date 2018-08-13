@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Recollectable.API.Models;
+using Newtonsoft.Json;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -18,32 +19,79 @@ namespace Recollectable.API.Controllers
         private ICollectableRepository _collectableRepository;
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
+        private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
         public CollectablesController(ICollectableRepository collectableRepository,
-            ICollectionRepository collectionRepository, IConditionRepository conditionRepository)
+            ICollectionRepository collectionRepository, IConditionRepository conditionRepository,
+            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _collectableRepository = collectableRepository;
             _collectionRepository = collectionRepository;
             _conditionRepository = conditionRepository;
+            _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
-        [HttpGet]
-        public IActionResult GetCollectables(Guid collectionId)
+        [HttpGet(Name = "GetCollectables")]
+        public IActionResult GetCollectables(Guid collectionId, 
+            CollectablesResourceParameters resourceParameters)
         {
-            var collectablesFromRepo = _collectableRepository.GetCollectables(collectionId);
+            if (!_propertyMappingService.ValidMappingExistsFor<CollectableDto, Collectable>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<CollectableDto>
+                (resourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
+            var collectablesFromRepo = _collectableRepository
+                .GetCollectables(collectionId, resourceParameters);
 
             if (collectablesFromRepo == null)
             {
                 return BadRequest();
             }
 
+            var previousPageLink = collectablesFromRepo.HasPrevious ?
+                CreateCollectablesResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = collectablesFromRepo.HasNext ?
+                CreateCollectablesResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = collectablesFromRepo.TotalCount,
+                pageSize = collectablesFromRepo.PageSize,
+                currentPage = collectablesFromRepo.CurrentPage,
+                totalPages = collectablesFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var collectables = Mapper.Map<IEnumerable<CollectableDto>>(collectablesFromRepo);
-            return Ok(collectables);
+            return Ok(collectables.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCollectable")]
-        public IActionResult GetCollectable(Guid collectionId, Guid id)
+        public IActionResult GetCollectable(Guid collectionId, Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<CollectableDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var collectableFromRepo = _collectableRepository.GetCollectable(collectionId, id);
 
             if (collectableFromRepo == null)
@@ -52,13 +100,18 @@ namespace Recollectable.API.Controllers
             }
 
             var collectable = Mapper.Map<CollectableDto>(collectableFromRepo);
-            return Ok(collectable);
+            return Ok(collectable.ShapeData(fields));
         }
 
         [HttpPost]
         public IActionResult CreateCollectable(Guid collectionId, 
             [FromBody] CollectableCreationDto collectable)
         {
+            if (collectable == null)
+            {
+                return BadRequest();
+            }
+
             var collection = _collectionRepository.GetCollection(collectionId);
 
             if (collection == null)
@@ -234,6 +287,44 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateCollectablesResourceUri
+            (CollectablesResourceParameters resourceParameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetCollectables", new
+                    {
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetCollectables", new
+                    {
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetCollectables", new
+                    {
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

@@ -1,35 +1,44 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
     public class ConditionRepository : IConditionRepository
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public ConditionRepository(RecollectableContext context)
+        public ConditionRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public IEnumerable<Condition> GetConditions()
+        public IEnumerable<Condition> GetConditions
+            (ConditionsResourceParameters resourceParameters)
         {
-            return _context.Conditions.OrderBy(c => c.Grade);
-        }
+            var conditions = _context.Conditions.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<ConditionDto, Condition>());
 
-        public IEnumerable<Condition> GetConditionsByCollectable
-            (Guid collectionId, Guid collectableId)
-        {
-            return _context.CollectionCollectables
-                .Include(cc => cc.Condition)
-                .Where(cc => cc.CollectionId == collectionId && 
-                    cc.CollectableId == collectableId)
-                .Select(cc => cc.Condition)
-                .OrderBy(c => c.Grade);
+            if (!string.IsNullOrEmpty(resourceParameters.Grade))
+            {
+                var grade = resourceParameters.Grade.Trim().ToLowerInvariant();
+                conditions = conditions.Where(c => c.Grade.ToLowerInvariant() == grade);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                conditions = conditions.Where(c => c.Grade.ToLowerInvariant().Contains(search));
+            }
+
+            return conditions;
         }
 
         public Condition GetCondition(Guid conditionId)

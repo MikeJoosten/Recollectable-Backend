@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Recollectable.API.Models;
+using Newtonsoft.Json;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -16,23 +17,69 @@ namespace Recollectable.API.Controllers
     public class UsersController : Controller
     {
         private IUserRepository _userRepository;
+        private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
-        public UsersController(IUserRepository userRepository)
+        public UsersController(IUserRepository userRepository, 
+            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _userRepository = userRepository;
+            _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
-        [HttpGet]
-        public IActionResult GetUsers()
+        [HttpGet(Name = "GetUsers")]
+        public IActionResult GetUsers(UsersResourceParameters resourceParameters)
         {
-            var usersFromRepo = _userRepository.GetUsers();
+            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<UserDto>
+                (resourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
+            var usersFromRepo = _userRepository.GetUsers(resourceParameters);
+
+            var previousPageLink = usersFromRepo.HasPrevious ?
+                CreateUsersResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = usersFromRepo.HasNext ?
+                CreateUsersResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = usersFromRepo.TotalCount,
+                pageSize = usersFromRepo.PageSize,
+                currentPage = usersFromRepo.CurrentPage,
+                totalPages = usersFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var users = Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
-            return Ok(users);
+            return Ok(users.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetUser")]
-        public IActionResult GetUser(Guid id)
+        public IActionResult GetUser(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var userFromRepo = _userRepository.GetUser(id);
 
             if (userFromRepo == null)
@@ -41,7 +88,7 @@ namespace Recollectable.API.Controllers
             }
 
             var user = Mapper.Map<UserDto>(userFromRepo);
-            return Ok(user);
+            return Ok(user.ShapeData(fields));
         }
 
         [HttpPost]
@@ -149,6 +196,41 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateUsersResourceUri(UsersResourceParameters resourceParameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetUsers", new
+                    {
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetUsers", new
+                    {
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetUsers", new
+                    {
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

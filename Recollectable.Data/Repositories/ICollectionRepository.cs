@@ -1,13 +1,13 @@
-﻿using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Domain.Entities;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
     public interface ICollectionRepository
     {
-        IEnumerable<Collection> GetCollections();
+        PagedList<Collection> GetCollections
+            (CollectionsResourceParameters resourceParameters);
         Collection GetCollection(Guid collectionId);
         void AddCollection(Collection collection);
         void UpdateCollection(Collection collection);

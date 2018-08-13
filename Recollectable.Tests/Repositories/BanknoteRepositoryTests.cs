@@ -1,17 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Data.Repositories;
-using Recollectable.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xunit;
+﻿using Recollectable.Data.Repositories;
 
 namespace Recollectable.Tests.Repositories
 {
     public class BanknoteRepositoryTests : RecollectableTestBase
     {
-        private IBanknoteRepository _banknoteRepository;
+        /*private IBanknoteRepository _banknoteRepository;
         private ICountryRepository _countryRepository;
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
@@ -136,6 +129,6 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(5, _banknoteRepository.GetBanknotes().Count());
             Assert.Null(_banknoteRepository
                 .GetBanknote(new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c")));
-        }
+        }*/
     }
 }

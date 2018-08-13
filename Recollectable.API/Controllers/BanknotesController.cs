@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Recollectable.API.Models;
+using Newtonsoft.Json;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -18,27 +19,73 @@ namespace Recollectable.API.Controllers
         private IBanknoteRepository _banknoteRepository;
         private ICountryRepository _countryRepository;
         private ICollectorValueRepository _collectorValueRepository;
+        private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
         public BanknotesController(IBanknoteRepository banknoteRepository,
             ICollectorValueRepository collectorValueRepository,
-            ICountryRepository countryRepository)
+            ICountryRepository countryRepository, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _banknoteRepository = banknoteRepository;
             _countryRepository = countryRepository;
             _collectorValueRepository = collectorValueRepository;
+            _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
-        [HttpGet]
-        public IActionResult GetBanknotes()
+        [HttpGet(Name = "GetBanknotes")]
+        public IActionResult GetBanknotes(CurrenciesResourceParameters resourceParameters)
         {
-            var banknotesFromRepo = _banknoteRepository.GetBanknotes();
+            if (!_propertyMappingService.ValidMappingExistsFor<BanknoteDto, Banknote>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<BanknoteDto>
+                (resourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
+            var banknotesFromRepo = _banknoteRepository.GetBanknotes(resourceParameters);
+
+            var previousPageLink = banknotesFromRepo.HasPrevious ?
+                CreateBanknotesResourceUri(resourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = banknotesFromRepo.HasNext ?
+                CreateBanknotesResourceUri(resourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = banknotesFromRepo.TotalCount,
+                pageSize = banknotesFromRepo.PageSize,
+                currentPage = banknotesFromRepo.CurrentPage,
+                totalPages = banknotesFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
+
             var banknotes = Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
-            return Ok(banknotes);
+            return Ok(banknotes.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetBanknote")]
-        public IActionResult GetBanknote(Guid id)
+        public IActionResult GetBanknote(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<BanknoteDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var banknoteFromRepo = _banknoteRepository.GetBanknote(id);
 
             if (banknoteFromRepo == null)
@@ -47,7 +94,7 @@ namespace Recollectable.API.Controllers
             }
 
             var banknote = Mapper.Map<BanknoteDto>(banknoteFromRepo);
-            return Ok(banknote);
+            return Ok(banknote.ShapeData(fields));
         }
 
         [HttpPost]
@@ -208,6 +255,47 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        private string CreateBanknotesResourceUri(CurrenciesResourceParameters resourceParameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetBanknotes", new
+                    {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page - 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetBanknotes", new
+                    {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page + 1,
+                        pageSize = resourceParameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetBanknotes", new
+                    {
+                        type = resourceParameters.Type,
+                        country = resourceParameters.Country,
+                        search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
+                        page = resourceParameters.Page,
+                        pageSize = resourceParameters.PageSize
+                    });
+            }
         }
     }
 }

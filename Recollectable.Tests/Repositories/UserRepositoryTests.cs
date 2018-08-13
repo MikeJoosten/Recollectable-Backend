@@ -12,7 +12,7 @@ namespace Recollectable.Tests.Repositories
 {
     public class UserRepositoryTests : RecollectableTestBase
     {
-        private IUserRepository _repository;
+        /*private IUserRepository _repository;
 
         public UserRepositoryTests()
         {
@@ -98,6 +98,6 @@ namespace Recollectable.Tests.Repositories
 
             Assert.Equal(5, _repository.GetUsers().Count());
             Assert.Null(_repository.GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")));
-        }
+        }*/
     }
 }

@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Recollectable.API.Models;
+using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -16,23 +16,46 @@ namespace Recollectable.API.Controllers
     public class ConditionsController : Controller
     {
         private IConditionRepository _conditionRepository;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
-        public ConditionsController(IConditionRepository conditionRepository)
+        public ConditionsController(IConditionRepository conditionRepository,
+            IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _conditionRepository = conditionRepository;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet]
-        public IActionResult GetConditions()
+        public IActionResult GetConditions(ConditionsResourceParameters resourceParameters)
         {
-            var conditionsFromRepo = _conditionRepository.GetConditions();
+            if (!_propertyMappingService.ValidMappingExistsFor<ConditionDto, Condition>
+                (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<ConditionDto>
+                (resourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
+            var conditionsFromRepo = _conditionRepository.GetConditions(resourceParameters);
             var conditions = Mapper.Map<IEnumerable<ConditionDto>>(conditionsFromRepo);
-            return Ok(conditions);
+            return Ok(conditions.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCondition")]
-        public IActionResult GetCondition(Guid id)
+        public IActionResult GetCondition(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<ConditionDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var conditionFromRepo = _conditionRepository.GetCondition(id);
 
             if (conditionFromRepo == null)
@@ -41,7 +64,7 @@ namespace Recollectable.API.Controllers
             }
 
             var condition = Mapper.Map<ConditionDto>(conditionFromRepo);
-            return Ok(condition);
+            return Ok(condition.ShapeData(fields));
         }
 
         [HttpPost]

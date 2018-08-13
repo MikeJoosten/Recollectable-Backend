@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Domain;
+using Recollectable.Data.Helpers;
+using Recollectable.Data.Services;
+using Recollectable.Domain.Entities;
+using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Recollectable.Data.Repositories
 {
@@ -13,26 +15,53 @@ namespace Recollectable.Data.Repositories
         private ICountryRepository _countryRepository;
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
+        private IPropertyMappingService _propertyMappingService;
 
         public CoinRepository(RecollectableContext context, 
             ICountryRepository countryRepository, 
             ICollectionRepository collectionRepository,
-            IConditionRepository conditionRepository)
+            IConditionRepository conditionRepository,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _countryRepository = countryRepository;
             _collectionRepository = collectionRepository;
             _conditionRepository = conditionRepository;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public IEnumerable<Coin> GetCoins()
+        public PagedList<Coin> GetCoins(CurrenciesResourceParameters resourceParameters)
         {
-            return _context.Coins
+            var coins = _context.Coins
                 .Include(c => c.Country)
                 .Include(c => c.CollectorValue)
-                .OrderBy(c => c.Country.Name)
-                .ThenBy(c => (c.FaceValue + " " + c.Type))
-                .ThenBy(c => c.ReleaseDate);
+                .ApplySort(resourceParameters.OrderBy,
+                    _propertyMappingService.GetPropertyMapping<CoinDto, Coin>());
+
+            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            {
+                var type = resourceParameters.Type.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Type.ToLowerInvariant() == type);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Country))
+            {
+                var country = resourceParameters.Country.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Country.Name.ToLowerInvariant() == country);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Country.Name.ToLowerInvariant().Contains(search)
+                    || c.Type.ToLowerInvariant().Contains(search)
+                    || c.ReleaseDate.ToLowerInvariant().Contains(search)
+                    || c.Metal.ToLowerInvariant().Contains(search));
+            }
+
+            return PagedList<Coin>.Create(coins,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public IEnumerable<Coin> GetCoinsByCountry(Guid countryId)

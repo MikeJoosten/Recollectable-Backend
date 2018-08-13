@@ -12,7 +12,7 @@ namespace Recollectable.Tests.Repositories
 {
     public class CoinRepositoryTests : RecollectableTestBase
     {
-        private ICoinRepository _coinRepository;
+        /*private ICoinRepository _coinRepository;
         private ICountryRepository _countryRepository;
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
@@ -136,6 +136,6 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(5, _coinRepository.GetCoins().Count());
             Assert.Null(_coinRepository
                 .GetCoin(new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48")));
-        }
+        }*/
     }
 }
