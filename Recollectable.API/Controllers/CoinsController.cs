@@ -21,17 +21,20 @@ namespace Recollectable.API.Controllers
         private ICollectorValueRepository _collectorValueRepository;
         private IUrlHelper _urlHelper;
         private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
         public CoinsController(ICoinRepository coinRepository, 
             ICollectorValueRepository collectorValueRepository, 
             ICountryRepository countryRepository, IUrlHelper urlHelper,
-            IPropertyMappingService propertyMappingService)
+            IPropertyMappingService propertyMappingService, 
+            ITypeHelperService typeHelperService)
         {
             _coinRepository = coinRepository;
             _countryRepository = countryRepository;
             _collectorValueRepository = collectorValueRepository;
             _urlHelper = urlHelper;
             _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet(Name = "GetCoins")]
@@ -39,6 +42,12 @@ namespace Recollectable.API.Controllers
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CoinDto, Coin>
                 (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<CoinDto>
+                (resourceParameters.Fields))
             {
                 return BadRequest();
             }
@@ -66,12 +75,17 @@ namespace Recollectable.API.Controllers
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
-            return Ok(coins);
+            return Ok(coins.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCoin")]
-        public IActionResult GetCoin(Guid id)
+        public IActionResult GetCoin(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<CoinDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var coinFromRepo = _coinRepository.GetCoin(id);
 
             if (coinFromRepo == null)
@@ -80,7 +94,7 @@ namespace Recollectable.API.Controllers
             }
 
             var coin = Mapper.Map<CoinDto>(coinFromRepo);
-            return Ok(coin);
+            return Ok(coin.ShapeData(fields));
         }
 
         [HttpPost]
@@ -252,6 +266,8 @@ namespace Recollectable.API.Controllers
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page - 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -261,6 +277,8 @@ namespace Recollectable.API.Controllers
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -270,6 +288,8 @@ namespace Recollectable.API.Controllers
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     });

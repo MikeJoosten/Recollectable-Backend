@@ -17,5 +17,6 @@ namespace Recollectable.Data.Helpers
         }
 
         public string OrderBy { get; set; } = "Id";
+        public string Fields { get; set; }
     }
 }

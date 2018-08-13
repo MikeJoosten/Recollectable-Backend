@@ -21,16 +21,19 @@ namespace Recollectable.API.Controllers
         private IConditionRepository _conditionRepository;
         private IUrlHelper _urlHelper;
         private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
         public CollectablesController(ICollectableRepository collectableRepository,
             ICollectionRepository collectionRepository, IConditionRepository conditionRepository,
-            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService)
+            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _collectableRepository = collectableRepository;
             _collectionRepository = collectionRepository;
             _conditionRepository = conditionRepository;
             _urlHelper = urlHelper;
             _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet(Name = "GetCollectables")]
@@ -39,6 +42,12 @@ namespace Recollectable.API.Controllers
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CollectableDto, Collectable>
                 (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<CollectableDto>
+                (resourceParameters.Fields))
             {
                 return BadRequest();
             }
@@ -72,12 +81,17 @@ namespace Recollectable.API.Controllers
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var collectables = Mapper.Map<IEnumerable<CollectableDto>>(collectablesFromRepo);
-            return Ok(collectables);
+            return Ok(collectables.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCollectable")]
-        public IActionResult GetCollectable(Guid collectionId, Guid id)
+        public IActionResult GetCollectable(Guid collectionId, Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<CollectableDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var collectableFromRepo = _collectableRepository.GetCollectable(collectionId, id);
 
             if (collectableFromRepo == null)
@@ -86,7 +100,7 @@ namespace Recollectable.API.Controllers
             }
 
             var collectable = Mapper.Map<CollectableDto>(collectableFromRepo);
-            return Ok(collectable);
+            return Ok(collectable.ShapeData(fields));
         }
 
         [HttpPost]
@@ -285,6 +299,8 @@ namespace Recollectable.API.Controllers
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page - 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -293,6 +309,8 @@ namespace Recollectable.API.Controllers
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -301,6 +319,8 @@ namespace Recollectable.API.Controllers
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     });

@@ -20,7 +20,7 @@ namespace Recollectable.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public IEnumerable<Country> GetCountries
+        public PagedList<Country> GetCountries
             (CountriesResourceParameters resourceParameters)
         {
             var countries = _context.Countries.ApplySort(resourceParameters.OrderBy,
@@ -38,7 +38,9 @@ namespace Recollectable.Data.Repositories
                 countries = countries.Where(c => c.Name.ToLowerInvariant().Contains(search));
             }
 
-            return countries;
+            return PagedList<Country>.Create(countries,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
         }
 
         public Country GetCountry(Guid countryId)

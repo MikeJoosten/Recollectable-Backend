@@ -9,5 +9,6 @@ namespace Recollectable.Data.Helpers
         public string Grade { get; set; }
         public string Search { get; set; }
         public string OrderBy { get; set; } = "Grade";
+        public string Fields { get; set; }
     }
 }

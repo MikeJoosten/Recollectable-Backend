@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 using Recollectable.Data;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -33,7 +34,13 @@ namespace Recollectable.API
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
                 options.InputFormatters.Add(new XmlSerializerInputFormatter(options));
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            })
+            .AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver =
+                    new CamelCasePropertyNamesContractResolver();
+            })
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Register DbContext
             services.AddDbContext<RecollectableContext>(options => 
@@ -57,6 +64,7 @@ namespace Recollectable.API
                 return new UrlHelper(actionContext);
             });
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+            services.AddTransient<ITypeHelperService, TypeHelperService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

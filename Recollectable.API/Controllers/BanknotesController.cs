@@ -21,17 +21,20 @@ namespace Recollectable.API.Controllers
         private ICollectorValueRepository _collectorValueRepository;
         private IUrlHelper _urlHelper;
         private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
         public BanknotesController(IBanknoteRepository banknoteRepository,
             ICollectorValueRepository collectorValueRepository,
             ICountryRepository countryRepository, IUrlHelper urlHelper,
-            IPropertyMappingService propertyMappingService)
+            IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _banknoteRepository = banknoteRepository;
             _countryRepository = countryRepository;
             _collectorValueRepository = collectorValueRepository;
             _urlHelper = urlHelper;
             _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet(Name = "GetBanknotes")]
@@ -39,6 +42,12 @@ namespace Recollectable.API.Controllers
         {
             if (!_propertyMappingService.ValidMappingExistsFor<BanknoteDto, Banknote>
                 (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<BanknoteDto>
+                (resourceParameters.Fields))
             {
                 return BadRequest();
             }
@@ -66,12 +75,17 @@ namespace Recollectable.API.Controllers
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var banknotes = Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
-            return Ok(banknotes);
+            return Ok(banknotes.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetBanknote")]
-        public IActionResult GetBanknote(Guid id)
+        public IActionResult GetBanknote(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<BanknoteDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var banknoteFromRepo = _banknoteRepository.GetBanknote(id);
 
             if (banknoteFromRepo == null)
@@ -80,7 +94,7 @@ namespace Recollectable.API.Controllers
             }
 
             var banknote = Mapper.Map<BanknoteDto>(banknoteFromRepo);
-            return Ok(banknote);
+            return Ok(banknote.ShapeData(fields));
         }
 
         [HttpPost]
@@ -254,6 +268,8 @@ namespace Recollectable.API.Controllers
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page - 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -263,6 +279,8 @@ namespace Recollectable.API.Controllers
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -272,6 +290,8 @@ namespace Recollectable.API.Controllers
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     });

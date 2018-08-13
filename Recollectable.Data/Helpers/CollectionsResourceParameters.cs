@@ -6,8 +6,8 @@ namespace Recollectable.Data.Helpers
 {
     public class CollectionsResourceParameters
     {
-        private int _pageSize = 10;
-        const int maxPageSize = 25;
+        private int _pageSize = 50;
+        const int maxPageSize = 100;
 
         public int Page { get; set; } = 1;
         public int PageSize
@@ -19,5 +19,6 @@ namespace Recollectable.Data.Helpers
         public string Type { get; set; }
         public string Search { get; set; }
         public string OrderBy { get; set; } = "Type";
+        public string Fields { get; set; }
     }
 }

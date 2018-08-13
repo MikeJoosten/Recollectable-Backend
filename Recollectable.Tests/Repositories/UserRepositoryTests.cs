@@ -12,9 +12,9 @@ namespace Recollectable.Tests.Repositories
 {
     public class UserRepositoryTests : RecollectableTestBase
     {
-        private IUserRepository _repository;
+        /*private IUserRepository _repository;
 
-        /*public UserRepositoryTests()
+        public UserRepositoryTests()
         {
             _repository = new UserRepository(_context);
         }

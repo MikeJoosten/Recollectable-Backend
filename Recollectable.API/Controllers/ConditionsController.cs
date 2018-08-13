@@ -17,12 +17,15 @@ namespace Recollectable.API.Controllers
     {
         private IConditionRepository _conditionRepository;
         private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
         public ConditionsController(IConditionRepository conditionRepository,
-            IPropertyMappingService propertyMappingService)
+            IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _conditionRepository = conditionRepository;
             _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet]
@@ -34,14 +37,25 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!_typeHelperService.TypeHasProperties<ConditionDto>
+                (resourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
             var conditionsFromRepo = _conditionRepository.GetConditions(resourceParameters);
             var conditions = Mapper.Map<IEnumerable<ConditionDto>>(conditionsFromRepo);
-            return Ok(conditions);
+            return Ok(conditions.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCondition")]
-        public IActionResult GetCondition(Guid id)
+        public IActionResult GetCondition(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<ConditionDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var conditionFromRepo = _conditionRepository.GetCondition(id);
 
             if (conditionFromRepo == null)
@@ -50,7 +64,7 @@ namespace Recollectable.API.Controllers
             }
 
             var condition = Mapper.Map<ConditionDto>(conditionFromRepo);
-            return Ok(condition);
+            return Ok(condition.ShapeData(fields));
         }
 
         [HttpPost]

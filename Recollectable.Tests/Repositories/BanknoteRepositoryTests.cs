@@ -4,12 +4,12 @@ namespace Recollectable.Tests.Repositories
 {
     public class BanknoteRepositoryTests : RecollectableTestBase
     {
-        private IBanknoteRepository _banknoteRepository;
+        /*private IBanknoteRepository _banknoteRepository;
         private ICountryRepository _countryRepository;
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
 
-        /*public BanknoteRepositoryTests()
+        public BanknoteRepositoryTests()
         {
             _countryRepository = new CountryRepository(_context);
             _collectionRepository = new CollectionRepository

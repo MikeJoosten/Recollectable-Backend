@@ -12,12 +12,12 @@ namespace Recollectable.Tests.Repositories
 {
     public class CoinRepositoryTests : RecollectableTestBase
     {
-        private ICoinRepository _coinRepository;
+        /*private ICoinRepository _coinRepository;
         private ICountryRepository _countryRepository;
         private ICollectionRepository _collectionRepository;
         private IConditionRepository _conditionRepository;
 
-        /*public CoinRepositoryTests()
+        public CoinRepositoryTests()
         {
             _countryRepository = new CountryRepository(_context);
             _collectionRepository = new CollectionRepository

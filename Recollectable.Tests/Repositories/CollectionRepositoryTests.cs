@@ -10,10 +10,10 @@ namespace Recollectable.Tests.Repositories
 {
     public class CollectionRepositoryTests : RecollectableTestBase
     {
-        private IUserRepository _userRepository;
+        /*private IUserRepository _userRepository;
         private ICollectionRepository _collectionRepository;
 
-        /*public CollectionRepositoryTests()
+        public CollectionRepositoryTests()
         {
             _userRepository = new UserRepository(_context);
             _collectionRepository = new CollectionRepository(_context, _userRepository);

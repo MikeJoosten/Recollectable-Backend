@@ -8,9 +8,9 @@ namespace Recollectable.Tests.Repositories
 {
     public class CollectorValueRepositoryTests : RecollectableTestBase
     {
-        private ICollectorValueRepository _repository;
+        /*private ICollectorValueRepository _repository;
 
-        /*public CollectorValueRepositoryTests()
+        public CollectorValueRepositoryTests()
         {
             _repository = new CollectorValueRepository(_context);
         }
@@ -94,6 +94,6 @@ namespace Recollectable.Tests.Repositories
             Assert.Equal(5, _repository.GetCollectorValues().Count());
             Assert.Null(_repository
                 .GetCollectorValue(new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")));
-        }
-    }*/
+        }*/
+    }
 }

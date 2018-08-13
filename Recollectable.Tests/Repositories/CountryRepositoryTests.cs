@@ -12,14 +12,14 @@ namespace Recollectable.Tests.Repositories
 {
     public class CountryRepositoryTests : RecollectableTestBase
     {
-        private ICountryRepository _repository;
+        /*private ICountryRepository _repository;
 
         public CountryRepositoryTests()
         {
             _repository = new CountryRepository(_context);
         }
 
-        /*[Fact]
+        [Fact]
         public void GetCountries_ReturnsAllCountries()
         {
             var result = _repository.GetCountries();

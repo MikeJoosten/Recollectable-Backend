@@ -20,15 +20,18 @@ namespace Recollectable.API.Controllers
         private IUserRepository _userRepository;
         private IUrlHelper _urlHelper;
         private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
         public CollectionsController(ICollectionRepository collectionRepository,
             IUserRepository userRepository, IUrlHelper urlHelper,
-            IPropertyMappingService propertyMappingService)
+            IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _collectionRepository = collectionRepository;
             _userRepository = userRepository;
             _urlHelper = urlHelper;
             _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet(Name = "GetCollections")]
@@ -36,6 +39,12 @@ namespace Recollectable.API.Controllers
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CollectionDto, Collection>
                 (resourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<CollectionDto>
+                (resourceParameters.Fields))
             {
                 return BadRequest();
             }
@@ -63,12 +72,17 @@ namespace Recollectable.API.Controllers
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
 
             var collections = Mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
-            return Ok(collections);
+            return Ok(collections.ShapeData(resourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCollection")]
-        public IActionResult GetCollection(Guid id)
+        public IActionResult GetCollection(Guid id, [FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<CollectionDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var collectionFromRepo = _collectionRepository.GetCollection(id);
 
             if (collectionFromRepo == null)
@@ -77,7 +91,7 @@ namespace Recollectable.API.Controllers
             }
 
             var collection = Mapper.Map<CollectionDto>(collectionFromRepo);
-            return Ok(collection);
+            return Ok(collection.ShapeData(fields));
         }
 
         [HttpPost]
@@ -222,6 +236,8 @@ namespace Recollectable.API.Controllers
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page - 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -230,6 +246,8 @@ namespace Recollectable.API.Controllers
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page + 1,
                         pageSize = resourceParameters.PageSize
                     });
@@ -238,6 +256,8 @@ namespace Recollectable.API.Controllers
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
+                        orderBy = resourceParameters.OrderBy,
+                        fields = resourceParameters.Fields,
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     });

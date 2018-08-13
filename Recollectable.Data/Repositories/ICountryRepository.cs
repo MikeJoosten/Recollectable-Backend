@@ -7,7 +7,7 @@ namespace Recollectable.Data.Repositories
 {
     public interface ICountryRepository
     {
-        IEnumerable<Country> GetCountries
+        PagedList<Country> GetCountries
             (CountriesResourceParameters resourceParameters);
         Country GetCountry(Guid countryId);
         void AddCountry(Country country);

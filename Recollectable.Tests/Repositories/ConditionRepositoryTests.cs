@@ -10,14 +10,14 @@ namespace Recollectable.Tests.Repositories
 {
     public class ConditionRepositoryTests : RecollectableTestBase
     {
-        private IConditionRepository _repository;
+        /*private IConditionRepository _repository;
 
         public ConditionRepositoryTests()
         {
             _repository = new ConditionRepository(_context);
         }
 
-        /*[Fact]
+        [Fact]
         public void GetConditions_ReturnsAllConditions()
         {
             var result = _repository.GetConditions();
