@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -169,6 +170,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var user = _userRepository.GetUser(collection.UserId);
 
             if (user == null)
@@ -227,6 +233,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             if (!_userRepository.UserExists(collection.UserId))
             {
                 return BadRequest();
@@ -269,7 +280,12 @@ namespace Recollectable.API.Controllers
             }
 
             var patchedCollection = Mapper.Map<CollectionUpdateDto>(collectionFromRepo);
-            patchDoc.ApplyTo(patchedCollection);
+            patchDoc.ApplyTo(patchedCollection, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             if (!_userRepository.UserExists(patchedCollection.UserId))
             {

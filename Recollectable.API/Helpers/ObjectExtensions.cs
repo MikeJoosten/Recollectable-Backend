@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Reflection;
 
-namespace Recollectable.Data.Helpers
+namespace Recollectable.API.Helpers
 {
     public static class ObjectExtensions
     {

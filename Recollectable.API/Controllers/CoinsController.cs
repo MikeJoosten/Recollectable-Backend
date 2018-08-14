@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -172,6 +173,17 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (coin.Note == coin.Subject)
+            {
+                ModelState.AddModelError(nameof(CoinCreationDto),
+                    "The provided note should be different from the coin's subject");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var country = _countryRepository.GetCountry(coin.CountryId);
 
             if (country != null && coin.Country == null)
@@ -246,6 +258,17 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (coin.Note == coin.Subject)
+            {
+                ModelState.AddModelError(nameof(CoinUpdateDto),
+                    "The provided note should be different from the coin's subject");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             if (!_countryRepository.CountryExists(coin.CountryId))
             {
                 return BadRequest();
@@ -294,7 +317,20 @@ namespace Recollectable.API.Controllers
             }
 
             var patchedCoin = Mapper.Map<CoinUpdateDto>(coinFromRepo);
-            patchDoc.ApplyTo(patchedCoin);
+            patchDoc.ApplyTo(patchedCoin, ModelState);
+
+            if (patchedCoin.Note == patchedCoin.Subject)
+            {
+                ModelState.AddModelError(nameof(CoinUpdateDto),
+                    "The provided note should be different from the coin's subject");
+            }
+
+            TryValidateModel(patchedCoin);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             if (!_countryRepository.CountryExists(patchedCoin.CountryId))
             {

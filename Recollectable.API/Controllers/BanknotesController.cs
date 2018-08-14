@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -172,6 +173,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var country = _countryRepository.GetCountry(banknote.CountryId);
 
             if (country != null && banknote.Country == null)
@@ -246,6 +252,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             if (!_countryRepository.CountryExists(banknote.CountryId))
             {
                 return BadRequest();
@@ -294,7 +305,12 @@ namespace Recollectable.API.Controllers
             }
 
             var patchedBanknote = Mapper.Map<BanknoteUpdateDto>(banknoteFromRepo);
-            patchDoc.ApplyTo(patchedBanknote);
+            patchDoc.ApplyTo(patchedBanknote, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             if (!_countryRepository.CountryExists(patchedBanknote.CountryId))
             {

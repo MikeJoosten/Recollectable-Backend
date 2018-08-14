@@ -4,10 +4,7 @@ using System.Text;
 
 namespace Recollectable.Domain.Models
 {
-    public class UserUpdateDto
+    public class UserUpdateDto : UserManipulationDto
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -166,6 +167,17 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (country.Description == country.Name)
+            {
+                ModelState.AddModelError(nameof(CountryCreationDto),
+                    "The provided description should be different from the country name");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var newCountry = Mapper.Map<Country>(country);
             _countryRepository.AddCountry(newCountry);
 
@@ -215,6 +227,17 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (country.Description == country.Name)
+            {
+                ModelState.AddModelError(nameof(CountryUpdateDto),
+                    "The provided description should be different from the country name");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var countryFromRepo = _countryRepository.GetCountry(id);
 
             if (countryFromRepo == null)
@@ -250,7 +273,20 @@ namespace Recollectable.API.Controllers
             }
 
             var patchedCountry = Mapper.Map<CountryUpdateDto>(countryFromRepo);
-            patchDoc.ApplyTo(patchedCountry);
+            patchDoc.ApplyTo(patchedCountry, ModelState);
+
+            if (patchedCountry.Description == patchedCountry.Name)
+            {
+                ModelState.AddModelError(nameof(CountryUpdateDto),
+                    "The provided description should be different from the country name");
+            }
+
+            TryValidateModel(patchedCountry);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             Mapper.Map(patchedCountry, countryFromRepo);
             _countryRepository.UpdateCountry(countryFromRepo);

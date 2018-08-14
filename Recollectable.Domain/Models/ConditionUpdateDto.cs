@@ -4,8 +4,7 @@ using System.Text;
 
 namespace Recollectable.Domain.Models
 {
-    public class ConditionUpdateDto
+    public class ConditionUpdateDto : ConditionManipulationDto
     {
-        public string Grade { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -166,6 +167,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var newCondition = Mapper.Map<Condition>(condition);
             _conditionRepository.AddCondition(newCondition);
 
@@ -215,6 +221,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var conditionFromRepo = _conditionRepository.GetCondition(id);
 
             if (conditionFromRepo == null)
@@ -250,7 +261,12 @@ namespace Recollectable.API.Controllers
             }
 
             var patchedCondition = Mapper.Map<ConditionUpdateDto>(conditionFromRepo);
-            patchDoc.ApplyTo(patchedCondition);
+            patchDoc.ApplyTo(patchedCondition, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             Mapper.Map(patchedCondition, conditionFromRepo);
             _conditionRepository.UpdateCondition(conditionFromRepo);

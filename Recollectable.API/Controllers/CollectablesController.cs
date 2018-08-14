@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -180,6 +181,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var collection = _collectionRepository.GetCollection(collectionId);
 
             if (collection == null)
@@ -257,6 +263,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             var collection = _collectionRepository.GetCollection(collectable.CollectionId);
 
             if (collection == null)
@@ -316,7 +327,12 @@ namespace Recollectable.API.Controllers
             }
 
             var patchedCollectable = Mapper.Map<CollectableUpdateDto>(collectableFromRepo);
-            patchDoc.ApplyTo(patchedCollectable);
+            patchDoc.ApplyTo(patchedCollectable, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             var collection = _collectionRepository.GetCollection(patchedCollectable.CollectionId);
 
