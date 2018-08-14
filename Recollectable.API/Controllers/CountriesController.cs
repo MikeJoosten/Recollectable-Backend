@@ -33,7 +33,8 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet(Name = "GetCountries")]
-        public IActionResult GetCountries(CountriesResourceParameters resourceParameters)
+        public IActionResult GetCountries(CountriesResourceParameters resourceParameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CountryDto, Country>
                 (resourceParameters.OrderBy))
@@ -48,44 +49,74 @@ namespace Recollectable.API.Controllers
             }
 
             var countriesFromRepo = _countryRepository.GetCountries(resourceParameters);
-
-            var paginationMetadata = new
-            {
-                totalCount = countriesFromRepo.TotalCount,
-                pageSize = countriesFromRepo.PageSize,
-                currentPage = countriesFromRepo.CurrentPage,
-                totalPages = countriesFromRepo.TotalPages
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
-
             var countries = Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
-            var links = CreateCountriesLinks(resourceParameters, countriesFromRepo.HasNext,
-                countriesFromRepo.HasPrevious);
-            var shapedCountries = countries.ShapeData(resourceParameters.Fields);
 
-            var linkedCountries = shapedCountries.Select(country =>
+            if (mediaType == "application/json+hateoas")
             {
-                var countryAsDictionary = country as IDictionary<string, object>;
-                var countryLinks = CreateCountryLinks((Guid)countryAsDictionary["Id"],
-                    resourceParameters.Fields);
+                var paginationMetadata = new
+                {
+                    totalCount = countriesFromRepo.TotalCount,
+                    pageSize = countriesFromRepo.PageSize,
+                    currentPage = countriesFromRepo.CurrentPage,
+                    totalPages = countriesFromRepo.TotalPages
+                };
 
-                countryAsDictionary.Add("links", countryLinks);
+                Response.Headers.Add("X-Pagination", 
+                    JsonConvert.SerializeObject(paginationMetadata));
 
-                return countryAsDictionary;
-            });
+                var links = CreateCountriesLinks(resourceParameters,
+                    countriesFromRepo.HasNext, countriesFromRepo.HasPrevious);
+                var shapedCountries = countries.ShapeData(resourceParameters.Fields);
 
-            var linkedCollectionResource = new
+                var linkedCountries = shapedCountries.Select(country =>
+                {
+                    var countryAsDictionary = country as IDictionary<string, object>;
+                    var countryLinks = CreateCountryLinks((Guid)countryAsDictionary["Id"],
+                        resourceParameters.Fields);
+
+                    countryAsDictionary.Add("links", countryLinks);
+
+                    return countryAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = linkedCountries,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
             {
-                value = linkedCountries,
-                links
-            };
+                var previousPageLink = countriesFromRepo.HasPrevious ?
+                    CreateCountriesResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage) : null;
 
-            return Ok(linkedCollectionResource);
+                var nextPageLink = countriesFromRepo.HasNext ?
+                    CreateCountriesResourceUri(resourceParameters,
+                    ResourceUriType.NextPage) : null;
+
+                var paginationMetadata = new
+                {
+                    totalCount = countriesFromRepo.TotalCount,
+                    pageSize = countriesFromRepo.PageSize,
+                    currentPage = countriesFromRepo.CurrentPage,
+                    totalPages = countriesFromRepo.TotalPages,
+                    previousPageLink,
+                    nextPageLink,
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                return Ok(countries.ShapeData(resourceParameters.Fields));
+            }
         }
 
         [HttpGet("{id}", Name = "GetCountry")]
-        public IActionResult GetCountry(Guid id, [FromQuery] string fields)
+        public IActionResult GetCountry(Guid id, [FromQuery] string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<CountryDto>(fields))
             {
@@ -100,17 +131,26 @@ namespace Recollectable.API.Controllers
             }
 
             var country = Mapper.Map<CountryDto>(countryFromRepo);
-            var links = CreateCountryLinks(id, fields);
-            var linkedResource = country.ShapeData(fields)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateCountryLinks(id, fields);
+                var linkedResource = country.ShapeData(fields)
+                    as IDictionary<string, object>;
 
-            return Ok(linkedResource);
+                linkedResource.Add("links", links);
+
+                return Ok(linkedResource);
+            }
+            else
+            {
+                return Ok(country.ShapeData(fields));
+            }
         }
 
         [HttpPost(Name = "CreateCountry")]
-        public IActionResult CreateCountry([FromBody] CountryCreationDto country)
+        public IActionResult CreateCountry([FromBody] CountryCreationDto country,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (country == null)
             {
@@ -126,13 +166,25 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCountry = Mapper.Map<CountryDto>(newCountry);
-            var links = CreateCountryLinks(returnedCountry.Id, null);
-            var linkedResource = returnedCountry.ShapeData(null)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateCountryLinks(returnedCountry.Id, null);
+                var linkedResource = returnedCountry.ShapeData(null)
+                    as IDictionary<string, object>;
 
-            return CreatedAtRoute("GetCountry", new { id = returnedCountry.Id }, linkedResource);
+                linkedResource.Add("links", links);
+
+                return CreatedAtRoute("GetCountry", 
+                    new { id = returnedCountry.Id }, 
+                    linkedResource);
+            }
+            else
+            {
+                return CreatedAtRoute("GetCountry",
+                    new { id = returnedCountry.Id },
+                    returnedCountry);
+            }
         }
 
         [HttpPost("{id}")]

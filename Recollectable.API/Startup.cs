@@ -15,6 +15,7 @@ using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
+using System.Linq;
 
 namespace Recollectable.API
 {
@@ -34,6 +35,14 @@ namespace Recollectable.API
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
                 options.InputFormatters.Add(new XmlSerializerInputFormatter(options));
+
+                var jsonOutputFormatter = options.OutputFormatters
+                    .OfType<JsonOutputFormatter>().FirstOrDefault();
+
+                if (jsonOutputFormatter != null)
+                {
+                    jsonOutputFormatter.SupportedMediaTypes.Add("application/json+hateoas");
+                }
             })
             .AddJsonOptions(options =>
             {

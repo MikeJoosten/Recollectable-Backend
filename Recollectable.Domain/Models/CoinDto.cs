@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Recollectable.Domain.Models
 {
-    public class CoinDto : LinkedResourceBaseDto
+    public class CoinDto
     {
         public Guid Id { get; set; }
         public int FaceValue { get; set; }

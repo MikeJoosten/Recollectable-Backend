@@ -33,7 +33,8 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet(Name = "GetConditions")]
-        public IActionResult GetConditions(ConditionsResourceParameters resourceParameters)
+        public IActionResult GetConditions(ConditionsResourceParameters resourceParameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<ConditionDto, Condition>
                 (resourceParameters.OrderBy))
@@ -48,44 +49,74 @@ namespace Recollectable.API.Controllers
             }
 
             var conditionsFromRepo = _conditionRepository.GetConditions(resourceParameters);
-
-            var paginationMetadata = new
-            {
-                totalCount = conditionsFromRepo.TotalCount,
-                pageSize = conditionsFromRepo.PageSize,
-                currentPage = conditionsFromRepo.CurrentPage,
-                totalPages = conditionsFromRepo.TotalPages
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
-
             var conditions = Mapper.Map<IEnumerable<ConditionDto>>(conditionsFromRepo);
-            var links = CreateConditionsLinks(resourceParameters, conditionsFromRepo.HasNext,
-                conditionsFromRepo.HasPrevious);
-            var shapedConditions = conditions.ShapeData(resourceParameters.Fields);
 
-            var linkedConditions = shapedConditions.Select(condition =>
+            if (mediaType == "application/json+hateoas")
             {
-                var conditionAsDictionary = condition as IDictionary<string, object>;
-                var conditionLinks = CreateConditionLinks((Guid)conditionAsDictionary["Id"],
-                    resourceParameters.Fields);
+                var paginationMetadata = new
+                {
+                    totalCount = conditionsFromRepo.TotalCount,
+                    pageSize = conditionsFromRepo.PageSize,
+                    currentPage = conditionsFromRepo.CurrentPage,
+                    totalPages = conditionsFromRepo.TotalPages
+                };
 
-                conditionAsDictionary.Add("links", conditionLinks);
+                Response.Headers.Add("X-Pagination", 
+                    JsonConvert.SerializeObject(paginationMetadata));
 
-                return conditionAsDictionary;
-            });
+                var links = CreateConditionsLinks(resourceParameters,
+                    conditionsFromRepo.HasNext, conditionsFromRepo.HasPrevious);
+                var shapedConditions = conditions.ShapeData(resourceParameters.Fields);
 
-            var linkedCollectionResource = new
+                var linkedConditions = shapedConditions.Select(condition =>
+                {
+                    var conditionAsDictionary = condition as IDictionary<string, object>;
+                    var conditionLinks = CreateConditionLinks((Guid)conditionAsDictionary["Id"],
+                        resourceParameters.Fields);
+
+                    conditionAsDictionary.Add("links", conditionLinks);
+
+                    return conditionAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = linkedConditions,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
             {
-                value = linkedConditions,
-                links
-            };
+                var previousPageLink = conditionsFromRepo.HasPrevious ?
+                    CreateConditionsResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage) : null;
 
-            return Ok(linkedCollectionResource);
+                var nextPageLink = conditionsFromRepo.HasNext ?
+                    CreateConditionsResourceUri(resourceParameters,
+                    ResourceUriType.NextPage) : null;
+
+                var paginationMetadata = new
+                {
+                    totalCount = conditionsFromRepo.TotalCount,
+                    pageSize = conditionsFromRepo.PageSize,
+                    currentPage = conditionsFromRepo.CurrentPage,
+                    totalPages = conditionsFromRepo.TotalPages,
+                    previousPageLink,
+                    nextPageLink,
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                return Ok(conditions.ShapeData(resourceParameters.Fields));
+            }
         }
 
         [HttpGet("{id}", Name = "GetCondition")]
-        public IActionResult GetCondition(Guid id, [FromQuery] string fields)
+        public IActionResult GetCondition(Guid id, [FromQuery] string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<ConditionDto>(fields))
             {
@@ -100,17 +131,26 @@ namespace Recollectable.API.Controllers
             }
 
             var condition = Mapper.Map<ConditionDto>(conditionFromRepo);
-            var links = CreateConditionLinks(id, fields);
-            var linkedResource = condition.ShapeData(fields)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateConditionLinks(id, fields);
+                var linkedResource = condition.ShapeData(fields)
+                    as IDictionary<string, object>;
 
-            return Ok(linkedResource);
+                linkedResource.Add("links", links);
+
+                return Ok(linkedResource);
+            }
+            else
+            {
+                return Ok(condition.ShapeData(fields));
+            }
         }
 
         [HttpPost(Name = "CreateCondition")]
-        public IActionResult CreateCondition([FromBody] ConditionCreationDto condition)
+        public IActionResult CreateCondition([FromBody] ConditionCreationDto condition,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (condition == null)
             {
@@ -126,15 +166,25 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCondition = Mapper.Map<ConditionDto>(newCondition);
-            var links = CreateConditionLinks(returnedCondition.Id, null);
-            var linkedResource = returnedCondition.ShapeData(null)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateConditionLinks(returnedCondition.Id, null);
+                var linkedResource = returnedCondition.ShapeData(null)
+                    as IDictionary<string, object>;
 
-            return CreatedAtRoute("GetCondition",
-                new { id = returnedCondition.Id },
-                linkedResource);
+                linkedResource.Add("links", links);
+
+                return CreatedAtRoute("GetCondition",
+                    new { id = returnedCondition.Id },
+                    linkedResource);
+            }
+            else
+            {
+                return CreatedAtRoute("GetCondition",
+                    new { id = returnedCondition.Id },
+                    returnedCondition);
+            }
         }
 
         [HttpPost("{id}")]

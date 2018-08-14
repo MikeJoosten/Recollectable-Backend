@@ -39,7 +39,8 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet(Name = "GetCoins")]
-        public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters)
+        public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CoinDto, Coin>
                 (resourceParameters.OrderBy))
@@ -54,44 +55,74 @@ namespace Recollectable.API.Controllers
             }
 
             var coinsFromRepo = _coinRepository.GetCoins(resourceParameters);
-
-            var paginationMetadata = new
-            {
-                totalCount = coinsFromRepo.TotalCount,
-                pageSize = coinsFromRepo.PageSize,
-                currentPage = coinsFromRepo.CurrentPage,
-                totalPages = coinsFromRepo.TotalPages
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
-
             var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
-            var links = CreateCoinsLinks(resourceParameters, coinsFromRepo.HasNext,
-                coinsFromRepo.HasPrevious);
-            var shapedCoins = coins.ShapeData(resourceParameters.Fields);
 
-            var linkedCoins = shapedCoins.Select(coin =>
+            if (mediaType == "application/json+hateoas")
             {
-                var coinAsDictionary = coin as IDictionary<string, object>;
-                var coinLinks = CreateCoinLinks((Guid)coinAsDictionary["Id"],
-                    resourceParameters.Fields);
+                var paginationMetadata = new
+                {
+                    totalCount = coinsFromRepo.TotalCount,
+                    pageSize = coinsFromRepo.PageSize,
+                    currentPage = coinsFromRepo.CurrentPage,
+                    totalPages = coinsFromRepo.TotalPages
+                };
 
-                coinAsDictionary.Add("links", coinLinks);
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
 
-                return coinAsDictionary;
-            });
+                var links = CreateCoinsLinks(resourceParameters,
+                    coinsFromRepo.HasNext, coinsFromRepo.HasPrevious);
+                var shapedCoins = coins.ShapeData(resourceParameters.Fields);
 
-            var linkedCollectionResource = new
+                var linkedCoins = shapedCoins.Select(coin =>
+                {
+                    var coinAsDictionary = coin as IDictionary<string, object>;
+                    var coinLinks = CreateCoinLinks((Guid)coinAsDictionary["Id"],
+                        resourceParameters.Fields);
+
+                    coinAsDictionary.Add("links", coinLinks);
+
+                    return coinAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = linkedCoins,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
             {
-                value = linkedCoins,
-                links
-            };
+                var previousPageLink = coinsFromRepo.HasPrevious ?
+                    CreateCoinsResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage) : null;
 
-            return Ok(linkedCollectionResource);
+                var nextPageLink = coinsFromRepo.HasNext ?
+                    CreateCoinsResourceUri(resourceParameters,
+                    ResourceUriType.NextPage) : null;
+
+                var paginationMetadata = new
+                {
+                    totalCount = coinsFromRepo.TotalCount,
+                    pageSize = coinsFromRepo.PageSize,
+                    currentPage = coinsFromRepo.CurrentPage,
+                    totalPages = coinsFromRepo.TotalPages,
+                    previousPageLink,
+                    nextPageLink,
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                return Ok(coins.ShapeData(resourceParameters.Fields));
+            }
         }
 
         [HttpGet("{id}", Name = "GetCoin")]
-        public IActionResult GetCoin(Guid id, [FromQuery] string fields)
+        public IActionResult GetCoin(Guid id, [FromQuery] string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<CoinDto>(fields))
             {
@@ -106,17 +137,26 @@ namespace Recollectable.API.Controllers
             }
 
             var coin = Mapper.Map<CoinDto>(coinFromRepo);
-            var links = CreateCoinLinks(id, fields);
-            var linkedResource = coin.ShapeData(fields)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateCoinLinks(id, fields);
+                var linkedResource = coin.ShapeData(fields)
+                    as IDictionary<string, object>;
 
-            return Ok(linkedResource);
+                linkedResource.Add("links", links);
+
+                return Ok(linkedResource);
+            }
+            else
+            {
+                return Ok(coin.ShapeData(fields));
+            }
         }
 
         [HttpPost(Name = "CreateCoin")]
-        public IActionResult CreateCoin([FromBody] CoinCreationDto coin)
+        public IActionResult CreateCoin([FromBody] CoinCreationDto coin,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (coin == null)
             {
@@ -157,13 +197,25 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCoin = Mapper.Map<CoinDto>(newCoin);
-            var links = CreateCoinLinks(returnedCoin.Id, null);
-            var linkedResource = returnedCoin.ShapeData(null)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateCoinLinks(returnedCoin.Id, null);
+                var linkedResource = returnedCoin.ShapeData(null)
+                    as IDictionary<string, object>;
 
-            return CreatedAtRoute("GetCoin", new { id = returnedCoin.Id }, linkedResource);
+                linkedResource.Add("links", links);
+
+                return CreatedAtRoute("GetCoin", 
+                    new { id = returnedCoin.Id }, 
+                    linkedResource);
+            }
+            else
+            {
+                return CreatedAtRoute("GetCoin",
+                    new { id = returnedCoin.Id },
+                    returnedCoin);
+            }
         }
 
         [HttpPost("{id}")]

@@ -8,7 +8,7 @@ namespace Recollectable.Domain.Models
 {
     [XmlInclude(typeof(Coin))]
     [XmlInclude(typeof(Banknote))]
-    public class CollectableDto : LinkedResourceBaseDto
+    public class CollectableDto
     {
         public Guid Id { get; set; }
         public Collectable Collectable { get; set; }

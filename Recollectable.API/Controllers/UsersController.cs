@@ -33,7 +33,8 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet(Name = "GetUsers")]
-        public IActionResult GetUsers(UsersResourceParameters resourceParameters)
+        public IActionResult GetUsers(UsersResourceParameters resourceParameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
                 (resourceParameters.OrderBy))
@@ -48,44 +49,74 @@ namespace Recollectable.API.Controllers
             }
 
             var usersFromRepo = _userRepository.GetUsers(resourceParameters);
-
-            var paginationMetadata = new
-            {
-                totalCount = usersFromRepo.TotalCount,
-                pageSize = usersFromRepo.PageSize,
-                currentPage = usersFromRepo.CurrentPage,
-                totalPages = usersFromRepo.TotalPages
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
-
             var users = Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
-            var links = CreateUsersLinks(resourceParameters, usersFromRepo.HasNext, 
-                usersFromRepo.HasPrevious);
-            var shapedUsers = users.ShapeData(resourceParameters.Fields);
 
-            var linkedUsers = shapedUsers.Select(user =>
+            if (mediaType == "application/json+hateoas")
             {
-                var userAsDictionary = user as IDictionary<string, object>;
-                var userLinks = CreateUserLinks((Guid)userAsDictionary["Id"],
-                    resourceParameters.Fields);
+                var paginationMetadata = new
+                {
+                    totalCount = usersFromRepo.TotalCount,
+                    pageSize = usersFromRepo.PageSize,
+                    currentPage = usersFromRepo.CurrentPage,
+                    totalPages = usersFromRepo.TotalPages
+                };
 
-                userAsDictionary.Add("links", userLinks);
+                Response.Headers.Add("X-Pagination", 
+                    JsonConvert.SerializeObject(paginationMetadata));
 
-                return userAsDictionary;
-            });
+                var links = CreateUsersLinks(resourceParameters, 
+                    usersFromRepo.HasNext, usersFromRepo.HasPrevious);
+                var shapedUsers = users.ShapeData(resourceParameters.Fields);
 
-            var linkedCollectionResource = new
+                var linkedUsers = shapedUsers.Select(user =>
+                {
+                    var userAsDictionary = user as IDictionary<string, object>;
+                    var userLinks = CreateUserLinks((Guid)userAsDictionary["Id"],
+                        resourceParameters.Fields);
+
+                    userAsDictionary.Add("links", userLinks);
+
+                    return userAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = linkedUsers,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
             {
-                value = linkedUsers,
-                links
-            };
+                var previousPageLink = usersFromRepo.HasPrevious ?
+                    CreateUsersResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage) : null;
 
-            return Ok(linkedCollectionResource);
+                var nextPageLink = usersFromRepo.HasNext ?
+                    CreateUsersResourceUri(resourceParameters,
+                    ResourceUriType.NextPage) : null;
+
+                var paginationMetadata = new
+                {
+                    totalCount = usersFromRepo.TotalCount,
+                    pageSize = usersFromRepo.PageSize,
+                    currentPage = usersFromRepo.CurrentPage,
+                    totalPages = usersFromRepo.TotalPages,
+                    previousPageLink,
+                    nextPageLink,
+                };
+
+                Response.Headers.Add("X-Pagination", 
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                return Ok(users.ShapeData(resourceParameters.Fields));
+            }
         }
 
         [HttpGet("{id}", Name = "GetUser")]
-        public IActionResult GetUser(Guid id, [FromQuery] string fields)
+        public IActionResult GetUser(Guid id, [FromQuery] string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
             {
@@ -100,17 +131,26 @@ namespace Recollectable.API.Controllers
             }
 
             var user = Mapper.Map<UserDto>(userFromRepo);
-            var links = CreateUserLinks(id, fields);
-            var linkedResource = user.ShapeData(fields) 
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateUserLinks(id, fields);
+                var linkedResource = user.ShapeData(fields)
+                    as IDictionary<string, object>;
 
-            return Ok(linkedResource);
+                linkedResource.Add("links", links);
+
+                return Ok(linkedResource);
+            }
+            else
+            {
+                return Ok(user.ShapeData(fields));
+            }
         }
 
         [HttpPost(Name = "CreateUser")]
-        public IActionResult CreateUser([FromBody] UserCreationDto user)
+        public IActionResult CreateUser([FromBody] UserCreationDto user,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (user == null)
             {
@@ -126,13 +166,21 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedUser = Mapper.Map<UserDto>(newUser);
-            var links = CreateUserLinks(returnedUser.Id, null);
-            var linkedResource = returnedUser.ShapeData(null)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateUserLinks(returnedUser.Id, null);
+                var linkedResource = returnedUser.ShapeData(null)
+                    as IDictionary<string, object>;
 
-            return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, linkedResource);
+                linkedResource.Add("links", links);
+
+                return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, linkedResource);
+            }
+            else
+            {
+                return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, returnedUser);
+            }
         }
 
         [HttpPost("{id}")]

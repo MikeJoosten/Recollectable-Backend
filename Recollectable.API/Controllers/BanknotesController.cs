@@ -39,7 +39,8 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet(Name = "GetBanknotes")]
-        public IActionResult GetBanknotes(CurrenciesResourceParameters resourceParameters)
+        public IActionResult GetBanknotes(CurrenciesResourceParameters resourceParameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<BanknoteDto, Banknote>
                 (resourceParameters.OrderBy))
@@ -54,44 +55,74 @@ namespace Recollectable.API.Controllers
             }
 
             var banknotesFromRepo = _banknoteRepository.GetBanknotes(resourceParameters);
-
-            var paginationMetadata = new
-            {
-                totalCount = banknotesFromRepo.TotalCount,
-                pageSize = banknotesFromRepo.PageSize,
-                currentPage = banknotesFromRepo.CurrentPage,
-                totalPages = banknotesFromRepo.TotalPages
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
-
             var banknotes = Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
-            var links = CreateBanknotesLinks(resourceParameters, banknotesFromRepo.HasNext,
-                banknotesFromRepo.HasPrevious);
-            var shapedBanknotes = banknotes.ShapeData(resourceParameters.Fields);
 
-            var linkedBanknotes = shapedBanknotes.Select(banknote =>
+            if (mediaType == "application/json+hateoas")
             {
-                var banknoteAsDictionary = banknote as IDictionary<string, object>;
-                var banknoteLinks = CreateBanknoteLinks((Guid)banknoteAsDictionary["Id"],
-                    resourceParameters.Fields);
+                var paginationMetadata = new
+                {
+                    totalCount = banknotesFromRepo.TotalCount,
+                    pageSize = banknotesFromRepo.PageSize,
+                    currentPage = banknotesFromRepo.CurrentPage,
+                    totalPages = banknotesFromRepo.TotalPages
+                };
 
-                banknoteAsDictionary.Add("links", banknoteLinks);
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
 
-                return banknoteAsDictionary;
-            });
+                var links = CreateBanknotesLinks(resourceParameters,
+                    banknotesFromRepo.HasNext, banknotesFromRepo.HasPrevious);
+                var shapedBanknotes = banknotes.ShapeData(resourceParameters.Fields);
 
-            var linkedCollectionResource = new
+                var linkedBanknotes = shapedBanknotes.Select(banknote =>
+                {
+                    var banknoteAsDictionary = banknote as IDictionary<string, object>;
+                    var banknoteLinks = CreateBanknoteLinks((Guid)banknoteAsDictionary["Id"],
+                        resourceParameters.Fields);
+
+                    banknoteAsDictionary.Add("links", banknoteLinks);
+
+                    return banknoteAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = linkedBanknotes,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
             {
-                value = linkedBanknotes,
-                links
-            };
+                var previousPageLink = banknotesFromRepo.HasPrevious ?
+                    CreateBanknotesResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage) : null;
 
-            return Ok(linkedCollectionResource);
+                var nextPageLink = banknotesFromRepo.HasNext ?
+                    CreateBanknotesResourceUri(resourceParameters,
+                    ResourceUriType.NextPage) : null;
+
+                var paginationMetadata = new
+                {
+                    totalCount = banknotesFromRepo.TotalCount,
+                    pageSize = banknotesFromRepo.PageSize,
+                    currentPage = banknotesFromRepo.CurrentPage,
+                    totalPages = banknotesFromRepo.TotalPages,
+                    previousPageLink,
+                    nextPageLink,
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                return Ok(banknotes.ShapeData(resourceParameters.Fields));
+            }
         }
 
         [HttpGet("{id}", Name = "GetBanknote")]
-        public IActionResult GetBanknote(Guid id, [FromQuery] string fields)
+        public IActionResult GetBanknote(Guid id, [FromQuery] string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<BanknoteDto>(fields))
             {
@@ -106,17 +137,26 @@ namespace Recollectable.API.Controllers
             }
 
             var banknote = Mapper.Map<BanknoteDto>(banknoteFromRepo);
-            var links = CreateBanknoteLinks(id, fields);
-            var linkedResource = banknote.ShapeData(fields)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateBanknoteLinks(id, fields);
+                var linkedResource = banknote.ShapeData(fields)
+                    as IDictionary<string, object>;
 
-            return Ok(linkedResource);
+                linkedResource.Add("links", links);
+
+                return Ok(linkedResource);
+            }
+            else
+            {
+                return Ok(banknote.ShapeData(fields));
+            }
         }
 
         [HttpPost(Name = "CreateBanknote")]
-        public IActionResult CreateBanknote([FromBody] BanknoteCreationDto banknote)
+        public IActionResult CreateBanknote([FromBody] BanknoteCreationDto banknote,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (banknote == null)
             {
@@ -157,15 +197,25 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedBanknote = Mapper.Map<BanknoteDto>(newBanknote);
-            var links = CreateBanknoteLinks(returnedBanknote.Id, null);
-            var linkedResource = returnedBanknote.ShapeData(null)
-                as IDictionary<string, object>;
 
-            linkedResource.Add("links", links);
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateBanknoteLinks(returnedBanknote.Id, null);
+                var linkedResource = returnedBanknote.ShapeData(null)
+                    as IDictionary<string, object>;
 
-            return CreatedAtRoute("GetBanknote", 
-                new { id = returnedBanknote.Id },
-                linkedResource);
+                linkedResource.Add("links", links);
+
+                return CreatedAtRoute("GetBanknote",
+                    new { id = returnedBanknote.Id },
+                    linkedResource);
+            }
+            else
+            {
+                return CreatedAtRoute("GetBanknote",
+                    new { id = returnedBanknote.Id },
+                    returnedBanknote);
+            }
         }
 
         [HttpPost("{id}")]
