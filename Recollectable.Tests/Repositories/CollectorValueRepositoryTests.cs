@@ -1,4 +1,5 @@
-﻿using Recollectable.Data.Repositories;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Repositories;
 using Recollectable.Domain.Entities;
 using System;
 using System.Linq;
@@ -8,17 +9,19 @@ namespace Recollectable.Tests.Repositories
 {
     public class CollectorValueRepositoryTests : RecollectableTestBase
     {
-        /*private ICollectorValueRepository _repository;
+        private ICollectorValueRepository _repository;
+        private CollectorValuesResourceParameters resourceParameters;
 
         public CollectorValueRepositoryTests()
         {
-            _repository = new CollectorValueRepository(_context);
+            _repository = new CollectorValueRepository(_context, _propertyMappingService);
+            resourceParameters = new CollectorValuesResourceParameters();
         }
 
         [Fact]
         public void GetCollectorValues_ReturnsAllCollectorValues()
         {
-            var result = _repository.GetCollectorValues();
+            var result = _repository.GetCollectorValues(resourceParameters);
             Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
@@ -26,7 +29,7 @@ namespace Recollectable.Tests.Repositories
         [Fact]
         public void GetCollectorValues_OrdersCollectorValueById()
         {
-            var result = _repository.GetCollectorValues();
+            var result = _repository.GetCollectorValues(resourceParameters);
             Assert.Equal(125.48, result.First().G4);
         }
 
@@ -60,7 +63,7 @@ namespace Recollectable.Tests.Repositories
             _repository.AddCollectorValue(newCollectorValue);
             _repository.Save();
 
-            Assert.Equal(7, _repository.GetCollectorValues().Count());
+            Assert.Equal(7, _repository.GetCollectorValues(resourceParameters).Count());
             Assert.Equal(52.15, _repository
                 .GetCollectorValue(new Guid("3265cf70-f323-4021-932b-08813b1d3d5c"))
                 .PF60);
@@ -76,7 +79,7 @@ namespace Recollectable.Tests.Repositories
             _repository.UpdateCollectorValue(updatedCollectorValue);
             _repository.Save();
 
-            Assert.Equal(6, _repository.GetCollectorValues().Count());
+            Assert.Equal(6, _repository.GetCollectorValues(resourceParameters).Count());
             Assert.Equal(17.50, _repository
                 .GetCollectorValue(new Guid("2c716f5b-6792-4753-9f1a-fa8bcd4eabfb"))
                 .G4);
@@ -91,9 +94,9 @@ namespace Recollectable.Tests.Repositories
             _repository.DeleteCollectorValue(collectorValue);
             _repository.Save();
 
-            Assert.Equal(5, _repository.GetCollectorValues().Count());
+            Assert.Equal(5, _repository.GetCollectorValues(resourceParameters).Count());
             Assert.Null(_repository
                 .GetCollectorValue(new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")));
-        }*/
+        }
     }
 }

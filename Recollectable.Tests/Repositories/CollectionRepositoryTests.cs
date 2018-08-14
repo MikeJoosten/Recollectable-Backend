@@ -1,28 +1,28 @@
-﻿using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Repositories;
+using Recollectable.Domain.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories
 {
     public class CollectionRepositoryTests : RecollectableTestBase
     {
-        /*private IUserRepository _userRepository;
         private ICollectionRepository _collectionRepository;
+        private CollectionsResourceParameters resourceParameters;
 
         public CollectionRepositoryTests()
         {
-            _userRepository = new UserRepository(_context);
-            _collectionRepository = new CollectionRepository(_context, _userRepository);
+            _collectionRepository = new CollectionRepository(_context, 
+                _propertyMappingService);
+            resourceParameters = new CollectionsResourceParameters();
         }
 
         [Fact]
         public void GetCollections_ReturnsAllCollections()
         {
-            var result = _collectionRepository.GetCollections();
+            var result = _collectionRepository.GetCollections(resourceParameters);
             Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
@@ -30,7 +30,7 @@ namespace Recollectable.Tests.Repositories
         [Fact]
         public void GetCollections_OrdersCollectionsByType()
         {
-            var result = _collectionRepository.GetCollections();
+            var result = _collectionRepository.GetCollections(resourceParameters);
             Assert.Equal("Banknote", result.First().Type);
         }
 
@@ -62,7 +62,7 @@ namespace Recollectable.Tests.Repositories
             _collectionRepository.UpdateCollection(updatedCollection);
             _collectionRepository.Save();
 
-            Assert.Equal(6, _collectionRepository.GetCollections().Count());
+            Assert.Equal(6, _collectionRepository.GetCollections(resourceParameters).Count());
             Assert.Equal("Coin", _collectionRepository
                 .GetCollection(new Guid("80fa9706-2465-48cf-8933-932fdce18c89"))
                 .Type);
@@ -77,9 +77,9 @@ namespace Recollectable.Tests.Repositories
             _collectionRepository.DeleteCollection(collection);
             _collectionRepository.Save();
 
-            Assert.Equal(5, _collectionRepository.GetCollections().Count());
+            Assert.Equal(5, _collectionRepository.GetCollections(resourceParameters).Count());
             Assert.Null(_collectionRepository
                 .GetCollection(new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12")));
-        }*/
+        }
     }
 }

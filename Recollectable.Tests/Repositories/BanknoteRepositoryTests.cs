@@ -1,28 +1,30 @@
-﻿using Recollectable.Data.Repositories;
+﻿using Recollectable.Data.Helpers;
+using Recollectable.Data.Repositories;
+using Recollectable.Domain.Entities;
+using System;
+using System.Linq;
+using Xunit;
 
 namespace Recollectable.Tests.Repositories
 {
     public class BanknoteRepositoryTests : RecollectableTestBase
     {
-        /*private IBanknoteRepository _banknoteRepository;
+        private IBanknoteRepository _banknoteRepository;
         private ICountryRepository _countryRepository;
-        private ICollectionRepository _collectionRepository;
-        private IConditionRepository _conditionRepository;
+        private CurrenciesResourceParameters resourceParameters;
 
         public BanknoteRepositoryTests()
         {
-            _countryRepository = new CountryRepository(_context);
-            _collectionRepository = new CollectionRepository
-                (_context, new UserRepository(_context));
-            _conditionRepository = new ConditionRepository(_context);
+            _countryRepository = new CountryRepository(_context, _propertyMappingService);
             _banknoteRepository = new BanknoteRepository(_context, _countryRepository,
-                _collectionRepository, _conditionRepository);
+                _propertyMappingService);
+            resourceParameters = new CurrenciesResourceParameters();
         }
 
         [Fact]
         public void GetBanknotes_ReturnsAllBanknotes()
         {
-            var result = _banknoteRepository.GetBanknotes();
+            var result = _banknoteRepository.GetBanknotes(resourceParameters);
             Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
@@ -30,7 +32,7 @@ namespace Recollectable.Tests.Repositories
         [Fact]
         public void GetBanknotes_OrdersCollectionsByCountry()
         {
-            var result = _banknoteRepository.GetBanknotes();
+            var result = _banknoteRepository.GetBanknotes(resourceParameters);
             Assert.Equal("Canada", result.First().Country.Name);
         }
 
@@ -76,8 +78,8 @@ namespace Recollectable.Tests.Repositories
         [Fact]
         public void GetBanknote_ReturnsNull_GivenInvalidBanknoteId()
         {
-            var result = _collectionRepository
-                .GetCollection(new Guid("358a071b-9bf7-49d8-ac50-3296684e3ea7"));
+            var result = _banknoteRepository
+                .GetBanknote(new Guid("358a071b-9bf7-49d8-ac50-3296684e3ea7"));
             Assert.Null(result);
         }
 
@@ -95,7 +97,7 @@ namespace Recollectable.Tests.Repositories
             _banknoteRepository.AddBanknote(newBanknote);
             _banknoteRepository.Save();
 
-            Assert.Equal(7, _banknoteRepository.GetBanknotes().Count());
+            Assert.Equal(7, _banknoteRepository.GetBanknotes(resourceParameters).Count());
             Assert.Equal("Euros", _banknoteRepository
                 .GetBanknote(new Guid("86dbe5cf-df75-41a5-af56-6e2f2de181a4"))
                 .Type);
@@ -111,7 +113,7 @@ namespace Recollectable.Tests.Repositories
             _banknoteRepository.UpdateBanknote(updatedBanknote);
             _banknoteRepository.Save();
 
-            Assert.Equal(6, _banknoteRepository.GetBanknotes().Count());
+            Assert.Equal(6, _banknoteRepository.GetBanknotes(resourceParameters).Count());
             Assert.Equal("Euros", _banknoteRepository
                 .GetBanknote(new Guid("48d9049b-04f0-4c24-a1c3-c3668878013e"))
                 .Type);
@@ -126,9 +128,9 @@ namespace Recollectable.Tests.Repositories
             _banknoteRepository.DeleteBanknote(banknote);
             _banknoteRepository.Save();
 
-            Assert.Equal(5, _banknoteRepository.GetBanknotes().Count());
+            Assert.Equal(5, _banknoteRepository.GetBanknotes(resourceParameters).Count());
             Assert.Null(_banknoteRepository
                 .GetBanknote(new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c")));
-        }*/
+        }
     }
 }

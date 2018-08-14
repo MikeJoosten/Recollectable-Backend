@@ -1,28 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Data;
+﻿using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Domain.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories
 {
     public class CountryRepositoryTests : RecollectableTestBase
     {
-        /*private ICountryRepository _repository;
+        private ICountryRepository _repository;
+        private CountriesResourceParameters resourceParameters;
 
         public CountryRepositoryTests()
         {
-            _repository = new CountryRepository(_context);
+            _repository = new CountryRepository(_context, _propertyMappingService);
+            resourceParameters = new CountriesResourceParameters();
         }
 
         [Fact]
         public void GetCountries_ReturnsAllCountries()
         {
-            var result = _repository.GetCountries();
+            var result = _repository.GetCountries(resourceParameters);
             Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
@@ -30,7 +29,7 @@ namespace Recollectable.Tests.Repositories
         [Fact]
         public void GetCountries_OrdersCountriesByName()
         {
-            var result = _repository.GetCountries();
+            var result = _repository.GetCountries(resourceParameters);
             Assert.Equal("Canada", result.First().Name);
         }
 
@@ -64,7 +63,7 @@ namespace Recollectable.Tests.Repositories
             _repository.AddCountry(newCountry);
             _repository.Save();
 
-            Assert.Equal(7, _repository.GetCountries().Count());
+            Assert.Equal(7, _repository.GetCountries(resourceParameters).Count());
             Assert.Equal("China", _repository
                 .GetCountry(new Guid("5de43b7d-3a80-4ad3-84ba-4f260bf94318"))
                 .Name);
@@ -80,7 +79,7 @@ namespace Recollectable.Tests.Repositories
             _repository.UpdateCountry(updatedCountry);
             _repository.Save();
 
-            Assert.Equal(6, _repository.GetCountries().Count());
+            Assert.Equal(6, _repository.GetCountries(resourceParameters).Count());
             Assert.Equal("China", _repository
                 .GetCountry(new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0"))
                 .Name);
@@ -94,8 +93,8 @@ namespace Recollectable.Tests.Repositories
             _repository.DeleteCountry(country);
             _repository.Save();
 
-            Assert.Equal(5, _repository.GetCountries().Count());
+            Assert.Equal(5, _repository.GetCountries(resourceParameters).Count());
             Assert.Null(_repository.GetCountry(new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")));
-        }*/
+        }
     }
 }

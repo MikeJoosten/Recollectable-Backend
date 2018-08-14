@@ -13,20 +13,14 @@ namespace Recollectable.Data.Repositories
     {
         private RecollectableContext _context;
         private ICountryRepository _countryRepository;
-        private ICollectionRepository _collectionRepository;
-        private IConditionRepository _conditionRepository;
         private IPropertyMappingService _propertyMappingService;
 
         public BanknoteRepository(RecollectableContext context,
             ICountryRepository countryRepository,
-            ICollectionRepository collectionRepository,
-            IConditionRepository conditionRepository,
             IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _countryRepository = countryRepository;
-            _collectionRepository = collectionRepository;
-            _conditionRepository = conditionRepository;
             _propertyMappingService = propertyMappingService;
         }
 
