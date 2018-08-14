@@ -10,15 +10,12 @@ namespace Recollectable.Data.Repositories
     public class CollectionRepository : ICollectionRepository
     {
         private RecollectableContext _context;
-        private IUserRepository _userRepository;
         private IPropertyMappingService _propertyMappingService;
 
         public CollectionRepository(RecollectableContext context, 
-            IUserRepository userRepository, 
             IPropertyMappingService propertyMappingService)
         {
             _context = context;
-            _userRepository = userRepository;
             _propertyMappingService = propertyMappingService;
         }
 

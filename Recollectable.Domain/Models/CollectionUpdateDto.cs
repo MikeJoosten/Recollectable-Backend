@@ -4,9 +4,7 @@ using System.Text;
 
 namespace Recollectable.Domain.Models
 {
-    public class CollectionUpdateDto
+    public class CollectionUpdateDto : CollectionManipulationDto
     {
-        public string Type { get; set; }
-        public Guid UserId { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace Recollectable.Data.Helpers
         public string Type { get; set; }
         public string Country { get; set; }
         public string Search { get; set; }
-        public string OrderBy { get; set; } = "Value";
+        public string OrderBy { get; set; } = "Country";
         public string Fields { get; set; }
     }
 }

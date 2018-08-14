@@ -1,28 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Data;
+﻿using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories
 {
     public class UserRepositoryTests : RecollectableTestBase
     {
-        /*private IUserRepository _repository;
+        private IUserRepository _repository;
+        private UsersResourceParameters resourceParameters;
 
         public UserRepositoryTests()
         {
-            _repository = new UserRepository(_context);
+            _repository = new UserRepository(_context, _propertyMappingService);
+            resourceParameters = new UsersResourceParameters();
         }
 
         [Fact]
         public void GetUsers_ReturnsAllUsers()
         {
-            var result = _repository.GetUsers();
+            var result = _repository.GetUsers(resourceParameters);
             Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
@@ -30,7 +30,7 @@ namespace Recollectable.Tests.Repositories
         [Fact]
         public void GetUsers_OrdersUsersByName()
         {
-            var result = _repository.GetUsers();
+            var result = _repository.GetUsers(resourceParameters);
             Assert.Equal("Gavin", result.First().FirstName);
         }
 
@@ -66,7 +66,7 @@ namespace Recollectable.Tests.Repositories
             _repository.AddUser(newUser);
             _repository.Save();
 
-            Assert.Equal(7, _repository.GetUsers().Count());
+            Assert.Equal(7, _repository.GetUsers(resourceParameters).Count());
             Assert.Equal("Burnie", _repository
                 .GetUser(new Guid("21ced530-0488-4c40-9543-986c1970e66f"))
                 .FirstName);
@@ -82,7 +82,7 @@ namespace Recollectable.Tests.Repositories
             _repository.UpdateUser(updatedUser);
             _repository.Save();
 
-            Assert.Equal(6, _repository.GetUsers().Count());
+            Assert.Equal(6, _repository.GetUsers(resourceParameters).Count());
             Assert.Equal("Alfredo", _repository
                 .GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"))
                 .FirstName);
@@ -96,8 +96,8 @@ namespace Recollectable.Tests.Repositories
             _repository.DeleteUser(user);
             _repository.Save();
 
-            Assert.Equal(5, _repository.GetUsers().Count());
+            Assert.Equal(5, _repository.GetUsers(resourceParameters).Count());
             Assert.Null(_repository.GetUser(new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")));
-        }*/
+        }
     }
 }

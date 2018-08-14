@@ -1,36 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Data;
+﻿using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
-using Recollectable.Domain;
+using Recollectable.Domain.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories
 {
     public class CoinRepositoryTests : RecollectableTestBase
     {
-        /*private ICoinRepository _coinRepository;
+        private ICoinRepository _coinRepository;
         private ICountryRepository _countryRepository;
-        private ICollectionRepository _collectionRepository;
-        private IConditionRepository _conditionRepository;
+        private CurrenciesResourceParameters resourceParameters;
 
         public CoinRepositoryTests()
         {
-            _countryRepository = new CountryRepository(_context);
-            _collectionRepository = new CollectionRepository
-                (_context, new UserRepository(_context));
-            _conditionRepository = new ConditionRepository(_context);
+            _countryRepository = new CountryRepository(_context, 
+                _propertyMappingService);
             _coinRepository = new CoinRepository(_context, _countryRepository, 
-                _collectionRepository, _conditionRepository);
+                _propertyMappingService);
+            resourceParameters = new CurrenciesResourceParameters();
         }
 
         [Fact]
         public void GetCoins_ReturnsAllCoins()
         {
-            var result = _coinRepository.GetCoins();
+            var result = _coinRepository.GetCoins(resourceParameters);
             Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
@@ -38,7 +33,7 @@ namespace Recollectable.Tests.Repositories
         [Fact]
         public void GetCoins_OrdersCoinsByCountry()
         {
-            var result = _coinRepository.GetCoins();
+            var result = _coinRepository.GetCoins(resourceParameters);
             Assert.Equal("Canada", result.First().Country.Name);
         }
 
@@ -84,8 +79,8 @@ namespace Recollectable.Tests.Repositories
         [Fact]
         public void GetCoin_ReturnsNull_GivenInvalidCoinId()
         {
-            var result = _collectionRepository
-                .GetCollection(new Guid("4ab72e1b-c115-4f13-b317-a841f73e44b7"));
+            var result = _coinRepository
+                .GetCoin(new Guid("4ab72e1b-c115-4f13-b317-a841f73e44b7"));
             Assert.Null(result);
         }
 
@@ -103,7 +98,7 @@ namespace Recollectable.Tests.Repositories
             _coinRepository.AddCoin(newCoin);
             _coinRepository.Save();
 
-            Assert.Equal(7, _coinRepository.GetCoins().Count());
+            Assert.Equal(7, _coinRepository.GetCoins(resourceParameters).Count());
             Assert.Equal("Cent", _coinRepository
                 .GetCoin(new Guid("60e55387-ee18-4e5c-866f-7ca1d2d09c0f"))
                 .Type);
@@ -119,7 +114,7 @@ namespace Recollectable.Tests.Repositories
             _coinRepository.UpdateCoin(updatedCoin);
             _coinRepository.Save();
 
-            Assert.Equal(6, _coinRepository.GetCoins().Count());
+            Assert.Equal(6, _coinRepository.GetCoins(resourceParameters).Count());
             Assert.Equal("Baht", _coinRepository
                 .GetCoin(new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"))
                 .Type);
@@ -133,9 +128,9 @@ namespace Recollectable.Tests.Repositories
             _coinRepository.DeleteCoin(coin);
             _coinRepository.Save();
 
-            Assert.Equal(5, _coinRepository.GetCoins().Count());
+            Assert.Equal(5, _coinRepository.GetCoins(resourceParameters).Count());
             Assert.Null(_coinRepository
                 .GetCoin(new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48")));
-        }*/
+        }
     }
 }

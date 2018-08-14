@@ -10,7 +10,7 @@ using Recollectable.Data;
 namespace Recollectable.Data.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20180812131722_initial")]
+    [Migration("20180814122450_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace Recollectable.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Recollectable.Domain.Collectable", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Collectable", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -33,7 +33,9 @@ namespace Recollectable.Data.Migrations
                     b.Property<string>("Discriminator")
                         .IsRequired();
 
-                    b.Property<string>("ReleaseDate");
+                    b.Property<string>("ReleaseDate")
+                        .IsRequired()
+                        .HasMaxLength(100);
 
                     b.HasKey("Id");
 
@@ -46,12 +48,14 @@ namespace Recollectable.Data.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("Collectable");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Collection", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Collection", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Type");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(25);
 
                     b.Property<Guid>("UserId");
 
@@ -62,7 +66,7 @@ namespace Recollectable.Data.Migrations
                     b.ToTable("Collections");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.CollectionCollectable", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.CollectionCollectable", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -84,7 +88,7 @@ namespace Recollectable.Data.Migrations
                     b.ToTable("CollectionCollectables");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.CollectorValue", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.CollectorValue", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -116,157 +120,190 @@ namespace Recollectable.Data.Migrations
                     b.ToTable("CollectorValues");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Condition", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Condition", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Grade");
+                    b.Property<string>("Grade")
+                        .IsRequired()
+                        .HasMaxLength(50);
 
                     b.HasKey("Id");
 
                     b.ToTable("Conditions");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Country", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Country", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50);
 
                     b.HasKey("Id");
 
                     b.ToTable("Countries");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.User", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Email");
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(250);
 
-                    b.Property<string>("FirstName");
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100);
 
-                    b.Property<string>("LastName");
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100);
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Currency", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Currency", b =>
                 {
-                    b.HasBaseType("Recollectable.Domain.Collectable");
+                    b.HasBaseType("Recollectable.Domain.Entities.Collectable");
 
-                    b.Property<string>("BackImagePath");
+                    b.Property<string>("BackImagePath")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("Designer");
+                    b.Property<string>("Designer")
+                        .HasMaxLength(250);
 
                     b.Property<int>("FaceValue");
 
-                    b.Property<string>("FrontImagePath");
+                    b.Property<string>("FrontImagePath")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("HeadOfState");
+                    b.Property<string>("HeadOfState")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("ObverseDescription");
+                    b.Property<string>("ObverseDescription")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("ReverseDescription");
+                    b.Property<string>("ReverseDescription")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("Size");
+                    b.Property<string>("Size")
+                        .HasMaxLength(25);
 
-                    b.Property<string>("Type");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100);
 
                     b.ToTable("Currency");
 
                     b.HasDiscriminator().HasValue("Currency");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Banknote", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Banknote", b =>
                 {
-                    b.HasBaseType("Recollectable.Domain.Currency");
+                    b.HasBaseType("Recollectable.Domain.Entities.Currency");
 
-                    b.Property<string>("Color");
+                    b.Property<string>("Color")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("Signature");
+                    b.Property<string>("Signature")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("Watermark");
+                    b.Property<string>("Watermark")
+                        .HasMaxLength(250);
 
                     b.ToTable("Banknote");
 
                     b.HasDiscriminator().HasValue("Banknote");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Coin", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Coin", b =>
                 {
-                    b.HasBaseType("Recollectable.Domain.Currency");
+                    b.HasBaseType("Recollectable.Domain.Entities.Currency");
 
-                    b.Property<string>("EdgeLegend");
+                    b.Property<string>("EdgeLegend")
+                        .HasMaxLength(100);
 
-                    b.Property<string>("EdgeType");
+                    b.Property<string>("EdgeType")
+                        .HasMaxLength(50);
 
-                    b.Property<string>("Metal");
+                    b.Property<string>("Metal")
+                        .HasMaxLength(50);
 
-                    b.Property<string>("MintMark");
+                    b.Property<string>("MintMark")
+                        .HasMaxLength(50);
 
                     b.Property<int>("Mintage");
 
-                    b.Property<string>("Note");
+                    b.Property<string>("Note")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("ObverseInscription");
+                    b.Property<string>("ObverseInscription")
+                        .HasMaxLength(100);
 
-                    b.Property<string>("ObverseLegend");
+                    b.Property<string>("ObverseLegend")
+                        .HasMaxLength(100);
 
-                    b.Property<string>("ReverseInscription");
+                    b.Property<string>("ReverseInscription")
+                        .HasMaxLength(100);
 
-                    b.Property<string>("ReverseLegend");
+                    b.Property<string>("ReverseLegend")
+                        .HasMaxLength(100);
 
-                    b.Property<string>("Subject");
+                    b.Property<string>("Subject")
+                        .HasMaxLength(250);
 
-                    b.Property<string>("Weight");
+                    b.Property<string>("Weight")
+                        .HasMaxLength(25);
 
                     b.ToTable("Coin");
 
                     b.HasDiscriminator().HasValue("Coin");
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Collectable", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Collectable", b =>
                 {
-                    b.HasOne("Recollectable.Domain.CollectorValue", "CollectorValue")
+                    b.HasOne("Recollectable.Domain.Entities.CollectorValue", "CollectorValue")
                         .WithMany("Collectables")
                         .HasForeignKey("CollectorValueId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Recollectable.Domain.Country", "Country")
+                    b.HasOne("Recollectable.Domain.Entities.Country", "Country")
                         .WithMany("Collectables")
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.Collection", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.Collection", b =>
                 {
-                    b.HasOne("Recollectable.Domain.User", "User")
+                    b.HasOne("Recollectable.Domain.Entities.User", "User")
                         .WithMany("Collections")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Recollectable.Domain.CollectionCollectable", b =>
+            modelBuilder.Entity("Recollectable.Domain.Entities.CollectionCollectable", b =>
                 {
-                    b.HasOne("Recollectable.Domain.Collectable", "Collectable")
+                    b.HasOne("Recollectable.Domain.Entities.Collectable", "Collectable")
                         .WithMany("CollectionCollectables")
                         .HasForeignKey("CollectableId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Recollectable.Domain.Collection", "Collection")
+                    b.HasOne("Recollectable.Domain.Entities.Collection", "Collection")
                         .WithMany("CollectionCollectables")
                         .HasForeignKey("CollectionId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Recollectable.Domain.Condition", "Condition")
+                    b.HasOne("Recollectable.Domain.Entities.Condition", "Condition")
                         .WithMany("CollectionCollectables")
                         .HasForeignKey("ConditionId")
                         .OnDelete(DeleteBehavior.Cascade);

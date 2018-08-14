@@ -28,6 +28,8 @@ namespace Recollectable.Domain.Models
         public string Designer { get; set; }
         public string HeadOfState { get; set; }
         public string MintMark { get; set; }
+        public string FrontImagePath { get; set; }
+        public string BackImagePath { get; set; }
         public Country Country { get; set; }
         public CollectorValue CollectorValue { get; set; }
     }

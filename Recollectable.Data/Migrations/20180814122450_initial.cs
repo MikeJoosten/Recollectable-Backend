@@ -34,7 +34,7 @@ namespace Recollectable.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Grade = table.Column<string>(nullable: true)
+                    Grade = table.Column<string>(maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,7 +46,7 @@ namespace Recollectable.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(maxLength: 50, nullable: false),
                     Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -59,9 +59,9 @@ namespace Recollectable.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true),
-                    Email = table.Column<string>(nullable: true)
+                    FirstName = table.Column<string>(maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(maxLength: 100, nullable: false),
+                    Email = table.Column<string>(maxLength: 250, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -73,34 +73,34 @@ namespace Recollectable.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    ReleaseDate = table.Column<string>(nullable: true),
+                    ReleaseDate = table.Column<string>(maxLength: 100, nullable: false),
                     CountryId = table.Column<Guid>(nullable: false),
                     CollectorValueId = table.Column<Guid>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     FaceValue = table.Column<int>(nullable: true),
-                    Type = table.Column<string>(nullable: true),
-                    Size = table.Column<string>(nullable: true),
-                    Designer = table.Column<string>(nullable: true),
-                    HeadOfState = table.Column<string>(nullable: true),
-                    ObverseDescription = table.Column<string>(nullable: true),
-                    ReverseDescription = table.Column<string>(nullable: true),
-                    FrontImagePath = table.Column<string>(nullable: true),
-                    BackImagePath = table.Column<string>(nullable: true),
-                    Color = table.Column<string>(nullable: true),
-                    Watermark = table.Column<string>(nullable: true),
-                    Signature = table.Column<string>(nullable: true),
+                    Type = table.Column<string>(maxLength: 100, nullable: true),
+                    Size = table.Column<string>(maxLength: 25, nullable: true),
+                    Designer = table.Column<string>(maxLength: 250, nullable: true),
+                    HeadOfState = table.Column<string>(maxLength: 250, nullable: true),
+                    ObverseDescription = table.Column<string>(maxLength: 250, nullable: true),
+                    ReverseDescription = table.Column<string>(maxLength: 250, nullable: true),
+                    FrontImagePath = table.Column<string>(maxLength: 250, nullable: true),
+                    BackImagePath = table.Column<string>(maxLength: 250, nullable: true),
+                    Color = table.Column<string>(maxLength: 250, nullable: true),
+                    Watermark = table.Column<string>(maxLength: 250, nullable: true),
+                    Signature = table.Column<string>(maxLength: 250, nullable: true),
                     Mintage = table.Column<int>(nullable: true),
-                    Weight = table.Column<string>(nullable: true),
-                    Metal = table.Column<string>(nullable: true),
-                    Note = table.Column<string>(nullable: true),
-                    Subject = table.Column<string>(nullable: true),
-                    ObverseInscription = table.Column<string>(nullable: true),
-                    ObverseLegend = table.Column<string>(nullable: true),
-                    ReverseInscription = table.Column<string>(nullable: true),
-                    ReverseLegend = table.Column<string>(nullable: true),
-                    EdgeType = table.Column<string>(nullable: true),
-                    EdgeLegend = table.Column<string>(nullable: true),
-                    MintMark = table.Column<string>(nullable: true)
+                    Weight = table.Column<string>(maxLength: 25, nullable: true),
+                    Metal = table.Column<string>(maxLength: 50, nullable: true),
+                    Note = table.Column<string>(maxLength: 250, nullable: true),
+                    Subject = table.Column<string>(maxLength: 250, nullable: true),
+                    ObverseInscription = table.Column<string>(maxLength: 100, nullable: true),
+                    ObverseLegend = table.Column<string>(maxLength: 100, nullable: true),
+                    ReverseInscription = table.Column<string>(maxLength: 100, nullable: true),
+                    ReverseLegend = table.Column<string>(maxLength: 100, nullable: true),
+                    EdgeType = table.Column<string>(maxLength: 50, nullable: true),
+                    EdgeLegend = table.Column<string>(maxLength: 100, nullable: true),
+                    MintMark = table.Column<string>(maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -124,7 +124,7 @@ namespace Recollectable.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Type = table.Column<string>(nullable: true),
+                    Type = table.Column<string>(maxLength: 25, nullable: false),
                     UserId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>

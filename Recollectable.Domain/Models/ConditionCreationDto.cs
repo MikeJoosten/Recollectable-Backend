@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Recollectable.Domain.Models
 {
-    public class ConditionCreationDto
+    public class ConditionCreationDto : ConditionManipulationDto
     {
-        public string Grade { get; set; }
     }
 }

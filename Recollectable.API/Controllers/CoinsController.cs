@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -10,6 +11,7 @@ using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
@@ -37,8 +39,10 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetCoins")]
-        public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters)
+        public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CoinDto, Coin>
                 (resourceParameters.OrderBy))
@@ -53,33 +57,78 @@ namespace Recollectable.API.Controllers
             }
 
             var coinsFromRepo = _coinRepository.GetCoins(resourceParameters);
-
-            var previousPageLink = coinsFromRepo.HasPrevious ?
-                CreateCoinsResourceUri(resourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = coinsFromRepo.HasNext ?
-                CreateCoinsResourceUri(resourceParameters,
-                ResourceUriType.NextPage) : null;
-
-            var paginationMetadata = new
-            {
-                totalCount = coinsFromRepo.TotalCount,
-                pageSize = coinsFromRepo.PageSize,
-                currentPage = coinsFromRepo.CurrentPage,
-                totalPages = coinsFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
-
             var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
-            return Ok(coins.ShapeData(resourceParameters.Fields));
+
+            if (mediaType == "application/json+hateoas")
+            {
+                var paginationMetadata = new
+                {
+                    totalCount = coinsFromRepo.TotalCount,
+                    pageSize = coinsFromRepo.PageSize,
+                    currentPage = coinsFromRepo.CurrentPage,
+                    totalPages = coinsFromRepo.TotalPages
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                var links = CreateCoinsLinks(resourceParameters,
+                    coinsFromRepo.HasNext, coinsFromRepo.HasPrevious);
+                var shapedCoins = coins.ShapeData(resourceParameters.Fields);
+
+                var linkedCoins = shapedCoins.Select(coin =>
+                {
+                    var coinAsDictionary = coin as IDictionary<string, object>;
+                    var coinLinks = CreateCoinLinks((Guid)coinAsDictionary["Id"],
+                        resourceParameters.Fields);
+
+                    coinAsDictionary.Add("links", coinLinks);
+
+                    return coinAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = linkedCoins,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else if (mediaType == "application/json")
+            {
+                var previousPageLink = coinsFromRepo.HasPrevious ?
+                    CreateCoinsResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage) : null;
+
+                var nextPageLink = coinsFromRepo.HasNext ?
+                    CreateCoinsResourceUri(resourceParameters,
+                    ResourceUriType.NextPage) : null;
+
+                var paginationMetadata = new
+                {
+                    totalCount = coinsFromRepo.TotalCount,
+                    pageSize = coinsFromRepo.PageSize,
+                    currentPage = coinsFromRepo.CurrentPage,
+                    totalPages = coinsFromRepo.TotalPages,
+                    previousPageLink,
+                    nextPageLink,
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                return Ok(coins.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(coins);
+            }
         }
 
         [HttpGet("{id}", Name = "GetCoin")]
-        public IActionResult GetCoin(Guid id, [FromQuery] string fields)
+        public IActionResult GetCoin(Guid id, [FromQuery] string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<CoinDto>(fields))
             {
@@ -94,15 +143,45 @@ namespace Recollectable.API.Controllers
             }
 
             var coin = Mapper.Map<CoinDto>(coinFromRepo);
-            return Ok(coin.ShapeData(fields));
+
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateCoinLinks(id, fields);
+                var linkedResource = coin.ShapeData(fields)
+                    as IDictionary<string, object>;
+
+                linkedResource.Add("links", links);
+
+                return Ok(linkedResource);
+            }
+            else if (mediaType == "application/json")
+            {
+                return Ok(coin.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(coin);
+            }
         }
 
-        [HttpPost]
-        public IActionResult CreateCoin([FromBody] CoinCreationDto coin)
+        [HttpPost(Name = "CreateCoin")]
+        public IActionResult CreateCoin([FromBody] CoinCreationDto coin,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (coin == null)
             {
                 return BadRequest();
+            }
+
+            if (coin.Note == coin.Subject)
+            {
+                ModelState.AddModelError(nameof(CoinCreationDto),
+                    "The provided note should be different from the coin's subject");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             var country = _countryRepository.GetCountry(coin.CountryId);
@@ -139,7 +218,25 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCoin = Mapper.Map<CoinDto>(newCoin);
-            return CreatedAtRoute("GetCoin", new { id = returnedCoin.Id }, returnedCoin);
+
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateCoinLinks(returnedCoin.Id, null);
+                var linkedResource = returnedCoin.ShapeData(null)
+                    as IDictionary<string, object>;
+
+                linkedResource.Add("links", links);
+
+                return CreatedAtRoute("GetCoin", 
+                    new { id = returnedCoin.Id }, 
+                    linkedResource);
+            }
+            else
+            {
+                return CreatedAtRoute("GetCoin",
+                    new { id = returnedCoin.Id },
+                    returnedCoin);
+            }
         }
 
         [HttpPost("{id}")]
@@ -153,12 +250,23 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateCoin")]
         public IActionResult UpdateCoin(Guid id, [FromBody] CoinUpdateDto coin)
         {
             if (coin == null)
             {
                 return BadRequest();
+            }
+
+            if (coin.Note == coin.Subject)
+            {
+                ModelState.AddModelError(nameof(CoinUpdateDto),
+                    "The provided note should be different from the coin's subject");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             if (!_countryRepository.CountryExists(coin.CountryId))
@@ -192,7 +300,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateCoin")]
         public IActionResult PartiallyUpdateCoin(Guid id,
             [FromBody] JsonPatchDocument<CoinUpdateDto> patchDoc)
         {
@@ -209,7 +317,20 @@ namespace Recollectable.API.Controllers
             }
 
             var patchedCoin = Mapper.Map<CoinUpdateDto>(coinFromRepo);
-            patchDoc.ApplyTo(patchedCoin);
+            patchDoc.ApplyTo(patchedCoin, ModelState);
+
+            if (patchedCoin.Note == patchedCoin.Subject)
+            {
+                ModelState.AddModelError(nameof(CoinUpdateDto),
+                    "The provided note should be different from the coin's subject");
+            }
+
+            TryValidateModel(patchedCoin);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             if (!_countryRepository.CountryExists(patchedCoin.CountryId))
             {
@@ -235,7 +356,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteCoin")]
         public IActionResult DeleteCoin(Guid id)
         {
             var coinFromRepo = _coinRepository.GetCoin(id);
@@ -253,6 +374,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCoinsOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateCoinsResourceUri(CurrenciesResourceParameters resourceParameters, 
@@ -294,6 +422,55 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateCoinLinks(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(new LinkDto(_urlHelper.Link("GetCoins",
+                    new { id }), "self", "GET"));
+
+                links.Add(new LinkDto(_urlHelper.Link("CreateCoins",
+                    new { }), "create_coins", "POST"));
+
+                links.Add(new LinkDto(_urlHelper.Link("UpdateCoins",
+                    new { id }), "update_coins", "PUT"));
+
+                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCoins",
+                    new { id }), "partially_update_coins", "PATCH"));
+
+                links.Add(new LinkDto(_urlHelper.Link("DeleteCoins",
+                    new { id }), "delete_coins", "DELETE"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateCoinsLinks
+            (CurrenciesResourceParameters resourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(new LinkDto(CreateCoinsResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(new LinkDto(CreateCoinsResourceUri(resourceParameters,
+                    ResourceUriType.NextPage), "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkDto(CreateCoinsResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage), "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }

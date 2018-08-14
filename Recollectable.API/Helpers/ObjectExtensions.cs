@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Reflection;
-using System.Text;
 
-namespace Recollectable.Data.Helpers
+namespace Recollectable.API.Helpers
 {
     public static class ObjectExtensions
     {

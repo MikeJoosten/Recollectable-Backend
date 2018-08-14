@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Recollectable.Domain.Models
 {
-    public class CollectionCreationDto
+    public class CollectionCreationDto : CollectionManipulationDto
     {
-        public string Type { get; set; }
-        public Guid UserId { get; set; }
     }
 }

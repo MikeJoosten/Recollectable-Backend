@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Helpers;
 using Recollectable.Data.Helpers;
 using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
@@ -10,6 +11,7 @@ using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
@@ -31,8 +33,10 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetCollectorValues")]
-        public IActionResult GetCollectorValues(CollectorValuesResourceParameters resourceParameters)
+        public IActionResult GetCollectorValues(CollectorValuesResourceParameters resourceParameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CollectorValueDto, CollectorValue>
                 (resourceParameters.OrderBy))
@@ -47,33 +51,78 @@ namespace Recollectable.API.Controllers
             }
 
             var collectorValuesFromRepo = _collectorValueRepository.GetCollectorValues(resourceParameters);
-
-            var previousPageLink = collectorValuesFromRepo.HasPrevious ?
-                CreateCollectorValuesResourceUri(resourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = collectorValuesFromRepo.HasNext ?
-                CreateCollectorValuesResourceUri(resourceParameters,
-                ResourceUriType.NextPage) : null;
-
-            var paginationMetadata = new
-            {
-                totalCount = collectorValuesFromRepo.TotalCount,
-                pageSize = collectorValuesFromRepo.PageSize,
-                currentPage = collectorValuesFromRepo.CurrentPage,
-                totalPages = collectorValuesFromRepo.TotalPages,
-                previousPageLink,
-                nextPageLink
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
-
             var collectorValues = Mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
-            return Ok(collectorValues.ShapeData(resourceParameters.Fields));
+
+            if (mediaType == "application/json+hateoas")
+            {
+                var paginationMetadata = new
+                {
+                    totalCount = collectorValuesFromRepo.TotalCount,
+                    pageSize = collectorValuesFromRepo.PageSize,
+                    currentPage = collectorValuesFromRepo.CurrentPage,
+                    totalPages = collectorValuesFromRepo.TotalPages,
+                };
+
+                Response.Headers.Add("X-Pagination", 
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                var links = CreateCollectorValuesLinks(resourceParameters,
+                    collectorValuesFromRepo.HasNext, collectorValuesFromRepo.HasPrevious);
+                var shapedCollectorValues = collectorValues.ShapeData(resourceParameters.Fields);
+
+                var linkedCollectorValues = shapedCollectorValues.Select(collectorValue =>
+                {
+                    var collectorValueAsDictionary = collectorValue as IDictionary<string, object>;
+                    var collectorValueLinks = CreateCollectorValueLinks
+                        ((Guid)collectorValueAsDictionary["Id"], resourceParameters.Fields);
+
+                    collectorValueAsDictionary.Add("links", collectorValueLinks);
+
+                    return collectorValueAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = linkedCollectorValues,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else if (mediaType == "application/json")
+            {
+                var previousPageLink = collectorValuesFromRepo.HasPrevious ?
+                    CreateCollectorValuesResourceUri(resourceParameters,
+                    ResourceUriType.PreviousPage) : null;
+
+                var nextPageLink = collectorValuesFromRepo.HasNext ?
+                    CreateCollectorValuesResourceUri(resourceParameters,
+                    ResourceUriType.NextPage) : null;
+
+                var paginationMetadata = new
+                {
+                    totalCount = collectorValuesFromRepo.TotalCount,
+                    pageSize = collectorValuesFromRepo.PageSize,
+                    currentPage = collectorValuesFromRepo.CurrentPage,
+                    totalPages = collectorValuesFromRepo.TotalPages,
+                    previousPageLink,
+                    nextPageLink,
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    JsonConvert.SerializeObject(paginationMetadata));
+
+                return Ok(collectorValues.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(collectorValues);
+            }
         }
 
         [HttpGet("{id}", Name = "GetCollectorValue")]
-        public IActionResult GetCollectorValue(Guid id, [FromQuery] string fields)
+        public IActionResult GetCollectorValue(Guid id, [FromQuery] string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<CollectorValueDto>(fields))
             {
@@ -88,15 +137,39 @@ namespace Recollectable.API.Controllers
             }
 
             var collectorValue = Mapper.Map<CollectorValueDto>(collectorValueFromRepo);
-            return Ok(collectorValue.ShapeData(fields));
+
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateCollectorValueLinks(id, fields);
+                var linkedResource = collectorValue.ShapeData(fields)
+                    as IDictionary<string, object>;
+
+                linkedResource.Add("links", links);
+
+                return Ok(linkedResource);
+            }
+            else if (mediaType == "application/json")
+            {
+                return Ok(collectorValue.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(collectorValue);
+            }
         }
 
-        [HttpPost]
-        public IActionResult CreateCollectorValue([FromBody] CollectorValueCreationDto collectorValue)
+        [HttpPost(Name = "CreateCollectorValue")]
+        public IActionResult CreateCollectorValue([FromBody] CollectorValueCreationDto collectorValue,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (collectorValue == null)
             {
                 return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             var newCollectorValue = Mapper.Map<CollectorValue>(collectorValue);
@@ -108,9 +181,25 @@ namespace Recollectable.API.Controllers
             }
 
             var returnedCollectorValue = Mapper.Map<CollectorValueDto>(newCollectorValue);
-            return CreatedAtRoute("GetCollectorValue", 
-                new { id = returnedCollectorValue.Id }, 
-                returnedCollectorValue);
+
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateCollectorValueLinks(returnedCollectorValue.Id, null);
+                var linkedResource = returnedCollectorValue.ShapeData(null)
+                    as IDictionary<string, object>;
+
+                linkedResource.Add("links", links);
+
+                return CreatedAtRoute("GetCollectorValue",
+                    new { id = returnedCollectorValue.Id },
+                    linkedResource);
+            }
+            else
+            {
+                return CreatedAtRoute("GetCollectorValue",
+                    new { id = returnedCollectorValue.Id },
+                    returnedCollectorValue);
+            }
         }
 
         [HttpPost("{id}")]
@@ -124,13 +213,18 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateCollectorValue")]
         public IActionResult UpdateCollectorValue
             (Guid id, [FromBody] CollectorValueUpdateDto collectorValue)
         {
             if (collectorValue == null)
             {
                 return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             var collectorValueFromRepo = _collectorValueRepository.GetCollectorValue(id);
@@ -151,7 +245,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateCollectorValue")]
         public IActionResult PartiallyUpdateCollectorValue(Guid id,
             [FromBody] JsonPatchDocument<CollectorValueUpdateDto> patchDoc)
         {
@@ -168,7 +262,12 @@ namespace Recollectable.API.Controllers
             }
 
             var patchedCollectorValue = Mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);
-            patchDoc.ApplyTo(patchedCollectorValue);
+            patchDoc.ApplyTo(patchedCollectorValue, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             Mapper.Map(patchedCollectorValue, collectorValueFromRepo);
             _collectorValueRepository.UpdateCollectorValue(collectorValueFromRepo);
@@ -181,7 +280,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteCollectorValue")]
         public IActionResult DeleteCollectorValue(Guid id)
         {
             var collectorValueFromRepo = _collectorValueRepository.GetCollectorValue(id);
@@ -199,6 +298,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCollectorValuesOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateCollectorValuesResourceUri(CollectorValuesResourceParameters resourceParameters,
@@ -231,6 +337,58 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateCollectorValueLinks(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(new LinkDto(_urlHelper.Link("GetCollectorValue",
+                    new { id }), "self", "GET"));
+
+                links.Add(new LinkDto(_urlHelper.Link("CreateCollectorValue",
+                    new { }), "create_collector_value", "POST"));
+
+                links.Add(new LinkDto(_urlHelper.Link("UpdateCollectorValue",
+                    new { id }), "update_collector_value", "PUT"));
+
+                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCollectorValue",
+                    new { id }), "partially_update_collector_value", "PATCH"));
+
+                links.Add(new LinkDto(_urlHelper.Link("DeleteCollectorValue",
+                    new { id }), "delete_collector_value", "DELETE"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateCollectorValuesLinks
+            (CollectorValuesResourceParameters resourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(new LinkDto(CreateCollectorValuesResourceUri
+                (resourceParameters, ResourceUriType.Current), 
+                "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(new LinkDto(CreateCollectorValuesResourceUri
+                    (resourceParameters, ResourceUriType.NextPage), 
+                    "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(new LinkDto(CreateCollectorValuesResourceUri
+                    (resourceParameters, ResourceUriType.PreviousPage), 
+                    "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }
