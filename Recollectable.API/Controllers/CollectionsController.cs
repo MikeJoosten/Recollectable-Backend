@@ -35,6 +35,7 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetCollections")]
         public IActionResult GetCollections(CollectionsResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -90,7 +91,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 var previousPageLink = collectionsFromRepo.HasPrevious ?
                     CreateCollectionsResourceUri(resourceParameters,
@@ -114,6 +115,10 @@ namespace Recollectable.API.Controllers
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(collections.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(collections);
             }
         }
 
@@ -145,9 +150,13 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 return Ok(collection.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(collection);
             }
         }
 
@@ -298,6 +307,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCollectionsOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateCollectionsResourceUri(CollectionsResourceParameters resourceParameters,

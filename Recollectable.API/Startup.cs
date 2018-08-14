@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AspNetCoreRateLimit;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using Recollectable.Data.Repositories;
 using Recollectable.Data.Services;
 using Recollectable.Domain.Entities;
 using Recollectable.Domain.Models;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Recollectable.API
@@ -65,6 +67,7 @@ namespace Recollectable.API
             services.AddScoped<ICountryRepository, CountryRepository>();
             services.AddScoped<ICollectorValueRepository, CollectorValueRepository>();
 
+            // Register Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
             {
@@ -74,6 +77,33 @@ namespace Recollectable.API
             });
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
+
+            // Register HTTP Caching
+            services.AddHttpCacheHeaders(
+                (expirationModelOptions) => 
+                {
+                    expirationModelOptions.MaxAge = 600;
+                },
+                (validationModelOptions) =>
+                {
+                    validationModelOptions.MustRevalidate = true;
+                });
+            services.AddResponseCaching();
+            services.AddMemoryCache();
+            services.Configure<IpRateLimitOptions>((options) =>
+            {
+                options.GeneralRules = new List<RateLimitRule>()
+                {
+                    new RateLimitRule()
+                    {
+                        Endpoint = "*",
+                        Limit = 1000000000,
+                        Period = "1s"
+                    }
+                };
+            });
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -136,6 +166,9 @@ namespace Recollectable.API
 
             recollectableContext.Database.Migrate();
             app.UseHttpsRedirection();
+            app.UseIpRateLimiting();
+            app.UseResponseCaching();
+            app.UseHttpCacheHeaders();
             app.UseMvc();
         }
     }

@@ -37,6 +37,7 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetCollectables")]
         public IActionResult GetCollectables(Guid collectionId, 
             CollectablesResourceParameters resourceParameters,
@@ -100,7 +101,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 var previousPageLink = collectablesFromRepo.HasPrevious ?
                     CreateCollectablesResourceUri(resourceParameters,
@@ -124,6 +125,10 @@ namespace Recollectable.API.Controllers
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(collectables.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(collectables);
             }
         }
 
@@ -155,9 +160,13 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 return Ok(collectable.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(collectable);
             }
         }
 
@@ -291,7 +300,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPatch("{id}", Name = "PartiallyUpdateCollectable")]
-        public IActionResult PartiallyUpdateCoin(Guid collectionId, Guid id,
+        public IActionResult PartiallyUpdateCollectable(Guid collectionId, Guid id,
             [FromBody] JsonPatchDocument<CollectableUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -345,7 +354,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpDelete("{id}", Name = "DeleteCollectable")]
-        public IActionResult DeleteCoin(Guid collectionId, Guid id)
+        public IActionResult DeleteCollectable(Guid collectionId, Guid id)
         {
             var collectableFromRepo = _collectableRepository.GetCollectable(collectionId, id);
 
@@ -362,6 +371,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCollectablesOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateCollectablesResourceUri(CollectablesResourceParameters resourceParameters, 

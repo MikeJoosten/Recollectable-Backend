@@ -32,6 +32,7 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetUsers")]
         public IActionResult GetUsers(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -87,7 +88,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 var previousPageLink = usersFromRepo.HasPrevious ?
                     CreateUsersResourceUri(resourceParameters,
@@ -111,6 +112,10 @@ namespace Recollectable.API.Controllers
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(users.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(users);
             }
         }
 
@@ -142,9 +147,13 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 return Ok(user.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(user);
             }
         }
 
@@ -268,6 +277,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetUsersOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateUsersResourceUri(UsersResourceParameters resourceParameters,

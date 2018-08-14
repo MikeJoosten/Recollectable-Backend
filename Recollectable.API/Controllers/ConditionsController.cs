@@ -32,6 +32,7 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetConditions")]
         public IActionResult GetConditions(ConditionsResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -87,7 +88,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 var previousPageLink = conditionsFromRepo.HasPrevious ?
                     CreateConditionsResourceUri(resourceParameters,
@@ -111,6 +112,10 @@ namespace Recollectable.API.Controllers
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(conditions.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(conditions);
             }
         }
 
@@ -142,9 +147,13 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 return Ok(condition.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(condition);
             }
         }
 
@@ -272,6 +281,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetConditionsOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateConditionsResourceUri(ConditionsResourceParameters resourceParameters,

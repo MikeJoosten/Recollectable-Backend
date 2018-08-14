@@ -32,6 +32,7 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetCountries")]
         public IActionResult GetCountries(CountriesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -87,7 +88,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 var previousPageLink = countriesFromRepo.HasPrevious ?
                     CreateCountriesResourceUri(resourceParameters,
@@ -111,6 +112,10 @@ namespace Recollectable.API.Controllers
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(countries.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(countries);
             }
         }
 
@@ -142,9 +147,13 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 return Ok(country.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(country);
             }
         }
 
@@ -272,6 +281,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCountriesOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateCountriesResourceUri(CountriesResourceParameters resourceParameters,

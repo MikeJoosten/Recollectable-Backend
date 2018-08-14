@@ -38,6 +38,7 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetCoins")]
         public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -93,7 +94,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 var previousPageLink = coinsFromRepo.HasPrevious ?
                     CreateCoinsResourceUri(resourceParameters,
@@ -117,6 +118,10 @@ namespace Recollectable.API.Controllers
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(coins.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(coins);
             }
         }
 
@@ -148,9 +153,13 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 return Ok(coin.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(coin);
             }
         }
 
@@ -329,6 +338,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCoinsOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateCoinsResourceUri(CurrenciesResourceParameters resourceParameters, 

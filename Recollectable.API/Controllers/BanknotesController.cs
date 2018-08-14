@@ -38,6 +38,7 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetBanknotes")]
         public IActionResult GetBanknotes(CurrenciesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -93,7 +94,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 var previousPageLink = banknotesFromRepo.HasPrevious ?
                     CreateBanknotesResourceUri(resourceParameters,
@@ -117,6 +118,10 @@ namespace Recollectable.API.Controllers
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(banknotes.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(banknotes);
             }
         }
 
@@ -148,9 +153,13 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 return Ok(banknote.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(banknote);
             }
         }
 
@@ -329,6 +338,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetBanknotesOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateBanknotesResourceUri(CurrenciesResourceParameters resourceParameters,

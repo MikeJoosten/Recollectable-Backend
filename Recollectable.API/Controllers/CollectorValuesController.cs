@@ -32,6 +32,7 @@ namespace Recollectable.API.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [HttpHead]
         [HttpGet(Name = "GetCollectorValues")]
         public IActionResult GetCollectorValues(CollectorValuesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -87,7 +88,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 var previousPageLink = collectorValuesFromRepo.HasPrevious ?
                     CreateCollectorValuesResourceUri(resourceParameters,
@@ -111,6 +112,10 @@ namespace Recollectable.API.Controllers
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(collectorValues.ShapeData(resourceParameters.Fields));
+            }
+            else
+            {
+                return Ok(collectorValues);
             }
         }
 
@@ -142,9 +147,13 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedResource);
             }
-            else
+            else if (mediaType == "application/json")
             {
                 return Ok(collectorValue.ShapeData(fields));
+            }
+            else
+            {
+                return Ok(collectorValue);
             }
         }
 
@@ -273,6 +282,13 @@ namespace Recollectable.API.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCollectorValuesOptions()
+        {
+            Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
+            return Ok();
         }
 
         private string CreateCollectorValuesResourceUri(CollectorValuesResourceParameters resourceParameters,
