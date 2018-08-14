@@ -17,8 +17,8 @@ namespace Recollectable.Tests.Repositories
         {
             _countryRepository = new CountryRepository(_context, 
                 _propertyMappingService);
-            _coinRepository = new CoinRepository(_context, _countryRepository, 
-                _propertyMappingService);
+            _coinRepository = new CoinRepository(_context,
+                _countryRepository, _propertyMappingService);
             resourceParameters = new CurrenciesResourceParameters();
         }
 

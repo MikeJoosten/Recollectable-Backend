@@ -193,7 +193,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var collectableItem = _collectableRepository.GetCollectable(collectable.CollectableId);
+            var collectableItem = _collectableRepository.GetCollectableItem(collectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
                 .ToLower().Contains(collection.Type.ToLower()))
@@ -275,7 +275,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectableItem = _collectableRepository.GetCollectable(collectable.CollectableId);
+            var collectableItem = _collectableRepository.GetCollectableItem(collectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
                 .ToLower().Contains(collection.Type.ToLower()))
@@ -341,7 +341,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectableItem = _collectableRepository.GetCollectable(patchedCollectable.CollectableId);
+            var collectableItem = _collectableRepository.GetCollectableItem(patchedCollectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
                 .ToLower().Contains(collection.Type.ToLower()))
