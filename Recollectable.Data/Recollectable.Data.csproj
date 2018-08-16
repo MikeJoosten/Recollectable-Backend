@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20180725172548_initial.cs" />
+    <Compile Remove="Migrations\20180725172614_seed.cs" />
+    <Compile Remove="Migrations\20180730185759_initial.cs" />
+    <Compile Remove="Migrations\20180730185830_seed.cs" />
+    <Compile Remove="Migrations\20180801185723_seed.cs" />
+    <Compile Remove="Migrations\20180801193337_initial.cs" />
+    <Compile Remove="Migrations\20180801193425_seed.cs" />
+    <Compile Remove="Migrations\20180805142004_initial.cs" />
+    <Compile Remove="Migrations\20180805142032_seed.cs" />
+    <Compile Remove="Migrations\20180805170817_initial.cs" />
+    <Compile Remove="Migrations\20180805170844_seed.cs" />
+    <Compile Remove="Migrations\20180805174115_initial.cs" />
+    <Compile Remove="Migrations\20180805174221_seed.cs" />
+    <Compile Remove="Migrations\20180808213015_initial.cs" />
+    <Compile Remove="Migrations\20180808213118_initial.cs" />
+    <Compile Remove="Migrations\20180808213145_seed.cs" />
+    <Compile Remove="Migrations\20180808214218_initial.cs" />
+    <Compile Remove="Migrations\20180808214513_initial.cs" />
+    <Compile Remove="Migrations\20180808214532_seed.cs" />
+    <Compile Remove="Migrations\20180808215427_seed.cs" />
+    <Compile Remove="Migrations\20180808215901_initial.cs" />
+    <Compile Remove="Migrations\20180808215925_seed.cs" />
+    <Compile Remove="Migrations\20180808221241_initial.cs" />
+    <Compile Remove="Migrations\20180808221307_seed.cs" />
+    <Compile Remove="Migrations\20180809112139_initial.cs" />
+    <Compile Remove="Migrations\20180809112201_seed.cs" />
+    <Compile Remove="Migrations\20180810195838_initial.cs" />
+    <Compile Remove="Migrations\20180810195900_seed.cs" />
+    <Compile Remove="Migrations\20180810202556_initial.cs" />
+    <Compile Remove="Migrations\20180812131722_initial.cs" />
+    <Compile Remove="Migrations\20180812131758_seed.cs" />
+    <Compile Remove="Migrations\20180814115244_initial.cs" />
+    <Compile Remove="Migrations\20180814115619_seed.cs" />
+    <Compile Remove="Migrations\20180814122527_seed.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Recollectable.Domain\Recollectable.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
