@@ -48,10 +48,8 @@ namespace Recollectable.Domain.Models
         [MaxLength(250, ErrorMessage = "BackImagePath shouldn't contain more than 250 characters")]
         public string BackImagePath { get; set; }
 
-        [MaxLength(32, ErrorMessage = "CountryId shouldn't contain more than 32 characters")]
         public Guid CountryId { get; set; }
 
-        [MaxLength(32, ErrorMessage = "CollectorValueId shouldn't contain more than 32 characters")]
         public Guid CollectorValueId { get; set; }
     }
 }
