@@ -60,7 +60,7 @@ namespace Recollectable.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Collectable GetCollectable(Guid collectableId)
+        public Collectable GetCollectableItem(Guid collectableId)
         {
             return _context.Collectables.FirstOrDefault(c => c.Id == collectableId);
         }

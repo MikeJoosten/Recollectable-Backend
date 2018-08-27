@@ -12,7 +12,6 @@ namespace Recollectable.Domain.Models
         public string Type { get; set; }
 
         [Required(ErrorMessage = "UserId is a required field")]
-        [MaxLength(32, ErrorMessage = "UserId shouldn't contain more than 32 characters")]
         public Guid UserId { get; set; }
     }
 }

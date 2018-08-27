@@ -8,8 +8,8 @@ namespace Recollectable.Data.Repositories
     {
         PagedList<CollectionCollectable> GetCollectables(Guid collectionId,
             CollectablesResourceParameters resourceParameters);
-        Collectable GetCollectable(Guid collectableId);
-        CollectionCollectable GetCollectable(Guid collectionId, Guid Id);
+        Collectable GetCollectableItem(Guid collectableItemId);
+        CollectionCollectable GetCollectable(Guid collectionId, Guid collectableId);
         void AddCollectable(CollectionCollectable collectable);
         void UpdateCollectable(CollectionCollectable collectable);
         void DeleteCollectable(CollectionCollectable collectable);

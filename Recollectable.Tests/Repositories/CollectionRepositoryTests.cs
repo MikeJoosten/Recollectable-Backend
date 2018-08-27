@@ -53,6 +53,24 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
+        public void AddCollection_AddsNewCollection()
+        {
+            Collection newCollection = new Collection
+            {
+                Id = new Guid("2cb67024-729e-4d76-bbe4-e80f929557ab"),
+                Type = "Banknote"
+            };
+
+            _collectionRepository.AddCollection(newCollection);
+            _collectionRepository.Save();
+
+            Assert.Equal(7, _collectionRepository.GetCollections(resourceParameters).Count());
+            Assert.Equal("Banknote", _collectionRepository
+                .GetCollection(new Guid("2cb67024-729e-4d76-bbe4-e80f929557ab"))
+                .Type);
+        }
+
+        [Fact]
         public void UpdateCollection_UpdatesExistingCollection()
         {
             Collection updatedCollection = _collectionRepository

@@ -173,7 +173,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (coin.Note == coin.Subject)
+            if ((coin.Note == coin.Subject) && (coin.Note != null || coin.Subject != null))
             {
                 ModelState.AddModelError(nameof(CoinCreationDto),
                     "The provided note should be different from the coin's subject");
@@ -258,7 +258,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (coin.Note == coin.Subject)
+            if ((coin.Note == coin.Subject) && (coin.Note != null || coin.Subject != null))
             {
                 ModelState.AddModelError(nameof(CoinUpdateDto),
                     "The provided note should be different from the coin's subject");

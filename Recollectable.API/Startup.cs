@@ -82,7 +82,7 @@ namespace Recollectable.API
             services.AddHttpCacheHeaders(
                 (expirationModelOptions) => 
                 {
-                    expirationModelOptions.MaxAge = 600;
+                    expirationModelOptions.MaxAge = 1;
                 },
                 (validationModelOptions) =>
                 {

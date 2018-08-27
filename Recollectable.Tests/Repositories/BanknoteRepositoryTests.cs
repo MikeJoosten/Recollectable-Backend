@@ -15,9 +15,10 @@ namespace Recollectable.Tests.Repositories
 
         public BanknoteRepositoryTests()
         {
-            _countryRepository = new CountryRepository(_context, _propertyMappingService);
-            _banknoteRepository = new BanknoteRepository(_context, _countryRepository,
+            _countryRepository = new CountryRepository(_context, 
                 _propertyMappingService);
+            _banknoteRepository = new BanknoteRepository(_context, 
+                _countryRepository, _propertyMappingService);
             resourceParameters = new CurrenciesResourceParameters();
         }
 
