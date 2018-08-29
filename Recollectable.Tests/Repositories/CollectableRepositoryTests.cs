@@ -1,6 +1,8 @@
-﻿using Recollectable.Data.Helpers;
-using Recollectable.Data.Repositories;
-using Recollectable.Domain.Entities;
+﻿using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Collections;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Infrastructure.Data.Repositories;
 using System;
 using System.Linq;
 using Xunit;
@@ -10,12 +12,15 @@ namespace Recollectable.Tests.Repositories
     public class CollectableRepositoryTests : RecollectableTestBase
     {
         private ICollectableRepository _collectableRepository;
+        private ICoinRepository _coinRepository;
         private ICollectionRepository _collectionRepository;
         private CollectablesResourceParameters resourceParameters;
 
         public CollectableRepositoryTests()
         {
             _collectionRepository = new CollectionRepository(_context,
+                _propertyMappingService);
+            _coinRepository = new CoinRepository(_context, 
                 _propertyMappingService);
             _collectableRepository = new CollectableRepository(_context, 
                 _collectionRepository, _propertyMappingService);
@@ -42,24 +47,6 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void GetCollectableItem_ReturnsCollectableItem_GivenValidCollectableItemId()
-        {
-            var result = _collectableRepository
-                .GetCollectableItem(new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"));
-            Assert.NotNull(result);
-            Assert.Equal("3a7fd6a5-d654-4647-8374-eba27001b0d3", result.Id.ToString());
-            Assert.Equal("Mexico", result.Country.Name);
-        }
-
-        [Fact]
-        public void GetCollectableItem_ReturnsNull_GivenInvalidCollectableItemId()
-        {
-            var result = _collectableRepository
-                .GetCollectableItem(new Guid("6ad88c33-4ccf-4850-a4ef-0f84db739a24"));
-            Assert.Null(result);
-        }
-
-        [Fact]
         public void GetCollectable_ReturnsCollectable_GivenValidIds()
         {
             var result = _collectableRepository.GetCollectable
@@ -79,6 +66,24 @@ namespace Recollectable.Tests.Repositories
         {
             var result = _collectableRepository.GetCollectable
                 (new Guid(collectionId), new Guid(collectableId));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetCollectableItem_ReturnsCollectableItem_GivenValidCollectableItemId()
+        {
+            var result = _collectableRepository
+                .GetCollectableItem(new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"));
+            Assert.NotNull(result);
+            Assert.Equal("3a7fd6a5-d654-4647-8374-eba27001b0d3", result.Id.ToString());
+            Assert.Equal("Mexico", result.Country.Name);
+        }
+
+        [Fact]
+        public void GetCollectableItem_ReturnsNull_GivenInvalidCollectableItemId()
+        {
+            var result = _collectableRepository
+                .GetCollectableItem(new Guid("6ad88c33-4ccf-4850-a4ef-0f84db739a24"));
             Assert.Null(result);
         }
 
@@ -111,9 +116,9 @@ namespace Recollectable.Tests.Repositories
             CollectionCollectable updatedCollectable = _collectableRepository
                 .GetCollectable(new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789"),
                 new Guid("355e785b-dd47-4fb7-b112-1fb34d189569"));
-            Collectable collectableItem = _collectableRepository
-                .GetCollectableItem(new Guid("db14f24e-aceb-4315-bfcf-6ace1f9b3613"));
-            updatedCollectable.Collectable = collectableItem;
+            Coin coin = _coinRepository
+                .GetCoin(new Guid("db14f24e-aceb-4315-bfcf-6ace1f9b3613"));
+            updatedCollectable.Collectable = coin;
 
             _collectableRepository.UpdateCollectable(updatedCollectable);
             _collectableRepository.Save();

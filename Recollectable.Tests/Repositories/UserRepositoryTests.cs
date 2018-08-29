@@ -1,6 +1,8 @@
-﻿using Recollectable.Data.Helpers;
-using Recollectable.Data.Repositories;
-using Recollectable.Domain.Entities;
+﻿using Recollectable.Core.Entities.Collections;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Infrastructure.Data.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;

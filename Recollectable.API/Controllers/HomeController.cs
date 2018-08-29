@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Recollectable.Domain.Models;
-using System;
+using Recollectable.Core.DTOs.Common;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {

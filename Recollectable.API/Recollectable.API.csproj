@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Recollectable.Data\Recollectable.Data.csproj" />
+    <ProjectReference Include="..\Recollectable.Core\Recollectable.Core.csproj" />
+    <ProjectReference Include="..\Recollectable.Infrastructure\Recollectable.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
-﻿using Recollectable.Data.Helpers;
-using Recollectable.Data.Repositories;
-using Recollectable.Domain.Entities;
+﻿using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Infrastructure.Data.Repositories;
 using System;
 using System.Linq;
 using Xunit;
@@ -10,15 +11,12 @@ namespace Recollectable.Tests.Repositories
     public class BanknoteRepositoryTests : RecollectableTestBase
     {
         private IBanknoteRepository _banknoteRepository;
-        private ICountryRepository _countryRepository;
         private CurrenciesResourceParameters resourceParameters;
 
         public BanknoteRepositoryTests()
         {
-            _countryRepository = new CountryRepository(_context, 
-                _propertyMappingService);
             _banknoteRepository = new BanknoteRepository(_context, 
-                _countryRepository, _propertyMappingService);
+                _propertyMappingService);
             resourceParameters = new CurrenciesResourceParameters();
         }
 
@@ -35,35 +33,6 @@ namespace Recollectable.Tests.Repositories
         {
             var result = _banknoteRepository.GetBanknotes(resourceParameters);
             Assert.Equal("Canada", result.First().Country.Name);
-        }
-
-        [Theory]
-        [InlineData("8c29c8a2-93ae-483d-8235-b0c728d3a034", 1, "Mexico")]
-        [InlineData("c8f2031e-c780-4d27-bf13-1ee48a7207a3", 2, "United States of America")]
-        public void GetBanknotesByCountry_ReturnsAllBanknotesFromCountry_GivenValidCountryId
-            (string countryId, int expectedCount, string expectedName)
-        {
-            var result = _banknoteRepository
-                .GetBanknotesByCountry(new Guid(countryId));
-            Assert.NotNull(result);
-            Assert.Equal(expectedCount, result.Count());
-            Assert.Equal(expectedName, result.First().Country.Name);
-        }
-
-        [Fact]
-        public void GetBanknotesByCountry_OrdersByBanknoteType_GivenValidCountryId()
-        {
-            var result = _banknoteRepository
-                .GetBanknotesByCountry(new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"));
-            Assert.Equal("Dollars", result.First().Type);
-        }
-
-        [Fact]
-        public void GetBanknotesByCountry_ReturnsNull_GivenInvalidCountryId()
-        {
-            var result = _banknoteRepository
-                .GetBanknotesByCountry(new Guid("61a01d02-666c-4d88-b867-ba8d7c134987"));
-            Assert.Null(result);
         }
 
         [Fact]

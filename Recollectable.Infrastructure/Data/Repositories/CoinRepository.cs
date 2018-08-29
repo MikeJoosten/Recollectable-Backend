@@ -1,0 +1,105 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Core.DTOs.Collectables;
+using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Common;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Extensions;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces.Services;
+using System;
+using System.Linq;
+
+namespace Recollectable.Infrastructure.Data.Repositories
+{
+    public class CoinRepository : ICoinRepository
+    {
+        private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
+
+        public CoinRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
+        {
+            _context = context;
+            _propertyMappingService = propertyMappingService;
+        }
+
+        public PagedList<Coin> GetCoins(CurrenciesResourceParameters resourceParameters)
+        {
+            var coins = _context.Coins
+                .Include(c => c.Country)
+                .Include(c => c.CollectorValue)
+                .ApplySort(resourceParameters.OrderBy,
+                    _propertyMappingService.GetPropertyMapping<CoinDto, Coin>());
+
+            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            {
+                var type = resourceParameters.Type.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Type.ToLowerInvariant() == type);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Country))
+            {
+                var country = resourceParameters.Country.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Country.Name.ToLowerInvariant() == country);
+            }
+
+            if (!string.IsNullOrEmpty(resourceParameters.Search))
+            {
+                var search = resourceParameters.Search.Trim().ToLowerInvariant();
+                coins = coins.Where(c => c.Country.Name.ToLowerInvariant().Contains(search)
+                    || c.Type.ToLowerInvariant().Contains(search)
+                    || c.ReleaseDate.ToLowerInvariant().Contains(search)
+                    || c.Metal.ToLowerInvariant().Contains(search));
+            }
+
+            return PagedList<Coin>.Create(coins,
+                resourceParameters.Page,
+                resourceParameters.PageSize);
+        }
+
+        public Coin GetCoin(Guid coinId)
+        {
+            return _context.Coins
+                .Include(c => c.Country)
+                .Include(c => c.CollectorValue)
+                .FirstOrDefault(c => c.Id == coinId);
+        }
+
+        public void AddCoin(Coin coin)
+        {
+            if (coin.Id == Guid.Empty)
+            {
+                coin.Id = Guid.NewGuid();
+            }
+
+            if (coin.CountryId == Guid.Empty)
+            {
+                coin.CountryId = Guid.NewGuid();
+            }
+
+            if (coin.CollectorValueId == Guid.Empty)
+            {
+                coin.CollectorValueId = Guid.NewGuid();
+            }
+
+            _context.Coins.Add(coin);
+        }
+
+        public void UpdateCoin(Coin coin) { }
+
+        public void DeleteCoin(Coin coin)
+        {
+            _context.Coins.Remove(coin);
+        }
+
+        public bool Save()
+        {
+            return (_context.SaveChanges() >= 0);
+        }
+
+        public bool CoinExists(Guid coinId)
+        {
+            return _context.Coins.Any(c => c.Id == coinId);
+        }
+    }
+}

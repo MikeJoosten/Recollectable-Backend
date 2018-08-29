@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Data;
-using Recollectable.Data.Services;
+using Recollectable.Core.Interfaces.Services;
+using Recollectable.Core.Services;
+using Recollectable.Infrastructure.Data;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Recollectable.Tests
 {
