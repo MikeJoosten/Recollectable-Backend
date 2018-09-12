@@ -20,16 +20,16 @@ namespace Recollectable.API.Controllers
     [Route("api/countries")]
     public class CountriesController : Controller
     {
-        private ICountryRepository _countryRepository;
+        private IUnitOfWork _unitOfWork;
         private IUrlHelper _urlHelper;
         private IPropertyMappingService _propertyMappingService;
         private ITypeHelperService _typeHelperService;
 
-        public CountriesController(ICountryRepository countryRepository,
-            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
+        public CountriesController(IUnitOfWork unitOfWork, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService,
             ITypeHelperService typeHelperService)
         {
-            _countryRepository = countryRepository;
+            _unitOfWork = unitOfWork;
             _urlHelper = urlHelper;
             _propertyMappingService = propertyMappingService;
             _typeHelperService = typeHelperService;
@@ -52,7 +52,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var countriesFromRepo = _countryRepository.GetCountries(resourceParameters);
+            var countriesFromRepo = _unitOfWork.CountryRepository.Get(resourceParameters);
             var countries = Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -131,7 +131,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var countryFromRepo = _countryRepository.GetCountry(id);
+            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
@@ -181,9 +181,9 @@ namespace Recollectable.API.Controllers
             }
 
             var newCountry = Mapper.Map<Country>(country);
-            _countryRepository.AddCountry(newCountry);
+            _unitOfWork.CountryRepository.Add(newCountry);
 
-            if (!_countryRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a country failed on save.");
             }
@@ -213,7 +213,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public IActionResult BlockCountryCreation(Guid id)
         {
-            if (_countryRepository.CountryExists(id))
+            if (_unitOfWork.CountryRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -240,7 +240,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var countryFromRepo = _countryRepository.GetCountry(id);
+            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
@@ -248,9 +248,9 @@ namespace Recollectable.API.Controllers
             }
 
             Mapper.Map(country, countryFromRepo);
-            _countryRepository.UpdateCountry(countryFromRepo);
+            _unitOfWork.CountryRepository.Update(countryFromRepo);
 
-            if (!_countryRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Updating country {id} failed on save.");
             }
@@ -267,7 +267,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var countryFromRepo = _countryRepository.GetCountry(id);
+            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
@@ -291,9 +291,9 @@ namespace Recollectable.API.Controllers
             }
 
             Mapper.Map(patchedCountry, countryFromRepo);
-            _countryRepository.UpdateCountry(countryFromRepo);
+            _unitOfWork.CountryRepository.Update(countryFromRepo);
 
-            if (!_countryRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Patching country {id} failed on save.");
             }
@@ -304,16 +304,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteCountry")]
         public IActionResult DeleteCountry(Guid id)
         {
-            var countryFromRepo = _countryRepository.GetCountry(id);
+            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
                 return NotFound();
             }
 
-            _countryRepository.DeleteCountry(countryFromRepo);
+            _unitOfWork.CountryRepository.Delete(countryFromRepo);
             
-            if (!_countryRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Deleting country {id} failed on save.");
             }

@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class ConditionRepository : IConditionRepository
+    public class ConditionRepository : IRepository<Condition, ConditionsResourceParameters>
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -22,8 +22,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Condition> GetConditions
-            (ConditionsResourceParameters resourceParameters)
+        public PagedList<Condition> Get(ConditionsResourceParameters resourceParameters)
         {
             var conditions = _context.Conditions.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<ConditionDto, Condition>());
@@ -45,12 +44,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Condition GetCondition(Guid conditionId)
+        public Condition GetById(Guid conditionId)
         {
             return _context.Conditions.FirstOrDefault(c => c.Id == conditionId);
         }
 
-        public void AddCondition(Condition condition)
+        public void Add(Condition condition)
         {
             if (condition.Id == Guid.Empty)
             {
@@ -60,19 +59,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Conditions.Add(condition);
         }
 
-        public void UpdateCondition(Condition condition) { }
+        public void Update(Condition condition) { }
 
-        public void DeleteCondition(Condition condition)
+        public void Delete(Condition condition)
         {
             _context.Conditions.Remove(condition);
         }
 
-        public bool Save()
-        {
-            return (_context.SaveChanges() >= 0);
-        }
-
-        public bool ConditionExists(Guid conditionId)
+        public bool Exists(Guid conditionId)
         {
             return _context.Conditions.Any(c => c.Id == conditionId);
         }

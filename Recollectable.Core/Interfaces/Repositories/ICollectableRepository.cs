@@ -3,19 +3,20 @@ using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Common;
 using Recollectable.Core.Entities.ResourceParameters;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Recollectable.Core.Interfaces.Repositories
 {
     public interface ICollectableRepository
     {
-        PagedList<CollectionCollectable> GetCollectables(Guid collectionId,
+        PagedList<CollectionCollectable> Get(Guid collectionId,
             CollectablesResourceParameters resourceParameters);
-        CollectionCollectable GetCollectable(Guid collectionId, Guid collectableId);
-        Collectable GetCollectableItem(Guid collectableItemId);
-        void AddCollectable(CollectionCollectable collectable);
-        void UpdateCollectable(CollectionCollectable collectable);
-        void DeleteCollectable(CollectionCollectable collectable);
-        bool Save();
-        bool CollectableExists(Guid Id);
+        CollectionCollectable GetById(Guid collectionId, Guid Id);
+        Collectable GetCollectableItem(Guid collectableId);
+        void Add(CollectionCollectable collectable);
+        void Update(CollectionCollectable collectable);
+        void Delete(CollectionCollectable collectable);
+        bool Exists(Guid Id);
     }
 }

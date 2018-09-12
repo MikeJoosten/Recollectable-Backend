@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CoinRepository : ICoinRepository
+    public class CoinRepository : IRepository<Coin, CurrenciesResourceParameters>
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -23,7 +23,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Coin> GetCoins(CurrenciesResourceParameters resourceParameters)
+        public PagedList<Coin> Get(CurrenciesResourceParameters resourceParameters)
         {
             var coins = _context.Coins
                 .Include(c => c.Country)
@@ -57,7 +57,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Coin GetCoin(Guid coinId)
+        public Coin GetById(Guid coinId)
         {
             return _context.Coins
                 .Include(c => c.Country)
@@ -65,7 +65,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 .FirstOrDefault(c => c.Id == coinId);
         }
 
-        public void AddCoin(Coin coin)
+        public void Add(Coin coin)
         {
             if (coin.Id == Guid.Empty)
             {
@@ -85,19 +85,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Coins.Add(coin);
         }
 
-        public void UpdateCoin(Coin coin) { }
+        public void Update(Coin coin) { }
 
-        public void DeleteCoin(Coin coin)
+        public void Delete(Coin coin)
         {
             _context.Coins.Remove(coin);
         }
 
-        public bool Save()
-        {
-            return (_context.SaveChanges() >= 0);
-        }
-
-        public bool CoinExists(Guid coinId)
+        public bool Exists(Guid coinId)
         {
             return _context.Coins.Any(c => c.Id == coinId);
         }

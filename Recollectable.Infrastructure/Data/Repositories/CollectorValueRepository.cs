@@ -10,7 +10,8 @@ using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectorValueRepository : ICollectorValueRepository
+    public class CollectorValueRepository : 
+        IRepository<CollectorValue, CollectorValuesResourceParameters>
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -22,7 +23,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<CollectorValue> GetCollectorValues
+        public PagedList<CollectorValue> Get
             (CollectorValuesResourceParameters resourceParameters)
         {
             var collectorValues = _context.CollectorValues.ApplySort(resourceParameters.OrderBy,
@@ -33,12 +34,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public CollectorValue GetCollectorValue(Guid collectorValueId)
+        public CollectorValue GetById(Guid collectorValueId)
         {
             return _context.CollectorValues.FirstOrDefault(c => c.Id == collectorValueId);
         }
 
-        public void AddCollectorValue(CollectorValue collectorValue)
+        public void Add(CollectorValue collectorValue)
         {
             if (collectorValue.Id == Guid.Empty)
             {
@@ -48,19 +49,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.CollectorValues.Add(collectorValue);
         }
 
-        public void UpdateCollectorValue(CollectorValue collectorValue) { }
+        public void Update(CollectorValue collectorValue) { }
 
-        public void DeleteCollectorValue(CollectorValue collectorValue)
+        public void Delete(CollectorValue collectorValue)
         {
             _context.CollectorValues.Remove(collectorValue);
         }
 
-        public bool Save()
-        {
-            return (_context.SaveChanges() >= 0);
-        }
-
-        public bool CollectorValueExists(Guid collectorValueId)
+        public bool Exists(Guid collectorValueId)
         {
             return _context.CollectorValues.Any(c => c.Id == collectorValueId);
         }

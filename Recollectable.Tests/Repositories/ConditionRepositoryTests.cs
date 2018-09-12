@@ -1,7 +1,5 @@
 ﻿using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Infrastructure.Data.Repositories;
 using System;
 using System.Linq;
 using Xunit;
@@ -10,50 +8,48 @@ namespace Recollectable.Tests.Repositories
 {
     public class ConditionRepositoryTests : RecollectableTestBase
     {
-        private IConditionRepository _repository;
         private ConditionsResourceParameters resourceParameters;
 
         public ConditionRepositoryTests()
         {
-            _repository = new ConditionRepository(_context, _propertyMappingService);
             resourceParameters = new ConditionsResourceParameters();
         }
 
         [Fact]
-        public void GetConditions_ReturnsAllConditions()
+        public void Get_ReturnsAllConditions()
         {
-            var result = _repository.GetConditions(resourceParameters);
+            var result = _unitOfWork.ConditionRepository.Get(resourceParameters);
             Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
 
         [Fact]
-        public void GetConditions_OrdersConditionsByGrade()
+        public void Get_OrdersConditionsByGrade()
         {
-            var result = _repository.GetConditions(resourceParameters);
+            var result = _unitOfWork.ConditionRepository.Get(resourceParameters);
             Assert.Equal("AU52", result.First().Grade);
         }
 
         [Fact]
-        public void GetCondition_ReturnsCondition_GivenValidId()
+        public void GetById_ReturnsCondition_GivenValidId()
         {
-            var result = _repository
-                .GetCondition(new Guid("0a8d0c2b-1e7f-40b1-980f-eec355e2aca4"));
+            var result = _unitOfWork.ConditionRepository
+                .GetById(new Guid("0a8d0c2b-1e7f-40b1-980f-eec355e2aca4"));
             Assert.NotNull(result);
             Assert.Equal("0a8d0c2b-1e7f-40b1-980f-eec355e2aca4", result.Id.ToString());
             Assert.Equal("XF45", result.Grade);
         }
 
         [Fact]
-        public void GetCondition_ReturnsNull_GivenInvalidId()
+        public void GetById_ReturnsNull_GivenInvalidId()
         {
-            var result = _repository
-                .GetCondition(new Guid("4e7e331a-f93f-4ae3-a229-7153c17a1ca8"));
+            var result = _unitOfWork.ConditionRepository
+                .GetById(new Guid("4e7e331a-f93f-4ae3-a229-7153c17a1ca8"));
             Assert.Null(result);
         }
 
         [Fact]
-        public void AddCondition_AddsNewCondition()
+        public void Add_AddsNewCondition()
         {
             Condition newCondition = new Condition
             {
@@ -61,43 +57,43 @@ namespace Recollectable.Tests.Repositories
                 Grade = "F14"
             };
 
-            _repository.AddCondition(newCondition);
-            _repository.Save();
+            _unitOfWork.ConditionRepository.Add(newCondition);
+            _unitOfWork.Save();
 
-            Assert.Equal(7, _repository.GetConditions(resourceParameters).Count());
-            Assert.Equal("F14", _repository
-                .GetCondition(new Guid("ac41b63b-1dfb-4e2f-844f-fca2b43815f8"))
+            Assert.Equal(7, _unitOfWork.ConditionRepository.Get(resourceParameters).Count());
+            Assert.Equal("F14", _unitOfWork.ConditionRepository
+                .GetById(new Guid("ac41b63b-1dfb-4e2f-844f-fca2b43815f8"))
                 .Grade);
         }
 
         [Fact]
-        public void UpdateCondition_UpdatesExistingCondition()
+        public void Update_UpdatesExistingCondition()
         {
-            Condition updatedCondition = _repository
-                .GetCondition(new Guid("ef147683-5fa1-48b5-b31f-a95e7264245b"));
+            Condition updatedCondition = _unitOfWork.ConditionRepository
+                .GetById(new Guid("ef147683-5fa1-48b5-b31f-a95e7264245b"));
             updatedCondition.Grade = "Proof";
 
-            _repository.UpdateCondition(updatedCondition);
-            _repository.Save();
+            _unitOfWork.ConditionRepository.Update(updatedCondition);
+            _unitOfWork.Save();
 
-            Assert.Equal(6, _repository.GetConditions(resourceParameters).Count());
-            Assert.Equal("Proof", _repository
-                .GetCondition(new Guid("ef147683-5fa1-48b5-b31f-a95e7264245b"))
+            Assert.Equal(6, _unitOfWork.ConditionRepository.Get(resourceParameters).Count());
+            Assert.Equal("Proof", _unitOfWork.ConditionRepository
+                .GetById(new Guid("ef147683-5fa1-48b5-b31f-a95e7264245b"))
                 .Grade);
         }
 
         [Fact]
-        public void DeleteCondition_RemovesConditionFromDatabase()
+        public void Delete_RemovesConditionFromDatabase()
         {
-            Condition condition = _repository
-                .GetCondition(new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f"));
+            Condition condition = _unitOfWork.ConditionRepository
+                .GetById(new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f"));
 
-            _repository.DeleteCondition(condition);
-            _repository.Save();
+            _unitOfWork.ConditionRepository.Delete(condition);
+            _unitOfWork.Save();
 
-            Assert.Equal(5, _repository.GetConditions(resourceParameters).Count());
-            Assert.Null(_repository
-                .GetCondition(new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f")));
+            Assert.Equal(5, _unitOfWork.ConditionRepository.Get(resourceParameters).Count());
+            Assert.Null(_unitOfWork.ConditionRepository
+                .GetById(new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f")));
         }
     }
 }

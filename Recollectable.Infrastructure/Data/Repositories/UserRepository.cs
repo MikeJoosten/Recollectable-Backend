@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : IRepository<User, UsersResourceParameters>
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -23,7 +23,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<User> GetUsers(UsersResourceParameters resourceParameters)
+        public PagedList<User> Get(UsersResourceParameters resourceParameters)
         {
             var users = _context.Users
                 .Include(u => u.Collections)
@@ -43,14 +43,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public User GetUser(Guid userId)
+        public User GetById(Guid userId)
         {
             return _context.Users
                 .Include(u => u.Collections)
                 .FirstOrDefault(u => u.Id == userId);
         }
 
-        public void AddUser(User user)
+        public void Add(User user)
         {
             if (user.Id == Guid.Empty)
             {
@@ -68,19 +68,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Users.Add(user);
         }
 
-        public void UpdateUser(User user) { }
+        public void Update(User user) { }
 
-        public void DeleteUser(User user)
+        public void Delete(User user)
         {
             _context.Users.Remove(user);
         }
 
-        public bool Save()
-        {
-            return (_context.SaveChanges() >= 0);
-        }
-
-        public bool UserExists(Guid userId)
+        public bool Exists(Guid userId)
         {
             return _context.Users.Any(u => u.Id == userId);
         }

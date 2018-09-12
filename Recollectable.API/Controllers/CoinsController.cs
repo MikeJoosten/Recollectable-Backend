@@ -20,22 +20,16 @@ namespace Recollectable.API.Controllers
     [Route("api/coins")]
     public class CoinsController : Controller
     {
-        private ICoinRepository _coinRepository;
-        private ICountryRepository _countryRepository;
-        private ICollectorValueRepository _collectorValueRepository;
+        private IUnitOfWork _unitOfWork;
         private IUrlHelper _urlHelper;
         private IPropertyMappingService _propertyMappingService;
         private ITypeHelperService _typeHelperService;
 
-        public CoinsController(ICoinRepository coinRepository, 
-            ICollectorValueRepository collectorValueRepository, 
-            ICountryRepository countryRepository, IUrlHelper urlHelper,
+        public CoinsController(IUnitOfWork unitOfWork, IUrlHelper urlHelper,
             IPropertyMappingService propertyMappingService, 
             ITypeHelperService typeHelperService)
         {
-            _coinRepository = coinRepository;
-            _countryRepository = countryRepository;
-            _collectorValueRepository = collectorValueRepository;
+            _unitOfWork = unitOfWork;
             _urlHelper = urlHelper;
             _propertyMappingService = propertyMappingService;
             _typeHelperService = typeHelperService;
@@ -58,7 +52,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var coinsFromRepo = _coinRepository.GetCoins(resourceParameters);
+            var coinsFromRepo = _unitOfWork.CoinRepository.Get(resourceParameters);
             var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -137,7 +131,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var coinFromRepo = _coinRepository.GetCoin(id);
+            var coinFromRepo = _unitOfWork.CoinRepository.GetById(id);
 
             if (coinFromRepo == null)
             {
@@ -186,7 +180,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var country = _countryRepository.GetCountry(coin.CountryId);
+            var country = _unitOfWork.CountryRepository.GetById(coin.CountryId);
 
             if (country != null && coin.Country == null)
             {
@@ -198,8 +192,8 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectorValue = _collectorValueRepository
-                .GetCollectorValue(coin.CollectorValueId);
+            var collectorValue = _unitOfWork.CollectorValueRepository
+                .GetById(coin.CollectorValueId);
 
             if (collectorValue != null && coin.CollectorValue == null)
             {
@@ -212,9 +206,9 @@ namespace Recollectable.API.Controllers
             }
 
             var newCoin = Mapper.Map<Coin>(coin);
-            _coinRepository.AddCoin(newCoin);
+            _unitOfWork.CoinRepository.Add(newCoin);
 
-            if (!_coinRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a coin failed on save.");
             }
@@ -244,7 +238,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public IActionResult BlockCoinCreation(Guid id)
         {
-            if (_coinRepository.CoinExists(id))
+            if (_unitOfWork.CoinRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -271,17 +265,17 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!_countryRepository.CountryExists(coin.CountryId))
+            if (!_unitOfWork.CountryRepository.Exists(coin.CountryId))
             {
                 return BadRequest();
             }
 
-            if (!_collectorValueRepository.CollectorValueExists(coin.CollectorValueId))
+            if (!_unitOfWork.CollectorValueRepository.Exists(coin.CollectorValueId))
             {
                 return BadRequest();
             }
 
-            var coinFromRepo = _coinRepository.GetCoin(id);
+            var coinFromRepo = _unitOfWork.CoinRepository.GetById(id);
 
             if (coinFromRepo == null)
             {
@@ -292,9 +286,9 @@ namespace Recollectable.API.Controllers
             coinFromRepo.CollectorValueId = coin.CollectorValueId;
 
             Mapper.Map(coin, coinFromRepo);
-            _coinRepository.UpdateCoin(coinFromRepo);
+            _unitOfWork.CoinRepository.Update(coinFromRepo);
 
-            if (!_coinRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Updating coin {id} failed on save.");
             }
@@ -311,7 +305,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var coinFromRepo = _coinRepository.GetCoin(id);
+            var coinFromRepo = _unitOfWork.CoinRepository.GetById(id);
 
             if (coinFromRepo == null)
             {
@@ -334,12 +328,12 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!_countryRepository.CountryExists(patchedCoin.CountryId))
+            if (!_unitOfWork.CountryRepository.Exists(patchedCoin.CountryId))
             {
                 return BadRequest();
             }
 
-            if (!_collectorValueRepository.CollectorValueExists(patchedCoin.CollectorValueId))
+            if (!_unitOfWork.CollectorValueRepository.Exists(patchedCoin.CollectorValueId))
             {
                 return BadRequest();
             }
@@ -348,9 +342,9 @@ namespace Recollectable.API.Controllers
             coinFromRepo.CollectorValueId = patchedCoin.CollectorValueId;
 
             Mapper.Map(patchedCoin, coinFromRepo);
-            _coinRepository.UpdateCoin(coinFromRepo);
+            _unitOfWork.CoinRepository.Update(coinFromRepo);
 
-            if (!_coinRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Patching coin {id} failed on save.");
             }
@@ -361,16 +355,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteCoin")]
         public IActionResult DeleteCoin(Guid id)
         {
-            var coinFromRepo = _coinRepository.GetCoin(id);
+            var coinFromRepo = _unitOfWork.CoinRepository.GetById(id);
 
             if (coinFromRepo == null)
             {
                 return NotFound();
             }
 
-            _coinRepository.DeleteCoin(coinFromRepo);
+            _unitOfWork.CoinRepository.Delete(coinFromRepo);
 
-            if (!_coinRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Deleting coin {id} failed on save.");
             }

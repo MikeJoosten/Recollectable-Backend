@@ -1,7 +1,5 @@
 ﻿using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Infrastructure.Data.Repositories;
 using System;
 using System.Linq;
 using Xunit;
@@ -10,51 +8,48 @@ namespace Recollectable.Tests.Repositories
 {
     public class CoinRepositoryTests : RecollectableTestBase
     {
-        private ICoinRepository _coinRepository;
         private CurrenciesResourceParameters resourceParameters;
 
         public CoinRepositoryTests()
         {
-            _coinRepository = new CoinRepository(_context, 
-                _propertyMappingService);
             resourceParameters = new CurrenciesResourceParameters();
         }
 
         [Fact]
-        public void GetCoins_ReturnsAllCoins()
+        public void Get_ReturnsAllCoins()
         {
-            var result = _coinRepository.GetCoins(resourceParameters);
+            var result = _unitOfWork.CoinRepository.Get(resourceParameters);
             Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
 
         [Fact]
-        public void GetCoins_OrdersCoinsByCountry()
+        public void Get_OrdersCoinsByCountry()
         {
-            var result = _coinRepository.GetCoins(resourceParameters);
+            var result = _unitOfWork.CoinRepository.Get(resourceParameters);
             Assert.Equal("Canada", result.First().Country.Name);
         }
 
         [Fact]
-        public void GetCoin_ReturnsCoin_GivenValidCoinId()
+        public void GetById_ReturnsCoin_GivenValidCoinId()
         {
-            var result = _coinRepository
-                .GetCoin(new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"));
+            var result = _unitOfWork.CoinRepository
+                .GetById(new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"));
             Assert.NotNull(result);
             Assert.Equal("3a7fd6a5-d654-4647-8374-eba27001b0d3", result.Id.ToString());
             Assert.Equal("Pesos", result.Type);
         }
 
         [Fact]
-        public void GetCoin_ReturnsNull_GivenInvalidCoinId()
+        public void GetById_ReturnsNull_GivenInvalidCoinId()
         {
-            var result = _coinRepository
-                .GetCoin(new Guid("4ab72e1b-c115-4f13-b317-a841f73e44b7"));
+            var result = _unitOfWork.CoinRepository
+                .GetById(new Guid("4ab72e1b-c115-4f13-b317-a841f73e44b7"));
             Assert.Null(result);
         }
 
         [Fact]
-        public void AddCoin_AddsNewCoin()
+        public void Add_AddsNewCoin()
         {
             Coin newCoin = new Coin
             {
@@ -64,42 +59,42 @@ namespace Recollectable.Tests.Repositories
                 CollectorValueId = new Guid("2c716f5b-6792-4753-9f1a-fa8bcd4eabfb")
             };
 
-            _coinRepository.AddCoin(newCoin);
-            _coinRepository.Save();
+            _unitOfWork.CoinRepository.Add(newCoin);
+            _unitOfWork.Save();
 
-            Assert.Equal(7, _coinRepository.GetCoins(resourceParameters).Count());
-            Assert.Equal("Cent", _coinRepository
-                .GetCoin(new Guid("60e55387-ee18-4e5c-866f-7ca1d2d09c0f"))
+            Assert.Equal(7, _unitOfWork.CoinRepository.Get(resourceParameters).Count());
+            Assert.Equal("Cent", _unitOfWork.CoinRepository
+                .GetById(new Guid("60e55387-ee18-4e5c-866f-7ca1d2d09c0f"))
                 .Type);
         }
 
         [Fact]
-        public void UpdateCoin_UpdatesExistingCoin()
+        public void Update_UpdatesExistingCoin()
         {
-            Coin updatedCoin = _coinRepository
-                .GetCoin(new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"));
+            Coin updatedCoin = _unitOfWork.CoinRepository
+                .GetById(new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"));
             updatedCoin.Type = "Baht";
 
-            _coinRepository.UpdateCoin(updatedCoin);
-            _coinRepository.Save();
+            _unitOfWork.CoinRepository.Update(updatedCoin);
+            _unitOfWork.Save();
 
-            Assert.Equal(6, _coinRepository.GetCoins(resourceParameters).Count());
-            Assert.Equal("Baht", _coinRepository
-                .GetCoin(new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"))
+            Assert.Equal(6, _unitOfWork.CoinRepository.Get(resourceParameters).Count());
+            Assert.Equal("Baht", _unitOfWork.CoinRepository
+                .GetById(new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac"))
                 .Type);
         }
 
         [Fact]
-        public void DeleteCoin_RemovesCoinFromDatabase()
+        public void Delete_RemovesCoinFromDatabase()
         {
-            Coin coin = _coinRepository.GetCoin(new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48"));
+            Coin coin = _unitOfWork.CoinRepository.GetById(new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48"));
 
-            _coinRepository.DeleteCoin(coin);
-            _coinRepository.Save();
+            _unitOfWork.CoinRepository.Delete(coin);
+            _unitOfWork.Save();
 
-            Assert.Equal(5, _coinRepository.GetCoins(resourceParameters).Count());
-            Assert.Null(_coinRepository
-                .GetCoin(new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48")));
+            Assert.Equal(5, _unitOfWork.CoinRepository.Get(resourceParameters).Count());
+            Assert.Null(_unitOfWork.CoinRepository
+                .GetById(new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48")));
         }
     }
 }

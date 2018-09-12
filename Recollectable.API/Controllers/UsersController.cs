@@ -20,16 +20,16 @@ namespace Recollectable.API.Controllers
     [Route("api/users")]
     public class UsersController : Controller
     {
-        private IUserRepository _userRepository;
+        private IUnitOfWork _unitOfWork;
         private IUrlHelper _urlHelper;
         private IPropertyMappingService _propertyMappingService;
         private ITypeHelperService _typeHelperService;
 
-        public UsersController(IUserRepository userRepository, 
-            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
+        public UsersController(IUnitOfWork unitOfWork, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService,
             ITypeHelperService typeHelperService)
         {
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _urlHelper = urlHelper;
             _propertyMappingService = propertyMappingService;
             _typeHelperService = typeHelperService;
@@ -52,7 +52,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var usersFromRepo = _userRepository.GetUsers(resourceParameters);
+            var usersFromRepo = _unitOfWork.UserRepository.Get(resourceParameters);
             var users = Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -131,7 +131,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var userFromRepo = _userRepository.GetUser(id);
+            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
@@ -175,9 +175,9 @@ namespace Recollectable.API.Controllers
             }
 
             var newUser = Mapper.Map<User>(user);
-            _userRepository.AddUser(newUser);
+            _unitOfWork.UserRepository.Add(newUser);
 
-            if (!_userRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a user failed on save.");
             }
@@ -203,7 +203,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public IActionResult BlockUserCreation(Guid id)
         {
-            if (_userRepository.UserExists(id))
+            if (_unitOfWork.UserRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -224,7 +224,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var userFromRepo = _userRepository.GetUser(id);
+            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
@@ -232,9 +232,9 @@ namespace Recollectable.API.Controllers
             }
 
             Mapper.Map(user, userFromRepo);
-            _userRepository.UpdateUser(userFromRepo);
+            _unitOfWork.UserRepository.Update(userFromRepo);
 
-            if (!_userRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Updating user {id} failed on save.");
             }
@@ -251,7 +251,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var userFromRepo = _userRepository.GetUser(id);
+            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
@@ -261,15 +261,17 @@ namespace Recollectable.API.Controllers
             var patchedUser = Mapper.Map<UserUpdateDto>(userFromRepo);
             patchDoc.ApplyTo(patchedUser, ModelState);
 
+            TryValidateModel(patchedUser);
+
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
             Mapper.Map(patchedUser, userFromRepo);
-            _userRepository.UpdateUser(userFromRepo);
+            _unitOfWork.UserRepository.Update(userFromRepo);
 
-            if (!_userRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Patching user {id} failed on save.");
             }
@@ -280,16 +282,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteUser")]
         public IActionResult DeleteUser(Guid id)
         {
-            var userFromRepo = _userRepository.GetUser(id);
+            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
                 return NotFound();
             }
 
-            _userRepository.DeleteUser(userFromRepo);
+            _unitOfWork.UserRepository.Delete(userFromRepo);
 
-            if (!_userRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Deleting user {id} failed on save.");
             }

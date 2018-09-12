@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectionRepository : ICollectionRepository
+    public class CollectionRepository : IRepository<Collection, CollectionsResourceParameters>
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -22,8 +22,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Collection> GetCollections
-            (CollectionsResourceParameters resourceParameters)
+        public PagedList<Collection> Get(CollectionsResourceParameters resourceParameters)
         {
             var collections = _context.Collections.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>());
@@ -45,12 +44,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Collection GetCollection(Guid collectionId)
+        public Collection GetById(Guid collectionId)
         {
             return _context.Collections.FirstOrDefault(c => c.Id == collectionId);
         }
 
-        public void AddCollection(Collection collection)
+        public void Add(Collection collection)
         {
             if (collection.Id == Guid.Empty)
             {
@@ -60,19 +59,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Collections.Add(collection);
         }
 
-        public void UpdateCollection(Collection collection) { }
+        public void Update(Collection collection) { }
 
-        public void DeleteCollection(Collection collection)
+        public void Delete(Collection collection)
         {
             _context.Collections.Remove(collection);
         }
 
-        public bool Save()
-        {
-            return (_context.SaveChanges() >= 0);
-        }
-
-        public bool CollectionExists(Guid collectionId)
+        public bool Exists(Guid collectionId)
         {
             return _context.Collections.Any(c => c.Id == collectionId);
         }

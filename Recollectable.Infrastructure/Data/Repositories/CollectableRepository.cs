@@ -15,22 +15,21 @@ namespace Recollectable.Infrastructure.Data.Repositories
     public class CollectableRepository : ICollectableRepository
     {
         private RecollectableContext _context;
-        private ICollectionRepository _collectionRepository;
         private IPropertyMappingService _propertyMappingService;
+        private IUnitOfWork _unitOfWork;
 
         public CollectableRepository(RecollectableContext context,
-            ICollectionRepository collectionRepository,
-            IPropertyMappingService propertyMappingService)
+            IUnitOfWork unitOfWork, IPropertyMappingService propertyMappingService)
         {
             _context = context;
-            _collectionRepository = collectionRepository;
+            _unitOfWork = unitOfWork;
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<CollectionCollectable> GetCollectables(Guid collectionId,
+        public PagedList<CollectionCollectable> Get(Guid collectionId,
             CollectablesResourceParameters resourceParameters)
         {
-            if (!_collectionRepository.CollectionExists(collectionId))
+            if (!_unitOfWork.CollectionRepository.Exists(collectionId))
             {
                 return null;
             }
@@ -64,7 +63,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public CollectionCollectable GetCollectable(Guid collectionId, Guid Id)
+        public CollectionCollectable GetById(Guid collectionId, Guid Id)
         {
             return _context.CollectionCollectables
                 .Include(cc => cc.Condition)
@@ -81,7 +80,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             return _context.Collectables.FirstOrDefault(c => c.Id == collectableId);
         }
 
-        public void AddCollectable(CollectionCollectable collectable)
+        public void Add(CollectionCollectable collectable)
         {
             if (collectable.Id == Guid.Empty)
             {
@@ -91,19 +90,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.CollectionCollectables.Add(collectable);
         }
 
-        public void UpdateCollectable(CollectionCollectable collectable) { }
+        public void Update(CollectionCollectable collectable) { }
 
-        public void DeleteCollectable(CollectionCollectable collectable)
+        public void Delete(CollectionCollectable collectable)
         {
             _context.CollectionCollectables.Remove(collectable);
         }
 
-        public bool Save()
-        {
-            return (_context.SaveChanges() >= 0);
-        }
-
-        public bool CollectableExists(Guid Id)
+        public bool Exists(Guid Id)
         {
             return _context.CollectionCollectables.Any(cc => cc.Id == Id);
         }

@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CountryRepository : ICountryRepository
+    public class CountryRepository : IRepository<Country, CountriesResourceParameters>
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -22,8 +22,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Country> GetCountries
-            (CountriesResourceParameters resourceParameters)
+        public PagedList<Country> Get(CountriesResourceParameters resourceParameters)
         {
             var countries = _context.Countries.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<CountryDto, Country>());
@@ -45,12 +44,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Country GetCountry(Guid countryId)
+        public Country GetById(Guid countryId)
         {
             return _context.Countries.FirstOrDefault(c => c.Id == countryId);
         }
 
-        public void AddCountry(Country country)
+        public void Add(Country country)
         {
             if (country.Id == Guid.Empty)
             {
@@ -60,19 +59,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Countries.Add(country);
         }
 
-        public void UpdateCountry(Country country) { }
+        public void Update(Country country) { }
 
-        public void DeleteCountry(Country country)
+        public void Delete(Country country)
         {
             _context.Countries.Remove(country);
         }
 
-        public bool Save()
-        {
-            return (_context.SaveChanges() >= 0);
-        }
-
-        public bool CountryExists(Guid countryId)
+        public bool Exists(Guid countryId)
         {
             return _context.Countries.Any(c => c.Id == countryId);
         }

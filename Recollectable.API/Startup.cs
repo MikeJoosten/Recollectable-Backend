@@ -18,6 +18,7 @@ using Recollectable.Core.DTOs.Users;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
+using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces.Repositories;
 using Recollectable.Core.Interfaces.Services;
@@ -66,14 +67,15 @@ namespace Recollectable.API
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
             // Register repositories
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ICollectionRepository, CollectionRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICollectableRepository, CollectableRepository>();
-            services.AddScoped<ICoinRepository, CoinRepository>();
-            services.AddScoped<IBanknoteRepository, BanknoteRepository>();
-            services.AddScoped<IConditionRepository, ConditionRepository>();
-            services.AddScoped<ICountryRepository, CountryRepository>();
-            services.AddScoped<ICollectorValueRepository, CollectorValueRepository>();
+            services.AddScoped<IRepository<User, UsersResourceParameters>, UserRepository>();
+            services.AddScoped<IRepository<Collection, CollectionsResourceParameters>, CollectionRepository>();
+            services.AddScoped<IRepository<Coin, CurrenciesResourceParameters>, CoinRepository>();
+            services.AddScoped<IRepository<Banknote, CurrenciesResourceParameters>, BanknoteRepository>();
+            services.AddScoped<IRepository<Condition, ConditionsResourceParameters>, ConditionRepository>();
+            services.AddScoped<IRepository<Country, CountriesResourceParameters>, CountryRepository>();
+            services.AddScoped<IRepository<CollectorValue, CollectorValuesResourceParameters>, CollectorValueRepository>();
 
             // Register Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

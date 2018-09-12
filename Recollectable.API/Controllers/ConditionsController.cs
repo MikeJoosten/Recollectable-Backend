@@ -20,16 +20,16 @@ namespace Recollectable.API.Controllers
     [Route("api/conditions")]
     public class ConditionsController : Controller
     {
-        private IConditionRepository _conditionRepository;
+        private IUnitOfWork _unitOfWork;
         private IUrlHelper _urlHelper;
         private IPropertyMappingService _propertyMappingService;
         private ITypeHelperService _typeHelperService;
 
-        public ConditionsController(IConditionRepository conditionRepository,
-            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
+        public ConditionsController(IUnitOfWork unitOfWork, IUrlHelper urlHelper, 
+            IPropertyMappingService propertyMappingService,
             ITypeHelperService typeHelperService)
         {
-            _conditionRepository = conditionRepository;
+            _unitOfWork = unitOfWork;
             _urlHelper = urlHelper;
             _propertyMappingService = propertyMappingService;
             _typeHelperService = typeHelperService;
@@ -52,7 +52,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var conditionsFromRepo = _conditionRepository.GetConditions(resourceParameters);
+            var conditionsFromRepo = _unitOfWork.ConditionRepository.Get(resourceParameters);
             var conditions = Mapper.Map<IEnumerable<ConditionDto>>(conditionsFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -131,7 +131,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var conditionFromRepo = _conditionRepository.GetCondition(id);
+            var conditionFromRepo = _unitOfWork.ConditionRepository.GetById(id);
 
             if (conditionFromRepo == null)
             {
@@ -175,9 +175,9 @@ namespace Recollectable.API.Controllers
             }
 
             var newCondition = Mapper.Map<Condition>(condition);
-            _conditionRepository.AddCondition(newCondition);
+            _unitOfWork.ConditionRepository.Add(newCondition);
 
-            if (!_conditionRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a condition failed on save.");
             }
@@ -207,7 +207,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public IActionResult BlockConditionCreation(Guid id)
         {
-            if (_conditionRepository.ConditionExists(id))
+            if (_unitOfWork.ConditionRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -228,7 +228,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var conditionFromRepo = _conditionRepository.GetCondition(id);
+            var conditionFromRepo = _unitOfWork.ConditionRepository.GetById(id);
 
             if (conditionFromRepo == null)
             {
@@ -236,9 +236,9 @@ namespace Recollectable.API.Controllers
             }
 
             Mapper.Map(condition, conditionFromRepo);
-            _conditionRepository.UpdateCondition(conditionFromRepo);
+            _unitOfWork.ConditionRepository.Update(conditionFromRepo);
 
-            if (!_conditionRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Updating condition {id} failed on save.");
             }
@@ -255,7 +255,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var conditionFromRepo = _conditionRepository.GetCondition(id);
+            var conditionFromRepo = _unitOfWork.ConditionRepository.GetById(id);
 
             if (conditionFromRepo == null)
             {
@@ -265,15 +265,17 @@ namespace Recollectable.API.Controllers
             var patchedCondition = Mapper.Map<ConditionUpdateDto>(conditionFromRepo);
             patchDoc.ApplyTo(patchedCondition, ModelState);
 
+            TryValidateModel(patchedCondition);
+
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
             Mapper.Map(patchedCondition, conditionFromRepo);
-            _conditionRepository.UpdateCondition(conditionFromRepo);
+            _unitOfWork.ConditionRepository.Update(conditionFromRepo);
 
-            if (!_conditionRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Patching condition {id} failed on save.");
             }
@@ -284,16 +286,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteCondition")]
         public IActionResult DeleteCondition(Guid id)
         {
-            var conditionFromRepo = _conditionRepository.GetCondition(id);
+            var conditionFromRepo = _unitOfWork.ConditionRepository.GetById(id);
 
             if (conditionFromRepo == null)
             {
                 return NotFound();
             }
 
-            _conditionRepository.DeleteCondition(conditionFromRepo);
+            _unitOfWork.ConditionRepository.Delete(conditionFromRepo);
 
-            if (!_conditionRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Deleting condition {id} failed on save.");
             }

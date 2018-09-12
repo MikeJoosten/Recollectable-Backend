@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class BanknoteRepository : IBanknoteRepository
+    public class BanknoteRepository : IRepository<Banknote, CurrenciesResourceParameters>
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -23,8 +23,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Banknote> GetBanknotes
-            (CurrenciesResourceParameters resourceParameters)
+        public PagedList<Banknote> Get(CurrenciesResourceParameters resourceParameters)
         {
             var banknotes = _context.Banknotes
                 .Include(c => c.Country)
@@ -58,7 +57,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Banknote GetBanknote(Guid banknoteId)
+        public Banknote GetById(Guid banknoteId)
         {
             return _context.Banknotes
                 .Include(b => b.Country)
@@ -66,7 +65,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 .FirstOrDefault(b => b.Id == banknoteId);
         }
 
-        public void AddBanknote(Banknote banknote)
+        public void Add(Banknote banknote)
         {
             if (banknote.Id == Guid.Empty)
             {
@@ -86,19 +85,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Banknotes.Add(banknote);
         }
 
-        public void UpdateBanknote(Banknote banknote) { }
+        public void Update(Banknote banknote) { }
 
-        public void DeleteBanknote(Banknote banknote)
+        public void Delete(Banknote banknote)
         {
             _context.Banknotes.Remove(banknote);
         }
 
-        public bool Save()
-        {
-            return (_context.SaveChanges() >= 0);
-        }
-
-        public bool BanknoteExists(Guid banknoteId)
+        public bool Exists(Guid banknoteId)
         {
             return _context.Banknotes.Any(b => b.Id == banknoteId);
         }
