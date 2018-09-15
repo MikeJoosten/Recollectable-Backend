@@ -20,19 +20,14 @@ namespace Recollectable.API.Controllers
     [Route("api/coins")]
     public class CoinsController : Controller
     {
-        private IUnitOfWork _unitOfWork;
-        private IUrlHelper _urlHelper;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        public readonly IUnitOfWork _unitOfWork;
+        public readonly IControllerService _controllerService;
 
-        public CoinsController(IUnitOfWork unitOfWork, IUrlHelper urlHelper,
-            IPropertyMappingService propertyMappingService, 
-            ITypeHelperService typeHelperService)
+        public CoinsController(IUnitOfWork unitOfWork,
+            IControllerService controllerService)
         {
             _unitOfWork = unitOfWork;
-            _urlHelper = urlHelper;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _controllerService = controllerService;
         }
 
         [HttpHead]
@@ -40,13 +35,13 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<CoinDto, Coin>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<CoinDto, Coin>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<CoinDto>
+            if (!_controllerService.TypeHelperService.TypeHasProperties<CoinDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
@@ -126,7 +121,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCoin(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<CoinDto>(fields))
+            if (!_controllerService.TypeHelperService.TypeHasProperties<CoinDto>(fields))
             {
                 return BadRequest();
             }
@@ -385,7 +380,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetCoins", new
+                    return _controllerService.UrlHelper.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -396,7 +391,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetCoins", new
+                    return _controllerService.UrlHelper.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -407,7 +402,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _urlHelper.Link("GetCoins", new
+                    return _controllerService.UrlHelper.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -426,19 +421,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_urlHelper.Link("GetCoins",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCoins",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_urlHelper.Link("CreateCoins",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCoins",
                     new { }), "create_coins", "POST"));
 
-                links.Add(new LinkDto(_urlHelper.Link("UpdateCoins",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCoins",
                     new { id }), "update_coins", "PUT"));
 
-                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCoins",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCoins",
                     new { id }), "partially_update_coins", "PATCH"));
 
-                links.Add(new LinkDto(_urlHelper.Link("DeleteCoins",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCoins",
                     new { id }), "delete_coins", "DELETE"));
             }
 
@@ -449,10 +444,11 @@ namespace Recollectable.API.Controllers
             (CurrenciesResourceParameters resourceParameters,
             bool hasNext, bool hasPrevious)
         {
-            var links = new List<LinkDto>();
-
-            links.Add(new LinkDto(CreateCoinsResourceUri(resourceParameters,
-                ResourceUriType.Current), "self", "GET"));
+            var links = new List<LinkDto>
+            {
+                new LinkDto(CreateCoinsResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET")
+            };
 
             if (hasNext)
             {

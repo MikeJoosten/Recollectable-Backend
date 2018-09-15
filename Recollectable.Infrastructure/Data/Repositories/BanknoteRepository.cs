@@ -4,26 +4,21 @@ using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Common;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Extensions;
-using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
 using System;
 using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class BanknoteRepository : IRepository<Banknote, CurrenciesResourceParameters>
+    public class BanknoteRepository : BaseRepository<Banknote, CurrenciesResourceParameters>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public BanknoteRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public BanknoteRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Banknote> Get(CurrenciesResourceParameters resourceParameters)
+        public override PagedList<Banknote> Get(CurrenciesResourceParameters resourceParameters)
         {
             var banknotes = _context.Banknotes
                 .Include(c => c.Country)
@@ -57,7 +52,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Banknote GetById(Guid banknoteId)
+        public override Banknote GetById(Guid banknoteId)
         {
             return _context.Banknotes
                 .Include(b => b.Country)
@@ -65,7 +60,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 .FirstOrDefault(b => b.Id == banknoteId);
         }
 
-        public void Add(Banknote banknote)
+        public override void Add(Banknote banknote)
         {
             if (banknote.Id == Guid.Empty)
             {
@@ -85,14 +80,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Banknotes.Add(banknote);
         }
 
-        public void Update(Banknote banknote) { }
+        public override void Update(Banknote banknote) { }
 
-        public void Delete(Banknote banknote)
+        public override void Delete(Banknote banknote)
         {
             _context.Banknotes.Remove(banknote);
         }
 
-        public bool Exists(Guid banknoteId)
+        public override bool Exists(Guid banknoteId)
         {
             return _context.Banknotes.Any(b => b.Id == banknoteId);
         }

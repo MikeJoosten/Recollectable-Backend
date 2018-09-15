@@ -87,6 +87,7 @@ namespace Recollectable.API
             });
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
+            services.AddTransient<IControllerService, ControllerService>();
 
             // Register HTTP Caching
             services.AddHttpCacheHeaders(

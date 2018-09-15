@@ -4,8 +4,6 @@ using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
-using Recollectable.Core.Services;
 using Recollectable.Infrastructure.Data.Repositories;
 using System;
 
@@ -14,37 +12,34 @@ namespace Recollectable.Infrastructure.Data
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly RecollectableContext _context;
-        private readonly IPropertyMappingService _propertyMappingService;
 
         public IRepository<Banknote, CurrenciesResourceParameters> BanknoteRepository =>
-            new BanknoteRepository(_context, _propertyMappingService);
+            new BanknoteRepository(_context);
 
         public IRepository<Coin, CurrenciesResourceParameters> CoinRepository =>
-            new CoinRepository(_context, _propertyMappingService);
+            new CoinRepository(_context);
 
         public IRepository<Collection, CollectionsResourceParameters> CollectionRepository =>
-            new CollectionRepository(_context, _propertyMappingService);
+            new CollectionRepository(_context);
 
         public IRepository<CollectorValue, CollectorValuesResourceParameters> CollectorValueRepository =>
-            new CollectorValueRepository(_context, _propertyMappingService);
+            new CollectorValueRepository(_context);
 
         public IRepository<Condition, ConditionsResourceParameters> ConditionRepository =>
-            new ConditionRepository(_context, _propertyMappingService);
+            new ConditionRepository(_context);
 
         public IRepository<Country, CountriesResourceParameters> CountryRepository =>
-            new CountryRepository(_context, _propertyMappingService);
+            new CountryRepository(_context);
 
         public IRepository<User, UsersResourceParameters> UserRepository =>
-            new UserRepository(_context, _propertyMappingService);
+            new UserRepository(_context);
 
         public ICollectableRepository CollectableRepository =>
-            new CollectableRepository(_context, this, _propertyMappingService);
+            new CollectableRepository(_context, this);
 
-        public UnitOfWork(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public UnitOfWork(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
         public bool Save()

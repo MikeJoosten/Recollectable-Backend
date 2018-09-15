@@ -20,19 +20,14 @@ namespace Recollectable.API.Controllers
     [Route("api/conditions")]
     public class ConditionsController : Controller
     {
-        private IUnitOfWork _unitOfWork;
-        private IUrlHelper _urlHelper;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        public readonly IUnitOfWork _unitOfWork;
+        public readonly IControllerService _controllerService;
 
-        public ConditionsController(IUnitOfWork unitOfWork, IUrlHelper urlHelper, 
-            IPropertyMappingService propertyMappingService,
-            ITypeHelperService typeHelperService)
+        public ConditionsController(IUnitOfWork unitOfWork,
+            IControllerService controllerService)
         {
             _unitOfWork = unitOfWork;
-            _urlHelper = urlHelper;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _controllerService = controllerService;
         }
 
         [HttpHead]
@@ -40,13 +35,13 @@ namespace Recollectable.API.Controllers
         public IActionResult GetConditions(ConditionsResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<ConditionDto, Condition>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<ConditionDto, Condition>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<ConditionDto>
+            if (!_controllerService.TypeHelperService.TypeHasProperties<ConditionDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
@@ -126,7 +121,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCondition(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<ConditionDto>(fields))
+            if (!_controllerService.TypeHelperService.TypeHasProperties<ConditionDto>(fields))
             {
                 return BadRequest();
             }
@@ -316,7 +311,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetConditions", new
+                    return _controllerService.UrlHelper.Link("GetConditions", new
                     {
                         grade = resourceParameters.Grade,
                         search = resourceParameters.Search,
@@ -326,7 +321,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetConditions", new
+                    return _controllerService.UrlHelper.Link("GetConditions", new
                     {
                         grade = resourceParameters.Grade,
                         search = resourceParameters.Search,
@@ -336,7 +331,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _urlHelper.Link("GetConditions", new
+                    return _controllerService.UrlHelper.Link("GetConditions", new
                     {
                         grade = resourceParameters.Grade,
                         search = resourceParameters.Search,
@@ -354,19 +349,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_urlHelper.Link("GetCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCondition",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_urlHelper.Link("CreateCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCondition",
                     new { }), "create_condition", "POST"));
 
-                links.Add(new LinkDto(_urlHelper.Link("UpdateCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCondition",
                     new { id }), "update_condition", "PUT"));
 
-                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCondition",
                     new { id }), "partially_update_condition", "PATCH"));
 
-                links.Add(new LinkDto(_urlHelper.Link("DeleteCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCondition",
                     new { id }), "delete_condition", "DELETE"));
             }
 
@@ -377,10 +372,11 @@ namespace Recollectable.API.Controllers
             (ConditionsResourceParameters resourceParameters,
             bool hasNext, bool hasPrevious)
         {
-            var links = new List<LinkDto>();
-
-            links.Add(new LinkDto(CreateConditionsResourceUri(resourceParameters,
-                ResourceUriType.Current), "self", "GET"));
+            var links = new List<LinkDto>
+            {
+                new LinkDto(CreateConditionsResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET")
+            };
 
             if (hasNext)
             {

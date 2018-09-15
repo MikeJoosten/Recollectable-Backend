@@ -4,26 +4,21 @@ using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Common;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Extensions;
-using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
 using System;
 using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CoinRepository : IRepository<Coin, CurrenciesResourceParameters>
+    public class CoinRepository : BaseRepository<Coin, CurrenciesResourceParameters>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public CoinRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public CoinRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Coin> Get(CurrenciesResourceParameters resourceParameters)
+        public override PagedList<Coin> Get(CurrenciesResourceParameters resourceParameters)
         {
             var coins = _context.Coins
                 .Include(c => c.Country)
@@ -57,7 +52,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Coin GetById(Guid coinId)
+        public override Coin GetById(Guid coinId)
         {
             return _context.Coins
                 .Include(c => c.Country)
@@ -65,7 +60,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 .FirstOrDefault(c => c.Id == coinId);
         }
 
-        public void Add(Coin coin)
+        public override void Add(Coin coin)
         {
             if (coin.Id == Guid.Empty)
             {
@@ -85,14 +80,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Coins.Add(coin);
         }
 
-        public void Update(Coin coin) { }
+        public override void Update(Coin coin) { }
 
-        public void Delete(Coin coin)
+        public override void Delete(Coin coin)
         {
             _context.Coins.Remove(coin);
         }
 
-        public bool Exists(Guid coinId)
+        public override bool Exists(Guid coinId)
         {
             return _context.Coins.Any(c => c.Id == coinId);
         }

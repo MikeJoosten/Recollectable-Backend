@@ -3,26 +3,21 @@ using Recollectable.Core.Entities.Common;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Extensions;
-using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
 using System;
 using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CountryRepository : IRepository<Country, CountriesResourceParameters>
+    public class CountryRepository : BaseRepository<Country, CountriesResourceParameters>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public CountryRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public CountryRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Country> Get(CountriesResourceParameters resourceParameters)
+        public override PagedList<Country> Get(CountriesResourceParameters resourceParameters)
         {
             var countries = _context.Countries.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<CountryDto, Country>());
@@ -44,12 +39,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Country GetById(Guid countryId)
+        public override Country GetById(Guid countryId)
         {
             return _context.Countries.FirstOrDefault(c => c.Id == countryId);
         }
 
-        public void Add(Country country)
+        public override void Add(Country country)
         {
             if (country.Id == Guid.Empty)
             {
@@ -59,14 +54,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Countries.Add(country);
         }
 
-        public void Update(Country country) { }
+        public override void Update(Country country) { }
 
-        public void Delete(Country country)
+        public override void Delete(Country country)
         {
             _context.Countries.Remove(country);
         }
 
-        public bool Exists(Guid countryId)
+        public override bool Exists(Guid countryId)
         {
             return _context.Countries.Any(c => c.Id == countryId);
         }

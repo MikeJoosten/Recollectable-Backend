@@ -20,19 +20,14 @@ namespace Recollectable.API.Controllers
     [Route("api/users")]
     public class UsersController : Controller
     {
-        private IUnitOfWork _unitOfWork;
-        private IUrlHelper _urlHelper;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        public readonly IUnitOfWork _unitOfWork;
+        public readonly IControllerService _controllerService;
 
-        public UsersController(IUnitOfWork unitOfWork, IUrlHelper urlHelper,
-            IPropertyMappingService propertyMappingService,
-            ITypeHelperService typeHelperService)
+        public UsersController(IUnitOfWork unitOfWork,
+            IControllerService controllerService)
         {
             _unitOfWork = unitOfWork;
-            _urlHelper = urlHelper;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _controllerService = controllerService;
         }
 
         [HttpHead]
@@ -40,13 +35,13 @@ namespace Recollectable.API.Controllers
         public IActionResult GetUsers(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<UserDto, User>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<UserDto>
+            if (!_controllerService.TypeHelperService.TypeHasProperties<UserDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
@@ -126,7 +121,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetUser(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
+            if (!_controllerService.TypeHelperService.TypeHasProperties<UserDto>(fields))
             {
                 return BadRequest();
             }
@@ -312,7 +307,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetUsers", new
+                    return _controllerService.UrlHelper.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -321,7 +316,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetUsers", new
+                    return _controllerService.UrlHelper.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -331,7 +326,7 @@ namespace Recollectable.API.Controllers
                     });
                 case ResourceUriType.Current:
                 default:
-                    return _urlHelper.Link("GetUsers", new
+                    return _controllerService.UrlHelper.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -348,19 +343,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_urlHelper.Link("GetUser",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetUser",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_urlHelper.Link("CreateUser", 
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateUser", 
                     new { }), "create_user", "POST"));
 
-                links.Add(new LinkDto(_urlHelper.Link("UpdateUser",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateUser",
                     new { id }), "update_user", "PUT"));
 
-                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateUser",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateUser",
                     new { id }), "partially_update_user", "PATCH"));
 
-                links.Add(new LinkDto(_urlHelper.Link("DeleteUser",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteUser",
                     new { id }), "delete_user", "DELETE"));
             }
 
@@ -371,10 +366,11 @@ namespace Recollectable.API.Controllers
             (UsersResourceParameters resourceParameters, 
             bool hasNext, bool hasPrevious)
         {
-            var links = new List<LinkDto>();
-
-            links.Add(new LinkDto(CreateUsersResourceUri(resourceParameters,
-                ResourceUriType.Current), "self", "GET"));
+            var links = new List<LinkDto>
+            {
+                new LinkDto(CreateUsersResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET")
+            };
 
             if (hasNext)
             {

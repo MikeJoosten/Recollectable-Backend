@@ -3,26 +3,21 @@ using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Common;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Extensions;
-using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
 using System;
 using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectionRepository : IRepository<Collection, CollectionsResourceParameters>
+    public class CollectionRepository : BaseRepository<Collection, CollectionsResourceParameters>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public CollectionRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public CollectionRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Collection> Get(CollectionsResourceParameters resourceParameters)
+        public override PagedList<Collection> Get(CollectionsResourceParameters resourceParameters)
         {
             var collections = _context.Collections.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>());
@@ -44,12 +39,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Collection GetById(Guid collectionId)
+        public override Collection GetById(Guid collectionId)
         {
             return _context.Collections.FirstOrDefault(c => c.Id == collectionId);
         }
 
-        public void Add(Collection collection)
+        public override void Add(Collection collection)
         {
             if (collection.Id == Guid.Empty)
             {
@@ -59,14 +54,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Collections.Add(collection);
         }
 
-        public void Update(Collection collection) { }
+        public override void Update(Collection collection) { }
 
-        public void Delete(Collection collection)
+        public override void Delete(Collection collection)
         {
             _context.Collections.Remove(collection);
         }
 
-        public bool Exists(Guid collectionId)
+        public override bool Exists(Guid collectionId)
         {
             return _context.Collections.Any(c => c.Id == collectionId);
         }

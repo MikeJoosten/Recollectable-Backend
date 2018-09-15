@@ -21,19 +21,14 @@ namespace Recollectable.API.Controllers
     [Route("api/collections/{collectionId}/collectables")]
     public class CollectablesController : Controller
     {
-        private IUnitOfWork _unitOfWork;
-        private IUrlHelper _urlHelper;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        public readonly IUnitOfWork _unitOfWork;
+        public readonly IControllerService _controllerService;
 
-        public CollectablesController(IUnitOfWork unitOfWork, IUrlHelper urlHelper,
-            IPropertyMappingService propertyMappingService,
-            ITypeHelperService typeHelperService)
+        public CollectablesController(IUnitOfWork unitOfWork,
+            IControllerService controllerService)
         {
             _unitOfWork = unitOfWork;
-            _urlHelper = urlHelper;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _controllerService = controllerService;
         }
 
         [HttpHead]
@@ -42,13 +37,13 @@ namespace Recollectable.API.Controllers
             CollectablesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<CollectableDto, Collectable>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<CollectableDto, Collectable>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<CollectableDto>
+            if (!_controllerService.TypeHelperService.TypeHasProperties<CollectableDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
@@ -135,7 +130,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCollectable(Guid collectionId, Guid id, 
             [FromQuery] string fields, [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<CollectableDto>(fields))
+            if (!_controllerService.TypeHelperService.TypeHasProperties<CollectableDto>(fields))
             {
                 return BadRequest();
             }
@@ -405,7 +400,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetCollectables", new
+                    return _controllerService.UrlHelper.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -415,7 +410,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetCollectables", new
+                    return _controllerService.UrlHelper.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -425,7 +420,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _urlHelper.Link("GetCollectables", new
+                    return _controllerService.UrlHelper.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -443,19 +438,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_urlHelper.Link("GetCollectable",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCollectable",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_urlHelper.Link("CreateCollectable",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCollectable",
                     new { }), "create_collectable", "POST"));
 
-                links.Add(new LinkDto(_urlHelper.Link("UpdateCollectable",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCollectable",
                     new { id }), "update_collectable", "PUT"));
 
-                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCollectable",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCollectable",
                     new { id }), "partially_update_collectable", "PATCH"));
 
-                links.Add(new LinkDto(_urlHelper.Link("DeleteCollectable",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCollectable",
                     new { id }), "delete_collectable", "DELETE"));
             }
 
@@ -466,10 +461,11 @@ namespace Recollectable.API.Controllers
             (CollectablesResourceParameters resourceParameters,
             bool hasNext, bool hasPrevious)
         {
-            var links = new List<LinkDto>();
-
-            links.Add(new LinkDto(CreateCollectablesResourceUri(resourceParameters,
-                ResourceUriType.Current), "self", "GET"));
+            var links = new List<LinkDto>
+            {
+                new LinkDto(CreateCollectablesResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET")
+            };
 
             if (hasNext)
             {

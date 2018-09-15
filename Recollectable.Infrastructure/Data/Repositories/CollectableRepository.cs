@@ -7,6 +7,7 @@ using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Extensions;
 using Recollectable.Core.Interfaces.Repositories;
 using Recollectable.Core.Interfaces.Services;
+using Recollectable.Core.Services;
 using System;
 using System.Linq;
 
@@ -15,15 +16,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
     public class CollectableRepository : ICollectableRepository
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
         private IUnitOfWork _unitOfWork;
+        private IPropertyMappingService _propertyMappingService;
 
-        public CollectableRepository(RecollectableContext context,
-            IUnitOfWork unitOfWork, IPropertyMappingService propertyMappingService)
+        public CollectableRepository(RecollectableContext context, IUnitOfWork unitOfWork)
         {
             _context = context;
             _unitOfWork = unitOfWork;
-            _propertyMappingService = propertyMappingService;
+            _propertyMappingService = new PropertyMappingService();
         }
 
         public PagedList<CollectionCollectable> Get(Guid collectionId,

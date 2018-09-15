@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Recollectable.Core.DTOs.Common;
+using Recollectable.Core.Interfaces.Services;
 using System.Collections.Generic;
 
 namespace Recollectable.API.Controllers
@@ -7,11 +8,11 @@ namespace Recollectable.API.Controllers
     [Route("api")]
     public class HomeController : Controller
     {
-        private IUrlHelper _urlHelper;
+        public readonly IControllerService _controllerService;
 
-        public HomeController(IUrlHelper urlHelper)
+        public HomeController(IControllerService controllerService)
         {
-            _urlHelper = urlHelper;
+            _controllerService = controllerService;
         }
 
         [HttpGet(Name = "GetHome")]
@@ -19,22 +20,23 @@ namespace Recollectable.API.Controllers
         {
             if (mediaType == "application/json+hateoas")
             {
-                var links = new List<LinkDto>();
+                var links = new List<LinkDto>
+                {
+                    new LinkDto(_controllerService.UrlHelper.Link("GetHome",
+                    new { }), "self", "GET"),
 
-                links.Add(new LinkDto(_urlHelper.Link("GetHome", 
-                    new { }), "self", "GET"));
+                    new LinkDto(_controllerService.UrlHelper.Link("GetUsers",
+                    new { }), "users", "GET"),
 
-                links.Add(new LinkDto(_urlHelper.Link("GetUsers",
-                    new { }), "users", "GET"));
+                    new LinkDto(_controllerService.UrlHelper.Link("GetCollections",
+                    new { }), "collections", "GET"),
 
-                links.Add(new LinkDto(_urlHelper.Link("GetCollections",
-                    new { }), "collections", "GET"));
+                    new LinkDto(_controllerService.UrlHelper.Link("GetCoins",
+                    new { }), "coins", "GET"),
 
-                links.Add(new LinkDto(_urlHelper.Link("GetCoins",
-                    new { }), "coins", "GET"));
-
-                links.Add(new LinkDto(_urlHelper.Link("GetBanknotes",
-                    new { }), "banknotes", "GET"));
+                    new LinkDto(_controllerService.UrlHelper.Link("GetBanknotes",
+                    new { }), "banknotes", "GET")
+                };
 
                 return Ok(links);
             }
