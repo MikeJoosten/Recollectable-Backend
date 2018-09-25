@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Recollectable.Core.DTOs.Common;
 using Recollectable.Core.Interfaces.Services;
+using Recollectable.Core.Shared.DTOs;
 using System.Collections.Generic;
 
 namespace Recollectable.API.Controllers

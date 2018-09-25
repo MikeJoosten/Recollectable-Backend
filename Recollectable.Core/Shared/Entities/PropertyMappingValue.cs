@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Recollectable.Core.Entities.Common
+namespace Recollectable.Core.Shared.Entities
 {
     public class PropertyMappingValue
     {

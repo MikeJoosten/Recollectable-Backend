@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Recollectable.Core.Interfaces.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Recollectable.Core.Shared.Interfaces;
 
-namespace Recollectable.Core.Services
+namespace Recollectable.Core.Services.Common
 {
     public class ControllerService : IControllerService
     {

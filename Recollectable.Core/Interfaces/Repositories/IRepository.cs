@@ -1,4 +1,4 @@
-﻿using Recollectable.Core.Entities.Common;
+﻿using Recollectable.Core.Shared.Entities;
 using System;
 
 namespace Recollectable.Core.Interfaces.Repositories

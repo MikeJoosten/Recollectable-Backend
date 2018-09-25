@@ -1,4 +1,4 @@
-﻿namespace Recollectable.Core.Enums
+﻿namespace Recollectable.Core.Shared.Enums
 {
     public enum ResourceUriType
     {

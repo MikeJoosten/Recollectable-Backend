@@ -1,8 +1,8 @@
 ﻿using Recollectable.Core.DTOs.Collectables;
 using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Entities.Common;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Extensions;
+using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Extensions;
 using System;
 using System.Linq;
 

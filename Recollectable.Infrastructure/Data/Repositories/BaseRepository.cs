@@ -1,7 +1,7 @@
-﻿using Recollectable.Core.Entities.Common;
-using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
-using Recollectable.Core.Services;
+﻿using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Services.Common;
+using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Interfaces;
 using System;
 
 namespace Recollectable.Infrastructure.Data.Repositories

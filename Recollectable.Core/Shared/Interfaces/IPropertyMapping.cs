@@ -1,4 +1,4 @@
-﻿namespace Recollectable.Core.Interfaces.Common
+﻿namespace Recollectable.Core.Shared.Interfaces
 {
     public interface IPropertyMapping
     {

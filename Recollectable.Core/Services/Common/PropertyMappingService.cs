@@ -4,20 +4,19 @@ using Recollectable.Core.DTOs.Locations;
 using Recollectable.Core.DTOs.Users;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
-using Recollectable.Core.Entities.Common;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces.Common;
-using Recollectable.Core.Interfaces.Services;
+using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Recollectable.Core.Services
+namespace Recollectable.Core.Services.Common
 {
     public class PropertyMappingService : IPropertyMappingService
     {
-        private Dictionary<string, PropertyMappingValue> _userPropertyMapping =
+        private readonly Dictionary<string, PropertyMappingValue> _userPropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) },
@@ -25,7 +24,7 @@ namespace Recollectable.Core.Services
                 { "Email", new PropertyMappingValue(new List<string>() { "Email" }) }
             };
 
-        private Dictionary<string, PropertyMappingValue> _currencyPropertyMapping =
+        private readonly Dictionary<string, PropertyMappingValue> _currencyPropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) },
@@ -34,7 +33,7 @@ namespace Recollectable.Core.Services
                 { "ReleaseDate", new PropertyMappingValue(new List<string>() { "ReleaseDate" }) }
             };
 
-        private Dictionary<string, PropertyMappingValue> _collectablePropertyMapping =
+        private readonly Dictionary<string, PropertyMappingValue> _collectablePropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) },
@@ -42,28 +41,28 @@ namespace Recollectable.Core.Services
                 { "ReleaseDate", new PropertyMappingValue(new List<string>() { "Collectable.ReleaseDate" }) }
             };
 
-        private Dictionary<string, PropertyMappingValue> _collectionPropertyMapping =
+        private readonly Dictionary<string, PropertyMappingValue> _collectionPropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) },
                 { "Type", new PropertyMappingValue(new List<string>() { "Type" }) }
             };
 
-        private Dictionary<string, PropertyMappingValue> _countryPropertyMapping =
+        private readonly Dictionary<string, PropertyMappingValue> _countryPropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) },
                 { "Name", new PropertyMappingValue(new List<string>() { "Name" }) }
             };
 
-        private Dictionary<string, PropertyMappingValue> _conditionPropertyMapping =
+        private readonly Dictionary<string, PropertyMappingValue> _conditionPropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) },
                 { "Grade", new PropertyMappingValue(new List<string>() { "Grade" }) }
             };
 
-        private Dictionary<string, PropertyMappingValue> _collectorValuesPropertyMapping =
+        private readonly Dictionary<string, PropertyMappingValue> _collectorValuesPropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) }

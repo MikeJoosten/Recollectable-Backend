@@ -1,7 +1,7 @@
-﻿using Recollectable.Core.Entities.Common;
+﻿using Recollectable.Core.Shared.Entities;
 using System.Collections.Generic;
 
-namespace Recollectable.Core.Interfaces.Services
+namespace Recollectable.Core.Shared.Interfaces
 {
     public interface IPropertyMappingService
     {

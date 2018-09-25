@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Recollectable.Core.Shared.Interfaces;
 
 namespace Recollectable.Core.Interfaces.Services
 {

@@ -1,7 +1,7 @@
-﻿using Recollectable.Core.Interfaces.Common;
+﻿using Recollectable.Core.Shared.Interfaces;
 using System.Collections.Generic;
 
-namespace Recollectable.Core.Entities.Common
+namespace Recollectable.Core.Shared.Entities
 {
     public class PropertyMapping<TSource, TDestination> : IPropertyMapping
     {

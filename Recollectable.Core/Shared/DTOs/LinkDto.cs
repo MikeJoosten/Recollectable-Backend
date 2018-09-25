@@ -1,4 +1,4 @@
-﻿namespace Recollectable.Core.DTOs.Common
+﻿namespace Recollectable.Core.Shared.DTOs
 {
     public class LinkDto
     {

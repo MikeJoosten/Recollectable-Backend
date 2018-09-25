@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Recollectable.Core.Entities.Common
+namespace Recollectable.Core.Shared.Entities
 {
     public class PagedList<T> : List<T>
     {

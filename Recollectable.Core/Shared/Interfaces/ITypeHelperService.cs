@@ -1,4 +1,4 @@
-﻿namespace Recollectable.Core.Interfaces.Services
+﻿namespace Recollectable.Core.Shared.Interfaces
 {
     public interface ITypeHelperService
     {

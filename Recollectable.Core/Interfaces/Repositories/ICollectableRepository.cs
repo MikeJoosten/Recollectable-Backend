@@ -1,10 +1,8 @@
 ﻿using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
-using Recollectable.Core.Entities.Common;
 using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Shared.Entities;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Recollectable.Core.Interfaces.Repositories
 {

@@ -1,7 +1,10 @@
-﻿using Recollectable.Core.Interfaces.Services;
+﻿using Recollectable.Core.Shared.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 
-namespace Recollectable.Core.Services
+namespace Recollectable.Core.Shared.Services
 {
     public class TypeHelperService : ITypeHelperService
     {
