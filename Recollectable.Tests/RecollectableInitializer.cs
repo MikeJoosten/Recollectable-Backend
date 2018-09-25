@@ -1,5 +1,8 @@
-﻿using Recollectable.Data;
-using Recollectable.Domain.Entities;
+﻿using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Collections;
+using Recollectable.Core.Entities.Locations;
+using Recollectable.Core.Entities.Users;
+using Recollectable.Infrastructure.Data;
 using System;
 using System.Linq;
 

@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Helpers;
-using Recollectable.Data.Helpers;
-using Recollectable.Data.Repositories;
-using Recollectable.Data.Services;
-using Recollectable.Domain.Entities;
-using Recollectable.Domain.Models;
+using Recollectable.Core.DTOs.Collectables;
+using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces.Services;
+using Recollectable.Core.Shared.DTOs;
+using Recollectable.Core.Shared.Enums;
+using Recollectable.Core.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,25 +20,14 @@ namespace Recollectable.API.Controllers
     [Route("api/banknotes")]
     public class BanknotesController : Controller
     {
-        private IBanknoteRepository _banknoteRepository;
-        private ICountryRepository _countryRepository;
-        private ICollectorValueRepository _collectorValueRepository;
-        private IUrlHelper _urlHelper;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        public readonly IUnitOfWork _unitOfWork;
+        public readonly IControllerService _controllerService;
 
-        public BanknotesController(IBanknoteRepository banknoteRepository,
-            ICollectorValueRepository collectorValueRepository,
-            ICountryRepository countryRepository, IUrlHelper urlHelper,
-            IPropertyMappingService propertyMappingService,
-            ITypeHelperService typeHelperService)
+        public BanknotesController(IUnitOfWork unitOfWork, 
+            IControllerService controllerService)
         {
-            _banknoteRepository = banknoteRepository;
-            _countryRepository = countryRepository;
-            _collectorValueRepository = collectorValueRepository;
-            _urlHelper = urlHelper;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _unitOfWork = unitOfWork;
+            _controllerService = controllerService;
         }
 
         [HttpHead]
@@ -44,19 +35,19 @@ namespace Recollectable.API.Controllers
         public IActionResult GetBanknotes(CurrenciesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<BanknoteDto, Banknote>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<BanknoteDto, Banknote>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<BanknoteDto>
+            if (!_controllerService.TypeHelperService.TypeHasProperties<BanknoteDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var banknotesFromRepo = _banknoteRepository.GetBanknotes(resourceParameters);
+            var banknotesFromRepo = _unitOfWork.BanknoteRepository.Get(resourceParameters);
             var banknotes = Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -130,12 +121,12 @@ namespace Recollectable.API.Controllers
         public IActionResult GetBanknote(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<BanknoteDto>(fields))
+            if (!_controllerService.TypeHelperService.TypeHasProperties<BanknoteDto>(fields))
             {
                 return BadRequest();
             }
 
-            var banknoteFromRepo = _banknoteRepository.GetBanknote(id);
+            var banknoteFromRepo = _unitOfWork.BanknoteRepository.GetById(id);
 
             if (banknoteFromRepo == null)
             {
@@ -178,7 +169,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var country = _countryRepository.GetCountry(banknote.CountryId);
+            var country = _unitOfWork.CountryRepository.GetById(banknote.CountryId);
 
             if (country != null && banknote.Country == null)
             {
@@ -190,8 +181,8 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectorValue = _collectorValueRepository
-                .GetCollectorValue(banknote.CollectorValueId);
+            var collectorValue = _unitOfWork.CollectorValueRepository
+                .GetById(banknote.CollectorValueId);
 
             if (collectorValue != null && banknote.CollectorValue == null)
             {
@@ -204,9 +195,9 @@ namespace Recollectable.API.Controllers
             }
 
             var newBanknote = Mapper.Map<Banknote>(banknote);
-            _banknoteRepository.AddBanknote(newBanknote);
+            _unitOfWork.BanknoteRepository.Add(newBanknote);
 
-            if (!_banknoteRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a banknote failed on save.");
             }
@@ -236,7 +227,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public IActionResult BlockBanknoteCreation(Guid id)
         {
-            if (_banknoteRepository.BanknoteExists(id))
+            if (_unitOfWork.BanknoteRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -257,17 +248,17 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!_countryRepository.CountryExists(banknote.CountryId))
+            if (!_unitOfWork.CountryRepository.Exists(banknote.CountryId))
             {
                 return BadRequest();
             }
 
-            if (!_collectorValueRepository.CollectorValueExists(banknote.CollectorValueId))
+            if (!_unitOfWork.CollectorValueRepository.Exists(banknote.CollectorValueId))
             {
                 return BadRequest();
             }
 
-            var banknoteFromRepo = _banknoteRepository.GetBanknote(id);
+            var banknoteFromRepo = _unitOfWork.BanknoteRepository.GetById(id);
 
             if (banknoteFromRepo == null)
             {
@@ -278,9 +269,9 @@ namespace Recollectable.API.Controllers
             banknoteFromRepo.CollectorValueId = banknote.CollectorValueId;
 
             Mapper.Map(banknote, banknoteFromRepo);
-            _banknoteRepository.UpdateBanknote(banknoteFromRepo);
+            _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
 
-            if (!_banknoteRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Updating banknote {id} failed on save.");
             }
@@ -297,7 +288,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var banknoteFromRepo = _banknoteRepository.GetBanknote(id);
+            var banknoteFromRepo = _unitOfWork.BanknoteRepository.GetById(id);
 
             if (banknoteFromRepo == null)
             {
@@ -307,17 +298,19 @@ namespace Recollectable.API.Controllers
             var patchedBanknote = Mapper.Map<BanknoteUpdateDto>(banknoteFromRepo);
             patchDoc.ApplyTo(patchedBanknote, ModelState);
 
+            TryValidateModel(patchedBanknote);
+
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!_countryRepository.CountryExists(patchedBanknote.CountryId))
+            if (!_unitOfWork.CountryRepository.Exists(patchedBanknote.CountryId))
             {
                 return BadRequest();
             }
 
-            if (!_collectorValueRepository.CollectorValueExists(patchedBanknote.CollectorValueId))
+            if (!_unitOfWork.CollectorValueRepository.Exists(patchedBanknote.CollectorValueId))
             {
                 return BadRequest();
             }
@@ -326,9 +319,9 @@ namespace Recollectable.API.Controllers
             banknoteFromRepo.CollectorValueId = patchedBanknote.CollectorValueId;
 
             Mapper.Map(patchedBanknote, banknoteFromRepo);
-            _banknoteRepository.UpdateBanknote(banknoteFromRepo);
+            _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
 
-            if (!_banknoteRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Patching banknote {id} failed on save.");
             }
@@ -339,16 +332,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteBanknote")]
         public IActionResult DeleteBanknote(Guid id)
         {
-            var banknoteFromRepo = _banknoteRepository.GetBanknote(id);
+            var banknoteFromRepo = _unitOfWork.BanknoteRepository.GetById(id);
 
             if (banknoteFromRepo == null)
             {
                 return NotFound();
             }
 
-            _banknoteRepository.DeleteBanknote(banknoteFromRepo);
+            _unitOfWork.BanknoteRepository.Delete(banknoteFromRepo);
 
-            if (!_banknoteRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Deleting banknote {id} failed on save.");
             }
@@ -369,7 +362,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetBanknotes", new
+                    return _controllerService.UrlHelper.Link("GetBanknotes", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -380,7 +373,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetBanknotes", new
+                    return _controllerService.UrlHelper.Link("GetBanknotes", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -391,7 +384,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _urlHelper.Link("GetBanknotes", new
+                    return _controllerService.UrlHelper.Link("GetBanknotes", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -410,19 +403,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_urlHelper.Link("GetBanknote",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetBanknote",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_urlHelper.Link("CreateBanknote",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateBanknote",
                     new { }), "create_banknote", "POST"));
 
-                links.Add(new LinkDto(_urlHelper.Link("UpdateBanknote",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateBanknote",
                     new { id }), "update_banknote", "PUT"));
 
-                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateBanknote",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateBanknote",
                     new { id }), "partially_update_banknote", "PATCH"));
 
-                links.Add(new LinkDto(_urlHelper.Link("DeleteBanknote",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteBanknote",
                     new { id }), "delete_banknote", "DELETE"));
             }
 
@@ -433,10 +426,11 @@ namespace Recollectable.API.Controllers
             (CurrenciesResourceParameters resourceParameters,
             bool hasNext, bool hasPrevious)
         {
-            var links = new List<LinkDto>();
-
-            links.Add(new LinkDto(CreateBanknotesResourceUri(resourceParameters,
-                ResourceUriType.Current), "self", "GET"));
+            var links = new List<LinkDto>
+            {
+                new LinkDto(CreateBanknotesResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET")
+            };
 
             if (hasNext)
             {

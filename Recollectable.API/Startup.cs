@@ -11,11 +11,22 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
-using Recollectable.Data;
-using Recollectable.Data.Repositories;
-using Recollectable.Data.Services;
-using Recollectable.Domain.Entities;
-using Recollectable.Domain.Models;
+using Recollectable.Core.DTOs.Collectables;
+using Recollectable.Core.DTOs.Collections;
+using Recollectable.Core.DTOs.Locations;
+using Recollectable.Core.DTOs.Users;
+using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Collections;
+using Recollectable.Core.Entities.Locations;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces.Services;
+using Recollectable.Core.Services.Common;
+using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Shared.Services;
+using Recollectable.Infrastructure.Data;
+using Recollectable.Infrastructure.Data.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -58,14 +69,15 @@ namespace Recollectable.API
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
             // Register repositories
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ICollectionRepository, CollectionRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICollectableRepository, CollectableRepository>();
-            services.AddScoped<ICoinRepository, CoinRepository>();
-            services.AddScoped<IBanknoteRepository, BanknoteRepository>();
-            services.AddScoped<IConditionRepository, ConditionRepository>();
-            services.AddScoped<ICountryRepository, CountryRepository>();
-            services.AddScoped<ICollectorValueRepository, CollectorValueRepository>();
+            services.AddScoped<IRepository<User, UsersResourceParameters>, UserRepository>();
+            services.AddScoped<IRepository<Collection, CollectionsResourceParameters>, CollectionRepository>();
+            services.AddScoped<IRepository<Coin, CurrenciesResourceParameters>, CoinRepository>();
+            services.AddScoped<IRepository<Banknote, CurrenciesResourceParameters>, BanknoteRepository>();
+            services.AddScoped<IRepository<Condition, ConditionsResourceParameters>, ConditionRepository>();
+            services.AddScoped<IRepository<Country, CountriesResourceParameters>, CountryRepository>();
+            services.AddScoped<IRepository<CollectorValue, CollectorValuesResourceParameters>, CollectorValueRepository>();
 
             // Register Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -77,6 +89,7 @@ namespace Recollectable.API
             });
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
+            services.AddTransient<IControllerService, ControllerService>();
 
             // Register HTTP Caching
             services.AddHttpCacheHeaders(

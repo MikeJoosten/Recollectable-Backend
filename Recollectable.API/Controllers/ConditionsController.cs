@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Helpers;
-using Recollectable.Data.Helpers;
-using Recollectable.Data.Repositories;
-using Recollectable.Data.Services;
-using Recollectable.Domain.Entities;
-using Recollectable.Domain.Models;
+using Recollectable.Core.DTOs.Collections;
+using Recollectable.Core.Entities.Collections;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces.Services;
+using Recollectable.Core.Shared.DTOs;
+using Recollectable.Core.Shared.Enums;
+using Recollectable.Core.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +20,14 @@ namespace Recollectable.API.Controllers
     [Route("api/conditions")]
     public class ConditionsController : Controller
     {
-        private IConditionRepository _conditionRepository;
-        private IUrlHelper _urlHelper;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        public readonly IUnitOfWork _unitOfWork;
+        public readonly IControllerService _controllerService;
 
-        public ConditionsController(IConditionRepository conditionRepository,
-            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
-            ITypeHelperService typeHelperService)
+        public ConditionsController(IUnitOfWork unitOfWork,
+            IControllerService controllerService)
         {
-            _conditionRepository = conditionRepository;
-            _urlHelper = urlHelper;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _unitOfWork = unitOfWork;
+            _controllerService = controllerService;
         }
 
         [HttpHead]
@@ -38,19 +35,19 @@ namespace Recollectable.API.Controllers
         public IActionResult GetConditions(ConditionsResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<ConditionDto, Condition>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<ConditionDto, Condition>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<ConditionDto>
+            if (!_controllerService.TypeHelperService.TypeHasProperties<ConditionDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var conditionsFromRepo = _conditionRepository.GetConditions(resourceParameters);
+            var conditionsFromRepo = _unitOfWork.ConditionRepository.Get(resourceParameters);
             var conditions = Mapper.Map<IEnumerable<ConditionDto>>(conditionsFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -124,12 +121,12 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCondition(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<ConditionDto>(fields))
+            if (!_controllerService.TypeHelperService.TypeHasProperties<ConditionDto>(fields))
             {
                 return BadRequest();
             }
 
-            var conditionFromRepo = _conditionRepository.GetCondition(id);
+            var conditionFromRepo = _unitOfWork.ConditionRepository.GetById(id);
 
             if (conditionFromRepo == null)
             {
@@ -173,9 +170,9 @@ namespace Recollectable.API.Controllers
             }
 
             var newCondition = Mapper.Map<Condition>(condition);
-            _conditionRepository.AddCondition(newCondition);
+            _unitOfWork.ConditionRepository.Add(newCondition);
 
-            if (!_conditionRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a condition failed on save.");
             }
@@ -205,7 +202,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public IActionResult BlockConditionCreation(Guid id)
         {
-            if (_conditionRepository.ConditionExists(id))
+            if (_unitOfWork.ConditionRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -226,7 +223,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var conditionFromRepo = _conditionRepository.GetCondition(id);
+            var conditionFromRepo = _unitOfWork.ConditionRepository.GetById(id);
 
             if (conditionFromRepo == null)
             {
@@ -234,9 +231,9 @@ namespace Recollectable.API.Controllers
             }
 
             Mapper.Map(condition, conditionFromRepo);
-            _conditionRepository.UpdateCondition(conditionFromRepo);
+            _unitOfWork.ConditionRepository.Update(conditionFromRepo);
 
-            if (!_conditionRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Updating condition {id} failed on save.");
             }
@@ -253,7 +250,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var conditionFromRepo = _conditionRepository.GetCondition(id);
+            var conditionFromRepo = _unitOfWork.ConditionRepository.GetById(id);
 
             if (conditionFromRepo == null)
             {
@@ -263,15 +260,17 @@ namespace Recollectable.API.Controllers
             var patchedCondition = Mapper.Map<ConditionUpdateDto>(conditionFromRepo);
             patchDoc.ApplyTo(patchedCondition, ModelState);
 
+            TryValidateModel(patchedCondition);
+
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
             Mapper.Map(patchedCondition, conditionFromRepo);
-            _conditionRepository.UpdateCondition(conditionFromRepo);
+            _unitOfWork.ConditionRepository.Update(conditionFromRepo);
 
-            if (!_conditionRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Patching condition {id} failed on save.");
             }
@@ -282,16 +281,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteCondition")]
         public IActionResult DeleteCondition(Guid id)
         {
-            var conditionFromRepo = _conditionRepository.GetCondition(id);
+            var conditionFromRepo = _unitOfWork.ConditionRepository.GetById(id);
 
             if (conditionFromRepo == null)
             {
                 return NotFound();
             }
 
-            _conditionRepository.DeleteCondition(conditionFromRepo);
+            _unitOfWork.ConditionRepository.Delete(conditionFromRepo);
 
-            if (!_conditionRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Deleting condition {id} failed on save.");
             }
@@ -312,7 +311,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetConditions", new
+                    return _controllerService.UrlHelper.Link("GetConditions", new
                     {
                         grade = resourceParameters.Grade,
                         search = resourceParameters.Search,
@@ -322,7 +321,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetConditions", new
+                    return _controllerService.UrlHelper.Link("GetConditions", new
                     {
                         grade = resourceParameters.Grade,
                         search = resourceParameters.Search,
@@ -332,7 +331,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _urlHelper.Link("GetConditions", new
+                    return _controllerService.UrlHelper.Link("GetConditions", new
                     {
                         grade = resourceParameters.Grade,
                         search = resourceParameters.Search,
@@ -350,19 +349,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_urlHelper.Link("GetCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCondition",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_urlHelper.Link("CreateCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCondition",
                     new { }), "create_condition", "POST"));
 
-                links.Add(new LinkDto(_urlHelper.Link("UpdateCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCondition",
                     new { id }), "update_condition", "PUT"));
 
-                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCondition",
                     new { id }), "partially_update_condition", "PATCH"));
 
-                links.Add(new LinkDto(_urlHelper.Link("DeleteCondition",
+                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCondition",
                     new { id }), "delete_condition", "DELETE"));
             }
 
@@ -373,10 +372,11 @@ namespace Recollectable.API.Controllers
             (ConditionsResourceParameters resourceParameters,
             bool hasNext, bool hasPrevious)
         {
-            var links = new List<LinkDto>();
-
-            links.Add(new LinkDto(CreateConditionsResourceUri(resourceParameters,
-                ResourceUriType.Current), "self", "GET"));
+            var links = new List<LinkDto>
+            {
+                new LinkDto(CreateConditionsResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET")
+            };
 
             if (hasNext)
             {
