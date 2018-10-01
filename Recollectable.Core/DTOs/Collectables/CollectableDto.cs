@@ -11,6 +11,6 @@ namespace Recollectable.Core.DTOs.Collectables
     {
         public Guid Id { get; set; }
         public Collectable Collectable { get; set; }
-        public Condition Condition { get; set; }
+        public string Condition { get; set; }
     }
 }

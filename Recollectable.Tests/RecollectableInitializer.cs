@@ -102,40 +102,6 @@ namespace Recollectable.Tests
                 }
             };
 
-            var conditions = new[]
-            {
-                new Condition
-                {
-                    Id = new Guid("515af021-e46b-4b01-994f-b5f1a2db0c35"),
-                    Grade = "MS68"
-                },
-                new Condition
-                {
-                    Id = new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f"),
-                    Grade = "Fine"
-                },
-                new Condition
-                {
-                    Id = new Guid("0a8d0c2b-1e7f-40b1-980f-eec355e2aca4"),
-                    Grade = "XF45"
-                },
-                new Condition
-                {
-                    Id = new Guid("ef147683-5fa1-48b5-b31f-a95e7264245b"),
-                    Grade = "AU52"
-                },
-                new Condition
-                {
-                    Id = new Guid("3afc28eb-9af9-4a0a-8033-080954a9f55d"),
-                    Grade = "Good"
-                },
-                new Condition
-                {
-                    Id = new Guid("c2e4d849-c9bf-418d-9269-168a038edcd9"),
-                    Grade = "VG10"
-                }
-            };
-
             var countries = new[]
             {
                 new Country
@@ -298,7 +264,7 @@ namespace Recollectable.Tests
             };
 
             var banknotes = new[]
-{
+            {
                 new Banknote
                 {
                     Id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f"),
@@ -355,49 +321,49 @@ namespace Recollectable.Tests
                 }
             };
 
-            var collectionCollectables = new[]
+            var collectables = new[]
             {
                 new CollectionCollectable
                 {
                     Id = new Guid("355e785b-dd47-4fb7-b112-1fb34d189569"),
                     CollectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789"),
                     CollectableId = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
-                    ConditionId = new Guid("0a8d0c2b-1e7f-40b1-980f-eec355e2aca4")
+                    Condition = "XF45"
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("88460c77-e98b-403a-8e15-1a26d843ffe5"),
                     CollectionId = new Guid("6ee10276-5cb7-4c9f-819d-9204274c088a"),
                     CollectableId = new Guid("51d91016-54f5-44f0-a1d8-e87f72d4bcc4"),
-                    ConditionId = new Guid("515af021-e46b-4b01-994f-b5f1a2db0c35")
+                    Condition = "MS68"
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("ba0d7466-1fe9-478e-803c-0fcbcd48f6ec"),
                     CollectionId = new Guid("80fa9706-2465-48cf-8933-932fdce18c89"),
                     CollectableId = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4"),
-                    ConditionId = new Guid("8d0e9a80-caf4-4f31-9063-fd8cfaf2e07f")
+                    Condition = "Fine"
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("22e513a9-b851-4b93-931c-5904d9120f73"),
                     CollectionId = new Guid("ab76b149-09c9-40c8-9b35-e62e53e06c8a"),
                     CollectableId = new Guid("db14f24e-aceb-4315-bfcf-6ace1f9b3613"),
-                    ConditionId = new Guid("3afc28eb-9af9-4a0a-8033-080954a9f55d")
+                    Condition = "Good"
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("c165ebe2-3b35-4eeb-9fab-5f952598a0c5"),
                     CollectionId = new Guid("80fa9706-2465-48cf-8933-932fdce18c89"),
                     CollectableId = new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c"),
-                    ConditionId = new Guid("ef147683-5fa1-48b5-b31f-a95e7264245b")
+                    Condition = "AU52"
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("25da5d7a-d9bc-4f31-9982-2a44d1facdb1"),
                     CollectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789"),
                     CollectableId = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
-                    ConditionId = new Guid("c2e4d849-c9bf-418d-9269-168a038edcd9")
+                    Condition = "VG10"
                 }
             };
 
@@ -405,10 +371,9 @@ namespace Recollectable.Tests
             context.Collections.AddRange(collections);
             context.Coins.AddRange(coins);
             context.Banknotes.AddRange(banknotes);
-            context.Conditions.AddRange(conditions);
             context.Countries.AddRange(countries);
             context.CollectorValues.AddRange(collectorValues);
-            context.AddRange(collectionCollectables);
+            context.AddRange(collectables);
             context.SaveChanges();
         }
     }

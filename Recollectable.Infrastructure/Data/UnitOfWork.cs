@@ -25,9 +25,6 @@ namespace Recollectable.Infrastructure.Data
         public IRepository<CollectorValue, CollectorValuesResourceParameters> CollectorValueRepository =>
             new CollectorValueRepository(_context);
 
-        public IRepository<Condition, ConditionsResourceParameters> ConditionRepository =>
-            new ConditionRepository(_context);
-
         public IRepository<Country, CountriesResourceParameters> CountryRepository =>
             new CountryRepository(_context);
 

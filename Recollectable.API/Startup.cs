@@ -75,7 +75,6 @@ namespace Recollectable.API
             services.AddScoped<IRepository<Collection, CollectionsResourceParameters>, CollectionRepository>();
             services.AddScoped<IRepository<Coin, CurrenciesResourceParameters>, CoinRepository>();
             services.AddScoped<IRepository<Banknote, CurrenciesResourceParameters>, BanknoteRepository>();
-            services.AddScoped<IRepository<Condition, ConditionsResourceParameters>, ConditionRepository>();
             services.AddScoped<IRepository<Country, CountriesResourceParameters>, CountryRepository>();
             services.AddScoped<IRepository<CollectorValue, CollectorValuesResourceParameters>, CollectorValueRepository>();
 
@@ -163,10 +162,6 @@ namespace Recollectable.API
                 cfg.CreateMap<BanknoteCreationDto, Banknote>();
                 cfg.CreateMap<BanknoteUpdateDto, Banknote>();
                 cfg.CreateMap<Banknote, BanknoteUpdateDto>();
-                cfg.CreateMap<Condition, ConditionDto>();
-                cfg.CreateMap<ConditionCreationDto, Condition>();
-                cfg.CreateMap<ConditionUpdateDto, Condition>();
-                cfg.CreateMap<Condition, ConditionUpdateDto>();
                 cfg.CreateMap<Country, CountryDto>();
                 cfg.CreateMap<CountryCreationDto, Country>();
                 cfg.CreateMap<CountryUpdateDto, Country>();

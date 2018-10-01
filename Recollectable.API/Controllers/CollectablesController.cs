@@ -195,18 +195,10 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var condition = _unitOfWork.ConditionRepository.GetById(collectable.ConditionId);
-
-            if (condition == null)
-            {
-                return BadRequest();
-            }
-
             var newCollectable = Mapper.Map<CollectionCollectable>(collectable);
             newCollectable.CollectionId = collectionId;
             newCollectable.Collection = collection;
             newCollectable.Collectable = collectableItem;
-            newCollectable.Condition = condition;
 
             _unitOfWork.CollectableRepository.Add(newCollectable);
 
@@ -278,11 +270,6 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (!_unitOfWork.ConditionRepository.Exists(collectable.ConditionId))
-            {
-                return BadRequest();
-            }
-
             var collectableFromRepo = _unitOfWork.CollectableRepository.GetById(collectionId, id);
 
             if (collectableFromRepo == null)
@@ -292,7 +279,6 @@ namespace Recollectable.API.Controllers
 
             collectableFromRepo.CollectionId = collectable.CollectionId;
             collectableFromRepo.CollectableId = collectable.CollectableId;
-            collectableFromRepo.ConditionId = collectable.ConditionId;
 
             Mapper.Map(collectable, collectableFromRepo);
             _unitOfWork.CollectableRepository.Update(collectableFromRepo);
@@ -347,14 +333,8 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (!_unitOfWork.ConditionRepository.Exists(patchedCollectable.ConditionId))
-            {
-                return BadRequest();
-            }
-
             collectableFromRepo.CollectionId = patchedCollectable.CollectionId;
             collectableFromRepo.CollectableId = patchedCollectable.CollectableId;
-            collectableFromRepo.ConditionId = patchedCollectable.ConditionId;
 
             Mapper.Map(patchedCollectable, collectableFromRepo);
             _unitOfWork.CollectableRepository.Update(collectableFromRepo);

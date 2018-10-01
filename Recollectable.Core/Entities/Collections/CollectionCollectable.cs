@@ -18,8 +18,6 @@ namespace Recollectable.Core.Entities.Collections
         public Collectable Collectable { get; set; }
         public Guid CollectableId { get; set; }
 
-        [ForeignKey("ConditionId")]
-        public Condition Condition { get; set; }
-        public Guid ConditionId { get; set; }
+        public string Condition { get; set; }
     }
 }

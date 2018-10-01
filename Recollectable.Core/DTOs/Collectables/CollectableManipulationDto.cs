@@ -8,7 +8,7 @@ namespace Recollectable.Core.DTOs.Collectables
         [Required(ErrorMessage = "CollectableId is a required field")]
         public Guid CollectableId { get; set; }
 
-        [Required(ErrorMessage = "ConditionId is a required field")]
-        public Guid ConditionId { get; set; }
+        [Required(ErrorMessage = "Condition is a required field")]
+        public string Condition { get; set; }
     }
 }

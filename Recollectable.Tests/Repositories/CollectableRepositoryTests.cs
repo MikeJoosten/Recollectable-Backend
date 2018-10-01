@@ -84,7 +84,7 @@ namespace Recollectable.Tests.Repositories
                 Id = new Guid("60e55387-ee18-4e5c-866f-7ca1d2d09c0f"),
                 CollectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789"),
                 CollectableId = new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48"),
-                ConditionId = new Guid("3afc28eb-9af9-4a0a-8033-080954a9f55d")
+                Condition = "MS62"
             };
 
             _unitOfWork.CollectableRepository.Add(newCollectable);

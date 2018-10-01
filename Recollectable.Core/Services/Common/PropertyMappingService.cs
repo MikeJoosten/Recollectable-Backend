@@ -55,13 +55,6 @@ namespace Recollectable.Core.Services.Common
                 { "Name", new PropertyMappingValue(new List<string>() { "Name" }) }
             };
 
-        private readonly Dictionary<string, PropertyMappingValue> _conditionPropertyMapping =
-            new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) },
-                { "Grade", new PropertyMappingValue(new List<string>() { "Grade" }) }
-            };
-
         private readonly Dictionary<string, PropertyMappingValue> _collectorValuesPropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
@@ -78,7 +71,6 @@ namespace Recollectable.Core.Services.Common
             propertyMappings.Add(new PropertyMapping<BanknoteDto, Banknote>(_currencyPropertyMapping));
             propertyMappings.Add(new PropertyMapping<CollectableDto, Collectable>(_collectablePropertyMapping));
             propertyMappings.Add(new PropertyMapping<CountryDto, Country>(_countryPropertyMapping));
-            propertyMappings.Add(new PropertyMapping<ConditionDto, Condition>(_conditionPropertyMapping));
             propertyMappings.Add(new PropertyMapping<CollectorValueDto, CollectorValue>(_collectorValuesPropertyMapping));
         }
 

@@ -35,7 +35,6 @@ namespace Recollectable.Infrastructure.Data.Repositories
             }
 
             var collectables = _context.CollectionCollectables
-                .Include(cc => cc.Condition)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.Country)
                 .Include(cc => cc.Collectable)
@@ -66,7 +65,6 @@ namespace Recollectable.Infrastructure.Data.Repositories
         public CollectionCollectable GetById(Guid collectionId, Guid Id)
         {
             return _context.CollectionCollectables
-                .Include(cc => cc.Condition)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.Country)
                 .Include(cc => cc.Collectable)

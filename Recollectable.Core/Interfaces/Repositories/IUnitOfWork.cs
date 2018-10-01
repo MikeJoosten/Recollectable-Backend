@@ -15,7 +15,6 @@ namespace Recollectable.Core.Interfaces.Repositories
         IRepository<Coin, CurrenciesResourceParameters> CoinRepository { get; }
         IRepository<Collection, CollectionsResourceParameters> CollectionRepository { get; }
         IRepository<CollectorValue, CollectorValuesResourceParameters> CollectorValueRepository { get; }
-        IRepository<Condition, ConditionsResourceParameters> ConditionRepository { get; }
         IRepository<Country, CountriesResourceParameters> CountryRepository { get; }
         IRepository<User, UsersResourceParameters> UserRepository { get; }
 
