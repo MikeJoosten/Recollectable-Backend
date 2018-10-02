@@ -30,18 +30,6 @@ namespace Recollectable.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Conditions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    Grade = table.Column<string>(maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Conditions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Countries",
                 columns: table => new
                 {
@@ -145,7 +133,7 @@ namespace Recollectable.Infrastructure.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     CollectionId = table.Column<Guid>(nullable: false),
                     CollectableId = table.Column<Guid>(nullable: false),
-                    ConditionId = table.Column<Guid>(nullable: false)
+                    Condition = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -160,12 +148,6 @@ namespace Recollectable.Infrastructure.Migrations
                         name: "FK_CollectionCollectables_Collections_CollectionId",
                         column: x => x.CollectionId,
                         principalTable: "Collections",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CollectionCollectables_Conditions_ConditionId",
-                        column: x => x.ConditionId,
-                        principalTable: "Conditions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -191,11 +173,6 @@ namespace Recollectable.Infrastructure.Migrations
                 column: "CollectionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CollectionCollectables_ConditionId",
-                table: "CollectionCollectables",
-                column: "ConditionId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Collections_UserId",
                 table: "Collections",
                 column: "UserId");
@@ -211,9 +188,6 @@ namespace Recollectable.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Collections");
-
-            migrationBuilder.DropTable(
-                name: "Conditions");
 
             migrationBuilder.DropTable(
                 name: "CollectorValues");

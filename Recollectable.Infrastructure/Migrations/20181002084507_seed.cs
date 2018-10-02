@@ -20,17 +20,6 @@ namespace Recollectable.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Conditions",
-                columns: new[] { "Id", "Grade" },
-                values: new object[,]
-                {
-                    { new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca"), "MS62" },
-                    { new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a"), "Fine" },
-                    { new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a"), "VF24" },
-                    { new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d"), "Uncirculated" }
-                });
-
-            migrationBuilder.InsertData(
                 table: "Countries",
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
@@ -88,15 +77,15 @@ namespace Recollectable.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "CollectionCollectables",
-                columns: new[] { "Id", "CollectableId", "CollectionId", "ConditionId" },
+                columns: new[] { "Id", "CollectableId", "CollectionId", "Condition" },
                 values: new object[,]
                 {
-                    { new Guid("1078b50b-1d89-4b24-b071-67af06348875"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca") },
-                    { new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d") },
-                    { new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") },
-                    { new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") },
-                    { new Guid("583a957b-124f-49cb-955c-87d758819e87"), new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a") },
-                    { new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a") }
+                    { new Guid("1078b50b-1d89-4b24-b071-67af06348875"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), "MS62" },
+                    { new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), "Uncirculated" },
+                    { new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), "VF24" },
+                    { new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), "Fine" },
+                    { new Guid("583a957b-124f-49cb-955c-87d758819e87"), new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), "VF24" },
+                    { new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), "Fine" }
                 });
         }
 
@@ -176,26 +165,6 @@ namespace Recollectable.Infrastructure.Migrations
                 table: "Collections",
                 keyColumn: "Id",
                 keyValue: new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"));
-
-            migrationBuilder.DeleteData(
-                table: "Conditions",
-                keyColumn: "Id",
-                keyValue: new Guid("1f5713f4-3aec-4c6b-be0b-139e6221b1ca"));
-
-            migrationBuilder.DeleteData(
-                table: "Conditions",
-                keyColumn: "Id",
-                keyValue: new Guid("3f7a2032-1301-427e-abe7-d450293a2d0d"));
-
-            migrationBuilder.DeleteData(
-                table: "Conditions",
-                keyColumn: "Id",
-                keyValue: new Guid("58311fda-5c79-4beb-b8be-eb0799d3334a"));
-
-            migrationBuilder.DeleteData(
-                table: "Conditions",
-                keyColumn: "Id",
-                keyValue: new Guid("d8fd0831-f82e-40ec-a85a-71273ce26e8a"));
 
             migrationBuilder.DeleteData(
                 table: "CollectorValues",
