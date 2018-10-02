@@ -19,10 +19,7 @@ using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces;
-using Recollectable.Core.Models.Collectables;
-using Recollectable.Core.Models.Collections;
-using Recollectable.Core.Models.Locations;
-using Recollectable.Core.Models.Users;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;
 using Recollectable.Infrastructure.Data.Repositories;
@@ -140,35 +137,7 @@ namespace Recollectable.API
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
-                cfg.CreateMap<User, UserDto>().ForMember(dest => dest.Name, 
-                    opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
-                cfg.CreateMap<UserCreationDto, User>();
-                cfg.CreateMap<UserUpdateDto, User>();
-                cfg.CreateMap<User, UserUpdateDto>();
-                cfg.CreateMap<Collection, CollectionDto>();
-                cfg.CreateMap<CollectionCreationDto, Collection>();
-                cfg.CreateMap<CollectionUpdateDto, Collection>();
-                cfg.CreateMap<Collection, CollectionUpdateDto>();
-                cfg.CreateMap<CollectionCollectable, CollectableDto>();
-                cfg.CreateMap<CollectableCreationDto, CollectionCollectable>();
-                cfg.CreateMap<CollectableUpdateDto, CollectionCollectable>();
-                cfg.CreateMap<CollectionCollectable, CollectableUpdateDto>();
-                cfg.CreateMap<Coin, CoinDto>();
-                cfg.CreateMap<CoinCreationDto, Coin>();
-                cfg.CreateMap<CoinUpdateDto, Coin>();
-                cfg.CreateMap<Coin, CoinUpdateDto>();
-                cfg.CreateMap<Banknote, BanknoteDto>();
-                cfg.CreateMap<BanknoteCreationDto, Banknote>();
-                cfg.CreateMap<BanknoteUpdateDto, Banknote>();
-                cfg.CreateMap<Banknote, BanknoteUpdateDto>();
-                cfg.CreateMap<Country, CountryDto>();
-                cfg.CreateMap<CountryCreationDto, Country>();
-                cfg.CreateMap<CountryUpdateDto, Country>();
-                cfg.CreateMap<Country, CountryUpdateDto>();
-                cfg.CreateMap<CollectorValue, CollectorValueDto>();
-                cfg.CreateMap<CollectorValueCreationDto, CollectorValue>();
-                cfg.CreateMap<CollectorValueUpdateDto, CollectorValue>();
-                cfg.CreateMap<CollectorValue, CollectorValueUpdateDto>();
+                cfg.AddProfile<RecollectableMappingProfile>();
             });
 
             recollectableContext.Database.Migrate();
