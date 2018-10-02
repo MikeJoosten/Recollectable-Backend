@@ -1,11 +1,11 @@
 ﻿using Recollectable.Core.Shared.Entities;
 using System;
 
-namespace Recollectable.Core.Interfaces.Repositories
+namespace Recollectable.Core.Interfaces
 {
     public interface IRepository<TEntity, TParameters>
-        where TEntity: class
-        where TParameters: class
+        where TEntity : class
+        where TParameters : class
     {
         PagedList<TEntity> Get(TParameters resourceParameters);
         TEntity GetById(Guid id);

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
@@ -94,9 +94,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.CollectionCollectables.Remove(collectable);
         }
 
-        public bool Exists(Guid Id)
+        public bool Exists(Guid collectionId, Guid Id)
         {
-            return _context.CollectionCollectables.Any(cc => cc.Id == Id);
+            return _context.CollectionCollectables
+                .Where(cc => cc.CollectionId == collectionId)
+                .Any(cc => cc.Id == Id);
         }
     }
 }

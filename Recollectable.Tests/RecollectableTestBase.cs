@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Recollectable.API.Services;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;
 using System;

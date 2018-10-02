@@ -1,10 +1,9 @@
 ﻿using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Shared.Entities;
 using System;
 
-namespace Recollectable.Core.Interfaces.Repositories
+namespace Recollectable.Core.Interfaces
 {
     public interface ICollectableRepository
     {
@@ -15,6 +14,6 @@ namespace Recollectable.Core.Interfaces.Repositories
         void Add(CollectionCollectable collectable);
         void Update(CollectionCollectable collectable);
         void Delete(CollectionCollectable collectable);
-        bool Exists(Guid Id);
+        bool Exists(Guid collectionId, Guid Id);
     }
 }

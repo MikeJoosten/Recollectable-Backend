@@ -18,7 +18,7 @@ using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Models.Collections;
 using Recollectable.Core.Models.Locations;

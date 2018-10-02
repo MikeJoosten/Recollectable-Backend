@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collections;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;

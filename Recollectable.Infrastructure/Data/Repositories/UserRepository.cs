@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Users;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
@@ -229,9 +229,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost("{id}")]
-        public IActionResult BlockCollectableCreation(Guid id)
+        public IActionResult BlockCollectableCreation(Guid collectionId, Guid id)
         {
-            if (_unitOfWork.CollectableRepository.Exists(id))
+            if (_unitOfWork.CollectableRepository.Exists(collectionId, id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }

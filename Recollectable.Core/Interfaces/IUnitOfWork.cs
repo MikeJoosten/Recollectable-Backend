@@ -4,7 +4,7 @@ using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 
-namespace Recollectable.Core.Interfaces.Repositories
+namespace Recollectable.Core.Interfaces
 {
     public interface IUnitOfWork
     {
