@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Core.DTOs.Collectables;
 using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Services.Common;
+using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Interfaces;
@@ -19,11 +17,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
         private IUnitOfWork _unitOfWork;
         private IPropertyMappingService _propertyMappingService;
 
-        public CollectableRepository(RecollectableContext context, IUnitOfWork unitOfWork)
+        public CollectableRepository(RecollectableContext context, 
+            IUnitOfWork unitOfWork, IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _unitOfWork = unitOfWork;
-            _propertyMappingService = new PropertyMappingService();
+            _propertyMappingService = propertyMappingService;
         }
 
         public PagedList<CollectionCollectable> Get(Guid collectionId,

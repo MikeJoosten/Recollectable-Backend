@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.API.Services;
 using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
-using Recollectable.Core.Services;
+using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;
 using System;
 
@@ -11,8 +9,9 @@ namespace Recollectable.Tests
 {
     public class RecollectableTestBase
     {
-        protected readonly RecollectableContext _context;
+        private RecollectableContext _context;
         protected readonly IUnitOfWork _unitOfWork;
+        private IPropertyMappingService _propertyMappingService;
 
         public RecollectableTestBase()
         {
@@ -21,7 +20,8 @@ namespace Recollectable.Tests
                 .Options;
 
             _context = new RecollectableContext(options);
-            _unitOfWork = new UnitOfWork(_context);
+            _propertyMappingService = new PropertyMappingService();
+            _unitOfWork = new UnitOfWork(_context, _propertyMappingService);
             RecollectableInitializer.Initialize(_context);
         }
     }

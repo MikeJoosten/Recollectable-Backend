@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.Core.DTOs.Collectables;
+using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
-using Recollectable.Core.Shared.DTOs;
+using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +20,8 @@ namespace Recollectable.API.Controllers
     [Route("api/banknotes")]
     public class BanknotesController : Controller
     {
-        public readonly IUnitOfWork _unitOfWork;
-        public readonly IControllerService _controllerService;
+        private IUnitOfWork _unitOfWork;
+        private IControllerService _controllerService;
 
         public BanknotesController(IUnitOfWork unitOfWork, 
             IControllerService controllerService)
