@@ -1,23 +1,28 @@
-﻿using Recollectable.Core.DTOs.Collections;
-using Recollectable.Core.Entities.Collections;
+﻿using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Models.Collections;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectionRepository : BaseRepository<Collection, CollectionsResourceParameters>
+    public class CollectionRepository : IRepository<Collection, CollectionsResourceParameters>
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public CollectionRepository(RecollectableContext context)
+        public CollectionRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public override PagedList<Collection> Get(CollectionsResourceParameters resourceParameters)
+        public PagedList<Collection> Get(CollectionsResourceParameters resourceParameters)
         {
             var collections = _context.Collections.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>());
@@ -39,12 +44,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public override Collection GetById(Guid collectionId)
+        public Collection GetById(Guid collectionId)
         {
             return _context.Collections.FirstOrDefault(c => c.Id == collectionId);
         }
 
-        public override void Add(Collection collection)
+        public void Add(Collection collection)
         {
             if (collection.Id == Guid.Empty)
             {
@@ -54,14 +59,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Collections.Add(collection);
         }
 
-        public override void Update(Collection collection) { }
+        public void Update(Collection collection) { }
 
-        public override void Delete(Collection collection)
+        public void Delete(Collection collection)
         {
             _context.Collections.Remove(collection);
         }
 
-        public override bool Exists(Guid collectionId)
+        public bool Exists(Guid collectionId)
         {
             return _context.Collections.Any(c => c.Id == collectionId);
         }

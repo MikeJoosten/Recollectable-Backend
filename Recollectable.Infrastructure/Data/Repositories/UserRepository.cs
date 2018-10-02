@@ -1,24 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Core.DTOs.Users;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Models.Users;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class UserRepository : BaseRepository<User, UsersResourceParameters>
+    public class UserRepository : IRepository<User, UsersResourceParameters>
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public UserRepository(RecollectableContext context)
+        public UserRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public override PagedList<User> Get(UsersResourceParameters resourceParameters)
+        public PagedList<User> Get(UsersResourceParameters resourceParameters)
         {
             var users = _context.Users
                 .Include(u => u.Collections)
@@ -38,14 +43,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public override User GetById(Guid userId)
+        public User GetById(Guid userId)
         {
             return _context.Users
                 .Include(u => u.Collections)
                 .FirstOrDefault(u => u.Id == userId);
         }
 
-        public override void Add(User user)
+        public void Add(User user)
         {
             if (user.Id == Guid.Empty)
             {
@@ -63,14 +68,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Users.Add(user);
         }
 
-        public override void Update(User user) { }
+        public void Update(User user) { }
 
-        public override void Delete(User user)
+        public void Delete(User user)
         {
             _context.Users.Remove(user);
         }
 
-        public override bool Exists(Guid userId)
+        public bool Exists(Guid userId)
         {
             return _context.Users.Any(u => u.Id == userId);
         }

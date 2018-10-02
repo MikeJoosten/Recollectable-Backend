@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.Core.DTOs.Locations;
+using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces.Repositories;
-using Recollectable.Core.Interfaces.Services;
-using Recollectable.Core.Shared.DTOs;
+using Recollectable.Core.Models.Locations;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +20,8 @@ namespace Recollectable.API.Controllers
     [Route("api/countries")]
     public class CountriesController : Controller
     {
-        public readonly IUnitOfWork _unitOfWork;
-        public readonly IControllerService _controllerService;
+        private IUnitOfWork _unitOfWork;
+        private IControllerService _controllerService;
 
         public CountriesController(IUnitOfWork unitOfWork,
             IControllerService controllerService)

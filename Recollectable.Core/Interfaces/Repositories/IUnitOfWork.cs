@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Recollectable.Core.Entities.Collectables;
+﻿using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces.Services;
 
 namespace Recollectable.Core.Interfaces.Repositories
 {
@@ -15,7 +13,6 @@ namespace Recollectable.Core.Interfaces.Repositories
         IRepository<Coin, CurrenciesResourceParameters> CoinRepository { get; }
         IRepository<Collection, CollectionsResourceParameters> CollectionRepository { get; }
         IRepository<CollectorValue, CollectorValuesResourceParameters> CollectorValueRepository { get; }
-        IRepository<Condition, ConditionsResourceParameters> ConditionRepository { get; }
         IRepository<Country, CountriesResourceParameters> CountryRepository { get; }
         IRepository<User, UsersResourceParameters> UserRepository { get; }
 

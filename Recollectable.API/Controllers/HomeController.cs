@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Recollectable.Core.Interfaces.Services;
-using Recollectable.Core.Shared.DTOs;
+using Recollectable.API.Interfaces;
+using Recollectable.Core.Shared.Models;
 using System.Collections.Generic;
 
 namespace Recollectable.API.Controllers
@@ -8,7 +8,7 @@ namespace Recollectable.API.Controllers
     [Route("api")]
     public class HomeController : Controller
     {
-        public readonly IControllerService _controllerService;
+        private IControllerService _controllerService;
 
         public HomeController(IControllerService controllerService)
         {

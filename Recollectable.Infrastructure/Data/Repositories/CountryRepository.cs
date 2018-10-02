@@ -1,23 +1,28 @@
-﻿using Recollectable.Core.DTOs.Locations;
-using Recollectable.Core.Entities.Locations;
+﻿using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Models.Locations;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Linq;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CountryRepository : BaseRepository<Country, CountriesResourceParameters>
+    public class CountryRepository : IRepository<Country, CountriesResourceParameters>
     {
         private RecollectableContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public CountryRepository(RecollectableContext context)
+        public CountryRepository(RecollectableContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
-        public override PagedList<Country> Get(CountriesResourceParameters resourceParameters)
+        public PagedList<Country> Get(CountriesResourceParameters resourceParameters)
         {
             var countries = _context.Countries.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<CountryDto, Country>());
@@ -39,12 +44,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public override Country GetById(Guid countryId)
+        public Country GetById(Guid countryId)
         {
             return _context.Countries.FirstOrDefault(c => c.Id == countryId);
         }
 
-        public override void Add(Country country)
+        public void Add(Country country)
         {
             if (country.Id == Guid.Empty)
             {
@@ -54,14 +59,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Countries.Add(country);
         }
 
-        public override void Update(Country country) { }
+        public void Update(Country country) { }
 
-        public override void Delete(Country country)
+        public void Delete(Country country)
         {
             _context.Countries.Remove(country);
         }
 
-        public override bool Exists(Guid countryId)
+        public bool Exists(Guid countryId)
         {
             return _context.Countries.Any(c => c.Id == countryId);
         }
