@@ -1,5 +1,7 @@
-﻿using Recollectable.Core.Entities.Collectables;
+﻿using Recollectable.API.Services;
+using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Models.Collectables;
 using System;
 using System.Linq;
 using Xunit;
@@ -13,6 +15,10 @@ namespace Recollectable.Tests.Repositories
         public BanknoteRepositoryTests()
         {
             resourceParameters = new CurrenciesResourceParameters();
+
+            _mockPropertyMappingService.Setup(x =>
+                x.GetPropertyMapping<BanknoteDto, Banknote>())
+                .Returns(PropertyMappingService._currencyPropertyMapping);
         }
 
         [Fact]
@@ -22,6 +28,7 @@ namespace Recollectable.Tests.Repositories
             var result = _unitOfWork.BanknoteRepository.Get(resourceParameters);
 
             //Assert
+            Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
 
@@ -32,6 +39,7 @@ namespace Recollectable.Tests.Repositories
             var result = _unitOfWork.BanknoteRepository.Get(resourceParameters);
 
             //Assert
+            Assert.NotNull(result);
             Assert.Equal("Canada", result.First().Country.Name);
         }
 

@@ -8,13 +8,6 @@ namespace Recollectable.API.Controllers
     [Route("api")]
     public class HomeController : Controller
     {
-        private IControllerService _controllerService;
-
-        public HomeController(IControllerService controllerService)
-        {
-            _controllerService = controllerService;
-        }
-
         [HttpGet(Name = "GetHome")]
         public IActionResult GetHome([FromHeader(Name = "Accept")] string mediaType)
         {
@@ -22,19 +15,19 @@ namespace Recollectable.API.Controllers
             {
                 var links = new List<LinkDto>
                 {
-                    new LinkDto(_controllerService.UrlHelper.Link("GetHome",
+                    new LinkDto(Url.Link("GetHome",
                     new { }), "self", "GET"),
 
-                    new LinkDto(_controllerService.UrlHelper.Link("GetUsers",
+                    new LinkDto(Url.Link("GetUsers",
                     new { }), "users", "GET"),
 
-                    new LinkDto(_controllerService.UrlHelper.Link("GetCollections",
+                    new LinkDto(Url.Link("GetCollections",
                     new { }), "collections", "GET"),
 
-                    new LinkDto(_controllerService.UrlHelper.Link("GetCoins",
+                    new LinkDto(Url.Link("GetCoins",
                     new { }), "coins", "GET"),
 
-                    new LinkDto(_controllerService.UrlHelper.Link("GetBanknotes",
+                    new LinkDto(Url.Link("GetBanknotes",
                     new { }), "banknotes", "GET")
                 };
 

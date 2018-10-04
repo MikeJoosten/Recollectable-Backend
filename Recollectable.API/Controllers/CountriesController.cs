@@ -329,7 +329,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -339,7 +339,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -349,7 +349,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -367,19 +367,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCountry",
+                links.Add(new LinkDto(Url.Link("GetCountry",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCountry",
+                links.Add(new LinkDto(Url.Link("CreateCountry",
                     new { }), "create_country", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCountry",
+                links.Add(new LinkDto(Url.Link("UpdateCountry",
                     new { id }), "update_country", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCountry",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCountry",
                     new { id }), "partially_update_country", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCountry",
+                links.Add(new LinkDto(Url.Link("DeleteCountry",
                     new { id }), "delete_country", "DELETE"));
             }
 

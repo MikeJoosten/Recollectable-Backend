@@ -334,7 +334,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCollections", new
+                    return Url.Link("GetCollections", new
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
@@ -344,7 +344,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCollections", new
+                    return Url.Link("GetCollections", new
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
@@ -354,7 +354,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCollections", new
+                    return Url.Link("GetCollections", new
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
@@ -372,19 +372,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCollection",
+                links.Add(new LinkDto(Url.Link("GetCollection",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCollection",
+                links.Add(new LinkDto(Url.Link("CreateCollection",
                     new { }), "create_collection", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCollection",
+                links.Add(new LinkDto(Url.Link("UpdateCollection",
                     new { id }), "update_collection", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCollection",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCollection",
                     new { id }), "partially_update_collection", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCollection",
+                links.Add(new LinkDto(Url.Link("DeleteCollection",
                     new { id }), "delete_collection", "DELETE"));
             }
 

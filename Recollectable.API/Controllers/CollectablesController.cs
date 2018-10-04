@@ -379,7 +379,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCollectables", new
+                    return Url.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -389,7 +389,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCollectables", new
+                    return Url.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -399,7 +399,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCollectables", new
+                    return Url.Link("GetCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -417,19 +417,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCollectable",
+                links.Add(new LinkDto(Url.Link("GetCollectable",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCollectable",
+                links.Add(new LinkDto(Url.Link("CreateCollectable",
                     new { }), "create_collectable", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCollectable",
+                links.Add(new LinkDto(Url.Link("UpdateCollectable",
                     new { id }), "update_collectable", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCollectable",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCollectable",
                     new { id }), "partially_update_collectable", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCollectable",
+                links.Add(new LinkDto(Url.Link("DeleteCollectable",
                     new { id }), "delete_collectable", "DELETE"));
             }
 

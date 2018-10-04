@@ -380,7 +380,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCoins", new
+                    return Url.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -391,7 +391,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCoins", new
+                    return Url.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -402,7 +402,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCoins", new
+                    return Url.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -421,19 +421,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCoins",
+                links.Add(new LinkDto(Url.Link("GetCoins",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCoins",
+                links.Add(new LinkDto(Url.Link("CreateCoins",
                     new { }), "create_coins", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCoins",
+                links.Add(new LinkDto(Url.Link("UpdateCoins",
                     new { id }), "update_coins", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCoins",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCoins",
                     new { id }), "partially_update_coins", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCoins",
+                links.Add(new LinkDto(Url.Link("DeleteCoins",
                     new { id }), "delete_coins", "DELETE"));
             }
 

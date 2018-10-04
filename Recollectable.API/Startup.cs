@@ -76,12 +76,6 @@ namespace Recollectable.API
 
             // Register Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
-            {
-                var actionContext = implementationFactory
-                    .GetService<IActionContextAccessor>().ActionContext;
-                return new UrlHelper(actionContext);
-            });
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
             services.AddTransient<IControllerService, ControllerService>();

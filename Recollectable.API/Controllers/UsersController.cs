@@ -307,7 +307,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -316,7 +316,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -326,7 +326,7 @@ namespace Recollectable.API.Controllers
                     });
                 case ResourceUriType.Current:
                 default:
-                    return _controllerService.UrlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -343,19 +343,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetUser",
+                links.Add(new LinkDto(Url.Link("GetUser",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateUser", 
+                links.Add(new LinkDto(Url.Link("CreateUser", 
                     new { }), "create_user", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateUser",
+                links.Add(new LinkDto(Url.Link("UpdateUser",
                     new { id }), "update_user", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateUser",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateUser",
                     new { id }), "partially_update_user", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteUser",
+                links.Add(new LinkDto(Url.Link("DeleteUser",
                     new { id }), "delete_user", "DELETE"));
             }
 

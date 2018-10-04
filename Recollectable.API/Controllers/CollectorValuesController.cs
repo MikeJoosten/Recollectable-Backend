@@ -312,7 +312,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCollectorValues", new
+                    return Url.Link("GetCollectorValues", new
                     {
                         orderBy = resourceParameters.OrderBy,
                         fields = resourceParameters.Fields,
@@ -320,7 +320,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCollectorValues", new
+                    return Url.Link("GetCollectorValues", new
                     {
                         orderBy = resourceParameters.OrderBy,
                         fields = resourceParameters.Fields,
@@ -328,7 +328,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCollectorValues", new
+                    return Url.Link("GetCollectorValues", new
                     {
                         orderBy = resourceParameters.OrderBy,
                         fields = resourceParameters.Fields,
@@ -344,19 +344,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCollectorValue",
+                links.Add(new LinkDto(Url.Link("GetCollectorValue",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCollectorValue",
+                links.Add(new LinkDto(Url.Link("CreateCollectorValue",
                     new { }), "create_collector_value", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCollectorValue",
+                links.Add(new LinkDto(Url.Link("UpdateCollectorValue",
                     new { id }), "update_collector_value", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCollectorValue",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCollectorValue",
                     new { id }), "partially_update_collector_value", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCollectorValue",
+                links.Add(new LinkDto(Url.Link("DeleteCollectorValue",
                     new { id }), "delete_collector_value", "DELETE"));
             }
 

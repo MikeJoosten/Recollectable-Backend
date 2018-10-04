@@ -8,6 +8,7 @@ using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -78,10 +79,10 @@ namespace Recollectable.API.Controllers
                     return banknoteAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedBanknotes,
-                    links
+                    Value = linkedBanknotes,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -175,8 +176,7 @@ namespace Recollectable.API.Controllers
             {
                 banknote.Country = country;
             }
-            else if (banknote.CountryId != Guid.Empty || 
-                banknote.Country.Id != Guid.Empty)
+            else if (banknote.CountryId != Guid.Empty || banknote.Country.Id != Guid.Empty)
             {
                 return BadRequest();
             }
@@ -362,7 +362,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetBanknotes", new
+                    return Url.Link("GetBanknotes", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -373,7 +373,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetBanknotes", new
+                    return Url.Link("GetBanknotes", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -384,7 +384,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetBanknotes", new
+                    return Url.Link("GetBanknotes", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -403,19 +403,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetBanknote",
+                links.Add(new LinkDto(Url.Link("GetBanknote",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateBanknote",
+                links.Add(new LinkDto(Url.Link("CreateBanknote",
                     new { }), "create_banknote", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateBanknote",
+                links.Add(new LinkDto(Url.Link("UpdateBanknote",
                     new { id }), "update_banknote", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateBanknote",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateBanknote",
                     new { id }), "partially_update_banknote", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteBanknote",
+                links.Add(new LinkDto(Url.Link("DeleteBanknote",
                     new { id }), "delete_banknote", "DELETE"));
             }
 

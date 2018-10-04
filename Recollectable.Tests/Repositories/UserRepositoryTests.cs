@@ -1,6 +1,8 @@
-﻿using Recollectable.Core.Entities.Collections;
+﻿using Recollectable.API.Services;
+using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Models.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +17,10 @@ namespace Recollectable.Tests.Repositories
         public UserRepositoryTests()
         {
             resourceParameters = new UsersResourceParameters();
+
+            _mockPropertyMappingService.Setup(x =>
+                x.GetPropertyMapping<UserDto, User>())
+                .Returns(PropertyMappingService._userPropertyMapping);
         }
 
         [Fact]
@@ -24,6 +30,7 @@ namespace Recollectable.Tests.Repositories
             var result = _unitOfWork.UserRepository.Get(resourceParameters);
 
             //Assert
+            Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
 
@@ -34,6 +41,7 @@ namespace Recollectable.Tests.Repositories
             var result = _unitOfWork.UserRepository.Get(resourceParameters);
 
             //Assert
+            Assert.NotNull(result);
             Assert.Equal("Gavin", result.First().FirstName);
         }
 

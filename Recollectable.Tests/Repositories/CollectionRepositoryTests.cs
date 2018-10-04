@@ -1,5 +1,7 @@
-﻿using Recollectable.Core.Entities.Collections;
+﻿using Recollectable.API.Services;
+using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Models.Collections;
 using System;
 using System.Linq;
 using Xunit;
@@ -13,6 +15,10 @@ namespace Recollectable.Tests.Repositories
         public CollectionRepositoryTests()
         {
             resourceParameters = new CollectionsResourceParameters();
+
+            _mockPropertyMappingService.Setup(x =>
+                x.GetPropertyMapping<CollectionDto, Collection>())
+                .Returns(PropertyMappingService._collectionPropertyMapping);
         }
 
         [Fact]
@@ -22,6 +28,7 @@ namespace Recollectable.Tests.Repositories
             var result = _unitOfWork.CollectionRepository.Get(resourceParameters);
 
             //Assert
+            Assert.NotNull(result);
             Assert.Equal(6, result.Count());
         }
 
@@ -32,6 +39,7 @@ namespace Recollectable.Tests.Repositories
             var result = _unitOfWork.CollectionRepository.Get(resourceParameters);
 
             //Assert
+            Assert.NotNull(result);
             Assert.Equal("Banknote", result.First().Type);
         }
 
