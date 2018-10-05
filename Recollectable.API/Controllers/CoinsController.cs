@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var coinsFromRepo = _unitOfWork.CoinRepository.Get(resourceParameters);
-            var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
+            var coins = _controllerService.Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var coin = Mapper.Map<CoinDto>(coinFromRepo);
+            var coin = _controllerService.Mapper.Map<CoinDto>(coinFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -200,7 +200,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var newCoin = Mapper.Map<Coin>(coin);
+            var newCoin = _controllerService.Mapper.Map<Coin>(coin);
             _unitOfWork.CoinRepository.Add(newCoin);
 
             if (!_unitOfWork.Save())
@@ -208,7 +208,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a coin failed on save.");
             }
 
-            var returnedCoin = Mapper.Map<CoinDto>(newCoin);
+            var returnedCoin = _controllerService.Mapper.Map<CoinDto>(newCoin);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -280,7 +280,7 @@ namespace Recollectable.API.Controllers
             coinFromRepo.CountryId = coin.CountryId;
             coinFromRepo.CollectorValueId = coin.CollectorValueId;
 
-            Mapper.Map(coin, coinFromRepo);
+            _controllerService.Mapper.Map(coin, coinFromRepo);
             _unitOfWork.CoinRepository.Update(coinFromRepo);
 
             if (!_unitOfWork.Save())
@@ -307,7 +307,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCoin = Mapper.Map<CoinUpdateDto>(coinFromRepo);
+            var patchedCoin = _controllerService.Mapper.Map<CoinUpdateDto>(coinFromRepo);
             patchDoc.ApplyTo(patchedCoin, ModelState);
 
             if (patchedCoin.Note == patchedCoin.Subject)
@@ -336,7 +336,7 @@ namespace Recollectable.API.Controllers
             coinFromRepo.CountryId = patchedCoin.CountryId;
             coinFromRepo.CollectorValueId = patchedCoin.CollectorValueId;
 
-            Mapper.Map(patchedCoin, coinFromRepo);
+            _controllerService.Mapper.Map(patchedCoin, coinFromRepo);
             _unitOfWork.CoinRepository.Update(coinFromRepo);
 
             if (!_unitOfWork.Save())

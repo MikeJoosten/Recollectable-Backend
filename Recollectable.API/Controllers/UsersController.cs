@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var usersFromRepo = _unitOfWork.UserRepository.Get(resourceParameters);
-            var users = Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
+            var users = _controllerService.Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var user = Mapper.Map<UserDto>(userFromRepo);
+            var user = _controllerService.Mapper.Map<UserDto>(userFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -169,7 +169,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newUser = Mapper.Map<User>(user);
+            var newUser = _controllerService.Mapper.Map<User>(user);
             _unitOfWork.UserRepository.Add(newUser);
 
             if (!_unitOfWork.Save())
@@ -177,7 +177,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a user failed on save.");
             }
 
-            var returnedUser = Mapper.Map<UserDto>(newUser);
+            var returnedUser = _controllerService.Mapper.Map<UserDto>(newUser);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -226,7 +226,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            Mapper.Map(user, userFromRepo);
+            _controllerService.Mapper.Map(user, userFromRepo);
             _unitOfWork.UserRepository.Update(userFromRepo);
 
             if (!_unitOfWork.Save())
@@ -253,7 +253,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedUser = Mapper.Map<UserUpdateDto>(userFromRepo);
+            var patchedUser = _controllerService.Mapper.Map<UserUpdateDto>(userFromRepo);
             patchDoc.ApplyTo(patchedUser, ModelState);
 
             TryValidateModel(patchedUser);
@@ -263,7 +263,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            Mapper.Map(patchedUser, userFromRepo);
+            _controllerService.Mapper.Map(patchedUser, userFromRepo);
             _unitOfWork.UserRepository.Update(userFromRepo);
 
             if (!_unitOfWork.Save())

@@ -56,7 +56,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectables = Mapper.Map<IEnumerable<CollectableDto>>(collectablesFromRepo);
+            var collectables = _controllerService.Mapper.Map<IEnumerable<CollectableDto>>(collectablesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -141,7 +141,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var collectable = Mapper.Map<CollectableDto>(collectableFromRepo);
+            var collectable = _controllerService.Mapper.Map<CollectableDto>(collectableFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -194,7 +194,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var newCollectable = Mapper.Map<CollectionCollectable>(collectable);
+            var newCollectable = _controllerService.Mapper.Map<CollectionCollectable>(collectable);
             newCollectable.CollectionId = collectionId;
             newCollectable.Collection = collection;
             newCollectable.Collectable = collectableItem;
@@ -206,7 +206,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a collectable failed on save.");
             }
 
-            var returnedCollectable = Mapper.Map<CollectableDto>(newCollectable);
+            var returnedCollectable = _controllerService.Mapper.Map<CollectableDto>(newCollectable);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -279,7 +279,7 @@ namespace Recollectable.API.Controllers
             collectableFromRepo.CollectionId = collectable.CollectionId;
             collectableFromRepo.CollectableId = collectable.CollectableId;
 
-            Mapper.Map(collectable, collectableFromRepo);
+            _controllerService.Mapper.Map(collectable, collectableFromRepo);
             _unitOfWork.CollectableRepository.Update(collectableFromRepo);
 
             if (!_unitOfWork.Save())
@@ -306,7 +306,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCollectable = Mapper.Map<CollectableUpdateDto>(collectableFromRepo);
+            var patchedCollectable = _controllerService.Mapper.Map<CollectableUpdateDto>(collectableFromRepo);
             patchDoc.ApplyTo(patchedCollectable, ModelState);
 
             TryValidateModel(patchedCollectable);
@@ -335,7 +335,7 @@ namespace Recollectable.API.Controllers
             collectableFromRepo.CollectionId = patchedCollectable.CollectionId;
             collectableFromRepo.CollectableId = patchedCollectable.CollectableId;
 
-            Mapper.Map(patchedCollectable, collectableFromRepo);
+            _controllerService.Mapper.Map(patchedCollectable, collectableFromRepo);
             _unitOfWork.CollectableRepository.Update(collectableFromRepo);
 
             if (!_unitOfWork.Save())

@@ -49,7 +49,7 @@ namespace Recollectable.API.Controllers
             }
 
             var banknotesFromRepo = _unitOfWork.BanknoteRepository.Get(resourceParameters);
-            var banknotes = Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
+            var banknotes = _controllerService.Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -134,7 +134,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var banknote = Mapper.Map<BanknoteDto>(banknoteFromRepo);
+            var banknote = _controllerService.Mapper.Map<BanknoteDto>(banknoteFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -194,7 +194,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var newBanknote = Mapper.Map<Banknote>(banknote);
+            var newBanknote = _controllerService.Mapper.Map<Banknote>(banknote);
             _unitOfWork.BanknoteRepository.Add(newBanknote);
 
             if (!_unitOfWork.Save())
@@ -202,7 +202,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a banknote failed on save.");
             }
 
-            var returnedBanknote = Mapper.Map<BanknoteDto>(newBanknote);
+            var returnedBanknote = _controllerService.Mapper.Map<BanknoteDto>(newBanknote);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -268,7 +268,7 @@ namespace Recollectable.API.Controllers
             banknoteFromRepo.CountryId = banknote.CountryId;
             banknoteFromRepo.CollectorValueId = banknote.CollectorValueId;
 
-            Mapper.Map(banknote, banknoteFromRepo);
+            _controllerService.Mapper.Map(banknote, banknoteFromRepo);
             _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
 
             if (!_unitOfWork.Save())
@@ -295,7 +295,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedBanknote = Mapper.Map<BanknoteUpdateDto>(banknoteFromRepo);
+            var patchedBanknote = _controllerService.Mapper.Map<BanknoteUpdateDto>(banknoteFromRepo);
             patchDoc.ApplyTo(patchedBanknote, ModelState);
 
             TryValidateModel(patchedBanknote);
@@ -318,7 +318,7 @@ namespace Recollectable.API.Controllers
             banknoteFromRepo.CountryId = patchedBanknote.CountryId;
             banknoteFromRepo.CollectorValueId = patchedBanknote.CollectorValueId;
 
-            Mapper.Map(patchedBanknote, banknoteFromRepo);
+            _controllerService.Mapper.Map(patchedBanknote, banknoteFromRepo);
             _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
 
             if (!_unitOfWork.Save())

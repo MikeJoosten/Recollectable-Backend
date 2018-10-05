@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var collectorValuesFromRepo = _unitOfWork.CollectorValueRepository.Get(resourceParameters);
-            var collectorValues = Mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
+            var collectorValues = _controllerService.Mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var collectorValue = Mapper.Map<CollectorValueDto>(collectorValueFromRepo);
+            var collectorValue = _controllerService.Mapper.Map<CollectorValueDto>(collectorValueFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -169,7 +169,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newCollectorValue = Mapper.Map<CollectorValue>(collectorValue);
+            var newCollectorValue = _controllerService.Mapper.Map<CollectorValue>(collectorValue);
             _unitOfWork.CollectorValueRepository.Add(newCollectorValue);
 
             if (!_unitOfWork.Save())
@@ -177,7 +177,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a collector value failed on save.");
             }
 
-            var returnedCollectorValue = Mapper.Map<CollectorValueDto>(newCollectorValue);
+            var returnedCollectorValue = _controllerService.Mapper.Map<CollectorValueDto>(newCollectorValue);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -231,7 +231,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            Mapper.Map(collectorValue, collectorValueFromRepo);
+            _controllerService.Mapper.Map(collectorValue, collectorValueFromRepo);
             _unitOfWork.CollectorValueRepository.Update(collectorValueFromRepo);
 
             if (!_unitOfWork.Save())
@@ -258,7 +258,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCollectorValue = Mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);
+            var patchedCollectorValue = _controllerService.Mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);
             patchDoc.ApplyTo(patchedCollectorValue, ModelState);
 
             TryValidateModel(patchedCollectorValue);
@@ -268,7 +268,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            Mapper.Map(patchedCollectorValue, collectorValueFromRepo);
+            _controllerService.Mapper.Map(patchedCollectorValue, collectorValueFromRepo);
             _unitOfWork.CollectorValueRepository.Update(collectorValueFromRepo);
 
             if (!_unitOfWork.Save())

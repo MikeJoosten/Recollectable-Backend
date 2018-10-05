@@ -1,8 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Moq;
 using Recollectable.API.Controllers;
 using Recollectable.API.Services;
@@ -18,45 +16,18 @@ using Xunit;
 
 namespace Recollectable.Tests.Controllers
 {
-    public class BanknoteControllerTests : RecollectableTestBase
+    public class BanknotesControllerTests : RecollectableTestBase
     {
         private readonly BanknotesController _controller;
         private readonly CurrenciesResourceParameters resourceParameters;
 
-        public BanknoteControllerTests()
+        public BanknotesControllerTests()
         {
             _controller = new BanknotesController(_unitOfWork, _mockControllerService.Object);
             resourceParameters = new CurrenciesResourceParameters();
 
-            Mapper.Reset();
-
-            Mapper.Initialize(cfg =>
-            {
-                cfg.AddProfile<RecollectableMappingProfile>();
-            });
-
-            _controller.ControllerContext.HttpContext = new DefaultHttpContext();
-
-            var mockUrlHelper = new Mock<IUrlHelper>();
-            mockUrlHelper.Setup(x => x.Link(It.IsAny<string>(), It.IsAny<object>()))
-                .Returns("http://localhost/");
-
-            _controller.Url = mockUrlHelper.Object;
-
-            var objectValidator = new Mock<IObjectModelValidator>();
-            objectValidator.Setup(o => 
-                o.Validate(It.IsAny<ActionContext>(), It.IsAny<ValidationStateDictionary>(), 
-                It.IsAny<string>(), It.IsAny<object>()));
-
-            _controller.ObjectValidator = objectValidator.Object;
-
-            _mockTypeHelperService.Setup(x => 
-                x.TypeHasProperties<BanknoteDto>(It.IsAny<string>())).Returns(true);
-            _mockPropertyMappingService.Setup(x =>
-                x.ValidMappingExistsFor<BanknoteDto, Banknote>(It.IsAny<string>())).Returns(true);
-            _mockPropertyMappingService.Setup(x =>
-                x.GetPropertyMapping<BanknoteDto, Banknote>())
-                .Returns(PropertyMappingService._currencyPropertyMapping);
+            SetupTestController<BanknoteDto, Banknote>(_controller, 
+                PropertyMappingService._currencyPropertyMapping);
         }
 
         [Fact]
@@ -77,7 +48,7 @@ namespace Recollectable.Tests.Controllers
         public void GetBanknotes_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
-            _mockTypeHelperService.Setup(x => 
+            _mockTypeHelperService.Setup(x =>
                 x.TypeHasProperties<BanknoteDto>(It.IsAny<string>())).Returns(false);
 
             //Act

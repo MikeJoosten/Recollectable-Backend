@@ -1,11 +1,11 @@
 ﻿using AspNetCoreRateLimit;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -80,6 +80,12 @@ namespace Recollectable.API
             services.AddTransient<ITypeHelperService, TypeHelperService>();
             services.AddTransient<IControllerService, ControllerService>();
 
+            // Register Auto Mapper
+            var configuration = new MapperConfiguration(cfg =>
+                cfg.AddProfile<RecollectableMappingProfile>());
+            IMapper mapper = configuration.CreateMapper();
+            services.AddSingleton(mapper);
+
             // Register HTTP Caching
             services.AddHttpCacheHeaders(
                 (expirationModelOptions) => 
@@ -129,10 +135,8 @@ namespace Recollectable.API
                 });
             }
 
-            AutoMapper.Mapper.Initialize(cfg =>
-            {
-                cfg.AddProfile<RecollectableMappingProfile>();
-            });
+            Mapper.Initialize(cfg =>
+                cfg.AddProfile<RecollectableMappingProfile>());
 
             recollectableContext.Database.Migrate();
             app.UseHttpsRedirection();

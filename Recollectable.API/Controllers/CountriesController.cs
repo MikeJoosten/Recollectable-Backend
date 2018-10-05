@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var countriesFromRepo = _unitOfWork.CountryRepository.Get(resourceParameters);
-            var countries = Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
+            var countries = _controllerService.Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var country = Mapper.Map<CountryDto>(countryFromRepo);
+            var country = _controllerService.Mapper.Map<CountryDto>(countryFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -175,7 +175,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newCountry = Mapper.Map<Country>(country);
+            var newCountry = _controllerService.Mapper.Map<Country>(country);
             _unitOfWork.CountryRepository.Add(newCountry);
 
             if (!_unitOfWork.Save())
@@ -183,7 +183,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a country failed on save.");
             }
 
-            var returnedCountry = Mapper.Map<CountryDto>(newCountry);
+            var returnedCountry = _controllerService.Mapper.Map<CountryDto>(newCountry);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -242,7 +242,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            Mapper.Map(country, countryFromRepo);
+            _controllerService.Mapper.Map(country, countryFromRepo);
             _unitOfWork.CountryRepository.Update(countryFromRepo);
 
             if (!_unitOfWork.Save())
@@ -269,7 +269,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCountry = Mapper.Map<CountryUpdateDto>(countryFromRepo);
+            var patchedCountry = _controllerService.Mapper.Map<CountryUpdateDto>(countryFromRepo);
             patchDoc.ApplyTo(patchedCountry, ModelState);
 
             if (patchedCountry.Description == patchedCountry.Name)
@@ -285,7 +285,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            Mapper.Map(patchedCountry, countryFromRepo);
+            _controllerService.Mapper.Map(patchedCountry, countryFromRepo);
             _unitOfWork.CountryRepository.Update(countryFromRepo);
 
             if (!_unitOfWork.Save())

@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var collectionsFromRepo = _unitOfWork.CollectionRepository.Get(resourceParameters);
-            var collections = Mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
+            var collections = _controllerService.Mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var collection = Mapper.Map<CollectionDto>(collectionFromRepo);
+            var collection = _controllerService.Mapper.Map<CollectionDto>(collectionFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -176,7 +176,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var newCollection = Mapper.Map<Collection>(collection);
+            var newCollection = _controllerService.Mapper.Map<Collection>(collection);
             newCollection.User = user;
 
             _unitOfWork.CollectionRepository.Add(newCollection);
@@ -186,7 +186,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a collection failed on save.");
             }
 
-            var returnedCollection = Mapper.Map<CollectionDto>(newCollection);
+            var returnedCollection = _controllerService.Mapper.Map<CollectionDto>(newCollection);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -246,7 +246,7 @@ namespace Recollectable.API.Controllers
 
             collectionFromRepo.UserId = collection.UserId;
 
-            Mapper.Map(collection, collectionFromRepo);
+            _controllerService.Mapper.Map(collection, collectionFromRepo);
             _unitOfWork.CollectionRepository.Update(collectionFromRepo);
 
             if (!_unitOfWork.Save())
@@ -273,7 +273,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCollection = Mapper.Map<CollectionUpdateDto>(collectionFromRepo);
+            var patchedCollection = _controllerService.Mapper.Map<CollectionUpdateDto>(collectionFromRepo);
             patchDoc.ApplyTo(patchedCollection, ModelState);
 
             TryValidateModel(patchedCollection);
@@ -290,7 +290,7 @@ namespace Recollectable.API.Controllers
 
             collectionFromRepo.UserId = patchedCollection.UserId;
 
-            Mapper.Map(patchedCollection, collectionFromRepo);
+            _controllerService.Mapper.Map(patchedCollection, collectionFromRepo);
             _unitOfWork.CollectionRepository.Update(collectionFromRepo);
 
             if (!_unitOfWork.Save())
