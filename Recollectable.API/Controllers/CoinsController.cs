@@ -8,6 +8,7 @@ using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -78,10 +79,10 @@ namespace Recollectable.API.Controllers
                     return coinAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCoins,
-                    links
+                    Value = linkedCoins,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -310,7 +311,7 @@ namespace Recollectable.API.Controllers
             var patchedCoin = _controllerService.Mapper.Map<CoinUpdateDto>(coinFromRepo);
             patchDoc.ApplyTo(patchedCoin, ModelState);
 
-            if (patchedCoin.Note == patchedCoin.Subject)
+            if (patchedCoin.Note?.ToLowerInvariant() == patchedCoin.Subject?.ToLowerInvariant())
             {
                 ModelState.AddModelError(nameof(CoinUpdateDto),
                     "The provided note should be different from the coin's subject");

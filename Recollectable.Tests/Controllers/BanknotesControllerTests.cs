@@ -122,11 +122,11 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
-            var items = response.Value as List<ExpandoObject>;
+            var banknotes = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(items);
-            Assert.Equal(2, items.Count);
+            Assert.NotNull(banknotes);
+            Assert.Equal(2, banknotes.Count);
         }
 
         [Fact]
@@ -138,11 +138,11 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
-            var items = response.Value as LinkedCollectionResource;
+            var banknotes = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(items);
-            Assert.Equal(2, items.Value.Count());
+            Assert.NotNull(banknotes);
+            Assert.Equal(2, banknotes.Value.Count());
         }
 
         [Fact]
@@ -289,7 +289,6 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             BanknoteCreationDto banknote = new BanknoteCreationDto
             {
-                Type = "Dollar",
                 CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
                 CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
             };
@@ -529,7 +528,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-            patchDoc.Replace(e => e.CountryId, new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d"));
+            patchDoc.Replace(b => b.CountryId, new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d"));
 
             //Act
             var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
@@ -544,7 +543,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-            patchDoc.Replace(e => e.CollectorValueId, new Guid("56b08b23-3ef5-4fa7-a607-4d254733a2e8"));
+            patchDoc.Replace(b => b.CollectorValueId, new Guid("56b08b23-3ef5-4fa7-a607-4d254733a2e8"));
 
             //Act
             var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
