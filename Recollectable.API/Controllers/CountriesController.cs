@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Helpers;
-using Recollectable.Data.Helpers;
-using Recollectable.Data.Repositories;
-using Recollectable.Data.Services;
-using Recollectable.Domain.Entities;
-using Recollectable.Domain.Models;
+using Recollectable.API.Interfaces;
+using Recollectable.Core.Entities.Locations;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces;
+using Recollectable.Core.Models.Locations;
+using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Enums;
+using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +21,14 @@ namespace Recollectable.API.Controllers
     [Route("api/countries")]
     public class CountriesController : Controller
     {
-        private ICountryRepository _countryRepository;
-        private IUrlHelper _urlHelper;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        private IUnitOfWork _unitOfWork;
+        private IControllerService _controllerService;
 
-        public CountriesController(ICountryRepository countryRepository,
-            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
-            ITypeHelperService typeHelperService)
+        public CountriesController(IUnitOfWork unitOfWork,
+            IControllerService controllerService)
         {
-            _countryRepository = countryRepository;
-            _urlHelper = urlHelper;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _unitOfWork = unitOfWork;
+            _controllerService = controllerService;
         }
 
         [HttpHead]
@@ -38,20 +36,20 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCountries(CountriesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<CountryDto, Country>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<CountryDto, Country>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<CountryDto>
+            if (!_controllerService.TypeHelperService.TypeHasProperties<CountryDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var countriesFromRepo = _countryRepository.GetCountries(resourceParameters);
-            var countries = Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
+            var countriesFromRepo = _unitOfWork.CountryRepository.Get(resourceParameters);
+            var countries = _controllerService.Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -81,10 +79,10 @@ namespace Recollectable.API.Controllers
                     return countryAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCountries,
-                    links
+                    Value = linkedCountries,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -124,19 +122,19 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCountry(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<CountryDto>(fields))
+            if (!_controllerService.TypeHelperService.TypeHasProperties<CountryDto>(fields))
             {
                 return BadRequest();
             }
 
-            var countryFromRepo = _countryRepository.GetCountry(id);
+            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
                 return NotFound();
             }
 
-            var country = Mapper.Map<CountryDto>(countryFromRepo);
+            var country = _controllerService.Mapper.Map<CountryDto>(countryFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -178,15 +176,15 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newCountry = Mapper.Map<Country>(country);
-            _countryRepository.AddCountry(newCountry);
+            var newCountry = _controllerService.Mapper.Map<Country>(country);
+            _unitOfWork.CountryRepository.Add(newCountry);
 
-            if (!_countryRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a country failed on save.");
             }
 
-            var returnedCountry = Mapper.Map<CountryDto>(newCountry);
+            var returnedCountry = _controllerService.Mapper.Map<CountryDto>(newCountry);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -211,7 +209,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public IActionResult BlockCountryCreation(Guid id)
         {
-            if (_countryRepository.CountryExists(id))
+            if (_unitOfWork.CountryRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -238,17 +236,17 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var countryFromRepo = _countryRepository.GetCountry(id);
+            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
                 return NotFound();
             }
 
-            Mapper.Map(country, countryFromRepo);
-            _countryRepository.UpdateCountry(countryFromRepo);
+            _controllerService.Mapper.Map(country, countryFromRepo);
+            _unitOfWork.CountryRepository.Update(countryFromRepo);
 
-            if (!_countryRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Updating country {id} failed on save.");
             }
@@ -265,17 +263,17 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var countryFromRepo = _countryRepository.GetCountry(id);
+            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
                 return NotFound();
             }
 
-            var patchedCountry = Mapper.Map<CountryUpdateDto>(countryFromRepo);
+            var patchedCountry = _controllerService.Mapper.Map<CountryUpdateDto>(countryFromRepo);
             patchDoc.ApplyTo(patchedCountry, ModelState);
 
-            if (patchedCountry.Description == patchedCountry.Name)
+            if (patchedCountry.Description?.ToLowerInvariant() == patchedCountry.Name?.ToLowerInvariant())
             {
                 ModelState.AddModelError(nameof(CountryUpdateDto),
                     "The provided description should be different from the country name");
@@ -288,10 +286,10 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            Mapper.Map(patchedCountry, countryFromRepo);
-            _countryRepository.UpdateCountry(countryFromRepo);
+            _controllerService.Mapper.Map(patchedCountry, countryFromRepo);
+            _unitOfWork.CountryRepository.Update(countryFromRepo);
 
-            if (!_countryRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Patching country {id} failed on save.");
             }
@@ -302,16 +300,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteCountry")]
         public IActionResult DeleteCountry(Guid id)
         {
-            var countryFromRepo = _countryRepository.GetCountry(id);
+            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
                 return NotFound();
             }
 
-            _countryRepository.DeleteCountry(countryFromRepo);
+            _unitOfWork.CountryRepository.Delete(countryFromRepo);
             
-            if (!_countryRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Deleting country {id} failed on save.");
             }
@@ -332,7 +330,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -342,7 +340,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -352,7 +350,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _urlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -370,19 +368,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_urlHelper.Link("GetCountry",
+                links.Add(new LinkDto(Url.Link("GetCountry",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_urlHelper.Link("CreateCountry",
+                links.Add(new LinkDto(Url.Link("CreateCountry",
                     new { }), "create_country", "POST"));
 
-                links.Add(new LinkDto(_urlHelper.Link("UpdateCountry",
+                links.Add(new LinkDto(Url.Link("UpdateCountry",
                     new { id }), "update_country", "PUT"));
 
-                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateCountry",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCountry",
                     new { id }), "partially_update_country", "PATCH"));
 
-                links.Add(new LinkDto(_urlHelper.Link("DeleteCountry",
+                links.Add(new LinkDto(Url.Link("DeleteCountry",
                     new { id }), "delete_country", "DELETE"));
             }
 
@@ -393,10 +391,11 @@ namespace Recollectable.API.Controllers
             (CountriesResourceParameters resourceParameters,
             bool hasNext, bool hasPrevious)
         {
-            var links = new List<LinkDto>();
-
-            links.Add(new LinkDto(CreateCountriesResourceUri(resourceParameters,
-                ResourceUriType.Current), "self", "GET"));
+            var links = new List<LinkDto>
+            {
+                new LinkDto(CreateCountriesResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET")
+            };
 
             if (hasNext)
             {

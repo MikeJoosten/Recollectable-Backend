@@ -1,21 +1,28 @@
 ﻿using AspNetCoreRateLimit;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
-using Recollectable.Data;
-using Recollectable.Data.Repositories;
-using Recollectable.Data.Services;
-using Recollectable.Domain.Entities;
-using Recollectable.Domain.Models;
+using Recollectable.API.Interfaces;
+using Recollectable.API.Services;
+using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Collections;
+using Recollectable.Core.Entities.Locations;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces;
+using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Infrastructure.Data;
+using Recollectable.Infrastructure.Data.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -58,31 +65,32 @@ namespace Recollectable.API
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
             // Register repositories
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ICollectionRepository, CollectionRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICollectableRepository, CollectableRepository>();
-            services.AddScoped<ICoinRepository, CoinRepository>();
-            services.AddScoped<IBanknoteRepository, BanknoteRepository>();
-            services.AddScoped<IConditionRepository, ConditionRepository>();
-            services.AddScoped<ICountryRepository, CountryRepository>();
-            services.AddScoped<ICollectorValueRepository, CollectorValueRepository>();
+            services.AddScoped<IRepository<User, UsersResourceParameters>, UserRepository>();
+            services.AddScoped<IRepository<Collection, CollectionsResourceParameters>, CollectionRepository>();
+            services.AddScoped<IRepository<Coin, CurrenciesResourceParameters>, CoinRepository>();
+            services.AddScoped<IRepository<Banknote, CurrenciesResourceParameters>, BanknoteRepository>();
+            services.AddScoped<IRepository<Country, CountriesResourceParameters>, CountryRepository>();
+            services.AddScoped<IRepository<CollectorValue, CollectorValuesResourceParameters>, CollectorValueRepository>();
 
             // Register Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
-            {
-                var actionContext = implementationFactory
-                    .GetService<IActionContextAccessor>().ActionContext;
-                return new UrlHelper(actionContext);
-            });
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
+            services.AddTransient<IControllerService, ControllerService>();
+
+            // Register Auto Mapper
+            var configuration = new MapperConfiguration(cfg =>
+                cfg.AddProfile<RecollectableMappingProfile>());
+            IMapper mapper = configuration.CreateMapper();
+            services.AddSingleton(mapper);
 
             // Register HTTP Caching
             services.AddHttpCacheHeaders(
                 (expirationModelOptions) => 
                 {
-                    expirationModelOptions.MaxAge = 600;
+                    expirationModelOptions.MaxAge = 1;
                 },
                 (validationModelOptions) =>
                 {
@@ -127,42 +135,8 @@ namespace Recollectable.API
                 });
             }
 
-            AutoMapper.Mapper.Initialize(cfg =>
-            {
-                cfg.CreateMap<User, UserDto>().ForMember(dest => dest.Name, 
-                    opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
-                cfg.CreateMap<UserCreationDto, User>();
-                cfg.CreateMap<UserUpdateDto, User>();
-                cfg.CreateMap<User, UserUpdateDto>();
-                cfg.CreateMap<Collection, CollectionDto>();
-                cfg.CreateMap<CollectionCreationDto, Collection>();
-                cfg.CreateMap<CollectionUpdateDto, Collection>();
-                cfg.CreateMap<Collection, CollectionUpdateDto>();
-                cfg.CreateMap<CollectionCollectable, CollectableDto>();
-                cfg.CreateMap<CollectableCreationDto, CollectionCollectable>();
-                cfg.CreateMap<CollectableUpdateDto, CollectionCollectable>();
-                cfg.CreateMap<CollectionCollectable, CollectableUpdateDto>();
-                cfg.CreateMap<Coin, CoinDto>();
-                cfg.CreateMap<CoinCreationDto, Coin>();
-                cfg.CreateMap<CoinUpdateDto, Coin>();
-                cfg.CreateMap<Coin, CoinUpdateDto>();
-                cfg.CreateMap<Banknote, BanknoteDto>();
-                cfg.CreateMap<BanknoteCreationDto, Banknote>();
-                cfg.CreateMap<BanknoteUpdateDto, Banknote>();
-                cfg.CreateMap<Banknote, BanknoteUpdateDto>();
-                cfg.CreateMap<Condition, ConditionDto>();
-                cfg.CreateMap<ConditionCreationDto, Condition>();
-                cfg.CreateMap<ConditionUpdateDto, Condition>();
-                cfg.CreateMap<Condition, ConditionUpdateDto>();
-                cfg.CreateMap<Country, CountryDto>();
-                cfg.CreateMap<CountryCreationDto, Country>();
-                cfg.CreateMap<CountryUpdateDto, Country>();
-                cfg.CreateMap<Country, CountryUpdateDto>();
-                cfg.CreateMap<CollectorValue, CollectorValueDto>();
-                cfg.CreateMap<CollectorValueCreationDto, CollectorValue>();
-                cfg.CreateMap<CollectorValueUpdateDto, CollectorValue>();
-                cfg.CreateMap<CollectorValue, CollectorValueUpdateDto>();
-            });
+            Mapper.Initialize(cfg =>
+                cfg.AddProfile<RecollectableMappingProfile>());
 
             recollectableContext.Database.Migrate();
             app.UseHttpsRedirection();

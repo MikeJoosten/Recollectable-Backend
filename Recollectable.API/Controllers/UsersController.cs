@@ -1,14 +1,16 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Helpers;
-using Recollectable.Data.Helpers;
-using Recollectable.Data.Repositories;
-using Recollectable.Data.Services;
-using Recollectable.Domain.Entities;
-using Recollectable.Domain.Models;
+using Recollectable.API.Interfaces;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces;
+using Recollectable.Core.Models.Users;
+using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Enums;
+using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +20,14 @@ namespace Recollectable.API.Controllers
     [Route("api/users")]
     public class UsersController : Controller
     {
-        private IUserRepository _userRepository;
-        private IUrlHelper _urlHelper;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        private IUnitOfWork _unitOfWork;
+        private IControllerService _controllerService;
 
-        public UsersController(IUserRepository userRepository, 
-            IUrlHelper urlHelper, IPropertyMappingService propertyMappingService,
-            ITypeHelperService typeHelperService)
+        public UsersController(IUnitOfWork unitOfWork,
+            IControllerService controllerService)
         {
-            _userRepository = userRepository;
-            _urlHelper = urlHelper;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _unitOfWork = unitOfWork;
+            _controllerService = controllerService;
         }
 
         [HttpHead]
@@ -38,20 +35,20 @@ namespace Recollectable.API.Controllers
         public IActionResult GetUsers(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<UserDto, User>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<UserDto>
+            if (!_controllerService.TypeHelperService.TypeHasProperties<UserDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var usersFromRepo = _userRepository.GetUsers(resourceParameters);
-            var users = Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
+            var usersFromRepo = _unitOfWork.UserRepository.Get(resourceParameters);
+            var users = _controllerService.Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -81,10 +78,10 @@ namespace Recollectable.API.Controllers
                     return userAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedUsers,
-                    links
+                    Value = linkedUsers,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -124,19 +121,19 @@ namespace Recollectable.API.Controllers
         public IActionResult GetUser(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
+            if (!_controllerService.TypeHelperService.TypeHasProperties<UserDto>(fields))
             {
                 return BadRequest();
             }
 
-            var userFromRepo = _userRepository.GetUser(id);
+            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
                 return NotFound();
             }
 
-            var user = Mapper.Map<UserDto>(userFromRepo);
+            var user = _controllerService.Mapper.Map<UserDto>(userFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -172,15 +169,15 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newUser = Mapper.Map<User>(user);
-            _userRepository.AddUser(newUser);
+            var newUser = _controllerService.Mapper.Map<User>(user);
+            _unitOfWork.UserRepository.Add(newUser);
 
-            if (!_userRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a user failed on save.");
             }
 
-            var returnedUser = Mapper.Map<UserDto>(newUser);
+            var returnedUser = _controllerService.Mapper.Map<UserDto>(newUser);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -201,7 +198,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public IActionResult BlockUserCreation(Guid id)
         {
-            if (_userRepository.UserExists(id))
+            if (_unitOfWork.UserRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -222,17 +219,17 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var userFromRepo = _userRepository.GetUser(id);
+            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
                 return NotFound();
             }
 
-            Mapper.Map(user, userFromRepo);
-            _userRepository.UpdateUser(userFromRepo);
+            _controllerService.Mapper.Map(user, userFromRepo);
+            _unitOfWork.UserRepository.Update(userFromRepo);
 
-            if (!_userRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Updating user {id} failed on save.");
             }
@@ -249,25 +246,27 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var userFromRepo = _userRepository.GetUser(id);
+            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
                 return NotFound();
             }
 
-            var patchedUser = Mapper.Map<UserUpdateDto>(userFromRepo);
+            var patchedUser = _controllerService.Mapper.Map<UserUpdateDto>(userFromRepo);
             patchDoc.ApplyTo(patchedUser, ModelState);
+
+            TryValidateModel(patchedUser);
 
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            Mapper.Map(patchedUser, userFromRepo);
-            _userRepository.UpdateUser(userFromRepo);
+            _controllerService.Mapper.Map(patchedUser, userFromRepo);
+            _unitOfWork.UserRepository.Update(userFromRepo);
 
-            if (!_userRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Patching user {id} failed on save.");
             }
@@ -278,16 +277,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteUser")]
         public IActionResult DeleteUser(Guid id)
         {
-            var userFromRepo = _userRepository.GetUser(id);
+            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
                 return NotFound();
             }
 
-            _userRepository.DeleteUser(userFromRepo);
+            _unitOfWork.UserRepository.Delete(userFromRepo);
 
-            if (!_userRepository.Save())
+            if (!_unitOfWork.Save())
             {
                 throw new Exception($"Deleting user {id} failed on save.");
             }
@@ -308,7 +307,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -317,7 +316,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -327,7 +326,7 @@ namespace Recollectable.API.Controllers
                     });
                 case ResourceUriType.Current:
                 default:
-                    return _urlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -344,19 +343,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_urlHelper.Link("GetUser",
+                links.Add(new LinkDto(Url.Link("GetUser",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_urlHelper.Link("CreateUser", 
+                links.Add(new LinkDto(Url.Link("CreateUser", 
                     new { }), "create_user", "POST"));
 
-                links.Add(new LinkDto(_urlHelper.Link("UpdateUser",
+                links.Add(new LinkDto(Url.Link("UpdateUser",
                     new { id }), "update_user", "PUT"));
 
-                links.Add(new LinkDto(_urlHelper.Link("PartiallyUpdateUser",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateUser",
                     new { id }), "partially_update_user", "PATCH"));
 
-                links.Add(new LinkDto(_urlHelper.Link("DeleteUser",
+                links.Add(new LinkDto(Url.Link("DeleteUser",
                     new { id }), "delete_user", "DELETE"));
             }
 
@@ -367,10 +366,11 @@ namespace Recollectable.API.Controllers
             (UsersResourceParameters resourceParameters, 
             bool hasNext, bool hasPrevious)
         {
-            var links = new List<LinkDto>();
-
-            links.Add(new LinkDto(CreateUsersResourceUri(resourceParameters,
-                ResourceUriType.Current), "self", "GET"));
+            var links = new List<LinkDto>
+            {
+                new LinkDto(CreateUsersResourceUri(resourceParameters,
+                ResourceUriType.Current), "self", "GET")
+            };
 
             if (hasNext)
             {
