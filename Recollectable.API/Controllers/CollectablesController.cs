@@ -189,7 +189,7 @@ namespace Recollectable.API.Controllers
                 .GetCollectableItem(collectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
-                .ToLower().Contains(collection.Type.ToLower()))
+                .ToLowerInvariant().Contains(collection.Type.ToLowerInvariant()))
             {
                 return BadRequest();
             }
@@ -269,7 +269,7 @@ namespace Recollectable.API.Controllers
                 .GetCollectableItem(collectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
-                .ToLower().Contains(collection.Type.ToLower()))
+                .ToLowerInvariant().Contains(collection.Type.ToLowerInvariant()))
             {
                 return BadRequest();
             }
@@ -337,7 +337,7 @@ namespace Recollectable.API.Controllers
                 .GetCollectableItem(patchedCollectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
-                .ToLower().Contains(collection.Type.ToLower()))
+                .ToLowerInvariant().Contains(collection.Type.ToLowerInvariant()))
             {
                 return BadRequest();
             }
