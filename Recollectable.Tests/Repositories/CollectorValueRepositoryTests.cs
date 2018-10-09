@@ -1,7 +1,5 @@
-﻿using Recollectable.API.Services;
-using Recollectable.Core.Entities.Collectables;
+﻿using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Models.Collectables;
 using System;
 using System.Linq;
 using Xunit;
@@ -15,10 +13,6 @@ namespace Recollectable.Tests.Repositories
         public CollectorValueRepositoryTests()
         {
             resourceParameters = new CollectorValuesResourceParameters();
-
-            _mockPropertyMappingService.Setup(x =>
-                x.GetPropertyMapping<CollectorValueDto, CollectorValue>())
-                .Returns(PropertyMappingService._collectorValuePropertyMapping);
         }
 
         [Fact]

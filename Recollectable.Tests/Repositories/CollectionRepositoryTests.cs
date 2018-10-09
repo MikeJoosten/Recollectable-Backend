@@ -1,7 +1,5 @@
-﻿using Recollectable.API.Services;
-using Recollectable.Core.Entities.Collections;
+﻿using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Models.Collections;
 using System;
 using System.Linq;
 using Xunit;
@@ -15,10 +13,6 @@ namespace Recollectable.Tests.Repositories
         public CollectionRepositoryTests()
         {
             resourceParameters = new CollectionsResourceParameters();
-
-            _mockPropertyMappingService.Setup(x =>
-                x.GetPropertyMapping<CollectionDto, Collection>())
-                .Returns(PropertyMappingService._collectionPropertyMapping);
         }
 
         [Fact]

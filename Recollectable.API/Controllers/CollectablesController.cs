@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -8,6 +7,7 @@ using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -36,7 +36,7 @@ namespace Recollectable.API.Controllers
             CollectablesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<CollectableDto, Collectable>
+            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<CollectableDto, CollectionCollectable>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
@@ -53,7 +53,7 @@ namespace Recollectable.API.Controllers
 
             if (collectablesFromRepo == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var collectables = _controllerService.Mapper.Map<IEnumerable<CollectableDto>>(collectablesFromRepo);
@@ -86,10 +86,10 @@ namespace Recollectable.API.Controllers
                     return collectableAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCollectables,
-                    links
+                    Value = linkedCollectables,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -240,7 +240,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPut("{id}", Name = "UpdateCollectable")]
-        public IActionResult UpdateCoin(Guid collectionId, Guid id,
+        public IActionResult UpdateCollectable(Guid collectionId, Guid id,
             [FromBody] CollectableUpdateDto collectable)
         {
             if (collectable == null)
@@ -251,6 +251,11 @@ namespace Recollectable.API.Controllers
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
+            }
+
+            if (collectable.CollectionId == Guid.Empty)
+            {
+                collectable.CollectionId = collectionId;
             }
 
             var collection = _unitOfWork.CollectionRepository.GetById(collectable.CollectionId);
@@ -314,6 +319,11 @@ namespace Recollectable.API.Controllers
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
+            }
+
+            if (patchedCollectable.CollectionId == Guid.Empty)
+            {
+                patchedCollectable.CollectionId = collectionId;
             }
 
             var collection = _unitOfWork.CollectionRepository.GetById(patchedCollectable.CollectionId);

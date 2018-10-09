@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Recollectable.API.Interfaces;
+using Recollectable.API.Services;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Interfaces;
@@ -16,10 +17,7 @@ namespace Recollectable.Tests
 {
     public class RecollectableTestBase
     {
-        private readonly RecollectableContext _context;
         protected readonly IUnitOfWork _unitOfWork;
-        protected readonly Mock<IPropertyMappingService> _mockPropertyMappingService;
-        protected readonly Mock<ITypeHelperService> _mockTypeHelperService;
         protected readonly Mock<IControllerService> _mockControllerService;
 
         public RecollectableTestBase()
@@ -28,14 +26,14 @@ namespace Recollectable.Tests
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            _context = new RecollectableContext(options);
-            _mockPropertyMappingService = new Mock<IPropertyMappingService>();
-            _unitOfWork = new UnitOfWork(_context, _mockPropertyMappingService.Object);
+            var _context = new RecollectableContext(options);
+            var _propertyMappingService = new PropertyMappingService();
+            _unitOfWork = new UnitOfWork(_context, _propertyMappingService);
 
             _mockControllerService = new Mock<IControllerService>();
-            _mockTypeHelperService = new Mock<ITypeHelperService>();
-            _mockControllerService.SetupGet(c => c.TypeHelperService).Returns(_mockTypeHelperService.Object);
-            _mockControllerService.SetupGet(c => c.PropertyMappingService).Returns(_mockPropertyMappingService.Object);
+            var _typeHelperService = new TypeHelperService();
+            _mockControllerService.SetupGet(c => c.TypeHelperService).Returns(_typeHelperService);
+            _mockControllerService.SetupGet(c => c.PropertyMappingService).Returns(_propertyMappingService);
 
             var configuration = new MapperConfiguration(cfg =>
                 cfg.AddProfile<RecollectableMappingProfile>());
@@ -45,8 +43,7 @@ namespace Recollectable.Tests
             RecollectableInitializer.Initialize(_context);
         }
 
-        public void SetupTestController<T, S>(Controller controller, 
-            Dictionary<string, PropertyMappingValue> _propertyMapping)
+        public void SetupTestController<T, S>(Controller controller)
         {
             controller.ControllerContext.HttpContext = new DefaultHttpContext();
 
@@ -61,13 +58,6 @@ namespace Recollectable.Tests
                 It.IsAny<ValidationStateDictionary>(), It.IsAny<string>(), It.IsAny<object>()));
 
             controller.ObjectValidator = objectValidator.Object;
-
-            _mockTypeHelperService.Setup(t =>
-                t.TypeHasProperties<T>(It.IsAny<string>())).Returns(true);
-            _mockPropertyMappingService.Setup(p =>
-                p.ValidMappingExistsFor<T, S>(It.IsAny<string>())).Returns(true);
-            _mockPropertyMappingService.Setup(p =>
-                p.GetPropertyMapping<T, S>()).Returns(_propertyMapping);
         }
     }
 }

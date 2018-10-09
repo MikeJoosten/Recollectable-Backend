@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -8,6 +7,7 @@ using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collections;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -78,10 +78,10 @@ namespace Recollectable.API.Controllers
                     return collectionAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCollections,
-                    links
+                    Value = linkedCollections,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -156,7 +156,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost(Name = "CreateCollection")]
-        public IActionResult CreateCollections([FromBody] CollectionCreationDto collection,
+        public IActionResult CreateCollection([FromBody] CollectionCreationDto collection,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (collection == null)

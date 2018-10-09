@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using Recollectable.API.Controllers;
-using Recollectable.API.Services;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Models.Collectables;
@@ -26,16 +24,14 @@ namespace Recollectable.Tests.Controllers
             _controller = new CoinsController(_unitOfWork, _mockControllerService.Object);
             resourceParameters = new CurrenciesResourceParameters();
 
-            SetupTestController<CoinDto, Coin>(_controller,
-                PropertyMappingService._currencyPropertyMapping);
+            SetupTestController<CoinDto, Coin>(_controller);
         }
 
         [Fact]
         public void GetCoins_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
-            _mockPropertyMappingService.Setup(x =>
-                x.ValidMappingExistsFor<CoinDto, Coin>(It.IsAny<string>())).Returns(false);
+            resourceParameters.OrderBy = "Invalid";
 
             //Act
             var response = _controller.GetCoins(resourceParameters, null);
@@ -48,8 +44,7 @@ namespace Recollectable.Tests.Controllers
         public void GetCoins_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
-            _mockTypeHelperService.Setup(x =>
-                x.TypeHasProperties<CoinDto>(It.IsAny<string>())).Returns(false);
+            resourceParameters.Fields = "Invalid";
 
             //Act
             var response = _controller.GetCoins(resourceParameters, null);
@@ -146,6 +141,19 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
+        public void GetCoin_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        {
+            //Arrange
+            string fields = "Invalid";
+
+            //Act
+            var response = _controller.GetCoin(Guid.Empty, fields, null);
+
+            //Assert
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
         public void GetCoin_ReturnsNotFoundResponse_GivenInvalidId()
         {
             //Arrange
@@ -212,8 +220,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"
-);
+            Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
             //Act
             var response = _controller.GetCoin(id, null, mediaType) as OkObjectResult;
@@ -302,7 +309,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateCoin_CreatesNewCoin_GivenJsonMediaTypeAndValidCoin()
+        public void CreateCoin_CreatesNewCoin_GivenAnyMediaTypeAndValidCoin()
         {
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
@@ -530,7 +537,6 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
-            patchDoc.Replace(c => c.Subject, "Chinese Coin");
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
@@ -573,7 +579,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_ReturnsNoContent_GivenValidPatchDocument()
+        public void PartiallyUpdateCoin_ReturnsNoContentResponse_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -593,9 +599,9 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
-            patchDoc.Replace(e => e.Type, "Euros");
-            patchDoc.Replace(c => c.Subject, "Chinese Coin");
-            patchDoc.Replace(e => e.CountryId, new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"));
+            patchDoc.Replace(c => c.Type, "Euros");
+            patchDoc.Replace(c => c.Subject, "Remembrance Coin");
+            patchDoc.Replace(c => c.CountryId, new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"));
 
             //Act
             var response = _controller.PartiallyUpdateCoin(id, patchDoc);

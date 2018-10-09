@@ -40,7 +40,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 .ThenInclude(c => c.CollectorValue)
                 .Where(cc => cc.CollectionId == collectionId)
                 .ApplySort(resourceParameters.OrderBy,
-                    _propertyMappingService.GetPropertyMapping<CollectableDto, Collectable>());
+                    _propertyMappingService.GetPropertyMapping<CollectableDto, CollectionCollectable>());
 
             if (!string.IsNullOrEmpty(resourceParameters.Country))
             {

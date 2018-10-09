@@ -1,7 +1,5 @@
-﻿using Recollectable.API.Services;
-using Recollectable.Core.Entities.Locations;
+﻿using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Models.Locations;
 using System;
 using System.Linq;
 using Xunit;
@@ -15,10 +13,6 @@ namespace Recollectable.Tests.Repositories
         public CountryRepositoryTests()
         {
             resourceParameters = new CountriesResourceParameters();
-
-            _mockPropertyMappingService.Setup(x =>
-                x.GetPropertyMapping<CountryDto, Country>())
-                .Returns(PropertyMappingService._countryPropertyMapping);
         }
 
         [Fact]

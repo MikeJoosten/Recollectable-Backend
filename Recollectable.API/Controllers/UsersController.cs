@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -8,6 +7,7 @@ using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Users;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -78,10 +78,10 @@ namespace Recollectable.API.Controllers
                     return userAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedUsers,
-                    links
+                    Value = linkedUsers,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);

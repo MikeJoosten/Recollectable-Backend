@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using Recollectable.API.Controllers;
-using Recollectable.API.Services;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Models.Collectables;
@@ -26,16 +24,14 @@ namespace Recollectable.Tests.Controllers
             _controller = new BanknotesController(_unitOfWork, _mockControllerService.Object);
             resourceParameters = new CurrenciesResourceParameters();
 
-            SetupTestController<BanknoteDto, Banknote>(_controller, 
-                PropertyMappingService._currencyPropertyMapping);
+            SetupTestController<BanknoteDto, Banknote>(_controller);
         }
 
         [Fact]
         public void GetBanknotes_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
-            _mockPropertyMappingService.Setup(x =>
-                x.ValidMappingExistsFor<BanknoteDto, Banknote>(It.IsAny<string>())).Returns(false);
+            resourceParameters.OrderBy = "Invalid";
 
             //Act
             var response = _controller.GetBanknotes(resourceParameters, null);
@@ -48,8 +44,7 @@ namespace Recollectable.Tests.Controllers
         public void GetBanknotes_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
-            _mockTypeHelperService.Setup(x =>
-                x.TypeHasProperties<BanknoteDto>(It.IsAny<string>())).Returns(false);
+            resourceParameters.Fields = "Invalid";
 
             //Act
             var response = _controller.GetBanknotes(resourceParameters, null);
@@ -143,6 +138,19 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.NotNull(banknotes);
             Assert.Equal(2, banknotes.Value.Count());
+        }
+
+        [Fact]
+        public void GetBanknote_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        {
+            //Arrange
+            string fields = "Invalid";
+
+            //Act
+            var response = _controller.GetBanknote(Guid.Empty, fields, null);
+
+            //Assert
+            Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
@@ -301,7 +309,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateBanknote_CreatesNewBanknote_GivenJsonMediaTypeAndValidBanknote()
+        public void CreateBanknote_CreatesNewBanknote_GivenAnyMediaTypeAndValidBanknote()
         {
             //Arrange
             BanknoteCreationDto banknote = new BanknoteCreationDto
@@ -553,7 +561,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void PartiallyUpdateBanknote_ReturnsNoContent_GivenValidPatchDocument()
+        public void PartiallyUpdateBanknote_ReturnsNoContentResponse_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
@@ -572,8 +580,8 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-            patchDoc.Replace(e => e.Type, "Euros");
-            patchDoc.Replace(e => e.CountryId, new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"));
+            patchDoc.Replace(b => b.Type, "Euros");
+            patchDoc.Replace(b => b.CountryId, new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"));
 
             //Act
             var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
@@ -582,19 +590,6 @@ namespace Recollectable.Tests.Controllers
             Assert.NotNull(_unitOfWork.BanknoteRepository.GetById(id));
             Assert.Equal("Euros", _unitOfWork.BanknoteRepository.GetById(id).Type);
             Assert.Equal("France", _unitOfWork.BanknoteRepository.GetById(id).Country.Name);
-        }
-
-        [Fact]
-        public void DeleteBanknote_ReturnsNoContentResponse_GivenValidBanknoteId()
-        {
-            //Arrange
-            Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
-
-            //Act
-            var response = _controller.DeleteBanknote(id);
-
-            //Assert
-            Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
@@ -608,6 +603,19 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void DeleteBanknote_ReturnsNoContentResponse_GivenValidBanknoteId()
+        {
+            //Arrange
+            Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
+
+            //Act
+            var response = _controller.DeleteBanknote(id);
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]

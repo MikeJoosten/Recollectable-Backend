@@ -8,6 +8,7 @@ using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Locations;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -78,10 +79,10 @@ namespace Recollectable.API.Controllers
                     return countryAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCountries,
-                    links
+                    Value = linkedCountries,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -272,7 +273,7 @@ namespace Recollectable.API.Controllers
             var patchedCountry = _controllerService.Mapper.Map<CountryUpdateDto>(countryFromRepo);
             patchDoc.ApplyTo(patchedCountry, ModelState);
 
-            if (patchedCountry.Description == patchedCountry.Name)
+            if (patchedCountry.Description?.ToLowerInvariant() == patchedCountry.Name?.ToLowerInvariant())
             {
                 ModelState.AddModelError(nameof(CountryUpdateDto),
                     "The provided description should be different from the country name");
