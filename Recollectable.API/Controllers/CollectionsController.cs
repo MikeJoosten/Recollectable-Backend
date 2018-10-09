@@ -1,13 +1,13 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collections;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var collectionsFromRepo = _unitOfWork.CollectionRepository.Get(resourceParameters);
-            var collections = Mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
+            var collections = _controllerService.Mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -78,10 +78,10 @@ namespace Recollectable.API.Controllers
                     return collectionAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCollections,
-                    links
+                    Value = linkedCollections,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var collection = Mapper.Map<CollectionDto>(collectionFromRepo);
+            var collection = _controllerService.Mapper.Map<CollectionDto>(collectionFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -156,7 +156,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost(Name = "CreateCollection")]
-        public IActionResult CreateCollections([FromBody] CollectionCreationDto collection,
+        public IActionResult CreateCollection([FromBody] CollectionCreationDto collection,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (collection == null)
@@ -176,7 +176,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var newCollection = Mapper.Map<Collection>(collection);
+            var newCollection = _controllerService.Mapper.Map<Collection>(collection);
             newCollection.User = user;
 
             _unitOfWork.CollectionRepository.Add(newCollection);
@@ -186,7 +186,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a collection failed on save.");
             }
 
-            var returnedCollection = Mapper.Map<CollectionDto>(newCollection);
+            var returnedCollection = _controllerService.Mapper.Map<CollectionDto>(newCollection);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -246,7 +246,7 @@ namespace Recollectable.API.Controllers
 
             collectionFromRepo.UserId = collection.UserId;
 
-            Mapper.Map(collection, collectionFromRepo);
+            _controllerService.Mapper.Map(collection, collectionFromRepo);
             _unitOfWork.CollectionRepository.Update(collectionFromRepo);
 
             if (!_unitOfWork.Save())
@@ -273,7 +273,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCollection = Mapper.Map<CollectionUpdateDto>(collectionFromRepo);
+            var patchedCollection = _controllerService.Mapper.Map<CollectionUpdateDto>(collectionFromRepo);
             patchDoc.ApplyTo(patchedCollection, ModelState);
 
             TryValidateModel(patchedCollection);
@@ -290,7 +290,7 @@ namespace Recollectable.API.Controllers
 
             collectionFromRepo.UserId = patchedCollection.UserId;
 
-            Mapper.Map(patchedCollection, collectionFromRepo);
+            _controllerService.Mapper.Map(patchedCollection, collectionFromRepo);
             _unitOfWork.CollectionRepository.Update(collectionFromRepo);
 
             if (!_unitOfWork.Save())
@@ -334,7 +334,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCollections", new
+                    return Url.Link("GetCollections", new
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
@@ -344,7 +344,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCollections", new
+                    return Url.Link("GetCollections", new
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
@@ -354,7 +354,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCollections", new
+                    return Url.Link("GetCollections", new
                     {
                         type = resourceParameters.Type,
                         search = resourceParameters.Search,
@@ -372,19 +372,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCollection",
+                links.Add(new LinkDto(Url.Link("GetCollection",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCollection",
+                links.Add(new LinkDto(Url.Link("CreateCollection",
                     new { }), "create_collection", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCollection",
+                links.Add(new LinkDto(Url.Link("UpdateCollection",
                     new { id }), "update_collection", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCollection",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCollection",
                     new { id }), "partially_update_collection", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCollection",
+                links.Add(new LinkDto(Url.Link("DeleteCollection",
                     new { id }), "delete_collection", "DELETE"));
             }
 

@@ -1,6 +1,6 @@
 ﻿using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collections;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;

@@ -1,13 +1,13 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Users;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var usersFromRepo = _unitOfWork.UserRepository.Get(resourceParameters);
-            var users = Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
+            var users = _controllerService.Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -78,10 +78,10 @@ namespace Recollectable.API.Controllers
                     return userAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedUsers,
-                    links
+                    Value = linkedUsers,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var user = Mapper.Map<UserDto>(userFromRepo);
+            var user = _controllerService.Mapper.Map<UserDto>(userFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -169,7 +169,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newUser = Mapper.Map<User>(user);
+            var newUser = _controllerService.Mapper.Map<User>(user);
             _unitOfWork.UserRepository.Add(newUser);
 
             if (!_unitOfWork.Save())
@@ -177,7 +177,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a user failed on save.");
             }
 
-            var returnedUser = Mapper.Map<UserDto>(newUser);
+            var returnedUser = _controllerService.Mapper.Map<UserDto>(newUser);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -226,7 +226,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            Mapper.Map(user, userFromRepo);
+            _controllerService.Mapper.Map(user, userFromRepo);
             _unitOfWork.UserRepository.Update(userFromRepo);
 
             if (!_unitOfWork.Save())
@@ -253,7 +253,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedUser = Mapper.Map<UserUpdateDto>(userFromRepo);
+            var patchedUser = _controllerService.Mapper.Map<UserUpdateDto>(userFromRepo);
             patchDoc.ApplyTo(patchedUser, ModelState);
 
             TryValidateModel(patchedUser);
@@ -263,7 +263,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            Mapper.Map(patchedUser, userFromRepo);
+            _controllerService.Mapper.Map(patchedUser, userFromRepo);
             _unitOfWork.UserRepository.Update(userFromRepo);
 
             if (!_unitOfWork.Save())
@@ -307,7 +307,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -316,7 +316,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -326,7 +326,7 @@ namespace Recollectable.API.Controllers
                     });
                 case ResourceUriType.Current:
                 default:
-                    return _controllerService.UrlHelper.Link("GetUsers", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -343,19 +343,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetUser",
+                links.Add(new LinkDto(Url.Link("GetUser",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateUser", 
+                links.Add(new LinkDto(Url.Link("CreateUser", 
                     new { }), "create_user", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateUser",
+                links.Add(new LinkDto(Url.Link("UpdateUser",
                     new { id }), "update_user", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateUser",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateUser",
                     new { id }), "partially_update_user", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteUser",
+                links.Add(new LinkDto(Url.Link("DeleteUser",
                     new { id }), "delete_user", "DELETE"));
             }
 

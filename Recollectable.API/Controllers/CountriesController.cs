@@ -6,8 +6,9 @@ using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Locations;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -48,7 +49,7 @@ namespace Recollectable.API.Controllers
             }
 
             var countriesFromRepo = _unitOfWork.CountryRepository.Get(resourceParameters);
-            var countries = Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
+            var countries = _controllerService.Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -78,10 +79,10 @@ namespace Recollectable.API.Controllers
                     return countryAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCountries,
-                    links
+                    Value = linkedCountries,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -133,7 +134,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var country = Mapper.Map<CountryDto>(countryFromRepo);
+            var country = _controllerService.Mapper.Map<CountryDto>(countryFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -175,7 +176,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newCountry = Mapper.Map<Country>(country);
+            var newCountry = _controllerService.Mapper.Map<Country>(country);
             _unitOfWork.CountryRepository.Add(newCountry);
 
             if (!_unitOfWork.Save())
@@ -183,7 +184,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a country failed on save.");
             }
 
-            var returnedCountry = Mapper.Map<CountryDto>(newCountry);
+            var returnedCountry = _controllerService.Mapper.Map<CountryDto>(newCountry);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -242,7 +243,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            Mapper.Map(country, countryFromRepo);
+            _controllerService.Mapper.Map(country, countryFromRepo);
             _unitOfWork.CountryRepository.Update(countryFromRepo);
 
             if (!_unitOfWork.Save())
@@ -269,10 +270,10 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCountry = Mapper.Map<CountryUpdateDto>(countryFromRepo);
+            var patchedCountry = _controllerService.Mapper.Map<CountryUpdateDto>(countryFromRepo);
             patchDoc.ApplyTo(patchedCountry, ModelState);
 
-            if (patchedCountry.Description == patchedCountry.Name)
+            if (patchedCountry.Description?.ToLowerInvariant() == patchedCountry.Name?.ToLowerInvariant())
             {
                 ModelState.AddModelError(nameof(CountryUpdateDto),
                     "The provided description should be different from the country name");
@@ -285,7 +286,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            Mapper.Map(patchedCountry, countryFromRepo);
+            _controllerService.Mapper.Map(patchedCountry, countryFromRepo);
             _unitOfWork.CountryRepository.Update(countryFromRepo);
 
             if (!_unitOfWork.Save())
@@ -329,7 +330,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -339,7 +340,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -349,7 +350,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCountries", new
+                    return Url.Link("GetCountries", new
                     {
                         name = resourceParameters.Name,
                         search = resourceParameters.Search,
@@ -367,19 +368,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCountry",
+                links.Add(new LinkDto(Url.Link("GetCountry",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCountry",
+                links.Add(new LinkDto(Url.Link("CreateCountry",
                     new { }), "create_country", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCountry",
+                links.Add(new LinkDto(Url.Link("UpdateCountry",
                     new { id }), "update_country", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCountry",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCountry",
                     new { id }), "partially_update_country", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCountry",
+                links.Add(new LinkDto(Url.Link("DeleteCountry",
                     new { id }), "delete_country", "DELETE"));
             }
 

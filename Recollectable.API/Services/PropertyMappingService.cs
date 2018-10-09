@@ -55,7 +55,7 @@ namespace Recollectable.API.Services
                 { "Name", new PropertyMappingValue(new List<string>() { "Name" }) }
             };
 
-        private readonly Dictionary<string, PropertyMappingValue> _collectorValuesPropertyMapping =
+        private readonly Dictionary<string, PropertyMappingValue> _collectorValuePropertyMapping =
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id.ToString()" }) }
@@ -69,9 +69,9 @@ namespace Recollectable.API.Services
             propertyMappings.Add(new PropertyMapping<CollectionDto, Collection>(_collectionPropertyMapping));
             propertyMappings.Add(new PropertyMapping<CoinDto, Coin>(_currencyPropertyMapping));
             propertyMappings.Add(new PropertyMapping<BanknoteDto, Banknote>(_currencyPropertyMapping));
-            propertyMappings.Add(new PropertyMapping<CollectableDto, Collectable>(_collectablePropertyMapping));
+            propertyMappings.Add(new PropertyMapping<CollectableDto, CollectionCollectable>(_collectablePropertyMapping));
             propertyMappings.Add(new PropertyMapping<CountryDto, Country>(_countryPropertyMapping));
-            propertyMappings.Add(new PropertyMapping<CollectorValueDto, CollectorValue>(_collectorValuesPropertyMapping));
+            propertyMappings.Add(new PropertyMapping<CollectorValueDto, CollectorValue>(_collectorValuePropertyMapping));
         }
 
         public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()

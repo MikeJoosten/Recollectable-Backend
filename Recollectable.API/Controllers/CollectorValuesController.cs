@@ -1,13 +1,13 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var collectorValuesFromRepo = _unitOfWork.CollectorValueRepository.Get(resourceParameters);
-            var collectorValues = Mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
+            var collectorValues = _controllerService.Mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -78,10 +78,10 @@ namespace Recollectable.API.Controllers
                     return collectorValueAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCollectorValues,
-                    links
+                    Value = linkedCollectorValues,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var collectorValue = Mapper.Map<CollectorValueDto>(collectorValueFromRepo);
+            var collectorValue = _controllerService.Mapper.Map<CollectorValueDto>(collectorValueFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -169,7 +169,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newCollectorValue = Mapper.Map<CollectorValue>(collectorValue);
+            var newCollectorValue = _controllerService.Mapper.Map<CollectorValue>(collectorValue);
             _unitOfWork.CollectorValueRepository.Add(newCollectorValue);
 
             if (!_unitOfWork.Save())
@@ -177,7 +177,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a collector value failed on save.");
             }
 
-            var returnedCollectorValue = Mapper.Map<CollectorValueDto>(newCollectorValue);
+            var returnedCollectorValue = _controllerService.Mapper.Map<CollectorValueDto>(newCollectorValue);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -231,7 +231,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            Mapper.Map(collectorValue, collectorValueFromRepo);
+            _controllerService.Mapper.Map(collectorValue, collectorValueFromRepo);
             _unitOfWork.CollectorValueRepository.Update(collectorValueFromRepo);
 
             if (!_unitOfWork.Save())
@@ -258,7 +258,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCollectorValue = Mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);
+            var patchedCollectorValue = _controllerService.Mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);
             patchDoc.ApplyTo(patchedCollectorValue, ModelState);
 
             TryValidateModel(patchedCollectorValue);
@@ -268,7 +268,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            Mapper.Map(patchedCollectorValue, collectorValueFromRepo);
+            _controllerService.Mapper.Map(patchedCollectorValue, collectorValueFromRepo);
             _unitOfWork.CollectorValueRepository.Update(collectorValueFromRepo);
 
             if (!_unitOfWork.Save())
@@ -312,7 +312,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCollectorValues", new
+                    return Url.Link("GetCollectorValues", new
                     {
                         orderBy = resourceParameters.OrderBy,
                         fields = resourceParameters.Fields,
@@ -320,7 +320,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCollectorValues", new
+                    return Url.Link("GetCollectorValues", new
                     {
                         orderBy = resourceParameters.OrderBy,
                         fields = resourceParameters.Fields,
@@ -328,7 +328,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCollectorValues", new
+                    return Url.Link("GetCollectorValues", new
                     {
                         orderBy = resourceParameters.OrderBy,
                         fields = resourceParameters.Fields,
@@ -344,19 +344,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCollectorValue",
+                links.Add(new LinkDto(Url.Link("GetCollectorValue",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCollectorValue",
+                links.Add(new LinkDto(Url.Link("CreateCollectorValue",
                     new { }), "create_collector_value", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCollectorValue",
+                links.Add(new LinkDto(Url.Link("UpdateCollectorValue",
                     new { id }), "update_collector_value", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCollectorValue",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCollectorValue",
                     new { id }), "partially_update_collector_value", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCollectorValue",
+                links.Add(new LinkDto(Url.Link("DeleteCollectorValue",
                     new { id }), "delete_collector_value", "DELETE"));
             }
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Shared.Interfaces;
 
@@ -6,14 +6,14 @@ namespace Recollectable.API.Services
 {
     public class ControllerService : IControllerService
     {
-        public IUrlHelper UrlHelper { get; }
+        public IMapper Mapper { get; }
         public ITypeHelperService TypeHelperService { get; }
         public IPropertyMappingService PropertyMappingService { get; }
 
-        public ControllerService(IUrlHelper urlHelper, ITypeHelperService typeHelperService,
-            IPropertyMappingService propertyMappingService)
+        public ControllerService(ITypeHelperService typeHelperService,
+            IPropertyMappingService propertyMappingService, IMapper mapper)
         {
-            UrlHelper = urlHelper;
+            Mapper = mapper;
             TypeHelperService = typeHelperService;
             PropertyMappingService = propertyMappingService;
         }

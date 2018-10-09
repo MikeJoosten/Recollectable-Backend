@@ -1,13 +1,13 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Repositories;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Models;
@@ -48,7 +48,7 @@ namespace Recollectable.API.Controllers
             }
 
             var coinsFromRepo = _unitOfWork.CoinRepository.Get(resourceParameters);
-            var coins = Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
+            var coins = _controllerService.Mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -78,10 +78,10 @@ namespace Recollectable.API.Controllers
                     return coinAsDictionary;
                 });
 
-                var linkedCollectionResource = new
+                var linkedCollectionResource = new LinkedCollectionResource
                 {
-                    value = linkedCoins,
-                    links
+                    Value = linkedCoins,
+                    Links = links
                 };
 
                 return Ok(linkedCollectionResource);
@@ -133,7 +133,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var coin = Mapper.Map<CoinDto>(coinFromRepo);
+            var coin = _controllerService.Mapper.Map<CoinDto>(coinFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -200,7 +200,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var newCoin = Mapper.Map<Coin>(coin);
+            var newCoin = _controllerService.Mapper.Map<Coin>(coin);
             _unitOfWork.CoinRepository.Add(newCoin);
 
             if (!_unitOfWork.Save())
@@ -208,7 +208,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a coin failed on save.");
             }
 
-            var returnedCoin = Mapper.Map<CoinDto>(newCoin);
+            var returnedCoin = _controllerService.Mapper.Map<CoinDto>(newCoin);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -280,7 +280,7 @@ namespace Recollectable.API.Controllers
             coinFromRepo.CountryId = coin.CountryId;
             coinFromRepo.CollectorValueId = coin.CollectorValueId;
 
-            Mapper.Map(coin, coinFromRepo);
+            _controllerService.Mapper.Map(coin, coinFromRepo);
             _unitOfWork.CoinRepository.Update(coinFromRepo);
 
             if (!_unitOfWork.Save())
@@ -307,10 +307,10 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCoin = Mapper.Map<CoinUpdateDto>(coinFromRepo);
+            var patchedCoin = _controllerService.Mapper.Map<CoinUpdateDto>(coinFromRepo);
             patchDoc.ApplyTo(patchedCoin, ModelState);
 
-            if (patchedCoin.Note == patchedCoin.Subject)
+            if (patchedCoin.Note?.ToLowerInvariant() == patchedCoin.Subject?.ToLowerInvariant())
             {
                 ModelState.AddModelError(nameof(CoinUpdateDto),
                     "The provided note should be different from the coin's subject");
@@ -336,7 +336,7 @@ namespace Recollectable.API.Controllers
             coinFromRepo.CountryId = patchedCoin.CountryId;
             coinFromRepo.CollectorValueId = patchedCoin.CollectorValueId;
 
-            Mapper.Map(patchedCoin, coinFromRepo);
+            _controllerService.Mapper.Map(patchedCoin, coinFromRepo);
             _unitOfWork.CoinRepository.Update(coinFromRepo);
 
             if (!_unitOfWork.Save())
@@ -380,7 +380,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _controllerService.UrlHelper.Link("GetCoins", new
+                    return Url.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -391,7 +391,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _controllerService.UrlHelper.Link("GetCoins", new
+                    return Url.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -402,7 +402,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return _controllerService.UrlHelper.Link("GetCoins", new
+                    return Url.Link("GetCoins", new
                     {
                         type = resourceParameters.Type,
                         country = resourceParameters.Country,
@@ -421,19 +421,19 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("GetCoins",
+                links.Add(new LinkDto(Url.Link("GetCoins",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("CreateCoins",
+                links.Add(new LinkDto(Url.Link("CreateCoins",
                     new { }), "create_coins", "POST"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("UpdateCoins",
+                links.Add(new LinkDto(Url.Link("UpdateCoins",
                     new { id }), "update_coins", "PUT"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("PartiallyUpdateCoins",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCoins",
                     new { id }), "partially_update_coins", "PATCH"));
 
-                links.Add(new LinkDto(_controllerService.UrlHelper.Link("DeleteCoins",
+                links.Add(new LinkDto(Url.Link("DeleteCoins",
                     new { id }), "delete_coins", "DELETE"));
             }
 
