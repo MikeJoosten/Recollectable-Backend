@@ -1,14 +1,15 @@
-﻿using Recollectable.Core.Entities.Collections;
+﻿using Microsoft.AspNetCore.Identity;
+using Recollectable.Core.Entities.Collections;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Recollectable.Core.Entities.Users
 {
-    public class User
+    public class User : IdentityUser<Guid>
     {
         [Key]
-        public Guid Id { get; set; }
+        public override Guid Id { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -21,7 +22,8 @@ namespace Recollectable.Core.Entities.Users
         [Required]
         [EmailAddress]
         [MaxLength(250)]
-        public string Email { get; set; }
+        public override string Email { get; set; }
+
         public List<Collection> Collections { get; set; }
     }
 }

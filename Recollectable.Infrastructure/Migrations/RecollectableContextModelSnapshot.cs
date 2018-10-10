@@ -15,9 +15,92 @@ namespace Recollectable.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.3-rtm-32065")
+                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ClaimType");
+
+                    b.Property<string>("ClaimValue");
+
+                    b.Property<Guid>("RoleId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ClaimType");
+
+                    b.Property<string>("ClaimValue");
+
+                    b.Property<Guid>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider");
+
+                    b.Property<string>("ProviderKey");
+
+                    b.Property<string>("ProviderDisplayName");
+
+                    b.Property<Guid>("UserId");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId");
+
+                    b.Property<Guid>("RoleId");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId");
+
+                    b.Property<string>("LoginProvider");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Value");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens");
+                });
 
             modelBuilder.Entity("Recollectable.Core.Entities.Collectables.Collectable", b =>
                 {
@@ -162,14 +245,45 @@ namespace Recollectable.Infrastructure.Migrations
                     );
                 });
 
+            modelBuilder.Entity("Recollectable.Core.Entities.Users.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken();
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles");
+                });
+
             modelBuilder.Entity("Recollectable.Core.Entities.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("AccessFailedCount");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken();
+
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(250);
+                        .HasMaxLength(256);
+
+                    b.Property<bool>("EmailConfirmed");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -179,14 +293,45 @@ namespace Recollectable.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100);
 
+                    b.Property<bool>("LockoutEnabled");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("PasswordHash");
+
+                    b.Property<string>("PhoneNumber");
+
+                    b.Property<bool>("PhoneNumberConfirmed");
+
+                    b.Property<string>("SecurityStamp");
+
+                    b.Property<bool>("TwoFactorEnabled");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256);
+
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("NormalizedEmail")
+                        .HasName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers");
 
                     b.HasData(
-                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), Email = "ryan.haywood@gmail.com", FirstName = "Ryan", LastName = "Haywood" },
-                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), Email = "jack.patillo@gmail.com", FirstName = "Jack", LastName = "Patillo" },
-                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), Email = "geoff.ramsey@gmail.com", FirstName = "Geoff", LastName = "Ramsey" }
+                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "b9d4206c-8db4-4838-a2ac-7514559631eb", Email = "ryan.haywood@gmail.com", EmailConfirmed = false, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = false, PhoneNumberConfirmed = false, TwoFactorEnabled = false },
+                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "09d21472-b0f1-4bf8-ba8d-e67767c1538e", Email = "jack.patillo@gmail.com", EmailConfirmed = false, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = false, PhoneNumberConfirmed = false, TwoFactorEnabled = false },
+                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "6d6284be-8d03-4fc5-a803-5665340aa38e", Email = "geoff.ramsey@gmail.com", EmailConfirmed = false, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = false, PhoneNumberConfirmed = false, TwoFactorEnabled = false }
                     );
                 });
 
@@ -297,6 +442,51 @@ namespace Recollectable.Infrastructure.Migrations
                         new { Id = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectorValueId = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), CountryId = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), ReleaseDate = "2009", FaceValue = 1, HeadOfState = "Rafael Correa", Size = "39 mm.", Type = "Sucre", Metal = "0.999 Silver 0.9925 oz. ASW", Mintage = 200, Subject = "Independence 200th Anniversary", Weight = "31.10 g." },
                         new { Id = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectorValueId = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), CountryId = new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), ReleaseDate = "1924", Designer = "Adolph A. Weinman", FaceValue = 1, HeadOfState = "Calvin Coolidge", Size = "17.8 mm.", Type = "Dime", Metal = "0.900 Silver 0.0723 oz. ASW", Mintage = 24010000, Weight = "2.5 g." }
                     );
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Recollectable.Core.Entities.Users.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Recollectable.Core.Entities.Collectables.Collectable", b =>

@@ -8,6 +8,16 @@ namespace Recollectable.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[,]
+                {
+                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), 0, "b9d4206c-8db4-4838-a2ac-7514559631eb", "ryan.haywood@gmail.com", false, "Ryan", "Haywood", false, null, null, null, null, null, false, null, false, null },
+                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), 0, "09d21472-b0f1-4bf8-ba8d-e67767c1538e", "jack.patillo@gmail.com", false, "Jack", "Patillo", false, null, null, null, null, null, false, null, false, null },
+                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), 0, "6d6284be-8d03-4fc5-a803-5665340aa38e", "geoff.ramsey@gmail.com", false, "Geoff", "Ramsey", false, null, null, null, null, null, false, null, false, null }
+                });
+
+            migrationBuilder.InsertData(
                 table: "CollectorValues",
                 columns: new[] { "Id", "AU50", "F12", "G4", "MS60", "MS63", "PF60", "PF63", "PF65", "VF20", "VG8", "XF40" },
                 values: new object[,]
@@ -28,16 +38,6 @@ namespace Recollectable.Infrastructure.Migrations
                     { new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"), null, "Canada" },
                     { new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), null, "Ecuador" },
                     { new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), null, "United States of America" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "Email", "FirstName", "LastName" },
-                values: new object[,]
-                {
-                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "ryan.haywood@gmail.com", "Ryan", "Haywood" },
-                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "jack.patillo@gmail.com", "Jack", "Patillo" },
-                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "geoff.ramsey@gmail.com", "Geoff", "Ramsey" }
                 });
 
             migrationBuilder.InsertData(
@@ -92,6 +92,11 @@ namespace Recollectable.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
+                table: "AspNetUsers",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "09d21472-b0f1-4bf8-ba8d-e67767c1538e" });
+
+            migrationBuilder.DeleteData(
                 table: "CollectionCollectables",
                 keyColumn: "Id",
                 keyValue: new Guid("1078b50b-1d89-4b24-b071-67af06348875"));
@@ -120,11 +125,6 @@ namespace Recollectable.Infrastructure.Migrations
                 table: "CollectionCollectables",
                 keyColumn: "Id",
                 keyValue: new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"));
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"));
 
             migrationBuilder.DeleteData(
                 table: "Collectables",
@@ -165,6 +165,16 @@ namespace Recollectable.Infrastructure.Migrations
                 table: "Collections",
                 keyColumn: "Id",
                 keyValue: new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"));
+
+            migrationBuilder.DeleteData(
+                table: "AspNetUsers",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "b9d4206c-8db4-4838-a2ac-7514559631eb" });
+
+            migrationBuilder.DeleteData(
+                table: "AspNetUsers",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "6d6284be-8d03-4fc5-a803-5665340aa38e" });
 
             migrationBuilder.DeleteData(
                 table: "CollectorValues",
@@ -210,16 +220,6 @@ namespace Recollectable.Infrastructure.Migrations
                 table: "Countries",
                 keyColumn: "Id",
                 keyValue: new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"));
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"));
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"));
         }
     }
 }

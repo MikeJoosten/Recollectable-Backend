@@ -3,6 +3,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -23,8 +25,10 @@ using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;
 using Recollectable.Infrastructure.Data.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Recollectable.API
 {
@@ -64,7 +68,11 @@ namespace Recollectable.API
             services.AddDbContext<RecollectableContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
-            // Register repositories
+            // Register User Authentication
+            services.AddIdentityCore<User>(options => { });
+            services.AddScoped<IUserStore<User>, UserOnlyStore<User, RecollectableContext, Guid>>();
+
+            // Register Repositories
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICollectableRepository, CollectableRepository>();
             services.AddScoped<IRepository<User, UsersResourceParameters>, UserRepository>();
@@ -138,6 +146,7 @@ namespace Recollectable.API
                 cfg.AddProfile<RecollectableMappingProfile>());
 
             recollectableContext.Database.Migrate();
+
             app.UseHttpsRedirection();
             app.UseIpRateLimiting();
             app.UseResponseCaching();

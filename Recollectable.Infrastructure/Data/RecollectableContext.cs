@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
@@ -7,9 +8,8 @@ using System;
 
 namespace Recollectable.Infrastructure.Data
 {
-    public class RecollectableContext : DbContext
+    public class RecollectableContext : IdentityDbContext<User, Role, Guid>
     {
-        public DbSet<User> Users { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Collection> Collections { get; set; }
         public DbSet<Coin> Coins { get; set; }
@@ -25,6 +25,8 @@ namespace Recollectable.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             // Seeding Database
             modelBuilder.Entity<User>().HasData(
                 new User
