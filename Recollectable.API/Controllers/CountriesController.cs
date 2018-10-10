@@ -11,6 +11,7 @@ using Recollectable.Core.Models.Locations;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -22,13 +23,17 @@ namespace Recollectable.API.Controllers
     public class CountriesController : Controller
     {
         private IUnitOfWork _unitOfWork;
-        private IControllerService _controllerService;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
+        private IMapper _mapper;
 
-        public CountriesController(IUnitOfWork unitOfWork,
-            IControllerService controllerService)
+        public CountriesController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
+            IPropertyMappingService propertyMappingService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _controllerService = controllerService;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
+            _mapper = mapper;
         }
 
         [HttpHead]
@@ -36,20 +41,20 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCountries(CountriesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<CountryDto, Country>
+            if (!_propertyMappingService.ValidMappingExistsFor<CountryDto, Country>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_controllerService.TypeHelperService.TypeHasProperties<CountryDto>
+            if (!_typeHelperService.TypeHasProperties<CountryDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
             var countriesFromRepo = _unitOfWork.CountryRepository.Get(resourceParameters);
-            var countries = _controllerService.Mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
+            var countries = _mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -122,7 +127,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCountry(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.TypeHelperService.TypeHasProperties<CountryDto>(fields))
+            if (!_typeHelperService.TypeHasProperties<CountryDto>(fields))
             {
                 return BadRequest();
             }
@@ -134,7 +139,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var country = _controllerService.Mapper.Map<CountryDto>(countryFromRepo);
+            var country = _mapper.Map<CountryDto>(countryFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -176,7 +181,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newCountry = _controllerService.Mapper.Map<Country>(country);
+            var newCountry = _mapper.Map<Country>(country);
             _unitOfWork.CountryRepository.Add(newCountry);
 
             if (!_unitOfWork.Save())
@@ -184,7 +189,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a country failed on save.");
             }
 
-            var returnedCountry = _controllerService.Mapper.Map<CountryDto>(newCountry);
+            var returnedCountry = _mapper.Map<CountryDto>(newCountry);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -243,7 +248,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            _controllerService.Mapper.Map(country, countryFromRepo);
+            _mapper.Map(country, countryFromRepo);
             _unitOfWork.CountryRepository.Update(countryFromRepo);
 
             if (!_unitOfWork.Save())
@@ -270,7 +275,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCountry = _controllerService.Mapper.Map<CountryUpdateDto>(countryFromRepo);
+            var patchedCountry = _mapper.Map<CountryUpdateDto>(countryFromRepo);
             patchDoc.ApplyTo(patchedCountry, ModelState);
 
             if (patchedCountry.Description?.ToLowerInvariant() == patchedCountry.Name?.ToLowerInvariant())
@@ -286,7 +291,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            _controllerService.Mapper.Map(patchedCountry, countryFromRepo);
+            _mapper.Map(patchedCountry, countryFromRepo);
             _unitOfWork.CountryRepository.Update(countryFromRepo);
 
             if (!_unitOfWork.Save())

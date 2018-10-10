@@ -78,7 +78,6 @@ namespace Recollectable.API
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
-            services.AddTransient<IControllerService, ControllerService>();
 
             // Register Auto Mapper
             var configuration = new MapperConfiguration(cfg =>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -10,6 +11,7 @@ using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -21,13 +23,17 @@ namespace Recollectable.API.Controllers
     public class BanknotesController : Controller
     {
         private IUnitOfWork _unitOfWork;
-        private IControllerService _controllerService;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
+        private IMapper _mapper;
 
-        public BanknotesController(IUnitOfWork unitOfWork, 
-            IControllerService controllerService)
+        public BanknotesController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
+            IPropertyMappingService propertyMappingService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _controllerService = controllerService;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
+            _mapper = mapper;
         }
 
         [HttpHead]
@@ -35,20 +41,20 @@ namespace Recollectable.API.Controllers
         public IActionResult GetBanknotes(CurrenciesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<BanknoteDto, Banknote>
+            if (!_propertyMappingService.ValidMappingExistsFor<BanknoteDto, Banknote>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_controllerService.TypeHelperService.TypeHasProperties<BanknoteDto>
+            if (!_typeHelperService.TypeHasProperties<BanknoteDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
             var banknotesFromRepo = _unitOfWork.BanknoteRepository.Get(resourceParameters);
-            var banknotes = _controllerService.Mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
+            var banknotes = _mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -121,7 +127,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetBanknote(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.TypeHelperService.TypeHasProperties<BanknoteDto>(fields))
+            if (!_typeHelperService.TypeHasProperties<BanknoteDto>(fields))
             {
                 return BadRequest();
             }
@@ -133,7 +139,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var banknote = _controllerService.Mapper.Map<BanknoteDto>(banknoteFromRepo);
+            var banknote = _mapper.Map<BanknoteDto>(banknoteFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -193,7 +199,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var newBanknote = _controllerService.Mapper.Map<Banknote>(banknote);
+            var newBanknote = _mapper.Map<Banknote>(banknote);
             _unitOfWork.BanknoteRepository.Add(newBanknote);
 
             if (!_unitOfWork.Save())
@@ -201,7 +207,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a banknote failed on save.");
             }
 
-            var returnedBanknote = _controllerService.Mapper.Map<BanknoteDto>(newBanknote);
+            var returnedBanknote = _mapper.Map<BanknoteDto>(newBanknote);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -267,7 +273,7 @@ namespace Recollectable.API.Controllers
             banknoteFromRepo.CountryId = banknote.CountryId;
             banknoteFromRepo.CollectorValueId = banknote.CollectorValueId;
 
-            _controllerService.Mapper.Map(banknote, banknoteFromRepo);
+            _mapper.Map(banknote, banknoteFromRepo);
             _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
 
             if (!_unitOfWork.Save())
@@ -294,7 +300,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedBanknote = _controllerService.Mapper.Map<BanknoteUpdateDto>(banknoteFromRepo);
+            var patchedBanknote = _mapper.Map<BanknoteUpdateDto>(banknoteFromRepo);
             patchDoc.ApplyTo(patchedBanknote, ModelState);
 
             TryValidateModel(patchedBanknote);
@@ -317,7 +323,7 @@ namespace Recollectable.API.Controllers
             banknoteFromRepo.CountryId = patchedBanknote.CountryId;
             banknoteFromRepo.CollectorValueId = patchedBanknote.CollectorValueId;
 
-            _controllerService.Mapper.Map(patchedBanknote, banknoteFromRepo);
+            _mapper.Map(patchedBanknote, banknoteFromRepo);
             _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
 
             if (!_unitOfWork.Save())

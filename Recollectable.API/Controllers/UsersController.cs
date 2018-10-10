@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -10,6 +11,7 @@ using Recollectable.Core.Models.Users;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -21,13 +23,17 @@ namespace Recollectable.API.Controllers
     public class UsersController : Controller
     {
         private IUnitOfWork _unitOfWork;
-        private IControllerService _controllerService;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
+        private IMapper _mapper;
 
-        public UsersController(IUnitOfWork unitOfWork,
-            IControllerService controllerService)
+        public UsersController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
+            IPropertyMappingService propertyMappingService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _controllerService = controllerService;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
+            _mapper = mapper;
         }
 
         [HttpHead]
@@ -35,20 +41,20 @@ namespace Recollectable.API.Controllers
         public IActionResult GetUsers(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<UserDto, User>
+            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_controllerService.TypeHelperService.TypeHasProperties<UserDto>
+            if (!_typeHelperService.TypeHasProperties<UserDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
             var usersFromRepo = _unitOfWork.UserRepository.Get(resourceParameters);
-            var users = _controllerService.Mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
+            var users = _mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -121,7 +127,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetUser(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.TypeHelperService.TypeHasProperties<UserDto>(fields))
+            if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
             {
                 return BadRequest();
             }
@@ -133,7 +139,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var user = _controllerService.Mapper.Map<UserDto>(userFromRepo);
+            var user = _mapper.Map<UserDto>(userFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -169,7 +175,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newUser = _controllerService.Mapper.Map<User>(user);
+            var newUser = _mapper.Map<User>(user);
             _unitOfWork.UserRepository.Add(newUser);
 
             if (!_unitOfWork.Save())
@@ -177,7 +183,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a user failed on save.");
             }
 
-            var returnedUser = _controllerService.Mapper.Map<UserDto>(newUser);
+            var returnedUser = _mapper.Map<UserDto>(newUser);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -226,7 +232,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            _controllerService.Mapper.Map(user, userFromRepo);
+            _mapper.Map(user, userFromRepo);
             _unitOfWork.UserRepository.Update(userFromRepo);
 
             if (!_unitOfWork.Save())
@@ -253,7 +259,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedUser = _controllerService.Mapper.Map<UserUpdateDto>(userFromRepo);
+            var patchedUser = _mapper.Map<UserUpdateDto>(userFromRepo);
             patchDoc.ApplyTo(patchedUser, ModelState);
 
             TryValidateModel(patchedUser);
@@ -263,7 +269,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            _controllerService.Mapper.Map(patchedUser, userFromRepo);
+            _mapper.Map(patchedUser, userFromRepo);
             _unitOfWork.UserRepository.Update(userFromRepo);
 
             if (!_unitOfWork.Save())

@@ -21,9 +21,10 @@ namespace Recollectable.Tests.Controllers
 
         public UsersControllerTests()
         {
-            _controller = new UsersController(_unitOfWork, _mockControllerService.Object);
-            resourceParameters = new UsersResourceParameters();
+            _controller = new UsersController(_unitOfWork, _typeHelperService,
+                _propertyMappingService, _mapper);
 
+            resourceParameters = new UsersResourceParameters();
             SetupTestController<UserDto, User>(_controller);
         }
 

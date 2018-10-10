@@ -21,9 +21,10 @@ namespace Recollectable.Tests.Controllers
 
         public CollectionsControllerTests()
         {
-            _controller = new CollectionsController(_unitOfWork, _mockControllerService.Object);
-            resourceParameters = new CollectionsResourceParameters();
+            _controller = new CollectionsController(_unitOfWork, _typeHelperService,
+                _propertyMappingService, _mapper);
 
+            resourceParameters = new CollectionsResourceParameters();
             SetupTestController<CollectionDto, Collection>(_controller);
         }
 

@@ -21,9 +21,10 @@ namespace Recollectable.Tests.Controllers
 
         public BanknotesControllerTests()
         {
-            _controller = new BanknotesController(_unitOfWork, _mockControllerService.Object);
-            resourceParameters = new CurrenciesResourceParameters();
+            _controller = new BanknotesController(_unitOfWork, _typeHelperService, 
+                _propertyMappingService, _mapper);
 
+            resourceParameters = new CurrenciesResourceParameters();
             SetupTestController<BanknoteDto, Banknote>(_controller);
         }
 

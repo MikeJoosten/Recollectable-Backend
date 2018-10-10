@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -10,6 +11,7 @@ using Recollectable.Core.Models.Collections;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -21,13 +23,17 @@ namespace Recollectable.API.Controllers
     public class CollectionsController : Controller
     {
         private IUnitOfWork _unitOfWork;
-        private IControllerService _controllerService;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
+        private IMapper _mapper;
 
-        public CollectionsController(IUnitOfWork unitOfWork,
-            IControllerService controllerService)
+        public CollectionsController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
+            IPropertyMappingService propertyMappingService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _controllerService = controllerService;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
+            _mapper = mapper;
         }
 
         [HttpHead]
@@ -35,20 +41,20 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCollections(CollectionsResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<CollectionDto, Collection>
+            if (!_propertyMappingService.ValidMappingExistsFor<CollectionDto, Collection>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_controllerService.TypeHelperService.TypeHasProperties<CollectionDto>
+            if (!_typeHelperService.TypeHasProperties<CollectionDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
             var collectionsFromRepo = _unitOfWork.CollectionRepository.Get(resourceParameters);
-            var collections = _controllerService.Mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
+            var collections = _mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -121,7 +127,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCollection(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.TypeHelperService.TypeHasProperties<CollectionDto>(fields))
+            if (!_typeHelperService.TypeHasProperties<CollectionDto>(fields))
             {
                 return BadRequest();
             }
@@ -133,7 +139,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var collection = _controllerService.Mapper.Map<CollectionDto>(collectionFromRepo);
+            var collection = _mapper.Map<CollectionDto>(collectionFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -176,7 +182,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var newCollection = _controllerService.Mapper.Map<Collection>(collection);
+            var newCollection = _mapper.Map<Collection>(collection);
             newCollection.User = user;
 
             _unitOfWork.CollectionRepository.Add(newCollection);
@@ -186,7 +192,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a collection failed on save.");
             }
 
-            var returnedCollection = _controllerService.Mapper.Map<CollectionDto>(newCollection);
+            var returnedCollection = _mapper.Map<CollectionDto>(newCollection);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -246,7 +252,7 @@ namespace Recollectable.API.Controllers
 
             collectionFromRepo.UserId = collection.UserId;
 
-            _controllerService.Mapper.Map(collection, collectionFromRepo);
+            _mapper.Map(collection, collectionFromRepo);
             _unitOfWork.CollectionRepository.Update(collectionFromRepo);
 
             if (!_unitOfWork.Save())
@@ -273,7 +279,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCollection = _controllerService.Mapper.Map<CollectionUpdateDto>(collectionFromRepo);
+            var patchedCollection = _mapper.Map<CollectionUpdateDto>(collectionFromRepo);
             patchDoc.ApplyTo(patchedCollection, ModelState);
 
             TryValidateModel(patchedCollection);
@@ -290,7 +296,7 @@ namespace Recollectable.API.Controllers
 
             collectionFromRepo.UserId = patchedCollection.UserId;
 
-            _controllerService.Mapper.Map(patchedCollection, collectionFromRepo);
+            _mapper.Map(patchedCollection, collectionFromRepo);
             _unitOfWork.CollectionRepository.Update(collectionFromRepo);
 
             if (!_unitOfWork.Save())

@@ -11,14 +11,15 @@ using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;
 using System;
-using System.Collections.Generic;
 
 namespace Recollectable.Tests
 {
     public class RecollectableTestBase
     {
         protected readonly IUnitOfWork _unitOfWork;
-        protected readonly Mock<IControllerService> _mockControllerService;
+        protected readonly IPropertyMappingService _propertyMappingService;
+        protected readonly ITypeHelperService _typeHelperService;
+        protected readonly IMapper _mapper;
 
         public RecollectableTestBase()
         {
@@ -27,18 +28,14 @@ namespace Recollectable.Tests
                 .Options;
 
             var _context = new RecollectableContext(options);
-            var _propertyMappingService = new PropertyMappingService();
+            _propertyMappingService = new PropertyMappingService();
             _unitOfWork = new UnitOfWork(_context, _propertyMappingService);
 
-            _mockControllerService = new Mock<IControllerService>();
-            var _typeHelperService = new TypeHelperService();
-            _mockControllerService.SetupGet(c => c.TypeHelperService).Returns(_typeHelperService);
-            _mockControllerService.SetupGet(c => c.PropertyMappingService).Returns(_propertyMappingService);
+            _typeHelperService = new TypeHelperService();
 
             var configuration = new MapperConfiguration(cfg =>
                 cfg.AddProfile<RecollectableMappingProfile>());
-            IMapper mapper = configuration.CreateMapper();
-            _mockControllerService.SetupGet(c => c.Mapper).Returns(mapper);
+            _mapper = configuration.CreateMapper();
 
             RecollectableInitializer.Initialize(_context);
         }
