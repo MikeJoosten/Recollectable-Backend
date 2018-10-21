@@ -17,8 +17,8 @@ namespace Recollectable.API.Controllers
                     new LinkDto(Url.Link("GetHome",
                     new { }), "self", "GET"),
 
-                    new LinkDto(Url.Link("GetUsers",
-                    new { }), "users", "GET"),
+                    new LinkDto(Url.Link("GetAccounts",
+                    new { }), "accounts", "GET"),
 
                     new LinkDto(Url.Link("GetCollections",
                     new { }), "collections", "GET"),

@@ -69,8 +69,8 @@ namespace Recollectable.API
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
             // Register User Authentication
-            services.AddIdentityCore<User>(options => { });
-            services.AddScoped<IUserStore<User>, UserOnlyStore<User, RecollectableContext, Guid>>();
+            services.AddIdentity<User, Role>(options => { })
+                .AddEntityFrameworkStores<RecollectableContext>();
 
             // Register Repositories
             services.AddScoped<IUnitOfWork, UnitOfWork>();

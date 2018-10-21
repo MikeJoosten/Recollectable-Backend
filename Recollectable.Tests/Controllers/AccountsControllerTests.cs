@@ -14,14 +14,14 @@ using Xunit;
 
 namespace Recollectable.Tests.Controllers
 {
-    public class UsersControllerTests : RecollectableTestBase
+    public class AccountsControllerTests : RecollectableTestBase
     {
-        private readonly UsersController _controller;
+        private readonly AccountsController _controller;
         private readonly UsersResourceParameters resourceParameters;
 
-        public UsersControllerTests()
+        public AccountsControllerTests()
         {
-            _controller = new UsersController(_unitOfWork, _typeHelperService,
+            _controller = new AccountsController(_unitOfWork, _typeHelperService,
                 _propertyMappingService, _mapper);
 
             resourceParameters = new UsersResourceParameters();
@@ -35,7 +35,7 @@ namespace Recollectable.Tests.Controllers
             resourceParameters.OrderBy = "Invalid";
 
             //Act
-            var response = _controller.GetUsers(resourceParameters, null);
+            var response = _controller.GetAccounts(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -48,7 +48,7 @@ namespace Recollectable.Tests.Controllers
             resourceParameters.Fields = "Invalid";
 
             //Act
-            var response = _controller.GetUsers(resourceParameters, null);
+            var response = _controller.GetAccounts(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -61,7 +61,7 @@ namespace Recollectable.Tests.Controllers
         public void GetUsers_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Act
-            var response = _controller.GetUsers(resourceParameters, mediaType);
+            var response = _controller.GetAccounts(resourceParameters, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -71,7 +71,7 @@ namespace Recollectable.Tests.Controllers
         public void GetUsers_ReturnsAllUsers_GivenNoMediaType()
         {
             //Act
-            var response = _controller.GetUsers(resourceParameters, null) as OkObjectResult;
+            var response = _controller.GetAccounts(resourceParameters, null) as OkObjectResult;
             var users = response.Value as List<UserDto>;
 
             //Assert
@@ -86,7 +86,7 @@ namespace Recollectable.Tests.Controllers
             string mediaType = "application/json";
 
             //Act
-            var response = _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
+            var response = _controller.GetAccounts(resourceParameters, mediaType) as OkObjectResult;
             var users = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -101,7 +101,7 @@ namespace Recollectable.Tests.Controllers
             string mediaType = "application/json+hateoas";
 
             //Act
-            var response = _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
+            var response = _controller.GetAccounts(resourceParameters, mediaType) as OkObjectResult;
             var linkedCollection = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -117,7 +117,7 @@ namespace Recollectable.Tests.Controllers
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
+            var response = _controller.GetAccounts(resourceParameters, mediaType) as OkObjectResult;
             var users = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -133,7 +133,7 @@ namespace Recollectable.Tests.Controllers
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
+            var response = _controller.GetAccounts(resourceParameters, mediaType) as OkObjectResult;
             var users = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -148,7 +148,7 @@ namespace Recollectable.Tests.Controllers
             string fields = "Invalid";
 
             //Act
-            var response = _controller.GetUser(Guid.Empty, fields, null);
+            var response = _controller.GetAccount(Guid.Empty, fields, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -161,7 +161,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("72e2cde4-0aec-47e7-9549-f2c578b2c21c");
 
             //Act
-            var response = _controller.GetUser(id, null, null);
+            var response = _controller.GetAccount(id, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -177,7 +177,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.GetUser(id, null, mediaType);
+            var response = _controller.GetAccount(id, null, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -190,7 +190,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.GetUser(id, null, null) as OkObjectResult;
+            var response = _controller.GetAccount(id, null, null) as OkObjectResult;
             var user = response.Value as UserDto;
 
             //Assert
@@ -207,7 +207,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.GetUser(id, null, mediaType) as OkObjectResult;
+            var response = _controller.GetAccount(id, null, mediaType) as OkObjectResult;
             dynamic user = response.Value as ExpandoObject;
 
             //Assert
@@ -224,7 +224,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.GetUser(id, null, mediaType) as OkObjectResult;
+            var response = _controller.GetAccount(id, null, mediaType) as OkObjectResult;
             dynamic user = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -237,7 +237,7 @@ namespace Recollectable.Tests.Controllers
         public void CreateUser_ReturnsBadRequestResponse_GivenNoUser()
         {
             //Act
-            var response = _controller.CreateUser(null, null);
+            var response = _controller.CreateAccount(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -251,7 +251,7 @@ namespace Recollectable.Tests.Controllers
             _controller.ModelState.AddModelError("FirstName", "Required");
 
             //Act
-            var response = _controller.CreateUser(user, null);
+            var response = _controller.CreateAccount(user, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -270,7 +270,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateUser(user, mediaType);
+            var response = _controller.CreateAccount(user, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
@@ -287,7 +287,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateUser(user, null) as CreatedAtRouteResult;
+            var response = _controller.CreateAccount(user, null) as CreatedAtRouteResult;
             var returnedUser = response.Value as UserDto;
 
             //Assert
@@ -307,7 +307,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateUser(user, mediaType) as CreatedAtRouteResult;
+            var response = _controller.CreateAccount(user, mediaType) as CreatedAtRouteResult;
             dynamic returnedUser = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -322,7 +322,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.BlockUserCreation(id) as StatusCodeResult;
+            var response = _controller.BlockAccountCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
@@ -335,7 +335,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("b6e2ad45-31da-4d0e-ab9f-2193dd539fc6");
 
             //Act
-            var response = _controller.BlockUserCreation(id);
+            var response = _controller.BlockAccountCreation(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -345,7 +345,7 @@ namespace Recollectable.Tests.Controllers
         public void UpdateUser_ReturnsBadRequestResponse_GivenNoUser()
         {
             //Act
-            var response = _controller.UpdateUser(Guid.Empty, null);
+            var response = _controller.UpdateAccount(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -359,7 +359,7 @@ namespace Recollectable.Tests.Controllers
             _controller.ModelState.AddModelError("FirstName", "Required");
 
             //Act
-            var response = _controller.UpdateUser(Guid.Empty, user);
+            var response = _controller.UpdateAccount(Guid.Empty, user);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -377,7 +377,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateUser(id, user);
+            var response = _controller.UpdateAccount(id, user);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -395,7 +395,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateUser(id, country);
+            var response = _controller.UpdateAccount(id, country);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
@@ -413,7 +413,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateUser(id, user);
+            var response = _controller.UpdateAccount(id, user);
 
             //Assert
             Assert.NotNull(_unitOfWork.UserRepository.GetById(id));
@@ -425,7 +425,7 @@ namespace Recollectable.Tests.Controllers
         public void PartiallyUpdateUser_ReturnsBadRequestResponse_GivenNoPatchDocument()
         {
             //Act
-            var response = _controller.PartiallyUpdateUser(Guid.Empty, null);
+            var response = _controller.PartiallyUpdateAccount(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -439,7 +439,7 @@ namespace Recollectable.Tests.Controllers
             JsonPatchDocument<UserUpdateDto> patchDoc = new JsonPatchDocument<UserUpdateDto>();
 
             //Act
-            var response = _controller.PartiallyUpdateUser(id, patchDoc);
+            var response = _controller.PartiallyUpdateAccount(id, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -454,7 +454,7 @@ namespace Recollectable.Tests.Controllers
             _controller.ModelState.AddModelError("FirstName", "Required");
 
             //Act
-            var response = _controller.PartiallyUpdateUser(id, patchDoc);
+            var response = _controller.PartiallyUpdateAccount(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -470,7 +470,7 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(u => u.LastName, "Eberle");
 
             //Act
-            var response = _controller.PartiallyUpdateUser(id, patchDoc);
+            var response = _controller.PartiallyUpdateAccount(id, patchDoc);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
@@ -486,7 +486,7 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(u => u.LastName, "Eberle");
 
             //Act
-            var response = _controller.PartiallyUpdateUser(id, patchDoc);
+            var response = _controller.PartiallyUpdateAccount(id, patchDoc);
 
             //Assert
             Assert.NotNull(_unitOfWork.UserRepository.GetById(id));
@@ -501,7 +501,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("65e2c5ae-3115-467c-8efa-30323924efed");
 
             //Act
-            var response = _controller.DeleteUser(id);
+            var response = _controller.DeleteAccount(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -514,7 +514,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.DeleteUser(id);
+            var response = _controller.DeleteAccount(id);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
@@ -527,7 +527,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            _controller.DeleteUser(id);
+            _controller.DeleteAccount(id);
 
             //Assert
             Assert.Equal(5, _unitOfWork.UserRepository.Get(resourceParameters).Count());

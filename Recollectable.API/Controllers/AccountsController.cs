@@ -19,15 +19,15 @@ using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
-    [Route("api/users")]
-    public class UsersController : Controller
+    [Route("api/accounts")]
+    public class AccountsController : Controller
     {
         private IUnitOfWork _unitOfWork;
         private IPropertyMappingService _propertyMappingService;
         private ITypeHelperService _typeHelperService;
         private IMapper _mapper;
 
-        public UsersController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
+        public AccountsController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
             IPropertyMappingService propertyMappingService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
@@ -37,8 +37,8 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpHead]
-        [HttpGet(Name = "GetUsers")]
-        public IActionResult GetUsers(UsersResourceParameters resourceParameters,
+        [HttpGet(Name = "GetAccounts")]
+        public IActionResult GetAccounts(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
@@ -66,10 +66,10 @@ namespace Recollectable.API.Controllers
                     totalPages = usersFromRepo.TotalPages
                 };
 
-                Response.Headers.Add("X-Pagination", 
+                Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                var links = CreateUsersLinks(resourceParameters, 
+                var links = CreateUsersLinks(resourceParameters,
                     usersFromRepo.HasNext, usersFromRepo.HasPrevious);
                 var shapedUsers = users.ShapeData(resourceParameters.Fields);
 
@@ -112,7 +112,7 @@ namespace Recollectable.API.Controllers
                     nextPageLink,
                 };
 
-                Response.Headers.Add("X-Pagination", 
+                Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 return Ok(users.ShapeData(resourceParameters.Fields));
@@ -123,8 +123,8 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        [HttpGet("{id}", Name = "GetUser")]
-        public IActionResult GetUser(Guid id, [FromQuery] string fields,
+        [HttpGet("{id}", Name = "GetAccount")]
+        public IActionResult GetAccount(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
@@ -161,8 +161,8 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        [HttpPost(Name = "CreateUser")]
-        public IActionResult CreateUser([FromBody] UserCreationDto user,
+        [HttpPost(Name = "CreateAccount")]
+        public IActionResult CreateAccount([FromBody] UserCreationDto user,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (user == null)
@@ -202,7 +202,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost("{id}")]
-        public IActionResult BlockUserCreation(Guid id)
+        public IActionResult BlockAccountCreation(Guid id)
         {
             if (_unitOfWork.UserRepository.Exists(id))
             {
@@ -212,8 +212,8 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}", Name = "UpdateUser")]
-        public IActionResult UpdateUser(Guid id, [FromBody] UserUpdateDto user)
+        [HttpPut("{id}", Name = "UpdateAccount")]
+        public IActionResult UpdateAccount(Guid id, [FromBody] UserUpdateDto user)
         {
             if (user == null)
             {
@@ -243,8 +243,8 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}", Name = "PartiallyUpdateUser")]
-        public IActionResult PartiallyUpdateUser(Guid id,
+        [HttpPatch("{id}", Name = "PartiallyUpdateAccount")]
+        public IActionResult PartiallyUpdateAccount(Guid id,
             [FromBody] JsonPatchDocument<UserUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -280,8 +280,8 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}", Name = "DeleteUser")]
-        public IActionResult DeleteUser(Guid id)
+        [HttpDelete("{id}", Name = "DeleteAccount")]
+        public IActionResult DeleteAccount(Guid id)
         {
             var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
@@ -313,7 +313,7 @@ namespace Recollectable.API.Controllers
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return Url.Link("GetUsers", new
+                    return Url.Link("GetAccounts", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -322,7 +322,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return Url.Link("GetUsers", new
+                    return Url.Link("GetAccounts", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -332,7 +332,7 @@ namespace Recollectable.API.Controllers
                     });
                 case ResourceUriType.Current:
                 default:
-                    return Url.Link("GetUsers", new
+                    return Url.Link("GetAccounts", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -349,27 +349,27 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(Url.Link("GetUser",
+                links.Add(new LinkDto(Url.Link("GetAccount",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateUser", 
-                    new { }), "create_user", "POST"));
+                links.Add(new LinkDto(Url.Link("CreateAccount",
+                    new { }), "create_account", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateUser",
-                    new { id }), "update_user", "PUT"));
+                links.Add(new LinkDto(Url.Link("UpdateAccount",
+                    new { id }), "update_account", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateUser",
-                    new { id }), "partially_update_user", "PATCH"));
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateAccount",
+                    new { id }), "partially_update_account", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteUser",
-                    new { id }), "delete_user", "DELETE"));
+                links.Add(new LinkDto(Url.Link("DeleteAccount",
+                    new { id }), "delete_account", "DELETE"));
             }
 
             return links;
         }
 
         private IEnumerable<LinkDto> CreateUsersLinks
-            (UsersResourceParameters resourceParameters, 
+            (UsersResourceParameters resourceParameters,
             bool hasNext, bool hasPrevious)
         {
             var links = new List<LinkDto>
