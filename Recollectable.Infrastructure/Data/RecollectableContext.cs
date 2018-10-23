@@ -34,21 +34,33 @@ namespace Recollectable.Infrastructure.Data
                     Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"),
                     FirstName = "Ryan",
                     LastName = "Haywood",
-                    Email = "ryan.haywood@gmail.com"
+                    UserName = "Ryan",
+                    NormalizedUserName = "ryan",
+                    Email = "ryan.haywood@gmail.com",
+                    NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM",
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A=="
                 },
                 new User
                 {
                     Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"),
                     FirstName = "Jack",
                     LastName = "Patillo",
-                    Email = "jack.patillo@gmail.com"
+                    UserName = "Jack",
+                    NormalizedUserName = "JACK",
+                    Email = "jack.patillo@gmail.com",
+                    NormalizedEmail = "JACK.PATILLO@GMAIL.COM",
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A=="
                 },
                 new User
                 {
                     Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"),
                     FirstName = "Geoff",
                     LastName = "Ramsey",
-                    Email = "geoff.ramsey@gmail.com"
+                    UserName = "Geoff",
+                    NormalizedUserName = "GEOFF",
+                    Email = "geoff.ramsey@gmail.com",
+                    NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM",
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A=="
                 }
             );
 

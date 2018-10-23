@@ -1,5 +1,6 @@
 ﻿using AspNetCoreRateLimit;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using Recollectable.API.Interfaces;
 using Recollectable.API.Services;
@@ -64,15 +66,41 @@ namespace Recollectable.API
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            // Register DbContext
+            // Configure DbContext
             services.AddDbContext<RecollectableContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
-            // Register User Authentication
+            // Configure User Identity
             services.AddIdentity<User, Role>(options => { })
                 .AddEntityFrameworkStores<RecollectableContext>();
 
-            // Register Repositories
+            // Configure JWT Authentication
+            var jwtAuthenticationSection = Configuration.GetSection("JwtAuthentication");
+            var jwtAuthentication = jwtAuthenticationSection.Get<JwtAuthentication>();
+            services.Configure<JwtAuthentication>(jwtAuthenticationSection);
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtAuthentication.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtAuthentication.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = jwtAuthentication.SecurityKey,
+                    RequireExpirationTime = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            // Configure Repositories
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICollectableRepository, CollectableRepository>();
             services.AddScoped<IRepository<User, UsersResourceParameters>, UserRepository>();
@@ -82,18 +110,18 @@ namespace Recollectable.API
             services.AddScoped<IRepository<Country, CountriesResourceParameters>, CountryRepository>();
             services.AddScoped<IRepository<CollectorValue, CollectorValuesResourceParameters>, CollectorValueRepository>();
 
-            // Register Helper Classes
+            // Configure Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
 
-            // Register Auto Mapper
+            // Configure Auto Mapper
             var configuration = new MapperConfiguration(cfg =>
                 cfg.AddProfile<RecollectableMappingProfile>());
             IMapper mapper = configuration.CreateMapper();
             services.AddSingleton(mapper);
 
-            // Register HTTP Caching
+            // Configure HTTP Caching
             services.AddHttpCacheHeaders(
                 (expirationModelOptions) => 
                 {

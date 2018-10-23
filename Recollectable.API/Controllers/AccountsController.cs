@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -25,14 +26,16 @@ namespace Recollectable.API.Controllers
         private IUnitOfWork _unitOfWork;
         private IPropertyMappingService _propertyMappingService;
         private ITypeHelperService _typeHelperService;
+        private UserManager<User> _userManager;
         private IMapper _mapper;
 
         public AccountsController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
-            IPropertyMappingService propertyMappingService, IMapper mapper)
+            IPropertyMappingService propertyMappingService, UserManager<User> userManager, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _propertyMappingService = propertyMappingService;
             _typeHelperService = typeHelperService;
+            _userManager = userManager;
             _mapper = mapper;
         }
 
@@ -176,7 +179,12 @@ namespace Recollectable.API.Controllers
             }
 
             var newUser = _mapper.Map<User>(user);
-            _unitOfWork.UserRepository.Add(newUser);
+            var result = _userManager.CreateAsync(newUser, user.Password);
+
+            if (!result.Result.Succeeded)
+            {
+                return new UnprocessableEntityObjectResult(result.Result);
+            }
 
             if (!_unitOfWork.Save())
             {
@@ -193,11 +201,11 @@ namespace Recollectable.API.Controllers
 
                 linkedResource.Add("links", links);
 
-                return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, linkedResource);
+                return CreatedAtRoute("GetAccount", new { id = returnedUser.Id }, linkedResource);
             }
             else
             {
-                return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, returnedUser);
+                return CreatedAtRoute("GetAccount", new { id = returnedUser.Id }, returnedUser);
             }
         }
 

@@ -57,14 +57,6 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 user.Id = Guid.NewGuid();
             }
 
-            if (user.Collections.Any())
-            {
-                foreach (var collection in user.Collections)
-                {
-                    collection.Id = Guid.NewGuid();
-                }
-            }
-
             _context.Users.Add(user);
         }
 
