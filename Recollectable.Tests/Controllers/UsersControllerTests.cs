@@ -1,28 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-using Recollectable.API.Controllers;
-using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Models.Users;
-using Recollectable.Core.Shared.Entities;
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using Xunit;
-
-namespace Recollectable.Tests.Controllers
+﻿namespace Recollectable.Tests.Controllers
 {
-    /*public class AccountsControllerTests : RecollectableTestBase
+    /*public class UsersControllerTests : RecollectableTestBase
     {
         private readonly AccountsController _controller;
         private readonly UsersResourceParameters resourceParameters;
         private Mock<UserManager<User>> _mockUserManager;
 
-        public AccountsControllerTests()
+        public UsersControllerTests()
         {
             _mockUserManager = new Mock<UserManager<User>>();
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -56,6 +57,13 @@ namespace Recollectable.API
                 {
                     jsonOutputFormatter.SupportedMediaTypes.Add("application/json+hateoas");
                 }
+
+                /*var policy = new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .Build();
+
+                options.Filters.Add(new AuthorizeFilter(policy));*/
             })
             .AddJsonOptions(options =>
             {
@@ -70,7 +78,16 @@ namespace Recollectable.API
 
             // Configure User Identity
             services.AddIdentity<User, Role>(options => { })
-                .AddEntityFrameworkStores<RecollectableContext>();
+                .AddEntityFrameworkStores<RecollectableContext>()
+                .AddDefaultTokenProviders();
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(3);
+            });
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/api/auth/login";
+            });
 
             // Configure JWT Authentication
             var tokenProviderOptionsSection = Configuration.GetSection("TokenProviderOptions");
@@ -80,7 +97,8 @@ namespace Recollectable.API
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
+            })
+            .AddJwtBearer(options =>
             {
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = false;

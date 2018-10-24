@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
@@ -17,31 +19,36 @@ using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
-    [Route("api/accounts")]
-    public class AccountsController : Controller
+    [Route("api/users")]
+    public class UsersController : Controller
     {
         private IUnitOfWork _unitOfWork;
         private IPropertyMappingService _propertyMappingService;
         private ITypeHelperService _typeHelperService;
         private UserManager<User> _userManager;
+        private ITokenFactory _tokenFactory;
         private IMapper _mapper;
 
-        public AccountsController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
-            IPropertyMappingService propertyMappingService, UserManager<User> userManager, IMapper mapper)
+        public UsersController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
+            IPropertyMappingService propertyMappingService, UserManager<User> userManager, 
+            ITokenFactory tokenFactory, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _propertyMappingService = propertyMappingService;
             _typeHelperService = typeHelperService;
             _userManager = userManager;
+            _tokenFactory = tokenFactory;
             _mapper = mapper;
         }
 
         [HttpHead]
-        [HttpGet(Name = "GetAccounts")]
-        public IActionResult GetAccounts(UsersResourceParameters resourceParameters,
+        [HttpGet(Name = "GetUsers")]
+        public IActionResult GetUsers(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
@@ -126,8 +133,8 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        [HttpGet("{id}", Name = "GetAccount")]
-        public IActionResult GetAccount(Guid id, [FromQuery] string fields,
+        [HttpGet("{id}", Name = "GetUser")]
+        public IActionResult GetUser(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
@@ -164,8 +171,9 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        [HttpPost(Name = "CreateAccount")]
-        public IActionResult CreateAccount([FromBody] UserCreationDto user,
+        [AllowAnonymous]
+        [HttpPost("register", Name = "Register")]
+        public IActionResult Register([FromBody] UserCreationDto user,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (user == null)
@@ -201,16 +209,44 @@ namespace Recollectable.API.Controllers
 
                 linkedResource.Add("links", links);
 
-                return CreatedAtRoute("GetAccount", new { id = returnedUser.Id }, linkedResource);
+                return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, linkedResource);
             }
             else
             {
-                return CreatedAtRoute("GetAccount", new { id = returnedUser.Id }, returnedUser);
+                return CreatedAtRoute("GetUser", new { id = returnedUser.Id }, returnedUser);
             }
         }
 
+        [AllowAnonymous]
+        [HttpPost("login", Name = "Login")]
+        public IActionResult Login([FromBody] CredentialsDto credentials)
+        {
+            if (credentials == null)
+            {
+                return BadRequest();
+            }
+
+            var identity = GenerateClaimsIdentity(credentials.UserName, credentials.Password).Result;
+
+            if (identity == null)
+            {
+                ModelState.AddModelError("Error", "Invalid username or password");
+                return BadRequest(ModelState);
+            }
+
+            var response = new
+            {
+                userName = credentials.UserName,
+                auth_token = _tokenFactory.GenerateToken(credentials.UserName).Result,
+                expires_in = (int)TokenProviderOptions.Expiration.TotalSeconds
+            };
+
+            HttpContext.SignInAsync("Identity.Application", new ClaimsPrincipal(identity));
+            return Ok(response);
+        }
+
         [HttpPost("{id}")]
-        public IActionResult BlockAccountCreation(Guid id)
+        public IActionResult BlockUserCreation(Guid id)
         {
             if (_unitOfWork.UserRepository.Exists(id))
             {
@@ -220,8 +256,8 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}", Name = "UpdateAccount")]
-        public IActionResult UpdateAccount(Guid id, [FromBody] UserUpdateDto user)
+        [HttpPut("{id}", Name = "UpdateUser")]
+        public IActionResult UpdateUser(Guid id, [FromBody] UserUpdateDto user)
         {
             if (user == null)
             {
@@ -251,8 +287,8 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}", Name = "PartiallyUpdateAccount")]
-        public IActionResult PartiallyUpdateAccount(Guid id,
+        [HttpPatch("{id}", Name = "PartiallyUpdateUser")]
+        public IActionResult PartiallyUpdateUser(Guid id,
             [FromBody] JsonPatchDocument<UserUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -288,8 +324,8 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}", Name = "DeleteAccount")]
-        public IActionResult DeleteAccount(Guid id)
+        [HttpDelete("{id}", Name = "DeleteUser")]
+        public IActionResult DeleteUser(Guid id)
         {
             var userFromRepo = _unitOfWork.UserRepository.GetById(id);
 
@@ -315,13 +351,31 @@ namespace Recollectable.API.Controllers
             return Ok();
         }
 
+        private async Task<ClaimsIdentity> GenerateClaimsIdentity(string userName, string password)
+        {
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+            {
+                return await Task.FromResult<ClaimsIdentity>(null);
+            }
+
+            var user = await _userManager.FindByNameAsync(userName);
+
+            if (user != null && await _userManager.CheckPasswordAsync(user, password))
+            {
+                var identity = new ClaimsIdentity("Identity.Application");
+                return await Task.FromResult(identity);
+            }
+
+            return await Task.FromResult<ClaimsIdentity>(null);
+        }
+
         private string CreateUsersResourceUri(UsersResourceParameters resourceParameters,
             ResourceUriType type)
         {
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return Url.Link("GetAccounts", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -330,7 +384,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return Url.Link("GetAccounts", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -340,7 +394,7 @@ namespace Recollectable.API.Controllers
                     });
                 case ResourceUriType.Current:
                 default:
-                    return Url.Link("GetAccounts", new
+                    return Url.Link("GetUsers", new
                     {
                         search = resourceParameters.Search,
                         orderBy = resourceParameters.OrderBy,
@@ -357,20 +411,23 @@ namespace Recollectable.API.Controllers
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(Url.Link("GetAccount",
+                links.Add(new LinkDto(Url.Link("GetUser",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateAccount",
-                    new { }), "create_account", "POST"));
+                links.Add(new LinkDto(Url.Link("Register",
+                    new { }), "register_user", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateAccount",
-                    new { id }), "update_account", "PUT"));
+                links.Add(new LinkDto(Url.Link("Login",
+                    new { }), "login_user", "POST"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateAccount",
-                    new { id }), "partially_update_account", "PATCH"));
+                links.Add(new LinkDto(Url.Link("UpdateUser",
+                    new { id }), "update_user", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("DeleteAccount",
-                    new { id }), "delete_account", "DELETE"));
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateUser",
+                    new { id }), "partially_update_user", "PATCH"));
+
+                links.Add(new LinkDto(Url.Link("DeleteUser",
+                    new { id }), "delete_user", "DELETE"));
             }
 
             return links;
