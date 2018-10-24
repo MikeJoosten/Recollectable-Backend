@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -24,13 +22,13 @@ using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Factories;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;
 using Recollectable.Infrastructure.Data.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Recollectable.API
 {
@@ -75,9 +73,9 @@ namespace Recollectable.API
                 .AddEntityFrameworkStores<RecollectableContext>();
 
             // Configure JWT Authentication
-            var jwtAuthenticationSection = Configuration.GetSection("JwtAuthentication");
-            var jwtAuthentication = jwtAuthenticationSection.Get<JwtAuthentication>();
-            services.Configure<JwtAuthentication>(jwtAuthenticationSection);
+            var tokenProviderOptionsSection = Configuration.GetSection("TokenProviderOptions");
+            var tokenProviderOptions = tokenProviderOptionsSection.Get<TokenProviderOptions>();
+            services.Configure<TokenProviderOptions>(tokenProviderOptionsSection);
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -89,12 +87,11 @@ namespace Recollectable.API
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = jwtAuthentication.Issuer,
+                    ValidIssuer = tokenProviderOptions.Issuer,
                     ValidateAudience = true,
-                    ValidAudience = jwtAuthentication.Audience,
+                    ValidAudience = tokenProviderOptions.Audience,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = jwtAuthentication.SecurityKey,
-                    RequireExpirationTime = false,
+                    IssuerSigningKey = tokenProviderOptions.SecurityKey,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
@@ -114,6 +111,7 @@ namespace Recollectable.API
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
+            services.AddSingleton<ITokenFactory, TokenFactory>();
 
             // Configure Auto Mapper
             var configuration = new MapperConfiguration(cfg =>

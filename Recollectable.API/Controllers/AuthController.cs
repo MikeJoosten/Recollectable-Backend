@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Models.Users;
 using Recollectable.Core.Shared.Entities;
-using System.IdentityModel.Tokens.Jwt;
+using Recollectable.Core.Shared.Interfaces;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -15,13 +14,12 @@ namespace Recollectable.API.Controllers
     public class AuthController : Controller
     {
         private readonly UserManager<User> _userManager;
-        private readonly JwtAuthentication _jwtAuthentication;
+        private readonly ITokenFactory _tokenFactory;
 
-        public AuthController(UserManager<User> userManager, 
-            IOptions<JwtAuthentication> jwtAuthentication)
+        public AuthController(UserManager<User> userManager, ITokenFactory tokenFactory)
         {
             _userManager = userManager;
-            _jwtAuthentication = jwtAuthentication?.Value;
+            _tokenFactory = tokenFactory;
         }
 
         [HttpPost("login")]
@@ -43,8 +41,8 @@ namespace Recollectable.API.Controllers
             var response = new
             {
                 userName = credentials.UserName,
-                auth_token = GenerateEncodedToken(credentials.UserName, identity).Result,
-                expires_in = (int)_jwtAuthentication.ValidFor.TotalSeconds
+                auth_token = _tokenFactory.GenerateToken(credentials.UserName).Result,
+                expires_in = (int)TokenProviderOptions.Expiration.TotalSeconds
             };
 
             HttpContext.SignInAsync("Identity.Application", new ClaimsPrincipal(identity));
@@ -67,26 +65,6 @@ namespace Recollectable.API.Controllers
             }
 
             return await Task.FromResult<ClaimsIdentity>(null);
-        }
-
-        private async Task<string> GenerateEncodedToken(string userName, ClaimsIdentity identity)
-        {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, userName),
-                new Claim(JwtRegisteredClaimNames.Jti, await _jwtAuthentication.JtiGenerator()),
-                new Claim(JwtRegisteredClaimNames.Iat, _jwtAuthentication.IssuedAt.ToString(), ClaimValueTypes.Integer64),
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: _jwtAuthentication.Issuer,
-                audience: _jwtAuthentication.Audience,
-                claims: claims,
-                notBefore: _jwtAuthentication.NotBefore,
-                expires: _jwtAuthentication.Expiration,
-                signingCredentials: _jwtAuthentication.SigningCredentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
