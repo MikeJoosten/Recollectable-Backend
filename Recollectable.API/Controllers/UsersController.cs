@@ -230,7 +230,6 @@ namespace Recollectable.API.Controllers
 
             if (identity == null)
             {
-                ModelState.AddModelError("Error", "Invalid username or password");
                 return BadRequest(ModelState);
             }
 
@@ -355,6 +354,7 @@ namespace Recollectable.API.Controllers
         {
             if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
             {
+                ModelState.AddModelError("Error", "Invalid username or password");
                 return await Task.FromResult<ClaimsIdentity>(null);
             }
 
@@ -362,10 +362,17 @@ namespace Recollectable.API.Controllers
 
             if (user != null && await _userManager.CheckPasswordAsync(user, password))
             {
+                if (!await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError("Error", "Email is not confirmed");
+                    return await Task.FromResult<ClaimsIdentity>(null);
+                }
+
                 var identity = new ClaimsIdentity("Identity.Application");
                 return await Task.FromResult(identity);
             }
 
+            ModelState.AddModelError("Error", "Invalid username or password");
             return await Task.FromResult<ClaimsIdentity>(null);
         }
 
