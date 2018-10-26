@@ -38,7 +38,8 @@ namespace Recollectable.Infrastructure.Data
                     NormalizedUserName = "ryan",
                     Email = "ryan.haywood@gmail.com",
                     NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM",
-                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A=="
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    EmailConfirmed = true
                 },
                 new User
                 {
@@ -49,7 +50,8 @@ namespace Recollectable.Infrastructure.Data
                     NormalizedUserName = "JACK",
                     Email = "jack.patillo@gmail.com",
                     NormalizedEmail = "JACK.PATILLO@GMAIL.COM",
-                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A=="
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    EmailConfirmed = true
                 },
                 new User
                 {
@@ -60,7 +62,8 @@ namespace Recollectable.Infrastructure.Data
                     NormalizedUserName = "GEOFF",
                     Email = "geoff.ramsey@gmail.com",
                     NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM",
-                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A=="
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    EmailConfirmed = true
                 }
             );
 

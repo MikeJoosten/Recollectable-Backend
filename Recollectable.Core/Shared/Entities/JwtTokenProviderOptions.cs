@@ -3,7 +3,7 @@ using System;
 
 namespace Recollectable.Core.Shared.Entities
 {
-    public class TokenProviderOptions
+    public class JwtTokenProviderOptions
     {
         public string Issuer { get; set; }
         public string Audience { get; set; }

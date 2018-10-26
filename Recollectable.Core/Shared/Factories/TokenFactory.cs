@@ -11,9 +11,9 @@ namespace Recollectable.Core.Shared.Factories
 {
     public class TokenFactory : ITokenFactory
     {
-        private readonly TokenProviderOptions _tokenProviderOptions;
+        private readonly JwtTokenProviderOptions _tokenProviderOptions;
 
-        public TokenFactory(IOptions<TokenProviderOptions> tokenProviderOptions)
+        public TokenFactory(IOptions<JwtTokenProviderOptions> tokenProviderOptions)
         {
             _tokenProviderOptions = tokenProviderOptions?.Value;
         }
@@ -27,7 +27,7 @@ namespace Recollectable.Core.Shared.Factories
                 audience: _tokenProviderOptions.Audience,
                 claims: GetTokenClaims(userName),
                 notBefore: now,
-                expires: now.Add(TokenProviderOptions.Expiration),
+                expires: now.Add(JwtTokenProviderOptions.Expiration),
                 signingCredentials: _tokenProviderOptions.SigningCredentials);
 
             var encodedToken = new JwtSecurityTokenHandler().WriteToken(token);

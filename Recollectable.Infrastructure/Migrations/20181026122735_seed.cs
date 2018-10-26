@@ -12,9 +12,9 @@ namespace Recollectable.Infrastructure.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), 0, "b0d05269-f7c0-445f-8289-99b556da0442", "ryan.haywood@gmail.com", false, "Ryan", "Haywood", false, null, "RYAN.HAYWOOD@GMAIL.COM", "ryan", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, null, false, "Ryan" },
-                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), 0, "b0d3abce-c73b-4298-9249-b42327ffe07c", "jack.patillo@gmail.com", false, "Jack", "Patillo", false, null, "JACK.PATILLO@GMAIL.COM", "JACK", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, null, false, "Jack" },
-                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), 0, "51c9688e-ccea-44a7-bbe0-4f7b1a46c98d", "geoff.ramsey@gmail.com", false, "Geoff", "Ramsey", false, null, "GEOFF.RAMSEY@GMAIL.COM", "GEOFF", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, null, false, "Geoff" }
+                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), 0, "b968551d-a4b3-4a30-be83-18edd2b4e944", "ryan.haywood@gmail.com", true, "Ryan", "Haywood", false, null, "RYAN.HAYWOOD@GMAIL.COM", "ryan", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, null, false, "Ryan" },
+                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), 0, "32e577e8-8c99-4772-9e7d-b1a8f086e6f1", "jack.patillo@gmail.com", true, "Jack", "Patillo", false, null, "JACK.PATILLO@GMAIL.COM", "JACK", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, null, false, "Jack" },
+                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), 0, "0e4a8527-8bd2-444a-b6eb-4eca632c17b5", "geoff.ramsey@gmail.com", true, "Geoff", "Ramsey", false, null, "GEOFF.RAMSEY@GMAIL.COM", "GEOFF", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, null, false, "Geoff" }
                 });
 
             migrationBuilder.InsertData(
@@ -94,7 +94,7 @@ namespace Recollectable.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "b0d3abce-c73b-4298-9249-b42327ffe07c" });
+                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "32e577e8-8c99-4772-9e7d-b1a8f086e6f1" });
 
             migrationBuilder.DeleteData(
                 table: "CollectionCollectables",
@@ -169,12 +169,12 @@ namespace Recollectable.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "b0d05269-f7c0-445f-8289-99b556da0442" });
+                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "b968551d-a4b3-4a30-be83-18edd2b4e944" });
 
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "51c9688e-ccea-44a7-bbe0-4f7b1a46c98d" });
+                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "0e4a8527-8bd2-444a-b6eb-4eca632c17b5" });
 
             migrationBuilder.DeleteData(
                 table: "CollectorValues",

@@ -199,6 +199,11 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a user failed on save.");
             }
 
+            //TODO Implement Mailing Service
+            var token = _userManager.GenerateEmailConfirmationTokenAsync(newUser).Result;
+            var confirmationEmail = Url.Action("ConfirmEmail", "Users", new { token, email = newUser.Email },
+                protocol: HttpContext.Request.Scheme);
+
             var returnedUser = _mapper.Map<UserDto>(newUser);
 
             if (mediaType == "application/json+hateoas")
@@ -237,15 +242,107 @@ namespace Recollectable.API.Controllers
             {
                 userName = credentials.UserName,
                 auth_token = _tokenFactory.GenerateToken(credentials.UserName).Result,
-                expires_in = (int)TokenProviderOptions.Expiration.TotalSeconds
+                expires_in = (int)JwtTokenProviderOptions.Expiration.TotalSeconds
             };
 
             HttpContext.SignInAsync("Identity.Application", new ClaimsPrincipal(identity));
             return Ok(response);
         }
 
+        [AllowAnonymous]
+        [HttpGet("{email}/forgot_password")]
+        public IActionResult ForgotPassword(string email)
+        {
+            var user = _userManager.FindByEmailAsync(email).Result;
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var token = _userManager.GeneratePasswordResetTokenAsync(user).Result;
+            var resetUrl = Url.Action("ResetPassword", "Users", new { token, email },
+                protocol: HttpContext.Request.Scheme);
+            System.IO.File.WriteAllText("resetLink.txt", resetUrl);
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset_password")]
+        public IActionResult ResetPassword([FromBody] ResetPasswordDto resetPassword)
+        {
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
+            var user = _userManager.FindByEmailAsync(resetPassword.Email).Result;
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = _userManager.ResetPasswordAsync(user, resetPassword.Token, resetPassword.Password).Result;
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("Error", error.Description);
+                }
+                return BadRequest(ModelState);
+            }
+
+            return NoContent();
+        }
+
+        [HttpPost("change_password")]
+        public IActionResult ChangePassword([FromBody] ChangedPasswordDto changedPassword)
+        {
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
+            var user = _userManager.FindByEmailAsync(changedPassword.Email).Result;
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = _userManager.ChangePasswordAsync(user, changedPassword.OldPassword, changedPassword.NewPassword).Result;
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("Error", error.Description);
+                }
+                return BadRequest(ModelState);
+            }
+
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{email}/confirm_account")]
+        public IActionResult ConfirmEmail(string token, string email)
+        {
+            var user = _userManager.FindByEmailAsync(email).Result;
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = _userManager.ConfirmEmailAsync(user, token).Result;
+            return NoContent();
+        }
+
         [HttpPost("{id}")]
-        public IActionResult BlockUserCreation(Guid id)
+        public IActionResult BlockRegistration(Guid id)
         {
             if (_unitOfWork.UserRepository.Exists(id))
             {
@@ -358,7 +455,7 @@ namespace Recollectable.API.Controllers
                 return await Task.FromResult<ClaimsIdentity>(null);
             }
 
-            var user = await _userManager.FindByNameAsync(userName);
+            var user = await _userManager.FindByNameOrEmailAsync(userName);
 
             if (user != null && await _userManager.CheckPasswordAsync(user, password))
             {

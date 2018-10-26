@@ -10,7 +10,7 @@ using Recollectable.Infrastructure.Data;
 namespace Recollectable.Infrastructure.Migrations
 {
     [DbContext(typeof(RecollectableContext))]
-    [Migration("20181023094223_seed")]
+    [Migration("20181026122735_seed")]
     partial class seed
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -331,9 +331,9 @@ namespace Recollectable.Infrastructure.Migrations
                     b.ToTable("AspNetUsers");
 
                     b.HasData(
-                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "b0d05269-f7c0-445f-8289-99b556da0442", Email = "ryan.haywood@gmail.com", EmailConfirmed = false, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = false, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, TwoFactorEnabled = false, UserName = "Ryan" },
-                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "b0d3abce-c73b-4298-9249-b42327ffe07c", Email = "jack.patillo@gmail.com", EmailConfirmed = false, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = false, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, TwoFactorEnabled = false, UserName = "Jack" },
-                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "51c9688e-ccea-44a7-bbe0-4f7b1a46c98d", Email = "geoff.ramsey@gmail.com", EmailConfirmed = false, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = false, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, TwoFactorEnabled = false, UserName = "Geoff" }
+                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "b968551d-a4b3-4a30-be83-18edd2b4e944", Email = "ryan.haywood@gmail.com", EmailConfirmed = true, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = false, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, TwoFactorEnabled = false, UserName = "Ryan" },
+                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "32e577e8-8c99-4772-9e7d-b1a8f086e6f1", Email = "jack.patillo@gmail.com", EmailConfirmed = true, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = false, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, TwoFactorEnabled = false, UserName = "Jack" },
+                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "0e4a8527-8bd2-444a-b6eb-4eca632c17b5", Email = "geoff.ramsey@gmail.com", EmailConfirmed = true, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = false, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, TwoFactorEnabled = false, UserName = "Geoff" }
                     );
                 });
 

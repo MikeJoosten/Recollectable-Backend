@@ -1,11 +1,13 @@
 ﻿using AspNetCoreRateLimit;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +60,7 @@ namespace Recollectable.API
                     jsonOutputFormatter.SupportedMediaTypes.Add("application/json+hateoas");
                 }
 
+                //TODO Activate Authorization
                 /*var policy = new AuthorizationPolicyBuilder()
                     .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                     .RequireAuthenticatedUser()
@@ -77,22 +80,26 @@ namespace Recollectable.API
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
             // Configure User Identity
-            services.AddIdentity<User, Role>(options => { })
-                .AddEntityFrameworkStores<RecollectableContext>()
-                .AddDefaultTokenProviders();
-            services.Configure<DataProtectionTokenProviderOptions>(options =>
+            services.AddIdentity<User, Role>(options => 
             {
-                options.TokenLifespan = TimeSpan.FromHours(3);
-            });
+                options.Tokens.EmailConfirmationTokenProvider = "email_conf";
+            })
+            .AddEntityFrameworkStores<RecollectableContext>()
+            .AddDefaultTokenProviders()
+            .AddTokenProvider<EmailConfirmationTokenProvider<User>>("email_conf");
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+                options.TokenLifespan = TimeSpan.FromHours(3));
+            services.Configure<EmailConfirmationTokenProviderOptions>(options =>
+                options.TokenLifespan = TimeSpan.FromDays(2));
             services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/api/auth/login";
+                options.LoginPath = "/api/users/login";
             });
 
             // Configure JWT Authentication
-            var tokenProviderOptionsSection = Configuration.GetSection("TokenProviderOptions");
-            var tokenProviderOptions = tokenProviderOptionsSection.Get<TokenProviderOptions>();
-            services.Configure<TokenProviderOptions>(tokenProviderOptionsSection);
+            var tokenProviderOptionsSection = Configuration.GetSection("JwtTokenProviderOptions");
+            var tokenProviderOptions = tokenProviderOptionsSection.Get<JwtTokenProviderOptions>();
+            services.Configure<JwtTokenProviderOptions>(tokenProviderOptionsSection);
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
