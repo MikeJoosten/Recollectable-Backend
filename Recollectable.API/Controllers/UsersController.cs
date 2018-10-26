@@ -260,10 +260,11 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
+            //TODO Implement Mailing Service
             var token = _userManager.GeneratePasswordResetTokenAsync(user).Result;
             var resetUrl = Url.Action("ResetPassword", "Users", new { token, email },
                 protocol: HttpContext.Request.Scheme);
-            System.IO.File.WriteAllText("resetLink.txt", resetUrl);
+
             return NoContent();
         }
 

@@ -1,13 +1,11 @@
 ﻿using AspNetCoreRateLimit;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +25,7 @@ using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Factories;
 using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Shared.Validators;
 using Recollectable.Infrastructure.Data;
 using Recollectable.Infrastructure.Data.Repositories;
 using System;
@@ -82,15 +81,26 @@ namespace Recollectable.API
             // Configure User Identity
             services.AddIdentity<User, Role>(options => 
             {
-                options.Tokens.EmailConfirmationTokenProvider = "email_confirm";
+                options.Tokens.EmailConfirmationTokenProvider = "email_confirmation";
+
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequiredUniqueChars = 4;
+                options.Password.RequiredLength = 8;
+
+                options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<RecollectableContext>()
             .AddDefaultTokenProviders()
-            .AddTokenProvider<EmailConfirmationTokenProvider<User>>("email_confirm");
+            .AddTokenProvider<EmailConfirmationTokenProvider<User>>("email_confirmation")
+            .AddPasswordValidator<DoesNotContainPasswordValidator<User>>();
             services.Configure<DataProtectionTokenProviderOptions>(options =>
                 options.TokenLifespan = TimeSpan.FromHours(3));
             services.Configure<EmailConfirmationTokenProviderOptions>(options =>
                 options.TokenLifespan = TimeSpan.FromDays(2));
+            services.Configure<PasswordHasherOptions>(options =>
+            {
+                options.IterationCount = 100000;
+            });
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/api/users/login";
