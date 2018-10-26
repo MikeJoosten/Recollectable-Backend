@@ -4,9 +4,6 @@ namespace Recollectable.Core.Models.Users
 {
     public class ResetPasswordDto
     {
-        public string Token { get; set; }
-        public string Email { get; set; }
-
         [DataType(DataType.Password)]
         public string Password { get; set; }
 

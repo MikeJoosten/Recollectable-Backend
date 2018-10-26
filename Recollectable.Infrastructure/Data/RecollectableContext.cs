@@ -39,6 +39,7 @@ namespace Recollectable.Infrastructure.Data
                     Email = "ryan.haywood@gmail.com",
                     NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM",
                     PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3",
                     EmailConfirmed = true
                 },
                 new User
@@ -51,6 +52,7 @@ namespace Recollectable.Infrastructure.Data
                     Email = "jack.patillo@gmail.com",
                     NormalizedEmail = "JACK.PATILLO@GMAIL.COM",
                     PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3",
                     EmailConfirmed = true
                 },
                 new User
@@ -63,6 +65,7 @@ namespace Recollectable.Infrastructure.Data
                     Email = "geoff.ramsey@gmail.com",
                     NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM",
                     PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3",
                     EmailConfirmed = true
                 }
             );

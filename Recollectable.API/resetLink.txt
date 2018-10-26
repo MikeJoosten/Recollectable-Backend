@@ -1,1 +1,0 @@
-https://localhost:44303/api/users/reset_password?token=CfDJ8A5pcGpEuj1KvvWFXZpVua0a3KVD%2Bl%2BhJrDYEfMLLAqQJdvtc5kFmBzAQ%2B6dptBQuNHVKnxOYVuDn3nYc%2Fw9OrEPBaVEsNIRlkmWlqC3VH%2Fd9RDMaKiO5iHjbYtmM2YMW%2BrMAszIouwQcFmKnssfKAjSWtfWs1QXpurXMDd%2B8VSJqz47NLEY5W3wFy%2BG%2BlYwAQ%3D%3D&email=ryan.haywood@gmail.com

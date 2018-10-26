@@ -268,22 +268,22 @@ namespace Recollectable.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("reset_password")]
-        public IActionResult ResetPassword([FromBody] ResetPasswordDto resetPassword)
+        [HttpPost("/{email}/reset_password")]
+        public IActionResult ResetPassword(string token, string email, [FromBody] ResetPasswordDto resetPassword)
         {
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var user = _userManager.FindByEmailAsync(resetPassword.Email).Result;
+            var user = _userManager.FindByEmailAsync(email).Result;
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            var result = _userManager.ResetPasswordAsync(user, resetPassword.Token, resetPassword.Password).Result;
+            var result = _userManager.ResetPasswordAsync(user, token, resetPassword.Password).Result;
 
             if (!result.Succeeded)
             {
@@ -297,15 +297,15 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPost("change_password")]
-        public IActionResult ChangePassword([FromBody] ChangedPasswordDto changedPassword)
+        [HttpPost("/{email}/change_password")]
+        public IActionResult ChangePassword(string email, [FromBody] ChangedPasswordDto changedPassword)
         {
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var user = _userManager.FindByEmailAsync(changedPassword.Email).Result;
+            var user = _userManager.FindByEmailAsync(email).Result;
 
             if (user == null)
             {

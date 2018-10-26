@@ -4,8 +4,6 @@ namespace Recollectable.Core.Models.Users
 {
     public class ChangedPasswordDto
     {
-        public string Email { get; set; }
-
         [DataType(DataType.Password)]
         public string OldPassword { get; set; }
 

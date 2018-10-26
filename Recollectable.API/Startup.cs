@@ -82,11 +82,11 @@ namespace Recollectable.API
             // Configure User Identity
             services.AddIdentity<User, Role>(options => 
             {
-                options.Tokens.EmailConfirmationTokenProvider = "email_conf";
+                options.Tokens.EmailConfirmationTokenProvider = "email_confirm";
             })
             .AddEntityFrameworkStores<RecollectableContext>()
             .AddDefaultTokenProviders()
-            .AddTokenProvider<EmailConfirmationTokenProvider<User>>("email_conf");
+            .AddTokenProvider<EmailConfirmationTokenProvider<User>>("email_confirm");
             services.Configure<DataProtectionTokenProviderOptions>(options =>
                 options.TokenLifespan = TimeSpan.FromHours(3));
             services.Configure<EmailConfirmationTokenProviderOptions>(options =>
