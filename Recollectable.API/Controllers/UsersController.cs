@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 namespace Recollectable.API.Controllers
 {
     [Route("api/users")]
+    //TODO Add Authorization [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private IUnitOfWork _unitOfWork;
@@ -194,6 +195,13 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(result.Result);
             }
 
+            result = _userManager.AddToRoleAsync(newUser, nameof(Roles.User));
+
+            if (!result.Result.Succeeded)
+            {
+                return new UnprocessableEntityObjectResult(result.Result);
+            }
+
             if (!_unitOfWork.Save())
             {
                 throw new Exception("Creating a user failed on save.");
@@ -248,7 +256,8 @@ namespace Recollectable.API.Controllers
             var response = new
             {
                 userName = user.UserName,
-                auth_token = _tokenFactory.GenerateToken(credentials.UserName).Result,
+                roles = _userManager.GetRolesAsync(user).Result,
+                auth_token = _tokenFactory.GenerateToken(credentials.UserName, identity).Result,
                 expires_in = (int)JwtTokenProviderOptions.Expiration.TotalSeconds
             };
 
@@ -310,6 +319,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "User")]
         [HttpPost("/{email}/change_password")]
         public IActionResult ChangePassword(string email, [FromBody] ChangedPasswordDto changedPassword)
         {
@@ -486,7 +496,10 @@ namespace Recollectable.API.Controllers
 
                     await _userManager.ResetAccessFailedCountAsync(user);
 
+                    var roles = await _userManager.GetRolesAsync(user);
                     var identity = new ClaimsIdentity("Identity.Application");
+                    identity.AddClaims(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
                     return await Task.FromResult(identity);
                 }
 

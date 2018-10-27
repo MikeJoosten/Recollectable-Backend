@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
@@ -70,6 +71,39 @@ namespace Recollectable.Infrastructure.Data
                     SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3",
                     EmailConfirmed = true,
                     LockoutEnabled = true
+                }
+            );
+
+            modelBuilder.Entity<Role>().HasData(
+                new Role
+                {
+                    Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"),
+                    Name = "User",
+                    NormalizedName = "USER"
+                },
+                new Role
+                {
+                    Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"),
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
+                }
+            );
+
+            modelBuilder.Entity<IdentityUserRole<Guid>>().HasData(
+                new IdentityUserRole<Guid>
+                {
+                    UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"),
+                    RoleId = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea")
+                },
+                new IdentityUserRole<Guid>
+                {
+                    UserId = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"),
+                    RoleId = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c")
+                },
+                new IdentityUserRole<Guid>
+                {
+                    UserId = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"),
+                    RoleId = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c")
                 }
             );
 

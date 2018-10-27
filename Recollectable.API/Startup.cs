@@ -1,11 +1,13 @@
 ﻿using AspNetCoreRateLimit;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -60,12 +62,12 @@ namespace Recollectable.API
                 }
 
                 //TODO Activate Authorization
-                /*var policy = new AuthorizationPolicyBuilder()
+                var policy = new AuthorizationPolicyBuilder()
                     .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                     .RequireAuthenticatedUser()
                     .Build();
 
-                options.Filters.Add(new AuthorizeFilter(policy));*/
+                options.Filters.Add(new AuthorizeFilter(policy));
             })
             .AddJsonOptions(options =>
             {
@@ -75,11 +77,11 @@ namespace Recollectable.API
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Configure DbContext
-            services.AddDbContext<RecollectableContext>(options => 
+            services.AddDbContext<RecollectableContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
             // Configure User Identity
-            services.AddIdentity<User, Role>(options => 
+            services.AddIdentity<User, Role>(options =>
             {
                 options.Tokens.EmailConfirmationTokenProvider = "email_confirmation";
 
@@ -136,6 +138,17 @@ namespace Recollectable.API
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
+            });
+
+            // Configure CORS Requests
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder
+                    .AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
             });
 
             // Configure Repositories
@@ -218,6 +231,7 @@ namespace Recollectable.API
             app.UseIpRateLimiting();
             app.UseResponseCaching();
             app.UseHttpCacheHeaders();
+            app.UseCors("CorsPolicy");
             app.UseMvc();
         }
     }

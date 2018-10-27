@@ -18,14 +18,16 @@ namespace Recollectable.Core.Shared.Factories
             _tokenProviderOptions = tokenProviderOptions?.Value;
         }
 
-        public async Task<string> GenerateToken(string userName)
+        public async Task<string> GenerateToken(string userName, ClaimsIdentity identity)
         {
             DateTime now = DateTime.UtcNow;
+
+            identity.AddClaims(GetTokenClaims(userName));
 
             var token = new JwtSecurityToken(
                 issuer: _tokenProviderOptions.Issuer,
                 audience: _tokenProviderOptions.Audience,
-                claims: GetTokenClaims(userName),
+                claims: identity.Claims,
                 notBefore: now,
                 expires: now.Add(JwtTokenProviderOptions.Expiration),
                 signingCredentials: _tokenProviderOptions.SigningCredentials);

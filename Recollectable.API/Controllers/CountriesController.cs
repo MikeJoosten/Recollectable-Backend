@@ -19,6 +19,7 @@ using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
+    //TODO Add Authorization
     [Route("api/countries")]
     public class CountriesController : Controller
     {

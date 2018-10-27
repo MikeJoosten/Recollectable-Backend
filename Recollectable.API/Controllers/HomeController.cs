@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Recollectable.Core.Shared.Models;
 using System.Collections.Generic;
 
 namespace Recollectable.API.Controllers
 {
     [Route("api")]
+    //TODO Add Authorization [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
         [HttpGet(Name = "GetHome")]
@@ -17,8 +19,8 @@ namespace Recollectable.API.Controllers
                     new LinkDto(Url.Link("GetHome",
                     new { }), "self", "GET"),
 
-                    new LinkDto(Url.Link("GetAccounts",
-                    new { }), "accounts", "GET"),
+                    new LinkDto(Url.Link("GetUsers",
+                    new { }), "users", "GET"),
 
                     new LinkDto(Url.Link("GetCollections",
                     new { }), "collections", "GET"),

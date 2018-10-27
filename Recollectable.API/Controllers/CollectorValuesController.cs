@@ -19,6 +19,7 @@ using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
+    //TODO Add Authorization
     [Route("api/collector-values")]
     public class CollectorValuesController : Controller
     {
