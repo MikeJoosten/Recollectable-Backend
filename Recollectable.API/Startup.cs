@@ -83,11 +83,17 @@ namespace Recollectable.API
             {
                 options.Tokens.EmailConfirmationTokenProvider = "email_confirmation";
 
-                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredUniqueChars = 4;
                 options.Password.RequiredLength = 8;
 
                 options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._!" +
+                    "àèìòùáéíóúäëïöüâêîôûãõßñç";
+
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 3;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
             })
             .AddEntityFrameworkStores<RecollectableContext>()
             .AddDefaultTokenProviders()

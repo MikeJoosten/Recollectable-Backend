@@ -231,7 +231,14 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var identity = GenerateClaimsIdentity(credentials.UserName, credentials.Password).Result;
+            var user = _userManager.FindByNameOrEmailAsync(credentials.UserName).Result;
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var identity = GenerateClaimsIdentity(user, credentials.Password).Result;
 
             if (identity == null)
             {
@@ -240,7 +247,7 @@ namespace Recollectable.API.Controllers
 
             var response = new
             {
-                userName = credentials.UserName,
+                userName = user.UserName,
                 auth_token = _tokenFactory.GenerateToken(credentials.UserName).Result,
                 expires_in = (int)JwtTokenProviderOptions.Expiration.TotalSeconds
             };
@@ -295,6 +302,11 @@ namespace Recollectable.API.Controllers
                 return BadRequest(ModelState);
             }
 
+            if (_userManager.IsLockedOutAsync(user).Result)
+            {
+                _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow);
+            }
+
             return NoContent();
         }
 
@@ -342,7 +354,7 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPost("{id}")]
+        [HttpPost("register/{id}")]
         public IActionResult BlockRegistration(Guid id)
         {
             if (_unitOfWork.UserRepository.Exists(id))
@@ -448,29 +460,49 @@ namespace Recollectable.API.Controllers
             return Ok();
         }
 
-        private async Task<ClaimsIdentity> GenerateClaimsIdentity(string userName, string password)
+        private async Task<ClaimsIdentity> GenerateClaimsIdentity(User user, string password)
         {
-            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(user.UserName))
             {
-                ModelState.AddModelError("Error", "Invalid username or password");
+                ModelState.AddModelError("Error", "Invalid username");
                 return await Task.FromResult<ClaimsIdentity>(null);
             }
 
-            var user = await _userManager.FindByNameOrEmailAsync(userName);
-
-            if (user != null && await _userManager.CheckPasswordAsync(user, password))
+            if (string.IsNullOrEmpty(password))
             {
-                if (!await _userManager.IsEmailConfirmedAsync(user))
-                {
-                    ModelState.AddModelError("Error", "Email is not confirmed");
-                    return await Task.FromResult<ClaimsIdentity>(null);
-                }
-
-                var identity = new ClaimsIdentity("Identity.Application");
-                return await Task.FromResult(identity);
+                ModelState.AddModelError("Error", "Invalid password");
+                return await Task.FromResult<ClaimsIdentity>(null);
             }
 
-            ModelState.AddModelError("Error", "Invalid username or password");
+            if (!await _userManager.IsLockedOutAsync(user))
+            {
+                if (await _userManager.CheckPasswordAsync(user, password))
+                {
+                    if (!await _userManager.IsEmailConfirmedAsync(user))
+                    {
+                        ModelState.AddModelError("Error", "Email is not confirmed");
+                        return await Task.FromResult<ClaimsIdentity>(null);
+                    }
+
+                    await _userManager.ResetAccessFailedCountAsync(user);
+
+                    var identity = new ClaimsIdentity("Identity.Application");
+                    return await Task.FromResult(identity);
+                }
+
+                await _userManager.AccessFailedAsync(user);
+            }
+
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                ModelState.AddModelError("Error", "User locked out");
+                //TODO Send email password reset + Notify user
+            }
+            else
+            {
+                ModelState.AddModelError("Error", "Invalid password");
+            }
+
             return await Task.FromResult<ClaimsIdentity>(null);
         }
 

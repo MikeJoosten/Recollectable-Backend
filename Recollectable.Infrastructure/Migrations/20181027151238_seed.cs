@@ -12,9 +12,9 @@ namespace Recollectable.Infrastructure.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), 0, "1dacc4f1-1ff4-42a1-b1cc-6b384adbae1b", "ryan.haywood@gmail.com", true, "Ryan", "Haywood", false, null, "RYAN.HAYWOOD@GMAIL.COM", "ryan", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Ryan" },
-                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), 0, "2eebab92-a858-4a1f-bddb-23bdbdc6f12d", "jack.patillo@gmail.com", true, "Jack", "Patillo", false, null, "JACK.PATILLO@GMAIL.COM", "JACK", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Jack" },
-                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), 0, "7de3ff38-ddb8-40b3-8c08-59d6ee5aa26f", "geoff.ramsey@gmail.com", true, "Geoff", "Ramsey", false, null, "GEOFF.RAMSEY@GMAIL.COM", "GEOFF", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Geoff" }
+                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), 0, "af54b22c-600b-46ef-ba2e-b2fee16cec7d", "ryan.haywood@gmail.com", true, "Ryan", "Haywood", true, null, "RYAN.HAYWOOD@GMAIL.COM", "ryan", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Ryan" },
+                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), 0, "d60d6997-0c95-45eb-906a-9a32ba0b2c35", "jack.patillo@gmail.com", true, "Jack", "Patillo", true, null, "JACK.PATILLO@GMAIL.COM", "JACK", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Jack" },
+                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), 0, "e4a19a4e-38f7-4726-b753-6bcf48c4066a", "geoff.ramsey@gmail.com", true, "Geoff", "Ramsey", true, null, "GEOFF.RAMSEY@GMAIL.COM", "GEOFF", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Geoff" }
                 });
 
             migrationBuilder.InsertData(
@@ -94,7 +94,7 @@ namespace Recollectable.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "2eebab92-a858-4a1f-bddb-23bdbdc6f12d" });
+                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "d60d6997-0c95-45eb-906a-9a32ba0b2c35" });
 
             migrationBuilder.DeleteData(
                 table: "CollectionCollectables",
@@ -169,12 +169,12 @@ namespace Recollectable.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "1dacc4f1-1ff4-42a1-b1cc-6b384adbae1b" });
+                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "af54b22c-600b-46ef-ba2e-b2fee16cec7d" });
 
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "7de3ff38-ddb8-40b3-8c08-59d6ee5aa26f" });
+                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "e4a19a4e-38f7-4726-b753-6bcf48c4066a" });
 
             migrationBuilder.DeleteData(
                 table: "CollectorValues",
