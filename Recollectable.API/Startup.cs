@@ -62,12 +62,12 @@ namespace Recollectable.API
                 }
 
                 //TODO Activate Authorization
-                var policy = new AuthorizationPolicyBuilder()
+                /*var policy = new AuthorizationPolicyBuilder()
                     .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                     .RequireAuthenticatedUser()
                     .Build();
 
-                options.Filters.Add(new AuthorizeFilter(policy));
+                options.Filters.Add(new AuthorizeFilter(policy));*/
             })
             .AddJsonOptions(options =>
             {

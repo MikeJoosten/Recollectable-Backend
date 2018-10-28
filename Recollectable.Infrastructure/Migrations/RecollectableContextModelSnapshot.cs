@@ -146,6 +146,8 @@ namespace Recollectable.Infrastructure.Migrations
 
                     b.Property<string>("Condition");
 
+                    b.Property<int>("Count");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CollectableId");
@@ -155,12 +157,12 @@ namespace Recollectable.Infrastructure.Migrations
                     b.ToTable("CollectionCollectables");
 
                     b.HasData(
-                        new { Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "MS62" },
-                        new { Id = new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), Condition = "Fine" },
-                        new { Id = new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "Uncirculated" },
-                        new { Id = new Guid("583a957b-124f-49cb-955c-87d758819e87"), CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), Condition = "VF24" },
-                        new { Id = new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), Condition = "Fine" },
-                        new { Id = new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "VF24" }
+                        new { Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "MS62", Count = 1 },
+                        new { Id = new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), Condition = "Fine", Count = 1 },
+                        new { Id = new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "Uncirculated", Count = 1 },
+                        new { Id = new Guid("583a957b-124f-49cb-955c-87d758819e87"), CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), Condition = "VF24", Count = 1 },
+                        new { Id = new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), Condition = "Fine", Count = 1 },
+                        new { Id = new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "VF24", Count = 1 }
                     );
                 });
 
@@ -275,8 +277,8 @@ namespace Recollectable.Infrastructure.Migrations
                     b.ToTable("AspNetRoles");
 
                     b.HasData(
-                        new { Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), ConcurrencyStamp = "324c3b01-bfc5-41df-9b97-2a148a76c135", Name = "User", NormalizedName = "USER" },
-                        new { Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), ConcurrencyStamp = "47d42ad9-8b42-4c4b-ae1c-4d4e7f3f81e0", Name = "Admin", NormalizedName = "ADMIN" }
+                        new { Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), ConcurrencyStamp = "1a79e1e5-628e-4481-b1af-b13ac5738eae", Name = "User", NormalizedName = "USER" },
+                        new { Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), ConcurrencyStamp = "ea43fe8f-1bba-46ef-9efa-7e44e247d362", Name = "Admin", NormalizedName = "ADMIN" }
                     );
                 });
 
@@ -340,9 +342,9 @@ namespace Recollectable.Infrastructure.Migrations
                     b.ToTable("AspNetUsers");
 
                     b.HasData(
-                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "ca33f242-4485-4e2a-a5a5-33ba14a58b29", Email = "ryan.haywood@gmail.com", EmailConfirmed = true, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = true, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Ryan" },
-                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "526a2613-fba6-40f5-9e5f-e07df161493e", Email = "jack.patillo@gmail.com", EmailConfirmed = true, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = true, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Jack" },
-                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "2a7a7233-2fb2-451a-a9e7-c9ebc890c96f", Email = "geoff.ramsey@gmail.com", EmailConfirmed = true, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = true, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Geoff" }
+                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "23350b69-8e00-4127-a849-4b863c7ba28f", Email = "ryan.haywood@gmail.com", EmailConfirmed = true, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = true, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Ryan" },
+                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "bf7643e5-664b-41aa-bee1-371c48d0dac3", Email = "jack.patillo@gmail.com", EmailConfirmed = true, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = true, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Jack" },
+                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "7667115c-56f7-4c39-a3a3-1eff8c879cc0", Email = "geoff.ramsey@gmail.com", EmailConfirmed = true, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = true, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Geoff" }
                     );
                 });
 

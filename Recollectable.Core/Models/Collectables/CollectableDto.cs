@@ -11,5 +11,6 @@ namespace Recollectable.Core.Models.Collectables
         public Guid Id { get; set; }
         public Collectable Collectable { get; set; }
         public string Condition { get; set; }
+        public int Count { get; set; }
     }
 }

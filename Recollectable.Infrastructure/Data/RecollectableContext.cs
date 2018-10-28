@@ -292,42 +292,48 @@ namespace Recollectable.Infrastructure.Data
                     Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"),
                     CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
                     CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
-                    Condition = "MS62"
+                    Condition = "MS62",
+                    Count = 1
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"),
                     CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"),
                     CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"),
-                    Condition = "Fine"
+                    Condition = "Fine",
+                    Count = 1
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"),
                     CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
                     CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"),
-                    Condition = "Uncirculated"
+                    Condition = "Uncirculated",
+                    Count = 1
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("583a957b-124f-49cb-955c-87d758819e87"),
                     CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"),
                     CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"),
-                    Condition = "VF24"
+                    Condition = "VF24",
+                    Count = 1
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"),
                     CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"),
                     CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
-                    Condition = "Fine"
+                    Condition = "Fine",
+                    Count = 1
                 },
                 new CollectionCollectable
                 {
                     Id = new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"),
                     CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
                     CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"),
-                    Condition = "VF24"
+                    Condition = "VF24",
+                    Count = 1
                 }
             );
         }

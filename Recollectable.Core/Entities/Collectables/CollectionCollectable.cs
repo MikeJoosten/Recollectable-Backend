@@ -19,5 +19,6 @@ namespace Recollectable.Core.Entities.Collectables
         public Guid CollectableId { get; set; }
 
         public string Condition { get; set; }
+        public int Count { get; set; }
     }
 }
