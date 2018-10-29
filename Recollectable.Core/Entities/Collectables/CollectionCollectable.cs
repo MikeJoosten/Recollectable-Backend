@@ -18,6 +18,7 @@ namespace Recollectable.Core.Entities.Collectables
         public Collectable Collectable { get; set; }
         public Guid CollectableId { get; set; }
 
+        [MaxLength(50)]
         public string Condition { get; set; }
     }
 }

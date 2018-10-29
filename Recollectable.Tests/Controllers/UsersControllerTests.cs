@@ -1,17 +1,49 @@
-﻿namespace Recollectable.Tests.Controllers
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using Recollectable.API.Controllers;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces;
+using Recollectable.Core.Models.Users;
+using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using Xunit;
+
+namespace Recollectable.Tests.Controllers
 {
-    /*public class UsersControllerTests : RecollectableTestBase
+    public class UsersControllerTests : RecollectableTestBase
     {
-        private readonly AccountsController _controller;
+        private readonly UsersController _controller;
         private readonly UsersResourceParameters resourceParameters;
         private Mock<UserManager<User>> _mockUserManager;
+        private Mock<IUserStore<User>> _mockUserStore;
+        private Mock<IEmailService> _mockEmailService;
+        private Mock<ITokenFactory> _mockTokenFactory;
 
         public UsersControllerTests()
         {
-            _mockUserManager = new Mock<UserManager<User>>();
+            _mockUserStore = new Mock<IUserStore<User>>();
+            _mockUserManager = new Mock<UserManager<User>>
+                (_mockUserStore.Object, null, null, null, null, null, null, null, null);
 
-            _controller = new AccountsController(_unitOfWork, _typeHelperService,
-                _propertyMappingService, _mockUserManager.Object, _mapper);
+            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _mockEmailService = new Mock<IEmailService>();
+            _mockTokenFactory = new Mock<ITokenFactory>();
+
+            _controller = new UsersController(_unitOfWork, _typeHelperService,
+                _propertyMappingService, _mockUserManager.Object, _mockTokenFactory.Object,
+                _mockEmailService.Object, _mapper);
 
             resourceParameters = new UsersResourceParameters();
             SetupTestController<UserDto, User>(_controller);
@@ -24,7 +56,7 @@
             resourceParameters.OrderBy = "Invalid";
 
             //Act
-            var response = _controller.GetAccounts(resourceParameters, null);
+            var response = _controller.GetUsers(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -37,7 +69,7 @@
             resourceParameters.Fields = "Invalid";
 
             //Act
-            var response = _controller.GetAccounts(resourceParameters, null);
+            var response = _controller.GetUsers(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -50,7 +82,7 @@
         public void GetUsers_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Act
-            var response = _controller.GetAccounts(resourceParameters, mediaType);
+            var response = _controller.GetUsers(resourceParameters, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -60,7 +92,7 @@
         public void GetUsers_ReturnsAllUsers_GivenNoMediaType()
         {
             //Act
-            var response = _controller.GetAccounts(resourceParameters, null) as OkObjectResult;
+            var response = _controller.GetUsers(resourceParameters, null) as OkObjectResult;
             var users = response.Value as List<UserDto>;
 
             //Assert
@@ -75,7 +107,7 @@
             string mediaType = "application/json";
 
             //Act
-            var response = _controller.GetAccounts(resourceParameters, mediaType) as OkObjectResult;
+            var response = _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
             var users = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -90,7 +122,7 @@
             string mediaType = "application/json+hateoas";
 
             //Act
-            var response = _controller.GetAccounts(resourceParameters, mediaType) as OkObjectResult;
+            var response = _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
             var linkedCollection = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -106,7 +138,7 @@
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetAccounts(resourceParameters, mediaType) as OkObjectResult;
+            var response = _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
             var users = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -122,7 +154,7 @@
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetAccounts(resourceParameters, mediaType) as OkObjectResult;
+            var response = _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
             var users = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -137,7 +169,7 @@
             string fields = "Invalid";
 
             //Act
-            var response = _controller.GetAccount(Guid.Empty, fields, null);
+            var response = _controller.GetUser(Guid.Empty, fields, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -150,7 +182,7 @@
             Guid id = new Guid("72e2cde4-0aec-47e7-9549-f2c578b2c21c");
 
             //Act
-            var response = _controller.GetAccount(id, null, null);
+            var response = _controller.GetUser(id, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -166,7 +198,7 @@
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.GetAccount(id, null, mediaType);
+            var response = _controller.GetUser(id, null, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -179,7 +211,7 @@
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.GetAccount(id, null, null) as OkObjectResult;
+            var response = _controller.GetUser(id, null, null) as OkObjectResult;
             var user = response.Value as UserDto;
 
             //Assert
@@ -196,7 +228,7 @@
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.GetAccount(id, null, mediaType) as OkObjectResult;
+            var response = _controller.GetUser(id, null, mediaType) as OkObjectResult;
             dynamic user = response.Value as ExpandoObject;
 
             //Assert
@@ -213,7 +245,7 @@
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.GetAccount(id, null, mediaType) as OkObjectResult;
+            var response = _controller.GetUser(id, null, mediaType) as OkObjectResult;
             dynamic user = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -223,24 +255,54 @@
         }
 
         [Fact]
-        public void CreateUser_ReturnsBadRequestResponse_GivenNoUser()
+        public void Register_ReturnsBadRequestResponse_GivenNoUser()
         {
             //Act
-            var response = _controller.CreateAccount(null, null);
+            var response = _controller.Register(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateUser_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
+        public void Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidUser()
         {
             //Arrange
             UserCreationDto user = new UserCreationDto();
             _controller.ModelState.AddModelError("FirstName", "Required");
 
             //Act
-            var response = _controller.CreateAccount(user, null);
+            var response = _controller.Register(user, null);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
+        public void Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidPassword()
+        {
+            //Arrange
+            UserCreationDto user = new UserCreationDto();
+            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
+
+            //Act
+            var response = _controller.Register(user, null);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
+        public void Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidRole()
+        {
+            //Arrange
+            UserCreationDto user = new UserCreationDto();
+            _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid role" }));
+
+            //Act
+            var response = _controller.Register(user, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -249,7 +311,7 @@
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
-        public void CreateUser_ReturnsCreatedResponse_GivenValidUser(string mediaType)
+        public void Register_ReturnsCreatedResponse_GivenValidUser(string mediaType)
         {
             //Arrange
             UserCreationDto user = new UserCreationDto
@@ -259,14 +321,14 @@
             };
 
             //Act
-            var response = _controller.CreateAccount(user, mediaType);
+            var response = _controller.Register(user, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
         }
 
         [Fact]
-        public void CreateUser_CreatesNewUser_GivenAnyMediaTypeAndValidUser()
+        public void Register_CreatesNewUser_GivenAnyMediaTypeAndValidUser()
         {
             //Arrange
             UserCreationDto user = new UserCreationDto
@@ -276,7 +338,7 @@
             };
 
             //Act
-            var response = _controller.CreateAccount(user, null) as CreatedAtRouteResult;
+            var response = _controller.Register(user, null) as CreatedAtRouteResult;
             var returnedUser = response.Value as UserDto;
 
             //Assert
@@ -285,7 +347,7 @@
         }
 
         [Fact]
-        public void CreateUser_CreatesNewUser_GivenHateoasMediaTypeAndValidUser()
+        public void Register_CreatesNewUser_GivenHateoasMediaTypeAndValidUser()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
@@ -296,7 +358,7 @@
             };
 
             //Act
-            var response = _controller.CreateAccount(user, mediaType) as CreatedAtRouteResult;
+            var response = _controller.Register(user, mediaType) as CreatedAtRouteResult;
             dynamic returnedUser = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -305,26 +367,26 @@
         }
 
         [Fact]
-        public void BlockUserCreation_ReturnsConflictResponse_GivenExistingId()
+        public void BlockRegistration_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.BlockAccountCreation(id) as StatusCodeResult;
+            var response = _controller.BlockRegistration(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
         }
 
         [Fact]
-        public void BlockUserCreation_ReturnsNotFoundResponse_GivenUnexistingId()
+        public void BlockRegistration_ReturnsNotFoundResponse_GivenUnexistingId()
         {
             //Arrange
             Guid id = new Guid("b6e2ad45-31da-4d0e-ab9f-2193dd539fc6");
 
             //Act
-            var response = _controller.BlockAccountCreation(id);
+            var response = _controller.BlockRegistration(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -334,7 +396,7 @@
         public void UpdateUser_ReturnsBadRequestResponse_GivenNoUser()
         {
             //Act
-            var response = _controller.UpdateAccount(Guid.Empty, null);
+            var response = _controller.UpdateUser(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -348,7 +410,7 @@
             _controller.ModelState.AddModelError("FirstName", "Required");
 
             //Act
-            var response = _controller.UpdateAccount(Guid.Empty, user);
+            var response = _controller.UpdateUser(Guid.Empty, user);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -366,7 +428,7 @@
             };
 
             //Act
-            var response = _controller.UpdateAccount(id, user);
+            var response = _controller.UpdateUser(id, user);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -384,7 +446,7 @@
             };
 
             //Act
-            var response = _controller.UpdateAccount(id, country);
+            var response = _controller.UpdateUser(id, country);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
@@ -402,7 +464,7 @@
             };
 
             //Act
-            var response = _controller.UpdateAccount(id, user);
+            var response = _controller.UpdateUser(id, user);
 
             //Assert
             Assert.NotNull(_unitOfWork.UserRepository.GetById(id));
@@ -414,7 +476,7 @@
         public void PartiallyUpdateUser_ReturnsBadRequestResponse_GivenNoPatchDocument()
         {
             //Act
-            var response = _controller.PartiallyUpdateAccount(Guid.Empty, null);
+            var response = _controller.PartiallyUpdateUser(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -428,7 +490,7 @@
             JsonPatchDocument<UserUpdateDto> patchDoc = new JsonPatchDocument<UserUpdateDto>();
 
             //Act
-            var response = _controller.PartiallyUpdateAccount(id, patchDoc);
+            var response = _controller.PartiallyUpdateUser(id, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -443,7 +505,7 @@
             _controller.ModelState.AddModelError("FirstName", "Required");
 
             //Act
-            var response = _controller.PartiallyUpdateAccount(id, patchDoc);
+            var response = _controller.PartiallyUpdateUser(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -459,7 +521,7 @@
             patchDoc.Replace(u => u.LastName, "Eberle");
 
             //Act
-            var response = _controller.PartiallyUpdateAccount(id, patchDoc);
+            var response = _controller.PartiallyUpdateUser(id, patchDoc);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
@@ -475,7 +537,7 @@
             patchDoc.Replace(u => u.LastName, "Eberle");
 
             //Act
-            var response = _controller.PartiallyUpdateAccount(id, patchDoc);
+            var response = _controller.PartiallyUpdateUser(id, patchDoc);
 
             //Assert
             Assert.NotNull(_unitOfWork.UserRepository.GetById(id));
@@ -490,7 +552,7 @@
             Guid id = new Guid("65e2c5ae-3115-467c-8efa-30323924efed");
 
             //Act
-            var response = _controller.DeleteAccount(id);
+            var response = _controller.DeleteUser(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -503,7 +565,7 @@
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.DeleteAccount(id);
+            var response = _controller.DeleteUser(id);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
@@ -516,11 +578,11 @@
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            _controller.DeleteAccount(id);
+            _controller.DeleteUser(id);
 
             //Assert
             Assert.Equal(5, _unitOfWork.UserRepository.Get(resourceParameters).Count());
             Assert.Null(_unitOfWork.UserRepository.GetById(id));
         }
-    }*/
+    }
 }

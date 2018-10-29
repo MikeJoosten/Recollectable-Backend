@@ -234,6 +234,17 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        [HttpPost("register/{id}")]
+        public IActionResult BlockRegistration(Guid id)
+        {
+            if (_unitOfWork.UserRepository.Exists(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status409Conflict);
+            }
+
+            return NotFound();
+        }
+
         [AllowAnonymous]
         [HttpPost("login", Name = "Login")]
         public IActionResult Login([FromBody] CredentialsDto credentials)
@@ -368,17 +379,6 @@ namespace Recollectable.API.Controllers
 
             var result = _userManager.ConfirmEmailAsync(user, token).Result;
             return NoContent();
-        }
-
-        [HttpPost("register/{id}")]
-        public IActionResult BlockRegistration(Guid id)
-        {
-            if (_unitOfWork.UserRepository.Exists(id))
-            {
-                return new StatusCodeResult(StatusCodes.Status409Conflict);
-            }
-
-            return NotFound();
         }
 
         [HttpPut("{id}", Name = "UpdateUser")]
