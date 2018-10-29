@@ -305,6 +305,11 @@ namespace Recollectable.API.Controllers
         [HttpPost("/{email}/reset_password")]
         public IActionResult ResetPassword(string token, string email, [FromBody] ResetPasswordDto resetPassword)
         {
+            if (resetPassword == null)
+            {
+                return BadRequest();
+            }
+
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
@@ -340,6 +345,11 @@ namespace Recollectable.API.Controllers
         [HttpPost("/{email}/change_password")]
         public IActionResult ChangePassword(string email, [FromBody] ChangedPasswordDto changedPassword)
         {
+            if (changedPassword == null)
+            {
+                return BadRequest();
+            }
+
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);

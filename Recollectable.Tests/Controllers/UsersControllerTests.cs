@@ -37,6 +37,12 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(IdentityResult.Success);
             _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(new User());
+            _mockUserManager.Setup(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(x => x.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
 
             _mockEmailService = new Mock<IEmailService>();
             _mockTokenFactory = new Mock<ITokenFactory>();
@@ -364,6 +370,215 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.NotNull(returnedUser);
             Assert.Equal("Kara Eberle", returnedUser.Name);
+        }
+
+        [Fact]
+        public void Login_ReturnsBadRequestResponse_GivenNoCredentials()
+        {
+            //Act
+            var response = _controller.Login(null);
+
+            //Assert
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public void Login_ReturnsNotFoundResponse_GivenInvalidUser()
+        {
+            //Arrange
+            CredentialsDto credentials = new CredentialsDto
+            {
+                UserName = "Invalid"
+            };
+
+            //Act
+            var response = _controller.Login(credentials);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ForgotPassword_ReturnsNotFoundResponse_GivenInvalidEmail()
+        {
+            //Arrange
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
+
+            //Act
+            var response = _controller.ForgotPassword(null);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ForgotPassword_ReturnsNoContentResponse_GivenValidEmail()
+        {
+            //Act
+            var response = _controller.ForgotPassword("ryan.haywood@gmail.com");
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsBadRequestResponse_GivenNoPassword()
+        {
+            //Act
+            var response = _controller.ResetPassword(null, null, null);
+
+            //Assert
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsUnprocessableEntityObjectResponse_GivenInvalidResetPassword()
+        {
+            //Arrange
+            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            _controller.ModelState.AddModelError("Password", "Required");
+
+            //Act
+            var response = _controller.ResetPassword(null, null, resetPassword);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsNotFoundResponse_GivenInvalidEmail()
+        {
+            //Arrange
+            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
+
+            //Act
+            var response = _controller.ResetPassword(null, null, resetPassword);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsBadRequestResponse_GivenInvalidPassword()
+        {
+            //Arrange
+            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            _mockUserManager.Setup(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
+
+            //Act
+            var response = _controller.ResetPassword(null, null, resetPassword);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsNoContentResponse_GivenValidPassword()
+        {
+            //Arrange
+            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            _mockUserManager.Setup(x => x.IsLockedOutAsync(It.IsAny<User>())).ReturnsAsync(false);
+
+            //Act
+            var response = _controller.ResetPassword("ryan.haywood@gmail.com", "valid token", resetPassword);
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsBadRequestResponse_GivenNoPassword()
+        {
+            //Act
+            var response = _controller.ChangePassword(null, null);
+
+            //Assert
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsUnprocessableEntityObjectResponse_GivenInvalidResetPassword()
+        {
+            //Arrange
+            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+            _controller.ModelState.AddModelError("Password", "Required");
+
+            //Act
+            var response = _controller.ChangePassword(null, changedPassword);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsNotFoundResponse_GivenInvalidEmail()
+        {
+            //Arrange
+            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
+
+            //Act
+            var response = _controller.ChangePassword(null, changedPassword);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsBadRequestResponse_GivenInvalidPassword()
+        {
+            //Arrange
+            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+            _mockUserManager.Setup(x => x.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
+
+            //Act
+            var response = _controller.ChangePassword(null, changedPassword);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsNoContentResponse_GivenValidPassword()
+        {
+            //Arrange
+            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+
+            //Act
+            var response = _controller.ChangePassword("ryan.haywood@gmail.com", changedPassword);
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public void ConfirmEmail_ReturnsNotFound_GivenInvalidEmail()
+        {
+            //Arrange
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
+
+            //Act
+            var response = _controller.ConfirmEmail(null, null);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ConfirmEmail_ReturnsNoContent_GivenValidTokenAndEmail()
+        {
+            //Act
+            var response = _controller.ConfirmEmail(null, null);
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]

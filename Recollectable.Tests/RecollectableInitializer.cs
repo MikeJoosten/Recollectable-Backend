@@ -28,37 +28,43 @@ namespace Recollectable.Tests
                 {
                     Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"),
                     FirstName = "Ryan",
-                    LastName = "Haywood"
+                    LastName = "Haywood",
+                    UserName = "Ryan"
                 },
                 new User
                 {
                     Id = new Guid("c7304af2-e5cd-4186-83d9-77807c9512ec"),
                     FirstName = "Michael",
-                    LastName = "Jones"
+                    LastName = "Jones",
+                    UserName = "Michael"
                 },
                 new User
                 {
                     Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"),
                     FirstName = "Geoff",
-                    LastName = "Ramsey"
+                    LastName = "Ramsey",
+                    UserName = "Geoff"
                 },
                 new User
                 {
                     Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"),
                     FirstName = "Jack",
-                    LastName = "Pattillo"
+                    LastName = "Pattillo",
+                    UserName = "Jack"
                 },
                 new User
                 {
                     Id = new Guid("ca26fdfb-46b3-4120-9e52-a07820bc0409"),
                     FirstName = "Jeremy",
-                    LastName = "Dooley"
+                    LastName = "Dooley",
+                    UserName = "Jeremy"
                 },
                 new User
                 {
                     Id = new Guid("58ba1e18-46a2-44d5-8f88-51a8e6426a56"),
                     FirstName = "Gavin",
-                    LastName = "Free"
+                    LastName = "Free",
+                    UserName = "Gavin"
                 }
             };
 
