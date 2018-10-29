@@ -1,15 +1,20 @@
 ﻿using AspNetCoreRateLimit;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using Recollectable.API.Interfaces;
 using Recollectable.API.Services;
@@ -20,9 +25,13 @@ using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Factories;
 using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Shared.Validators;
 using Recollectable.Infrastructure.Data;
 using Recollectable.Infrastructure.Data.Repositories;
+using Recollectable.Infrastructure.Email;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,6 +61,14 @@ namespace Recollectable.API
                 {
                     jsonOutputFormatter.SupportedMediaTypes.Add("application/json+hateoas");
                 }
+
+                //TODO Activate Authorization
+                /*var policy = new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .Build();
+
+                options.Filters.Add(new AuthorizeFilter(policy));*/
             })
             .AddJsonOptions(options =>
             {
@@ -60,11 +77,83 @@ namespace Recollectable.API
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            // Register DbContext
-            services.AddDbContext<RecollectableContext>(options => 
+            // Configure DbContext
+            services.AddDbContext<RecollectableContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
 
-            // Register repositories
+            // Configure User Identity
+            services.AddIdentity<User, Role>(options =>
+            {
+                options.Tokens.EmailConfirmationTokenProvider = "email_confirmation";
+
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredUniqueChars = 4;
+                options.Password.RequiredLength = 8;
+
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._!" +
+                    "àèìòùáéíóúäëïöüâêîôûãõßñç";
+
+                //TODO Improve Lockout features
+                /*options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 35;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);*/
+            })
+            .AddEntityFrameworkStores<RecollectableContext>()
+            .AddDefaultTokenProviders()
+            .AddTokenProvider<EmailConfirmationTokenProvider<User>>("email_confirmation")
+            .AddPasswordValidator<DoesNotContainPasswordValidator<User>>();
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+                options.TokenLifespan = TimeSpan.FromHours(3));
+            services.Configure<EmailConfirmationTokenProviderOptions>(options =>
+                options.TokenLifespan = TimeSpan.FromDays(2));
+            services.Configure<PasswordHasherOptions>(options =>
+            {
+                options.IterationCount = 100000;
+            });
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/api/users/login";
+            });
+
+            // Configure JWT Authentication
+            var tokenProviderOptionsSection = Configuration.GetSection("JwtTokenProviderOptions");
+            var tokenProviderOptions = tokenProviderOptionsSection.Get<JwtTokenProviderOptions>();
+            services.Configure<JwtTokenProviderOptions>(tokenProviderOptionsSection);
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = tokenProviderOptions.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = tokenProviderOptions.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = tokenProviderOptions.SecurityKey,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            // Configure CORS Requests
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder
+                    .AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
+            });
+
+            // Configure Repositories
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICollectableRepository, CollectableRepository>();
             services.AddScoped<IRepository<User, UsersResourceParameters>, UserRepository>();
@@ -74,19 +163,20 @@ namespace Recollectable.API
             services.AddScoped<IRepository<Country, CountriesResourceParameters>, CountryRepository>();
             services.AddScoped<IRepository<CollectorValue, CollectorValuesResourceParameters>, CollectorValueRepository>();
 
-            // Register Helper Classes
+            // Configure Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
-            services.AddTransient<IControllerService, ControllerService>();
+            services.AddSingleton<ITokenFactory, TokenFactory>();
+            services.AddSingleton<IEmailService, EmailService>();
 
-            // Register Auto Mapper
+            // Configure Auto Mapper
             var configuration = new MapperConfiguration(cfg =>
                 cfg.AddProfile<RecollectableMappingProfile>());
             IMapper mapper = configuration.CreateMapper();
             services.AddSingleton(mapper);
 
-            // Register HTTP Caching
+            // Configure HTTP Caching
             services.AddHttpCacheHeaders(
                 (expirationModelOptions) => 
                 {
@@ -139,10 +229,12 @@ namespace Recollectable.API
                 cfg.AddProfile<RecollectableMappingProfile>());
 
             recollectableContext.Database.Migrate();
+
             app.UseHttpsRedirection();
             app.UseIpRateLimiting();
             app.UseResponseCaching();
             app.UseHttpCacheHeaders();
+            app.UseCors("CorsPolicy");
             app.UseMvc();
         }
     }

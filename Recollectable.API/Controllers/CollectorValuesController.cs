@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -10,6 +11,7 @@ using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -17,17 +19,22 @@ using System.Linq;
 
 namespace Recollectable.API.Controllers
 {
+    //TODO Add Authorization
     [Route("api/collector-values")]
     public class CollectorValuesController : Controller
     {
         private IUnitOfWork _unitOfWork;
-        private IControllerService _controllerService;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
+        private IMapper _mapper;
 
-        public CollectorValuesController(IUnitOfWork unitOfWork,
-            IControllerService controllerService)
+        public CollectorValuesController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
+            IPropertyMappingService propertyMappingService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _controllerService = controllerService;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
+            _mapper = mapper;
         }
 
         [HttpHead]
@@ -35,20 +42,20 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCollectorValues(CollectorValuesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.PropertyMappingService.ValidMappingExistsFor<CollectorValueDto, CollectorValue>
+            if (!_propertyMappingService.ValidMappingExistsFor<CollectorValueDto, CollectorValue>
                 (resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_controllerService.TypeHelperService.TypeHasProperties<CollectorValueDto>
+            if (!_typeHelperService.TypeHasProperties<CollectorValueDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
             var collectorValuesFromRepo = _unitOfWork.CollectorValueRepository.Get(resourceParameters);
-            var collectorValues = _controllerService.Mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
+            var collectorValues = _mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -121,7 +128,7 @@ namespace Recollectable.API.Controllers
         public IActionResult GetCollectorValue(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_controllerService.TypeHelperService.TypeHasProperties<CollectorValueDto>(fields))
+            if (!_typeHelperService.TypeHasProperties<CollectorValueDto>(fields))
             {
                 return BadRequest();
             }
@@ -133,7 +140,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var collectorValue = _controllerService.Mapper.Map<CollectorValueDto>(collectorValueFromRepo);
+            var collectorValue = _mapper.Map<CollectorValueDto>(collectorValueFromRepo);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -169,7 +176,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newCollectorValue = _controllerService.Mapper.Map<CollectorValue>(collectorValue);
+            var newCollectorValue = _mapper.Map<CollectorValue>(collectorValue);
             _unitOfWork.CollectorValueRepository.Add(newCollectorValue);
 
             if (!_unitOfWork.Save())
@@ -177,7 +184,7 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a collector value failed on save.");
             }
 
-            var returnedCollectorValue = _controllerService.Mapper.Map<CollectorValueDto>(newCollectorValue);
+            var returnedCollectorValue = _mapper.Map<CollectorValueDto>(newCollectorValue);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -231,7 +238,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            _controllerService.Mapper.Map(collectorValue, collectorValueFromRepo);
+            _mapper.Map(collectorValue, collectorValueFromRepo);
             _unitOfWork.CollectorValueRepository.Update(collectorValueFromRepo);
 
             if (!_unitOfWork.Save())
@@ -258,7 +265,7 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            var patchedCollectorValue = _controllerService.Mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);
+            var patchedCollectorValue = _mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);
             patchDoc.ApplyTo(patchedCollectorValue, ModelState);
 
             TryValidateModel(patchedCollectorValue);
@@ -268,7 +275,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            _controllerService.Mapper.Map(patchedCollectorValue, collectorValueFromRepo);
+            _mapper.Map(patchedCollectorValue, collectorValueFromRepo);
             _unitOfWork.CollectorValueRepository.Update(collectorValueFromRepo);
 
             if (!_unitOfWork.Save())

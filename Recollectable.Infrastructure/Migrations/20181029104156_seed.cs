@@ -8,6 +8,25 @@ namespace Recollectable.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), "bd38c75a-62a7-468a-b0bf-b9bebb67818d", "User", "USER" },
+                    { new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), "d3db2102-21b9-4908-bd37-93925971018d", "Admin", "ADMIN" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[,]
+                {
+                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), 0, "177eeb3c-2aed-439d-88cf-67a4ec82a31e", "ryan.haywood@gmail.com", true, "Ryan", "Haywood", true, null, "RYAN.HAYWOOD@GMAIL.COM", "ryan", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Ryan" },
+                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), 0, "b37d5ad3-1ccf-41cb-8756-af2adae3d0cd", "jack.patillo@gmail.com", true, "Jack", "Patillo", true, null, "JACK.PATILLO@GMAIL.COM", "JACK", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Jack" },
+                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), 0, "861bddc5-7c37-4bbc-ab2b-7191a5a84a04", "geoff.ramsey@gmail.com", true, "Geoff", "Ramsey", true, null, "GEOFF.RAMSEY@GMAIL.COM", "GEOFF", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Geoff" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "CollectorValues",
                 columns: new[] { "Id", "AU50", "F12", "G4", "MS60", "MS63", "PF60", "PF63", "PF65", "VF20", "VG8", "XF40" },
                 values: new object[,]
@@ -31,13 +50,13 @@ namespace Recollectable.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "Email", "FirstName", "LastName" },
+                table: "AspNetUserRoles",
+                columns: new[] { "UserId", "RoleId" },
                 values: new object[,]
                 {
-                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "ryan.haywood@gmail.com", "Ryan", "Haywood" },
-                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "jack.patillo@gmail.com", "Jack", "Patillo" },
-                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "geoff.ramsey@gmail.com", "Geoff", "Ramsey" }
+                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea") },
+                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c") },
+                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c") }
                 });
 
             migrationBuilder.InsertData(
@@ -92,6 +111,21 @@ namespace Recollectable.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
+                table: "AspNetUserRoles",
+                keyColumns: new[] { "UserId", "RoleId" },
+                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c") });
+
+            migrationBuilder.DeleteData(
+                table: "AspNetUserRoles",
+                keyColumns: new[] { "UserId", "RoleId" },
+                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea") });
+
+            migrationBuilder.DeleteData(
+                table: "AspNetUserRoles",
+                keyColumns: new[] { "UserId", "RoleId" },
+                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c") });
+
+            migrationBuilder.DeleteData(
                 table: "CollectionCollectables",
                 keyColumn: "Id",
                 keyValue: new Guid("1078b50b-1d89-4b24-b071-67af06348875"));
@@ -122,9 +156,19 @@ namespace Recollectable.Infrastructure.Migrations
                 keyValue: new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"));
 
             migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"));
+                table: "AspNetRoles",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), "d3db2102-21b9-4908-bd37-93925971018d" });
+
+            migrationBuilder.DeleteData(
+                table: "AspNetRoles",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), "bd38c75a-62a7-468a-b0bf-b9bebb67818d" });
+
+            migrationBuilder.DeleteData(
+                table: "AspNetUsers",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "b37d5ad3-1ccf-41cb-8756-af2adae3d0cd" });
 
             migrationBuilder.DeleteData(
                 table: "Collectables",
@@ -165,6 +209,16 @@ namespace Recollectable.Infrastructure.Migrations
                 table: "Collections",
                 keyColumn: "Id",
                 keyValue: new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"));
+
+            migrationBuilder.DeleteData(
+                table: "AspNetUsers",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "177eeb3c-2aed-439d-88cf-67a4ec82a31e" });
+
+            migrationBuilder.DeleteData(
+                table: "AspNetUsers",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "861bddc5-7c37-4bbc-ab2b-7191a5a84a04" });
 
             migrationBuilder.DeleteData(
                 table: "CollectorValues",
@@ -210,16 +264,6 @@ namespace Recollectable.Infrastructure.Migrations
                 table: "Countries",
                 keyColumn: "Id",
                 keyValue: new Guid("e8a1c283-2300-4f3f-b408-59d0f8ccd893"));
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"));
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"));
         }
     }
 }

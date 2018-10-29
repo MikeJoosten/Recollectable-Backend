@@ -7,13 +7,28 @@
   <ItemGroup>
     <Compile Remove="Migrations\20180912201727_initial.cs" />
     <Compile Remove="Migrations\20180912201810_seed.cs" />
+    <Compile Remove="Migrations\20181002084444_initial.cs" />
+    <Compile Remove="Migrations\20181002084507_seed.cs" />
+    <Compile Remove="Migrations\20181010134758_initial.cs" />
+    <Compile Remove="Migrations\20181010134915_seed.cs" />
+    <Compile Remove="Migrations\20181023094223_seed.cs" />
+    <Compile Remove="Migrations\20181026122735_seed.cs" />
+    <Compile Remove="Migrations\20181026140442_seed.cs" />
+    <Compile Remove="Migrations\20181027151238_seed.cs" />
+    <Compile Remove="Migrations\20181027171859_seed.cs" />
+    <Compile Remove="Migrations\20181027175000_seed.cs" />
+    <Compile Remove="Migrations\20181028205043_seed.cs" />
+    <Compile Remove="Migrations\20181029103155_initial.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.1.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="2.1.3" />
   </ItemGroup>
 
   <ItemGroup>

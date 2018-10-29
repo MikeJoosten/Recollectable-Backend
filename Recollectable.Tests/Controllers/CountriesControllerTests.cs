@@ -21,9 +21,10 @@ namespace Recollectable.Tests.Controllers
 
         public CountriesControllerTests()
         {
-            _controller = new CountriesController(_unitOfWork, _mockControllerService.Object);
-            resourceParameters = new CountriesResourceParameters();
+            _controller = new CountriesController(_unitOfWork, _typeHelperService,
+                _propertyMappingService, _mapper);
 
+            resourceParameters = new CountriesResourceParameters();
             SetupTestController<CountryDto, Country>(_controller);
         }
 

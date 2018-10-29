@@ -21,9 +21,10 @@ namespace Recollectable.Tests.Controllers
 
         public CoinsControllerTests()
         {
-            _controller = new CoinsController(_unitOfWork, _mockControllerService.Object);
-            resourceParameters = new CurrenciesResourceParameters();
+            _controller = new CoinsController(_unitOfWork, _typeHelperService,
+                _propertyMappingService, _mapper);
 
+            resourceParameters = new CurrenciesResourceParameters();
             SetupTestController<CoinDto, Coin>(_controller);
         }
 

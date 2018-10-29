@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Recollectable.API.Interfaces;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Recollectable.Core.Shared.Models;
 using System.Collections.Generic;
 
 namespace Recollectable.API.Controllers
 {
     [Route("api")]
+    //TODO Add Authorization [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
         [HttpGet(Name = "GetHome")]

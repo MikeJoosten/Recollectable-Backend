@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Recollectable.API.Controllers;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Users;
 using Recollectable.Core.Shared.Entities;
+using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -18,12 +22,36 @@ namespace Recollectable.Tests.Controllers
     {
         private readonly UsersController _controller;
         private readonly UsersResourceParameters resourceParameters;
+        private Mock<UserManager<User>> _mockUserManager;
+        private Mock<IUserStore<User>> _mockUserStore;
+        private Mock<IEmailService> _mockEmailService;
+        private Mock<ITokenFactory> _mockTokenFactory;
 
         public UsersControllerTests()
         {
-            _controller = new UsersController(_unitOfWork, _mockControllerService.Object);
-            resourceParameters = new UsersResourceParameters();
+            _mockUserStore = new Mock<IUserStore<User>>();
+            _mockUserManager = new Mock<UserManager<User>>
+                (_mockUserStore.Object, null, null, null, null, null, null, null, null);
 
+            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(new User());
+            _mockUserManager.Setup(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(x => x.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _mockEmailService = new Mock<IEmailService>();
+            _mockTokenFactory = new Mock<ITokenFactory>();
+
+            _controller = new UsersController(_unitOfWork, _typeHelperService,
+                _propertyMappingService, _mockUserManager.Object, _mockTokenFactory.Object,
+                _mockEmailService.Object, _mapper);
+
+            resourceParameters = new UsersResourceParameters();
             SetupTestController<UserDto, User>(_controller);
         }
 
@@ -233,24 +261,54 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateUser_ReturnsBadRequestResponse_GivenNoUser()
+        public void Register_ReturnsBadRequestResponse_GivenNoUser()
         {
             //Act
-            var response = _controller.CreateUser(null, null);
+            var response = _controller.Register(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateUser_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
+        public void Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidUser()
         {
             //Arrange
             UserCreationDto user = new UserCreationDto();
             _controller.ModelState.AddModelError("FirstName", "Required");
 
             //Act
-            var response = _controller.CreateUser(user, null);
+            var response = _controller.Register(user, null);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
+        public void Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidPassword()
+        {
+            //Arrange
+            UserCreationDto user = new UserCreationDto();
+            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
+
+            //Act
+            var response = _controller.Register(user, null);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
+        public void Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidRole()
+        {
+            //Arrange
+            UserCreationDto user = new UserCreationDto();
+            _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid role" }));
+
+            //Act
+            var response = _controller.Register(user, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -259,7 +317,7 @@ namespace Recollectable.Tests.Controllers
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
-        public void CreateUser_ReturnsCreatedResponse_GivenValidUser(string mediaType)
+        public void Register_ReturnsCreatedResponse_GivenValidUser(string mediaType)
         {
             //Arrange
             UserCreationDto user = new UserCreationDto
@@ -269,14 +327,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateUser(user, mediaType);
+            var response = _controller.Register(user, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
         }
 
         [Fact]
-        public void CreateUser_CreatesNewUser_GivenAnyMediaTypeAndValidUser()
+        public void Register_CreatesNewUser_GivenAnyMediaTypeAndValidUser()
         {
             //Arrange
             UserCreationDto user = new UserCreationDto
@@ -286,7 +344,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateUser(user, null) as CreatedAtRouteResult;
+            var response = _controller.Register(user, null) as CreatedAtRouteResult;
             var returnedUser = response.Value as UserDto;
 
             //Assert
@@ -295,7 +353,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateUser_CreatesNewUser_GivenHateoasMediaTypeAndValidUser()
+        public void Register_CreatesNewUser_GivenHateoasMediaTypeAndValidUser()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
@@ -306,7 +364,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateUser(user, mediaType) as CreatedAtRouteResult;
+            var response = _controller.Register(user, mediaType) as CreatedAtRouteResult;
             dynamic returnedUser = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -315,26 +373,235 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void BlockUserCreation_ReturnsConflictResponse_GivenExistingId()
+        public void Login_ReturnsBadRequestResponse_GivenNoCredentials()
+        {
+            //Act
+            var response = _controller.Login(null);
+
+            //Assert
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public void Login_ReturnsNotFoundResponse_GivenInvalidUser()
+        {
+            //Arrange
+            CredentialsDto credentials = new CredentialsDto
+            {
+                UserName = "Invalid"
+            };
+
+            //Act
+            var response = _controller.Login(credentials);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ForgotPassword_ReturnsNotFoundResponse_GivenInvalidEmail()
+        {
+            //Arrange
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
+
+            //Act
+            var response = _controller.ForgotPassword(null);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ForgotPassword_ReturnsNoContentResponse_GivenValidEmail()
+        {
+            //Act
+            var response = _controller.ForgotPassword("ryan.haywood@gmail.com");
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsBadRequestResponse_GivenNoPassword()
+        {
+            //Act
+            var response = _controller.ResetPassword(null, null, null);
+
+            //Assert
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsUnprocessableEntityObjectResponse_GivenInvalidResetPassword()
+        {
+            //Arrange
+            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            _controller.ModelState.AddModelError("Password", "Required");
+
+            //Act
+            var response = _controller.ResetPassword(null, null, resetPassword);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsNotFoundResponse_GivenInvalidEmail()
+        {
+            //Arrange
+            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
+
+            //Act
+            var response = _controller.ResetPassword(null, null, resetPassword);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsBadRequestResponse_GivenInvalidPassword()
+        {
+            //Arrange
+            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            _mockUserManager.Setup(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
+
+            //Act
+            var response = _controller.ResetPassword(null, null, resetPassword);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
+        [Fact]
+        public void ResetPassword_ReturnsNoContentResponse_GivenValidPassword()
+        {
+            //Arrange
+            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            _mockUserManager.Setup(x => x.IsLockedOutAsync(It.IsAny<User>())).ReturnsAsync(false);
+
+            //Act
+            var response = _controller.ResetPassword("ryan.haywood@gmail.com", "valid token", resetPassword);
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsBadRequestResponse_GivenNoPassword()
+        {
+            //Act
+            var response = _controller.ChangePassword(null, null);
+
+            //Assert
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsUnprocessableEntityObjectResponse_GivenInvalidResetPassword()
+        {
+            //Arrange
+            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+            _controller.ModelState.AddModelError("Password", "Required");
+
+            //Act
+            var response = _controller.ChangePassword(null, changedPassword);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsNotFoundResponse_GivenInvalidEmail()
+        {
+            //Arrange
+            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
+
+            //Act
+            var response = _controller.ChangePassword(null, changedPassword);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsBadRequestResponse_GivenInvalidPassword()
+        {
+            //Arrange
+            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+            _mockUserManager.Setup(x => x.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
+
+            //Act
+            var response = _controller.ChangePassword(null, changedPassword);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
+        [Fact]
+        public void ChangePassword_ReturnsNoContentResponse_GivenValidPassword()
+        {
+            //Arrange
+            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+
+            //Act
+            var response = _controller.ChangePassword("ryan.haywood@gmail.com", changedPassword);
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public void ConfirmEmail_ReturnsNotFound_GivenInvalidEmail()
+        {
+            //Arrange
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
+
+            //Act
+            var response = _controller.ConfirmEmail(null, null);
+
+            //Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void ConfirmEmail_ReturnsNoContent_GivenValidTokenAndEmail()
+        {
+            //Act
+            var response = _controller.ConfirmEmail(null, null);
+
+            //Assert
+            Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public void BlockRegistration_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
             //Act
-            var response = _controller.BlockUserCreation(id) as StatusCodeResult;
+            var response = _controller.BlockRegistration(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
         }
 
         [Fact]
-        public void BlockUserCreation_ReturnsNotFoundResponse_GivenUnexistingId()
+        public void BlockRegistration_ReturnsNotFoundResponse_GivenUnexistingId()
         {
             //Arrange
             Guid id = new Guid("b6e2ad45-31da-4d0e-ab9f-2193dd539fc6");
 
             //Act
-            var response = _controller.BlockUserCreation(id);
+            var response = _controller.BlockRegistration(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);

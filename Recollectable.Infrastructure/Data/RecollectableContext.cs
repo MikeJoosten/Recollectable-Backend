@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
@@ -7,9 +9,8 @@ using System;
 
 namespace Recollectable.Infrastructure.Data
 {
-    public class RecollectableContext : DbContext
+    public class RecollectableContext : IdentityDbContext<User, Role, Guid>
     {
-        public DbSet<User> Users { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Collection> Collections { get; set; }
         public DbSet<Coin> Coins { get; set; }
@@ -23,34 +24,93 @@ namespace Recollectable.Infrastructure.Data
             : base(options)
         { }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
+            base.OnModelCreating(builder);
+
+            //Fluent API
+            builder.Entity<Country>().HasIndex(c => c.Name).IsUnique();
+
             // Seeding Database
-            modelBuilder.Entity<User>().HasData(
+            builder.Entity<User>().HasData(
                 new User
                 {
                     Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"),
                     FirstName = "Ryan",
                     LastName = "Haywood",
-                    Email = "ryan.haywood@gmail.com"
+                    UserName = "Ryan",
+                    NormalizedUserName = "ryan",
+                    Email = "ryan.haywood@gmail.com",
+                    NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM",
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3",
+                    EmailConfirmed = true,
+                    LockoutEnabled = true
                 },
                 new User
                 {
                     Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"),
                     FirstName = "Jack",
                     LastName = "Patillo",
-                    Email = "jack.patillo@gmail.com"
+                    UserName = "Jack",
+                    NormalizedUserName = "JACK",
+                    Email = "jack.patillo@gmail.com",
+                    NormalizedEmail = "JACK.PATILLO@GMAIL.COM",
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3",
+                    EmailConfirmed = true,
+                    LockoutEnabled = true
                 },
                 new User
                 {
                     Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"),
                     FirstName = "Geoff",
                     LastName = "Ramsey",
-                    Email = "geoff.ramsey@gmail.com"
+                    UserName = "Geoff",
+                    NormalizedUserName = "GEOFF",
+                    Email = "geoff.ramsey@gmail.com",
+                    NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM",
+                    PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==",
+                    SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3",
+                    EmailConfirmed = true,
+                    LockoutEnabled = true
                 }
             );
 
-            modelBuilder.Entity<Collection>().HasData(
+            builder.Entity<Role>().HasData(
+                new Role
+                {
+                    Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"),
+                    Name = "User",
+                    NormalizedName = "USER"
+                },
+                new Role
+                {
+                    Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"),
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
+                }
+            );
+
+            builder.Entity<IdentityUserRole<Guid>>().HasData(
+                new IdentityUserRole<Guid>
+                {
+                    UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"),
+                    RoleId = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea")
+                },
+                new IdentityUserRole<Guid>
+                {
+                    UserId = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"),
+                    RoleId = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c")
+                },
+                new IdentityUserRole<Guid>
+                {
+                    UserId = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"),
+                    RoleId = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c")
+                }
+            );
+
+            builder.Entity<Collection>().HasData(
                 new Collection
                 {
                     Id = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"),
@@ -71,7 +131,7 @@ namespace Recollectable.Infrastructure.Data
                 }
             );
 
-            modelBuilder.Entity<Country>().HasData(
+            builder.Entity<Country>().HasData(
                 new Country
                 {
                     Id = new Guid("406b1c0f-5505-43eb-a780-6ae1b72cf91b"),
@@ -94,7 +154,7 @@ namespace Recollectable.Infrastructure.Data
                 }
             );
 
-            modelBuilder.Entity<Coin>().HasData(
+            builder.Entity<Coin>().HasData(
                 new Coin
                 {
                     Id = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"),
@@ -147,7 +207,7 @@ namespace Recollectable.Infrastructure.Data
                 }
             );
 
-            modelBuilder.Entity<Banknote>().HasData(
+            builder.Entity<Banknote>().HasData(
                 new Banknote
                 {
                     Id = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"),
@@ -177,7 +237,7 @@ namespace Recollectable.Infrastructure.Data
                 }
             );
 
-            modelBuilder.Entity<CollectorValue>().HasData(
+            builder.Entity<CollectorValue>().HasData(
                 new CollectorValue
                 {
                     Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"),
@@ -229,7 +289,7 @@ namespace Recollectable.Infrastructure.Data
                 }
             );
 
-            modelBuilder.Entity<CollectionCollectable>().HasData(
+            builder.Entity<CollectionCollectable>().HasData(
                 new CollectionCollectable
                 {
                     Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"),
