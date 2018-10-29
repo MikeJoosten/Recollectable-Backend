@@ -349,6 +349,12 @@ namespace Recollectable.Infrastructure.Migrations
                 name: "IX_Collections_UserId",
                 table: "Collections",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Countries_Name",
+                table: "Countries",
+                column: "Name",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

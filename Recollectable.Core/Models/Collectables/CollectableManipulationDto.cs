@@ -10,8 +10,5 @@ namespace Recollectable.Core.Models.Collectables
 
         [Required(ErrorMessage = "Condition is a required field")]
         public string Condition { get; set; }
-
-        [Required(ErrorMessage = "Count is a required field")]
-        public int Count { get; set; }
     }
 }

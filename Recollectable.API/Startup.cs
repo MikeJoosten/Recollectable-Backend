@@ -30,6 +30,7 @@ using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Core.Shared.Validators;
 using Recollectable.Infrastructure.Data;
 using Recollectable.Infrastructure.Data.Repositories;
+using Recollectable.Infrastructure.Email;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,9 +94,10 @@ namespace Recollectable.API
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._!" +
                     "àèìòùáéíóúäëïöüâêîôûãõßñç";
 
-                options.Lockout.AllowedForNewUsers = true;
-                options.Lockout.MaxFailedAccessAttempts = 3;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+                //TODO Improve Lockout features
+                /*options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 35;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);*/
             })
             .AddEntityFrameworkStores<RecollectableContext>()
             .AddDefaultTokenProviders()
@@ -166,6 +168,7 @@ namespace Recollectable.API
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
             services.AddSingleton<ITokenFactory, TokenFactory>();
+            services.AddSingleton<IEmailService, EmailService>();
 
             // Configure Auto Mapper
             var configuration = new MapperConfiguration(cfg =>

@@ -33,17 +33,19 @@ namespace Recollectable.API.Controllers
         private ITypeHelperService _typeHelperService;
         private UserManager<User> _userManager;
         private ITokenFactory _tokenFactory;
+        private IEmailService _emailService;
         private IMapper _mapper;
 
         public UsersController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
             IPropertyMappingService propertyMappingService, UserManager<User> userManager, 
-            ITokenFactory tokenFactory, IMapper mapper)
+            ITokenFactory tokenFactory, IEmailService emailService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _propertyMappingService = propertyMappingService;
             _typeHelperService = typeHelperService;
             _userManager = userManager;
             _tokenFactory = tokenFactory;
+            _emailService = emailService;
             _mapper = mapper;
         }
 
@@ -207,10 +209,12 @@ namespace Recollectable.API.Controllers
                 throw new Exception("Creating a user failed on save.");
             }
 
-            //TODO Implement Mailing Service
             var token = _userManager.GenerateEmailConfirmationTokenAsync(newUser).Result;
-            var confirmationEmail = Url.Action("ConfirmEmail", "Users", new { token, email = newUser.Email },
+            var confirmationUrl = Url.Action("ConfirmEmail", "Users", new { token, email = newUser.Email },
                 protocol: HttpContext.Request.Scheme);
+
+            //TODO Activate Mailing Service
+            //_emailService.Send("Recipient's Email", "Confirmation", confirmationurl);
 
             var returnedUser = _mapper.Map<UserDto>(newUser);
 
@@ -276,10 +280,12 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            //TODO Implement Mailing Service
             var token = _userManager.GeneratePasswordResetTokenAsync(user).Result;
             var resetUrl = Url.Action("ResetPassword", "Users", new { token, email },
                 protocol: HttpContext.Request.Scheme);
+
+            //TODO Activate Mailing Service
+            //_emailService.Send("Recipient's Email", "Reset Password", resetUrl);
 
             return NoContent();
         }
@@ -509,7 +515,7 @@ namespace Recollectable.API.Controllers
             if (await _userManager.IsLockedOutAsync(user))
             {
                 ModelState.AddModelError("Error", "User locked out");
-                //TODO Send email password reset + Notify user
+                //TODO Notify user + Send email password reset
             }
             else
             {
