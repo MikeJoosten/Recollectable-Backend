@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace Recollectable.API.Controllers
 {
+    [ApiVersion("1.0")]
     [Route("api")]
     //TODO Add Authorization [Authorize(Roles = "Admin")]
     public class HomeController : Controller

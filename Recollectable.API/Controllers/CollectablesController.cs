@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 namespace Recollectable.API.Controllers
 {
     //TODO Add Authorization
+    [ApiVersion("1.0")]
     [Route("api/collections/{collectionId}/collectables")]
     public class CollectablesController : Controller
     {

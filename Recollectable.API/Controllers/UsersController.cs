@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
+    [ApiVersion("1.0")]
     [Route("api/users")]
     //TODO Add Authorization [Authorize(Roles = "Admin")]
     public class UsersController : Controller
