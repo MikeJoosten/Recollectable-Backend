@@ -16,6 +16,7 @@ using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -39,7 +40,7 @@ namespace Recollectable.API.Controllers
 
         [HttpHead]
         [HttpGet(Name = "GetCollectables")]
-        public IActionResult GetCollectables(Guid collectionId, 
+        public async Task<IActionResult> GetCollectables(Guid collectionId, 
             CollectablesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -55,7 +56,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectablesFromRepo = _unitOfWork.CollectableRepository
+            var collectablesFromRepo = await _unitOfWork.CollectableRepository
                 .Get(collectionId, resourceParameters);
 
             if (collectablesFromRepo == null)
@@ -133,7 +134,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet("{id}", Name = "GetCollectable")]
-        public IActionResult GetCollectable(Guid collectionId, Guid id, 
+        public async Task<IActionResult> GetCollectable(Guid collectionId, Guid id, 
             [FromQuery] string fields, [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<CollectableDto>(fields))
@@ -141,7 +142,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectableFromRepo = _unitOfWork.CollectableRepository.GetById(collectionId, id);
+            var collectableFromRepo = await _unitOfWork.CollectableRepository.GetById(collectionId, id);
 
             if (collectableFromRepo == null)
             {
@@ -171,7 +172,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost(Name = "CreateCollectable")]
-        public IActionResult CreateCollectable(Guid collectionId, 
+        public async Task<IActionResult> CreateCollectable(Guid collectionId, 
             [FromBody] CollectableCreationDto collectable,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -185,14 +186,14 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var collection = _unitOfWork.CollectionRepository.GetById(collectionId);
+            var collection = await _unitOfWork.CollectionRepository.GetById(collectionId);
 
             if (collection == null)
             {
                 return NotFound();
             }
 
-            var collectableItem = _unitOfWork.CollectableRepository
+            var collectableItem = await _unitOfWork.CollectableRepository
                 .GetCollectableItem(collectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
@@ -208,7 +209,7 @@ namespace Recollectable.API.Controllers
 
             _unitOfWork.CollectableRepository.Add(newCollectable);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception("Creating a collectable failed on save.");
             }
@@ -236,9 +237,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost("{id}")]
-        public IActionResult BlockCollectableCreation(Guid collectionId, Guid id)
+        public async Task<IActionResult> BlockCollectableCreation(Guid collectionId, Guid id)
         {
-            if (_unitOfWork.CollectableRepository.Exists(collectionId, id))
+            if (await _unitOfWork.CollectableRepository.Exists(collectionId, id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -247,7 +248,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPut("{id}", Name = "UpdateCollectable")]
-        public IActionResult UpdateCollectable(Guid collectionId, Guid id,
+        public async Task<IActionResult> UpdateCollectable(Guid collectionId, Guid id,
             [FromBody] CollectableUpdateDto collectable)
         {
             if (collectable == null)
@@ -265,14 +266,14 @@ namespace Recollectable.API.Controllers
                 collectable.CollectionId = collectionId;
             }
 
-            var collection = _unitOfWork.CollectionRepository.GetById(collectable.CollectionId);
+            var collection = await _unitOfWork.CollectionRepository.GetById(collectable.CollectionId);
 
             if (collection == null)
             {
                 return BadRequest();
             }
 
-            var collectableItem = _unitOfWork.CollectableRepository
+            var collectableItem = await _unitOfWork.CollectableRepository
                 .GetCollectableItem(collectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
@@ -281,7 +282,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectableFromRepo = _unitOfWork.CollectableRepository.GetById(collectionId, id);
+            var collectableFromRepo = await _unitOfWork.CollectableRepository.GetById(collectionId, id);
 
             if (collectableFromRepo == null)
             {
@@ -294,7 +295,7 @@ namespace Recollectable.API.Controllers
             _mapper.Map(collectable, collectableFromRepo);
             _unitOfWork.CollectableRepository.Update(collectableFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Updating collectable {id} failed on save.");
             }
@@ -303,7 +304,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPatch("{id}", Name = "PartiallyUpdateCollectable")]
-        public IActionResult PartiallyUpdateCollectable(Guid collectionId, Guid id,
+        public async Task<IActionResult> PartiallyUpdateCollectable(Guid collectionId, Guid id,
             [FromBody] JsonPatchDocument<CollectableUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -311,7 +312,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectableFromRepo = _unitOfWork.CollectableRepository.GetById(collectionId, id);
+            var collectableFromRepo = await _unitOfWork.CollectableRepository.GetById(collectionId, id);
 
             if (collectableFromRepo == null)
             {
@@ -333,14 +334,14 @@ namespace Recollectable.API.Controllers
                 patchedCollectable.CollectionId = collectionId;
             }
 
-            var collection = _unitOfWork.CollectionRepository.GetById(patchedCollectable.CollectionId);
+            var collection = await _unitOfWork.CollectionRepository.GetById(patchedCollectable.CollectionId);
 
             if (collection == null)
             {
                 return BadRequest();
             }
 
-            var collectableItem = _unitOfWork.CollectableRepository
+            var collectableItem = await _unitOfWork.CollectableRepository
                 .GetCollectableItem(patchedCollectable.CollectableId);
 
             if (collectableItem == null || !collectableItem.GetType().ToString()
@@ -355,7 +356,7 @@ namespace Recollectable.API.Controllers
             _mapper.Map(patchedCollectable, collectableFromRepo);
             _unitOfWork.CollectableRepository.Update(collectableFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Patching collectable {id} failed on save.");
             }
@@ -364,9 +365,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpDelete("{id}", Name = "DeleteCollectable")]
-        public IActionResult DeleteCollectable(Guid collectionId, Guid id)
+        public async Task<IActionResult> DeleteCollectable(Guid collectionId, Guid id)
         {
-            var collectableFromRepo = _unitOfWork.CollectableRepository.GetById(collectionId, id);
+            var collectableFromRepo = await _unitOfWork.CollectableRepository.GetById(collectionId, id);
 
             if (collectableFromRepo == null)
             {
@@ -375,7 +376,7 @@ namespace Recollectable.API.Controllers
 
             _unitOfWork.CollectableRepository.Delete(collectableFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Deleting collectable {id} failed on save.");
             }

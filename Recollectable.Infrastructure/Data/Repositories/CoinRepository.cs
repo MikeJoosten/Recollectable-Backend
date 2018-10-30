@@ -8,6 +8,7 @@ using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
@@ -23,24 +24,25 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Coin> Get(CurrenciesResourceParameters resourceParameters)
+        public async Task<PagedList<Coin>> Get(CurrenciesResourceParameters resourceParameters)
         {
-            var coins = _context.Coins
+            var coins = await _context.Coins
                 .Include(c => c.Country)
                 .Include(c => c.CollectorValue)
                 .ApplySort(resourceParameters.OrderBy,
-                    _propertyMappingService.GetPropertyMapping<CoinDto, Coin>());
+                    _propertyMappingService.GetPropertyMapping<CoinDto, Coin>())
+                .ToListAsync();
 
             if (!string.IsNullOrEmpty(resourceParameters.Type))
             {
                 var type = resourceParameters.Type.Trim().ToLowerInvariant();
-                coins = coins.Where(c => c.Type.ToLowerInvariant() == type);
+                coins = coins.Where(c => c.Type.ToLowerInvariant() == type).ToList();
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Country))
             {
                 var country = resourceParameters.Country.Trim().ToLowerInvariant();
-                coins = coins.Where(c => c.Country.Name.ToLowerInvariant() == country);
+                coins = coins.Where(c => c.Country.Name.ToLowerInvariant() == country).ToList();
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
@@ -49,7 +51,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 coins = coins.Where(c => c.Country.Name.ToLowerInvariant().Contains(search)
                     || c.Type.ToLowerInvariant().Contains(search)
                     || c.ReleaseDate.ToLowerInvariant().Contains(search)
-                    || c.Metal.ToLowerInvariant().Contains(search));
+                    || c.Metal.ToLowerInvariant().Contains(search)).ToList();
             }
 
             return PagedList<Coin>.Create(coins,
@@ -57,12 +59,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Coin GetById(Guid coinId)
+        public async Task<Coin> GetById(Guid coinId)
         {
-            return _context.Coins
+            return await _context.Coins
                 .Include(c => c.Country)
                 .Include(c => c.CollectorValue)
-                .FirstOrDefault(c => c.Id == coinId);
+                .FirstOrDefaultAsync(c => c.Id == coinId);
         }
 
         public void Add(Coin coin)
@@ -92,9 +94,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Coins.Remove(coin);
         }
 
-        public bool Exists(Guid coinId)
+        public async Task<bool> Exists(Guid coinId)
         {
-            return _context.Coins.Any(c => c.Id == coinId);
+            return await _context.Coins.AnyAsync(c => c.Id == coinId);
         }
     }
 }

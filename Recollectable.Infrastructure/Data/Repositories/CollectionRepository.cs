@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Collections;
+﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collections;
@@ -7,6 +8,7 @@ using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
@@ -22,21 +24,21 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Collection> Get(CollectionsResourceParameters resourceParameters)
+        public async Task<PagedList<Collection>> Get(CollectionsResourceParameters resourceParameters)
         {
-            var collections = _context.Collections.ApplySort(resourceParameters.OrderBy,
-                _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>());
+            var collections = await _context.Collections.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>()).ToListAsync();
 
             if (!string.IsNullOrEmpty(resourceParameters.Type))
             {
                 var type = resourceParameters.Type.Trim().ToLowerInvariant();
-                collections = collections.Where(c => c.Type.ToLowerInvariant() == type);
+                collections = collections.Where(c => c.Type.ToLowerInvariant() == type).ToList();
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
                 var search = resourceParameters.Search.Trim().ToLowerInvariant();
-                collections = collections.Where(c => c.Type.ToLowerInvariant().Contains(search));
+                collections = collections.Where(c => c.Type.ToLowerInvariant().Contains(search)).ToList();
             }
 
             return PagedList<Collection>.Create(collections,
@@ -44,9 +46,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Collection GetById(Guid collectionId)
+        public async Task<Collection> GetById(Guid collectionId)
         {
-            return _context.Collections.FirstOrDefault(c => c.Id == collectionId);
+            return await _context.Collections.FirstOrDefaultAsync(c => c.Id == collectionId);
         }
 
         public void Add(Collection collection)
@@ -66,9 +68,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Collections.Remove(collection);
         }
 
-        public bool Exists(Guid collectionId)
+        public async Task<bool> Exists(Guid collectionId)
         {
-            return _context.Collections.Any(c => c.Id == collectionId);
+            return await _context.Collections.AnyAsync(c => c.Id == collectionId);
         }
     }
 }

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Controllers
@@ -29,26 +30,26 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCollections_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
+        public async Task GetCollections_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
             resourceParameters.OrderBy = "Invalid";
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, null);
+            var response = await _controller.GetCollections(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCollections_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCollections_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             resourceParameters.Fields = "Invalid";
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, null);
+            var response = await _controller.GetCollections(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -58,20 +59,20 @@ namespace Recollectable.Tests.Controllers
         [InlineData(null)]
         [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCollections_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCollections_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType);
+            var response = await _controller.GetCollections(resourceParameters, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCollections_ReturnsAllCollections_GivenNoMediaType()
+        public async Task GetCollections_ReturnsAllCollections_GivenNoMediaType()
         {
             //Act
-            var response = _controller.GetCollections(resourceParameters, null) as OkObjectResult;
+            var response = await _controller.GetCollections(resourceParameters, null) as OkObjectResult;
             var collections = response.Value as List<CollectionDto>;
 
             //Assert
@@ -80,13 +81,13 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCollections_ReturnsAllCollections_GivenJsonMediaType()
+        public async Task GetCollections_ReturnsAllCollections_GivenJsonMediaType()
         {
             //Arrange
             string mediaType = "application/json";
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
             var collections = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -95,13 +96,13 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCollections_ReturnsAllCollections_GivenHateoasMediaType()
+        public async Task GetCollections_ReturnsAllCollections_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
             var linkedCollection = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -110,14 +111,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCollections_ReturnsCollections_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCollections_ReturnsCollections_GivenJsonMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json";
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
             var collections = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -126,14 +127,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCollections_ReturnsCollections_GivenHateoasMediaTypeAndPagingParameters()
+        public async Task GetCollections_ReturnsCollections_GivenHateoasMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
             var collections = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -142,26 +143,26 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCollection_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCollection_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             string fields = "Invalid";
 
             //Act
-            var response = _controller.GetCollection(Guid.Empty, fields, null);
+            var response = await _controller.GetCollection(Guid.Empty, fields, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCollection_ReturnsNotFoundResponse_GivenInvalidId()
+        public async Task GetCollection_ReturnsNotFoundResponse_GivenInvalidId()
         {
             //Arrange
             Guid id = new Guid("76efa0d4-2ec6-4dbb-80fa-a689fd5fe884");
 
             //Act
-            var response = _controller.GetCollection(id, null, null);
+            var response = await _controller.GetCollection(id, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -171,26 +172,26 @@ namespace Recollectable.Tests.Controllers
         [InlineData(null)]
         [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCollection_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCollection_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
             //Act
-            var response = _controller.GetCollection(id, null, mediaType);
+            var response = await _controller.GetCollection(id, null, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCollection_ReturnsCollection_GivenNoMediaType()
+        public async Task GetCollection_ReturnsCollection_GivenNoMediaType()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
             //Act
-            var response = _controller.GetCollection(id, null, null) as OkObjectResult;
+            var response = await _controller.GetCollection(id, null, null) as OkObjectResult;
             var collection = response.Value as CollectionDto;
 
             //Assert
@@ -200,14 +201,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCollection_ReturnsCollection_GivenJsonMediaType()
+        public async Task GetCollection_ReturnsCollection_GivenJsonMediaType()
         {
             //Arrange
             string mediaType = "application/json";
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
             //Act
-            var response = _controller.GetCollection(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollection(id, null, mediaType) as OkObjectResult;
             dynamic collection = response.Value as ExpandoObject;
 
             //Assert
@@ -217,14 +218,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCollection_ReturnsCollection_GivenHateoasMediaType()
+        public async Task GetCollection_ReturnsCollection_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
             //Act
-            var response = _controller.GetCollection(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollection(id, null, mediaType) as OkObjectResult;
             dynamic collection = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -234,31 +235,31 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateCollection_ReturnsBadRequestResponse_GivenNoCollection()
+        public async Task CreateCollection_ReturnsBadRequestResponse_GivenNoCollection()
         {
             //Act
-            var response = _controller.CreateCollection(null, null);
+            var response = await _controller.CreateCollection(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
+        public async Task CreateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
         {
             //Arrange
             CollectionCreationDto collection = new CollectionCreationDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.CreateCollection(collection, null);
+            var response = await _controller.CreateCollection(collection, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void CreateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
+        public async Task CreateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
         {
             //Arrange
             CollectionCreationDto collection = new CollectionCreationDto
@@ -267,7 +268,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCollection(null, null);
+            var response = await _controller.CreateCollection(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -276,7 +277,7 @@ namespace Recollectable.Tests.Controllers
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
-        public void CreateCollection_ReturnsCreatedResponse_GivenValidCollection(string mediaType)
+        public async Task CreateCollection_ReturnsCreatedResponse_GivenValidCollection(string mediaType)
         {
             //Arrange
             CollectionCreationDto collection = new CollectionCreationDto
@@ -286,14 +287,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCollection(collection, mediaType);
+            var response = await _controller.CreateCollection(collection, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
         }
 
         [Fact]
-        public void CreateCollection_CreatesNewCollection_GivenAnyMediaTypeAndValidCollection()
+        public async Task CreateCollection_CreatesNewCollection_GivenAnyMediaTypeAndValidCollection()
         {
             //Arrange
             Guid userId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
@@ -304,7 +305,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCollection(collection, null) as CreatedAtRouteResult;
+            var response = await _controller.CreateCollection(collection, null) as CreatedAtRouteResult;
             var returnedCollection = response.Value as CollectionDto;
 
             //Assert
@@ -314,7 +315,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateCollection_CreatesNewCollection_GivenHateoasMediaTypeAndValidCollection()
+        public async Task CreateCollection_CreatesNewCollection_GivenHateoasMediaTypeAndValidCollection()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
@@ -326,7 +327,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCollection(collection, mediaType) as CreatedAtRouteResult;
+            var response = await _controller.CreateCollection(collection, mediaType) as CreatedAtRouteResult;
             dynamic returnedCollection = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -336,57 +337,57 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void BlockCollectionCreation_ReturnsConflictResponse_GivenExistingId()
+        public async Task BlockCollectionCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
             //Act
-            var response = _controller.BlockCollectionCreation(id) as StatusCodeResult;
+            var response = await _controller.BlockCollectionCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
         }
 
         [Fact]
-        public void BlockCollectionCreation_ReturnsNotFoundResponse_GivenUnexistingId()
+        public async Task BlockCollectionCreation_ReturnsNotFoundResponse_GivenUnexistingId()
         {
             //Arrange
             Guid id = new Guid("514d80af-7748-46ed-99cd-a71f6d58315a");
 
             //Act
-            var response = _controller.BlockCollectionCreation(id);
+            var response = await _controller.BlockCollectionCreation(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsBadRequestResponse_GivenNoCollection()
+        public async Task UpdateCollection_ReturnsBadRequestResponse_GivenNoCollection()
         {
             //Act
-            var response = _controller.UpdateCollection(Guid.Empty, null);
+            var response = await _controller.UpdateCollection(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
+        public async Task UpdateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
         {
             //Arrange
             CollectionUpdateDto collection = new CollectionUpdateDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.UpdateCollection(Guid.Empty, collection);
+            var response = await _controller.UpdateCollection(Guid.Empty, collection);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
+        public async Task UpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
         {
             //Arrange
             Guid userId = new Guid("4512e2d5-779f-4423-b117-903f85990d4a");
@@ -397,14 +398,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCollection(Guid.Empty, collection);
+            var response = await _controller.UpdateCollection(Guid.Empty, collection);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
+        public async Task UpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
         {
             //Arrange
             Guid id = new Guid("e69bed8a-1b96-4d74-bff6-4c2894dd7872");
@@ -415,14 +416,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCollection(id, collection);
+            var response = await _controller.UpdateCollection(id, collection);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsNoContentResponse_GivenValidCollection()
+        public async Task UpdateCollection_ReturnsNoContentResponse_GivenValidCollection()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
@@ -433,14 +434,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCollection(id, collection);
+            var response = await _controller.UpdateCollection(id, collection);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_UpdatesExistingCollection_GivenValidCollection()
+        public async Task UpdateCollection_UpdatesExistingCollection_GivenValidCollection()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
@@ -452,40 +453,40 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCollection(id, country);
+            var response = await _controller.UpdateCollection(id, country);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CollectionRepository.GetById(id));
-            Assert.Equal("Banknote", _unitOfWork.CollectionRepository.GetById(id).Type);
-            Assert.Equal(userId, _unitOfWork.CollectionRepository.GetById(id).UserId);
+            Assert.NotNull(await _unitOfWork.CollectionRepository.GetById(id));
+            Assert.Equal("Banknote", (await _unitOfWork.CollectionRepository.GetById(id)).Type);
+            Assert.Equal(userId, (await _unitOfWork.CollectionRepository.GetById(id)).UserId);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsBadRequestResponse_GivenNoPatchDocument()
+        public async Task PartiallyUpdateCollection_ReturnsBadRequestResponse_GivenNoPatchDocument()
         {
             //Act
-            var response = _controller.PartiallyUpdateCollection(Guid.Empty, null);
+            var response = await _controller.PartiallyUpdateCollection(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
+        public async Task PartiallyUpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
         {
             //Arrange
             Guid id = new Guid("9f8925ae-1bbe-49f1-98d9-193f69a7fc5c");
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
+        public async Task PartiallyUpdateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
@@ -493,14 +494,14 @@ namespace Recollectable.Tests.Controllers
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
+        public async Task PartiallyUpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
@@ -510,14 +511,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.UserId, userId);
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsNoContentResponse_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCollection_ReturnsNoContentResponse_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
@@ -527,14 +528,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.UserId, userId);
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_UpdatesExistingCollection_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCollection_UpdatesExistingCollection_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
@@ -544,52 +545,52 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.UserId, userId);
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CollectionRepository.GetById(id));
-            Assert.Equal("Banknote", _unitOfWork.CollectionRepository.GetById(id).Type);
-            Assert.Equal(userId, _unitOfWork.CollectionRepository.GetById(id).UserId);
+            Assert.NotNull(await _unitOfWork.CollectionRepository.GetById(id));
+            Assert.Equal("Banknote", (await _unitOfWork.CollectionRepository.GetById(id)).Type);
+            Assert.Equal(userId, (await _unitOfWork.CollectionRepository.GetById(id)).UserId);
         }
 
         [Fact]
-        public void DeleteCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
+        public async Task DeleteCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
         {
             //Arrange
             Guid id = new Guid("02aef0b1-fef7-4e37-975a-0df8607c8efb");
 
             //Act
-            var response = _controller.DeleteCollection(id);
+            var response = await _controller.DeleteCollection(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void DeleteCollection_ReturnsNoContentResponse_GivenValidCollectionId()
+        public async Task DeleteCollection_ReturnsNoContentResponse_GivenValidCollectionId()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
             //Act
-            var response = _controller.DeleteCollection(id);
+            var response = await _controller.DeleteCollection(id);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void DeleteCollection_RemovesCollectionFromDatabase()
+        public async Task DeleteCollection_RemovesCollectionFromDatabase()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
             //Act
-            _controller.DeleteCollection(id);
+            await _controller.DeleteCollection(id);
 
             //Assert
-            Assert.Equal(5, _unitOfWork.CollectionRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.CollectionRepository.GetById(id));
+            Assert.Equal(5, (await _unitOfWork.CollectionRepository.Get(resourceParameters)).Count());
+            Assert.Null(await _unitOfWork.CollectionRepository.GetById(id));
         }
     }
 }

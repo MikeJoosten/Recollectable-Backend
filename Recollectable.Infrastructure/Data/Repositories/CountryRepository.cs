@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Locations;
+﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Locations;
@@ -7,6 +8,7 @@ using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
@@ -22,21 +24,22 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Country> Get(CountriesResourceParameters resourceParameters)
+        public async Task<PagedList<Country>> Get(CountriesResourceParameters resourceParameters)
         {
-            var countries = _context.Countries.ApplySort(resourceParameters.OrderBy,
-                _propertyMappingService.GetPropertyMapping<CountryDto, Country>());
+            var countries = await _context.Countries.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<CountryDto, Country>())
+                .ToListAsync();
 
             if (!string.IsNullOrEmpty(resourceParameters.Name))
             {
                 var name = resourceParameters.Name.Trim().ToLowerInvariant();
-                countries = countries.Where(c => c.Name.ToLowerInvariant() == name);
+                countries = countries.Where(c => c.Name.ToLowerInvariant() == name).ToList();
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
                 var search = resourceParameters.Search.Trim().ToLowerInvariant();
-                countries = countries.Where(c => c.Name.ToLowerInvariant().Contains(search));
+                countries = countries.Where(c => c.Name.ToLowerInvariant().Contains(search)).ToList();
             }
 
             return PagedList<Country>.Create(countries,
@@ -44,9 +47,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public Country GetById(Guid countryId)
+        public async Task<Country> GetById(Guid countryId)
         {
-            return _context.Countries.FirstOrDefault(c => c.Id == countryId);
+            return await _context.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
         }
 
         public void Add(Country country)
@@ -66,9 +69,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Countries.Remove(country);
         }
 
-        public bool Exists(Guid countryId)
+        public async Task<bool> Exists(Guid countryId)
         {
-            return _context.Countries.Any(c => c.Id == countryId);
+            return await _context.Countries.AnyAsync(c => c.Id == countryId);
         }
     }
 }

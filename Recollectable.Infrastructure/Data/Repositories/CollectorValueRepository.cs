@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Collectables;
+﻿using Microsoft.EntityFrameworkCore;
+using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
@@ -6,7 +7,7 @@ using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Interfaces;
 using System;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
@@ -23,20 +24,21 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<CollectorValue> Get
+        public async Task<PagedList<CollectorValue>> Get
             (CollectorValuesResourceParameters resourceParameters)
         {
-            var collectorValues = _context.CollectorValues.ApplySort(resourceParameters.OrderBy,
-                _propertyMappingService.GetPropertyMapping<CollectorValueDto, CollectorValue>());
+            var collectorValues = await _context.CollectorValues.ApplySort(resourceParameters.OrderBy,
+                _propertyMappingService.GetPropertyMapping<CollectorValueDto, CollectorValue>())
+                .ToListAsync();
 
             return PagedList<CollectorValue>.Create(collectorValues,
                 resourceParameters.Page,
                 resourceParameters.PageSize);
         }
 
-        public CollectorValue GetById(Guid collectorValueId)
+        public async Task<CollectorValue> GetById(Guid collectorValueId)
         {
-            return _context.CollectorValues.FirstOrDefault(c => c.Id == collectorValueId);
+            return await _context.CollectorValues.FirstOrDefaultAsync(c => c.Id == collectorValueId);
         }
 
         public void Add(CollectorValue collectorValue)
@@ -56,9 +58,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.CollectorValues.Remove(collectorValue);
         }
 
-        public bool Exists(Guid collectorValueId)
+        public async Task<bool> Exists(Guid collectorValueId)
         {
-            return _context.CollectorValues.Any(c => c.Id == collectorValueId);
+            return await _context.CollectorValues.AnyAsync(c => c.Id == collectorValueId);
         }
     }
 }

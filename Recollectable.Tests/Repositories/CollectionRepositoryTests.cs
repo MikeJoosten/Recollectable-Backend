@@ -2,6 +2,7 @@
 using Recollectable.Core.Entities.ResourceParameters;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories
@@ -16,10 +17,10 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void Get_ReturnsAllCollections()
+        public async Task Get_ReturnsAllCollections()
         {
             //Act
-            var result = _unitOfWork.CollectionRepository.Get(resourceParameters);
+            var result = await _unitOfWork.CollectionRepository.Get(resourceParameters);
 
             //Assert
             Assert.NotNull(result);
@@ -27,10 +28,10 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void Get_OrdersCollectionsByType()
+        public async Task Get_OrdersCollectionsByType()
         {
             //Act
-            var result = _unitOfWork.CollectionRepository.Get(resourceParameters);
+            var result = await _unitOfWork.CollectionRepository.Get(resourceParameters);
 
             //Assert
             Assert.NotNull(result);
@@ -38,13 +39,13 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void GetById_ReturnsCollection_GivenValidCollectionId()
+        public async Task GetById_ReturnsCollection_GivenValidCollectionId()
         {
             //Arrange
             Guid id = new Guid("80fa9706-2465-48cf-8933-932fdce18c89");
 
             //Act
-            var result = _unitOfWork.CollectionRepository.GetById(id);
+            var result = await _unitOfWork.CollectionRepository.GetById(id);
 
             //Assert
             Assert.NotNull(result);
@@ -53,20 +54,20 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void GetById_ReturnsNull_GivenInvalidCollectionId()
+        public async Task GetById_ReturnsNull_GivenInvalidCollectionId()
         {
             //Arrange
             Guid id = new Guid("ca4e2623-304b-49a5-80e4-1f7c7246aac6");
 
             //Act
-            var result = _unitOfWork.CollectionRepository.GetById(id);
+            var result = await _unitOfWork.CollectionRepository.GetById(id);
 
             //Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public void Add_AddsNewCollection()
+        public async Task Add_AddsNewCollection()
         {
             //Arrange
             Guid id = new Guid("2cb67024-729e-4d76-bbe4-e80f929557ab");
@@ -78,67 +79,67 @@ namespace Recollectable.Tests.Repositories
 
             //Act
             _unitOfWork.CollectionRepository.Add(newCollection);
-            _unitOfWork.Save();
+            await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(7, _unitOfWork.CollectionRepository.Get(resourceParameters).Count());
-            Assert.Equal("Banknote", _unitOfWork.CollectionRepository.GetById(id).Type);
+            Assert.Equal(7, (await _unitOfWork.CollectionRepository.Get(resourceParameters)).Count());
+            Assert.Equal("Banknote", (await _unitOfWork.CollectionRepository.GetById(id)).Type);
         }
 
         [Fact]
-        public void Update_UpdatesExistingCollection()
+        public async Task Update_UpdatesExistingCollection()
         {
             //Arrange
             Guid id = new Guid("80fa9706-2465-48cf-8933-932fdce18c89");
-            Collection updatedCollection = _unitOfWork.CollectionRepository.GetById(id);
+            Collection updatedCollection = await _unitOfWork.CollectionRepository.GetById(id);
             updatedCollection.Type = "Coin";
 
             //Act
             _unitOfWork.CollectionRepository.Update(updatedCollection);
-            _unitOfWork.Save();
+            await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(6, _unitOfWork.CollectionRepository.Get(resourceParameters).Count());
-            Assert.Equal("Coin", _unitOfWork.CollectionRepository.GetById(id).Type);
+            Assert.Equal(6, (await _unitOfWork.CollectionRepository.Get(resourceParameters)).Count());
+            Assert.Equal("Coin", (await _unitOfWork.CollectionRepository.GetById(id)).Type);
         }
 
         [Fact]
-        public void Delete_RemovesCollectionFromDatabase()
+        public async Task Delete_RemovesCollectionFromDatabase()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
-            Collection collection = _unitOfWork.CollectionRepository.GetById(id);
+            Collection collection = await _unitOfWork.CollectionRepository.GetById(id);
 
             //Act
             _unitOfWork.CollectionRepository.Delete(collection);
-            _unitOfWork.Save();
+            await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(5, _unitOfWork.CollectionRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.CollectionRepository.GetById(id));
+            Assert.Equal(5, (await _unitOfWork.CollectionRepository.Get(resourceParameters)).Count());
+            Assert.Null(await _unitOfWork.CollectionRepository.GetById(id));
         }
 
         [Fact]
-        public void Exists_ReturnsTrue_GivenValidCollectionId()
+        public async Task Exists_ReturnsTrue_GivenValidCollectionId()
         {
             //Arrange
             Guid id = new Guid("80fa9706-2465-48cf-8933-932fdce18c89");
 
             //Act
-            var result = _unitOfWork.CollectionRepository.Exists(id);
+            var result = await _unitOfWork.CollectionRepository.Exists(id);
 
             //Assert
             Assert.True(result);
         }
 
         [Fact]
-        public void Exists_ReturnsFalse_GivenInvalidCollectionId()
+        public async Task Exists_ReturnsFalse_GivenInvalidCollectionId()
         {
             //Arrange
             Guid id = new Guid("ca4e2623-304b-49a5-80e4-1f7c7246aac6");
 
             //Act
-            var result = _unitOfWork.CollectionRepository.Exists(id);
+            var result = await _unitOfWork.CollectionRepository.Exists(id);
 
             //Assert
             Assert.False(result);

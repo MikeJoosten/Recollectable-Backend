@@ -2,18 +2,19 @@
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Shared.Entities;
 using System;
+using System.Threading.Tasks;
 
 namespace Recollectable.Core.Interfaces
 {
     public interface ICollectableRepository
     {
-        PagedList<CollectionCollectable> Get(Guid collectionId,
+        Task<PagedList<CollectionCollectable>> Get(Guid collectionId,
             CollectablesResourceParameters resourceParameters);
-        CollectionCollectable GetById(Guid collectionId, Guid Id);
-        Collectable GetCollectableItem(Guid collectableId);
+        Task<CollectionCollectable> GetById(Guid collectionId, Guid Id);
+        Task<Collectable> GetCollectableItem(Guid collectableId);
         void Add(CollectionCollectable collectable);
         void Update(CollectionCollectable collectable);
         void Delete(CollectionCollectable collectable);
-        bool Exists(Guid collectionId, Guid Id);
+        Task<bool> Exists(Guid collectionId, Guid Id);
     }
 }

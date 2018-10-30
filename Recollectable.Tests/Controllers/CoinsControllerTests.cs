@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Controllers
@@ -29,26 +30,26 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCoins_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
+        public async Task GetCoins_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
             resourceParameters.OrderBy = "Invalid";
 
             //Act
-            var response = _controller.GetCoins(resourceParameters, null);
+            var response = await _controller.GetCoins(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCoins_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCoins_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             resourceParameters.Fields = "Invalid";
 
             //Act
-            var response = _controller.GetCoins(resourceParameters, null);
+            var response = await _controller.GetCoins(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -58,20 +59,20 @@ namespace Recollectable.Tests.Controllers
         [InlineData(null)]
         [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCoins_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCoins_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Act
-            var response = _controller.GetCoins(resourceParameters, mediaType);
+            var response = await _controller.GetCoins(resourceParameters, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCoins_ReturnsAllCoins_GivenNoMediaType()
+        public async Task GetCoins_ReturnsAllCoins_GivenNoMediaType()
         {
             //Act
-            var response = _controller.GetCoins(resourceParameters, null) as OkObjectResult;
+            var response = await _controller.GetCoins(resourceParameters, null) as OkObjectResult;
             var coins = response.Value as List<CoinDto>;
 
             //Assert
@@ -80,13 +81,13 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCoins_ReturnsAllCoins_GivenJsonMediaType()
+        public async Task GetCoins_ReturnsAllCoins_GivenJsonMediaType()
         {
             //Arrange
             string mediaType = "application/json";
 
             //Act
-            var response = _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
             var coins = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -95,13 +96,13 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCoins_ReturnsAllCoins_GivenHateoasMediaType()
+        public async Task GetCoins_ReturnsAllCoins_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
 
             //Act
-            var response = _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
             var linkedCollection = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -110,14 +111,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCoins_ReturnsCoins_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCoins_ReturnsCoins_GivenJsonMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json";
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
             var coins = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -126,14 +127,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCoins_ReturnsCoins_GivenHateoasMediaTypeAndPagingParameters()
+        public async Task GetCoins_ReturnsCoins_GivenHateoasMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
             var coins = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -142,26 +143,26 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCoin_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCoin_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             string fields = "Invalid";
 
             //Act
-            var response = _controller.GetCoin(Guid.Empty, fields, null);
+            var response = await _controller.GetCoin(Guid.Empty, fields, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCoin_ReturnsNotFoundResponse_GivenInvalidId()
+        public async Task GetCoin_ReturnsNotFoundResponse_GivenInvalidId()
         {
             //Arrange
             Guid id = new Guid("18a1946a-ca7a-4bf4-a642-f5eb846f7dd5");
 
             //Act
-            var response = _controller.GetCoin(id, null, null);
+            var response = await _controller.GetCoin(id, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -171,26 +172,26 @@ namespace Recollectable.Tests.Controllers
         [InlineData(null)]
         [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCoin_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCoin_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
             //Act
-            var response = _controller.GetCoin(id, null, mediaType);
+            var response = await _controller.GetCoin(id, null, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCoin_ReturnsCoin_GivenNoMediaType()
+        public async Task GetCoin_ReturnsCoin_GivenNoMediaType()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
             //Act
-            var response = _controller.GetCoin(id, null, null) as OkObjectResult;
+            var response = await _controller.GetCoin(id, null, null) as OkObjectResult;
             var coin = response.Value as CoinDto;
 
             //Assert
@@ -200,14 +201,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCoin_ReturnsCoin_GivenJsonMediaType()
+        public async Task GetCoin_ReturnsCoin_GivenJsonMediaType()
         {
             //Arrange
             string mediaType = "application/json";
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
             //Act
-            var response = _controller.GetCoin(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCoin(id, null, mediaType) as OkObjectResult;
             dynamic coin = response.Value as ExpandoObject;
 
             //Assert
@@ -217,14 +218,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCoin_ReturnsCoin_GivenHateoasMediaType()
+        public async Task GetCoin_ReturnsCoin_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
             //Act
-            var response = _controller.GetCoin(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCoin(id, null, mediaType) as OkObjectResult;
             dynamic coin = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -234,31 +235,31 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateCoin_ReturnsBadRequestResponse_GivenNoCoin()
+        public async Task CreateCoin_ReturnsBadRequestResponse_GivenNoCoin()
         {
             //Act
-            var response = _controller.CreateCoin(null, null);
+            var response = await _controller.CreateCoin(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateCoin_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
+        public async Task CreateCoin_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
         {
             //Arrange
             CoinCreationDto coin = new CoinCreationDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.CreateCoin(coin, null);
+            var response = await _controller.CreateCoin(coin, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void CreateCoin_ReturnsBadRequestResponse_GivenInvalidCountryId()
+        public async Task CreateCoin_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
@@ -267,14 +268,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCoin(coin, null);
+            var response = await _controller.CreateCoin(coin, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
+        public async Task CreateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
         {
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
@@ -284,7 +285,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCoin(coin, null);
+            var response = await _controller.CreateCoin(coin, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -293,7 +294,7 @@ namespace Recollectable.Tests.Controllers
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
-        public void CreateCoin_ReturnsCreatedResponse_GivenValidCoin(string mediaType)
+        public async Task CreateCoin_ReturnsCreatedResponse_GivenValidCoin(string mediaType)
         {
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
@@ -303,14 +304,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCoin(coin, mediaType);
+            var response = await _controller.CreateCoin(coin, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
         }
 
         [Fact]
-        public void CreateCoin_CreatesNewCoin_GivenAnyMediaTypeAndValidCoin()
+        public async Task CreateCoin_CreatesNewCoin_GivenAnyMediaTypeAndValidCoin()
         {
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
@@ -321,7 +322,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCoin(coin, null) as CreatedAtRouteResult;
+            var response = await _controller.CreateCoin(coin, null) as CreatedAtRouteResult;
             var returnedCoin = response.Value as CoinDto;
 
             //Assert
@@ -331,7 +332,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateCoin_CreatesNewCoin_GivenHateoasMediaTypeAndValidCoin()
+        public async Task CreateCoin_CreatesNewCoin_GivenHateoasMediaTypeAndValidCoin()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
@@ -343,7 +344,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCoin(coin, mediaType) as CreatedAtRouteResult;
+            var response = await _controller.CreateCoin(coin, mediaType) as CreatedAtRouteResult;
             dynamic returnedCoin = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -353,57 +354,57 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void BlockCoinCreation_ReturnsConflictResponse_GivenExistingId()
+        public async Task BlockCoinCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
             //Act
-            var response = _controller.BlockCoinCreation(id) as StatusCodeResult;
+            var response = await _controller.BlockCoinCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
         }
 
         [Fact]
-        public void BlockCoinCreation_ReturnsNotFoundResponse_GivenUnexistingId()
+        public async Task BlockCoinCreation_ReturnsNotFoundResponse_GivenUnexistingId()
         {
             //Arrange
             Guid id = new Guid("ba5b97b2-e8bd-4953-81ca-f107cb1f5b5d");
 
             //Act
-            var response = _controller.BlockCoinCreation(id);
+            var response = await _controller.BlockCoinCreation(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCoin_ReturnsBadRequestResponse_GivenNoCoin()
+        public async Task UpdateCoin_ReturnsBadRequestResponse_GivenNoCoin()
         {
             //Act
-            var response = _controller.UpdateCoin(Guid.Empty, null);
+            var response = await _controller.UpdateCoin(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateCoin_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
+        public async Task UpdateCoin_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
         {
             //Arrange
             CoinUpdateDto coin = new CoinUpdateDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.UpdateCoin(Guid.Empty, coin);
+            var response = await _controller.UpdateCoin(Guid.Empty, coin);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void UpdateCoin_ReturnsBadRequestResponse_GivenInvalidCountryId()
+        public async Task UpdateCoin_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
             CoinUpdateDto coin = new CoinUpdateDto
@@ -412,14 +413,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCoin(Guid.Empty, coin);
+            var response = await _controller.UpdateCoin(Guid.Empty, coin);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
+        public async Task UpdateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
         {
             //Arrange
             CoinUpdateDto coin = new CoinUpdateDto
@@ -429,14 +430,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCoin(Guid.Empty, coin);
+            var response = await _controller.UpdateCoin(Guid.Empty, coin);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateCoin_ReturnsNotFoundResponse_GivenInvalidCoinId()
+        public async Task UpdateCoin_ReturnsNotFoundResponse_GivenInvalidCoinId()
         {
             //Arrange
             Guid id = new Guid("46020ac4-f8c6-4bce-8fce-6c8513a49f28");
@@ -447,14 +448,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCoin(id, coin);
+            var response = await _controller.UpdateCoin(id, coin);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCoin_ReturnsNoContentResponse_GivenValidCoin()
+        public async Task UpdateCoin_ReturnsNoContentResponse_GivenValidCoin()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -465,14 +466,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCoin(id, coin);
+            var response = await _controller.UpdateCoin(id, coin);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void UpdateCoin_UpdatesExistingCoin_GivenValidCoin()
+        public async Task UpdateCoin_UpdatesExistingCoin_GivenValidCoin()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -484,40 +485,40 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCoin(id, coin);
+            var response = await _controller.UpdateCoin(id, coin);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CoinRepository.GetById(id));
-            Assert.Equal("Euros", _unitOfWork.CoinRepository.GetById(id).Type);
-            Assert.Equal("France", _unitOfWork.CoinRepository.GetById(id).Country.Name);
+            Assert.NotNull(await _unitOfWork.CoinRepository.GetById(id));
+            Assert.Equal("Euros", (await _unitOfWork.CoinRepository.GetById(id)).Type);
+            Assert.Equal("France", (await _unitOfWork.CoinRepository.GetById(id)).Country.Name);
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_ReturnsBadRequestResponse_GivenNoPatchDocument()
+        public async Task PartiallyUpdateCoin_ReturnsBadRequestResponse_GivenNoPatchDocument()
         {
             //Act
-            var response = _controller.PartiallyUpdateCoin(Guid.Empty, null);
+            var response = await _controller.PartiallyUpdateCoin(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_ReturnsNotFoundResponse_GivenInvalidCoinId()
+        public async Task PartiallyUpdateCoin_ReturnsNotFoundResponse_GivenInvalidCoinId()
         {
             //Arrange
             Guid id = new Guid("46020ac4-f8c6-4bce-8fce-6c8513a49f28");
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
 
             //Act
-            var response = _controller.PartiallyUpdateCoin(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_ReturnsUnprocessableEntityObjectResponse_GivenEqualSubjectAndNote()
+        public async Task PartiallyUpdateCoin_ReturnsUnprocessableEntityObjectResponse_GivenEqualSubjectAndNote()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -526,14 +527,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Note, "Chinese Coin");
 
             //Act
-            var response = _controller.PartiallyUpdateCoin(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
+        public async Task PartiallyUpdateCoin_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -541,14 +542,14 @@ namespace Recollectable.Tests.Controllers
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.PartiallyUpdateCoin(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_ReturnsBadRequestResponse_GivenInvalidCountryId()
+        public async Task PartiallyUpdateCoin_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -557,14 +558,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Subject, "Chinese Coin");
 
             //Act
-            var response = _controller.PartiallyUpdateCoin(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
+        public async Task PartiallyUpdateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -573,14 +574,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Subject, "Chinese Coin");
 
             //Act
-            var response = _controller.PartiallyUpdateCoin(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_ReturnsNoContentResponse_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCoin_ReturnsNoContentResponse_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -588,14 +589,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Subject, "Chinese Coin");
 
             //Act
-            var response = _controller.PartiallyUpdateCoin(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCoin_UpdatesExistingCoin_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCoin_UpdatesExistingCoin_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -605,52 +606,52 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.CountryId, new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"));
 
             //Act
-            var response = _controller.PartiallyUpdateCoin(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CoinRepository.GetById(id));
-            Assert.Equal("Euros", _unitOfWork.CoinRepository.GetById(id).Type);
-            Assert.Equal("France", _unitOfWork.CoinRepository.GetById(id).Country.Name);
+            Assert.NotNull(await _unitOfWork.CoinRepository.GetById(id));
+            Assert.Equal("Euros", (await _unitOfWork.CoinRepository.GetById(id)).Type);
+            Assert.Equal("France", (await _unitOfWork.CoinRepository.GetById(id)).Country.Name);
         }
 
         [Fact]
-        public void DeleteCoin_ReturnsNotFoundResponse_GivenInvalidCoinId()
+        public async Task DeleteCoin_ReturnsNotFoundResponse_GivenInvalidCoinId()
         {
             //Arrange
             Guid id = new Guid("46020ac4-f8c6-4bce-8fce-6c8513a49f28");
 
             //Act
-            var response = _controller.DeleteCoin(id);
+            var response = await _controller.DeleteCoin(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void DeleteCoin_ReturnsNoContentResponse_GivenValidCoinId()
+        public async Task DeleteCoin_ReturnsNoContentResponse_GivenValidCoinId()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
             //Act
-            var response = _controller.DeleteCoin(id);
+            var response = await _controller.DeleteCoin(id);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void DeleteCoin_RemovesCoinFromDatabase()
+        public async Task DeleteCoin_RemovesCoinFromDatabase()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
             //Act
-            _controller.DeleteCoin(id);
+            await _controller.DeleteCoin(id);
 
             //Assert
-            Assert.Equal(5, _unitOfWork.CoinRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.CoinRepository.GetById(id));
+            Assert.Equal(5, (await _unitOfWork.CoinRepository.Get(resourceParameters)).Count());
+            Assert.Null(await _unitOfWork.CoinRepository.GetById(id));
         }
     }
 }

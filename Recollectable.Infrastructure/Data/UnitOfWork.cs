@@ -7,6 +7,7 @@ using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data.Repositories;
 using System;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data
 {
@@ -43,9 +44,9 @@ namespace Recollectable.Infrastructure.Data
             _propertyMappingService = propertyMappingService;
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
-            return (_context.SaveChanges() >= 0);
+            return (await _context.SaveChangesAsync() >= 0);
         }
 
         public void Dispose()

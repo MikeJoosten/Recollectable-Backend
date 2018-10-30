@@ -8,6 +8,7 @@ using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
@@ -23,19 +24,20 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<User> Get(UsersResourceParameters resourceParameters)
+        public async Task<PagedList<User>> Get(UsersResourceParameters resourceParameters)
         {
-            var users = _context.Users
+            var users = await _context.Users
                 .Include(u => u.Collections)
                 .ApplySort(resourceParameters.OrderBy,
-                    _propertyMappingService.GetPropertyMapping<UserDto, User>());
+                    _propertyMappingService.GetPropertyMapping<UserDto, User>())
+                .ToListAsync();
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
                 var search = resourceParameters.Search.Trim().ToLowerInvariant();
                 users = users.Where(u => u.FirstName.ToLowerInvariant().Contains(search)
                     || u.LastName.ToLowerInvariant().Contains(search)
-                    || u.Email.ToLowerInvariant().Contains(search));
+                    || u.Email.ToLowerInvariant().Contains(search)).ToList();
             }
 
             return PagedList<User>.Create(users,
@@ -43,11 +45,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public User GetById(Guid userId)
+        public async Task<User> GetById(Guid userId)
         {
-            return _context.Users
+            return await _context.Users
                 .Include(u => u.Collections)
-                .FirstOrDefault(u => u.Id == userId);
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         public void Add(User user)
@@ -67,9 +69,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Users.Remove(user);
         }
 
-        public bool Exists(Guid userId)
+        public async Task<bool> Exists(Guid userId)
         {
-            return _context.Users.Any(u => u.Id == userId);
+            return await _context.Users.AnyAsync(u => u.Id == userId);
         }
     }
 }

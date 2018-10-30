@@ -51,7 +51,7 @@ namespace Recollectable.API.Controllers
 
         [HttpHead]
         [HttpGet(Name = "GetUsers")]
-        public IActionResult GetUsers(UsersResourceParameters resourceParameters,
+        public async Task<IActionResult> GetUsers(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
@@ -66,7 +66,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var usersFromRepo = _unitOfWork.UserRepository.Get(resourceParameters);
+            var usersFromRepo = await _unitOfWork.UserRepository.Get(resourceParameters);
             var users = _mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -137,7 +137,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet("{id}", Name = "GetUser")]
-        public IActionResult GetUser(Guid id, [FromQuery] string fields,
+        public async Task<IActionResult> GetUser(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
@@ -145,7 +145,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
+            var userFromRepo = await _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
@@ -176,7 +176,7 @@ namespace Recollectable.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("register", Name = "Register")]
-        public IActionResult Register([FromBody] UserCreationDto user,
+        public async Task<IActionResult> Register([FromBody] UserCreationDto user,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (user == null)
@@ -190,26 +190,26 @@ namespace Recollectable.API.Controllers
             }
 
             var newUser = _mapper.Map<User>(user);
-            var result = _userManager.CreateAsync(newUser, user.Password);
+            var result = await _userManager.CreateAsync(newUser, user.Password);
 
-            if (!result.Result.Succeeded)
+            if (!result.Succeeded)
             {
-                return new UnprocessableEntityObjectResult(result.Result);
+                return new UnprocessableEntityObjectResult(result);
             }
 
-            result = _userManager.AddToRoleAsync(newUser, nameof(Roles.User));
+            result = await _userManager.AddToRoleAsync(newUser, nameof(Roles.User));
 
-            if (!result.Result.Succeeded)
+            if (!result.Succeeded)
             {
-                return new UnprocessableEntityObjectResult(result.Result);
+                return new UnprocessableEntityObjectResult(result);
             }
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception("Creating a user failed on save.");
             }
 
-            var token = _userManager.GenerateEmailConfirmationTokenAsync(newUser).Result;
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
             var confirmationUrl = Url.Action("ConfirmEmail", "Users", new { token, email = newUser.Email },
                 protocol: HttpContext.Request.Scheme);
 
@@ -235,9 +235,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost("register/{id}")]
-        public IActionResult BlockRegistration(Guid id)
+        public async Task<IActionResult> BlockRegistration(Guid id)
         {
-            if (_unitOfWork.UserRepository.Exists(id))
+            if (await _unitOfWork.UserRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -247,21 +247,21 @@ namespace Recollectable.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("login", Name = "Login")]
-        public IActionResult Login([FromBody] CredentialsDto credentials)
+        public async Task<IActionResult> Login([FromBody] CredentialsDto credentials)
         {
             if (credentials == null)
             {
                 return BadRequest();
             }
 
-            var user = _userManager.FindByNameOrEmailAsync(credentials.UserName).Result;
+            var user = await _userManager.FindByNameOrEmailAsync(credentials.UserName);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            var identity = GenerateClaimsIdentity(user, credentials.Password).Result;
+            var identity = await GenerateClaimsIdentity(user, credentials.Password);
 
             if (identity == null)
             {
@@ -276,22 +276,22 @@ namespace Recollectable.API.Controllers
                 expires_in = (int)JwtTokenProviderOptions.Expiration.TotalSeconds
             };
 
-            HttpContext.SignInAsync("Identity.Application", new ClaimsPrincipal(identity));
+            await HttpContext.SignInAsync("Identity.Application", new ClaimsPrincipal(identity));
             return Ok(response);
         }
 
         [AllowAnonymous]
         [HttpGet("{email}/forgot_password")]
-        public IActionResult ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword(string email)
         {
-            var user = _userManager.FindByEmailAsync(email).Result;
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            var token = _userManager.GeneratePasswordResetTokenAsync(user).Result;
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var resetUrl = Url.Action("ResetPassword", "Users", new { token, email },
                 protocol: HttpContext.Request.Scheme);
 
@@ -303,7 +303,7 @@ namespace Recollectable.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("/{email}/reset_password")]
-        public IActionResult ResetPassword(string token, string email, [FromBody] ResetPasswordDto resetPassword)
+        public async Task<IActionResult> ResetPassword(string token, string email, [FromBody] ResetPasswordDto resetPassword)
         {
             if (resetPassword == null)
             {
@@ -315,14 +315,14 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var user = _userManager.FindByEmailAsync(email).Result;
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            var result = _userManager.ResetPasswordAsync(user, token, resetPassword.Password).Result;
+            var result = await _userManager.ResetPasswordAsync(user, token, resetPassword.Password);
 
             if (!result.Succeeded)
             {
@@ -335,7 +335,7 @@ namespace Recollectable.API.Controllers
 
             if (_userManager.IsLockedOutAsync(user).Result)
             {
-                _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow);
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow);
             }
 
             return NoContent();
@@ -343,7 +343,7 @@ namespace Recollectable.API.Controllers
 
         [Authorize(Roles = "User")]
         [HttpPost("/{email}/change_password")]
-        public IActionResult ChangePassword(string email, [FromBody] ChangedPasswordDto changedPassword)
+        public async Task<IActionResult> ChangePassword(string email, [FromBody] ChangedPasswordDto changedPassword)
         {
             if (changedPassword == null)
             {
@@ -355,14 +355,14 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var user = _userManager.FindByEmailAsync(email).Result;
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            var result = _userManager.ChangePasswordAsync(user, changedPassword.OldPassword, changedPassword.NewPassword).Result;
+            var result = await _userManager.ChangePasswordAsync(user, changedPassword.OldPassword, changedPassword.NewPassword);
 
             if (!result.Succeeded)
             {
@@ -378,21 +378,21 @@ namespace Recollectable.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("{email}/confirm_account")]
-        public IActionResult ConfirmEmail(string token, string email)
+        public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
-            var user = _userManager.FindByEmailAsync(email).Result;
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            var result = _userManager.ConfirmEmailAsync(user, token).Result;
+            var result = await _userManager.ConfirmEmailAsync(user, token);
             return NoContent();
         }
 
         [HttpPut("{id}", Name = "UpdateUser")]
-        public IActionResult UpdateUser(Guid id, [FromBody] UserUpdateDto user)
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto user)
         {
             if (user == null)
             {
@@ -404,7 +404,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
+            var userFromRepo = await _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
@@ -414,7 +414,7 @@ namespace Recollectable.API.Controllers
             _mapper.Map(user, userFromRepo);
             _unitOfWork.UserRepository.Update(userFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Updating user {id} failed on save.");
             }
@@ -423,7 +423,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPatch("{id}", Name = "PartiallyUpdateUser")]
-        public IActionResult PartiallyUpdateUser(Guid id,
+        public async Task<IActionResult> PartiallyUpdateUser(Guid id,
             [FromBody] JsonPatchDocument<UserUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -431,7 +431,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
+            var userFromRepo = await _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
@@ -451,7 +451,7 @@ namespace Recollectable.API.Controllers
             _mapper.Map(patchedUser, userFromRepo);
             _unitOfWork.UserRepository.Update(userFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Patching user {id} failed on save.");
             }
@@ -460,9 +460,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpDelete("{id}", Name = "DeleteUser")]
-        public IActionResult DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var userFromRepo = _unitOfWork.UserRepository.GetById(id);
+            var userFromRepo = await _unitOfWork.UserRepository.GetById(id);
 
             if (userFromRepo == null)
             {
@@ -471,7 +471,7 @@ namespace Recollectable.API.Controllers
 
             _unitOfWork.UserRepository.Delete(userFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Deleting user {id} failed on save.");
             }

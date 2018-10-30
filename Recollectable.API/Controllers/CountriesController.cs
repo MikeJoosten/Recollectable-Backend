@@ -16,6 +16,7 @@ using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -39,7 +40,7 @@ namespace Recollectable.API.Controllers
 
         [HttpHead]
         [HttpGet(Name = "GetCountries")]
-        public IActionResult GetCountries(CountriesResourceParameters resourceParameters,
+        public async Task<IActionResult> GetCountries(CountriesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CountryDto, Country>
@@ -54,7 +55,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var countriesFromRepo = _unitOfWork.CountryRepository.Get(resourceParameters);
+            var countriesFromRepo = await _unitOfWork.CountryRepository.Get(resourceParameters);
             var countries = _mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -125,7 +126,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet("{id}", Name = "GetCountry")]
-        public IActionResult GetCountry(Guid id, [FromQuery] string fields,
+        public async Task<IActionResult> GetCountry(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<CountryDto>(fields))
@@ -133,7 +134,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
+            var countryFromRepo = await _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
@@ -163,7 +164,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost(Name = "CreateCountry")]
-        public IActionResult CreateCountry([FromBody] CountryCreationDto country,
+        public async Task<IActionResult> CreateCountry([FromBody] CountryCreationDto country,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (country == null)
@@ -185,7 +186,7 @@ namespace Recollectable.API.Controllers
             var newCountry = _mapper.Map<Country>(country);
             _unitOfWork.CountryRepository.Add(newCountry);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception("Creating a country failed on save.");
             }
@@ -213,9 +214,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost("{id}")]
-        public IActionResult BlockCountryCreation(Guid id)
+        public async Task<IActionResult> BlockCountryCreation(Guid id)
         {
-            if (_unitOfWork.CountryRepository.Exists(id))
+            if (await _unitOfWork.CountryRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -224,7 +225,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPut("{id}", Name = "UpdateCountry")]
-        public IActionResult UpdateCountry(Guid id, [FromBody] CountryUpdateDto country)
+        public async Task<IActionResult> UpdateCountry(Guid id, [FromBody] CountryUpdateDto country)
         {
             if (country == null)
             {
@@ -242,7 +243,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
+            var countryFromRepo = await _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
@@ -252,7 +253,7 @@ namespace Recollectable.API.Controllers
             _mapper.Map(country, countryFromRepo);
             _unitOfWork.CountryRepository.Update(countryFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Updating country {id} failed on save.");
             }
@@ -261,7 +262,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPatch("{id}", Name = "PartiallyUpdateCountry")]
-        public IActionResult PartiallyUpdateCountry(Guid id, 
+        public async Task<IActionResult> PartiallyUpdateCountry(Guid id, 
             [FromBody] JsonPatchDocument<CountryUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -269,7 +270,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
+            var countryFromRepo = await _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
@@ -295,7 +296,7 @@ namespace Recollectable.API.Controllers
             _mapper.Map(patchedCountry, countryFromRepo);
             _unitOfWork.CountryRepository.Update(countryFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Patching country {id} failed on save.");
             }
@@ -304,9 +305,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpDelete("{id}", Name = "DeleteCountry")]
-        public IActionResult DeleteCountry(Guid id)
+        public async Task<IActionResult> DeleteCountry(Guid id)
         {
-            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
+            var countryFromRepo = await _unitOfWork.CountryRepository.GetById(id);
 
             if (countryFromRepo == null)
             {
@@ -315,7 +316,7 @@ namespace Recollectable.API.Controllers
 
             _unitOfWork.CountryRepository.Delete(countryFromRepo);
             
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Deleting country {id} failed on save.");
             }

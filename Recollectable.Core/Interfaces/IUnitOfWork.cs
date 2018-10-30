@@ -3,6 +3,7 @@ using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
+using System.Threading.Tasks;
 
 namespace Recollectable.Core.Interfaces
 {
@@ -16,7 +17,7 @@ namespace Recollectable.Core.Interfaces
         IRepository<Country, CountriesResourceParameters> CountryRepository { get; }
         IRepository<User, UsersResourceParameters> UserRepository { get; }
 
-        bool Save();
+        Task<bool> Save();
         void Dispose();
     }
 }

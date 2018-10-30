@@ -8,6 +8,7 @@ using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Interfaces;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
@@ -25,35 +26,36 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<CollectionCollectable> Get(Guid collectionId,
+        public async Task<PagedList<CollectionCollectable>> Get(Guid collectionId,
             CollectablesResourceParameters resourceParameters)
         {
-            if (!_unitOfWork.CollectionRepository.Exists(collectionId))
+            if (!await _unitOfWork.CollectionRepository.Exists(collectionId))
             {
                 return null;
             }
 
-            var collectables = _context.CollectionCollectables
+            var collectables = await _context.CollectionCollectables
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.Country)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.CollectorValue)
                 .Where(cc => cc.CollectionId == collectionId)
                 .ApplySort(resourceParameters.OrderBy,
-                    _propertyMappingService.GetPropertyMapping<CollectableDto, CollectionCollectable>());
+                    _propertyMappingService.GetPropertyMapping<CollectableDto, CollectionCollectable>())
+                .ToListAsync();
 
             if (!string.IsNullOrEmpty(resourceParameters.Country))
             {
                 var country = resourceParameters.Country.Trim().ToLowerInvariant();
                 collectables = collectables.Where(c =>
-                    c.Collectable.Country.Name.ToLowerInvariant() == country);
+                    c.Collectable.Country.Name.ToLowerInvariant() == country).ToList();
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
                 var search = resourceParameters.Search.Trim().ToLowerInvariant();
                 collectables = collectables.Where(c => c.Collectable.Country.Name.ToLowerInvariant().Contains(search)
-                    || c.Collectable.ReleaseDate.ToLowerInvariant().Contains(search));
+                    || c.Collectable.ReleaseDate.ToLowerInvariant().Contains(search)).ToList();
             }
 
             return PagedList<CollectionCollectable>.Create(collectables,
@@ -61,20 +63,20 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public CollectionCollectable GetById(Guid collectionId, Guid Id)
+        public async Task<CollectionCollectable> GetById(Guid collectionId, Guid Id)
         {
-            return _context.CollectionCollectables
+            return await _context.CollectionCollectables
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.Country)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.CollectorValue)
                 .Where(cc => cc.CollectionId == collectionId)
-                .FirstOrDefault(cc => cc.Id == Id);
+                .FirstOrDefaultAsync(cc => cc.Id == Id);
         }
 
-        public Collectable GetCollectableItem(Guid collectableId)
+        public async Task<Collectable> GetCollectableItem(Guid collectableId)
         {
-            return _context.Collectables.FirstOrDefault(c => c.Id == collectableId);
+            return await _context.Collectables.FirstOrDefaultAsync(c => c.Id == collectableId);
         }
 
         public void Add(CollectionCollectable collectable)
@@ -94,11 +96,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.CollectionCollectables.Remove(collectable);
         }
 
-        public bool Exists(Guid collectionId, Guid Id)
+        public async Task<bool> Exists(Guid collectionId, Guid Id)
         {
-            return _context.CollectionCollectables
+            return await _context.CollectionCollectables
                 .Where(cc => cc.CollectionId == collectionId)
-                .Any(cc => cc.Id == Id);
+                .AnyAsync(cc => cc.Id == Id);
         }
     }
 }

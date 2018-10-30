@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Controllers
@@ -29,26 +30,26 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCountries_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
+        public async Task GetCountries_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
             resourceParameters.OrderBy = "Invalid";
 
             //Act
-            var response = _controller.GetCountries(resourceParameters, null);
+            var response = await _controller.GetCountries(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCountries_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCountries_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             resourceParameters.Fields = "Invalid";
 
             //Act
-            var response = _controller.GetCountries(resourceParameters, null);
+            var response = await _controller.GetCountries(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
@@ -58,20 +59,20 @@ namespace Recollectable.Tests.Controllers
         [InlineData(null)]
         [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCountries_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCountries_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Act
-            var response = _controller.GetCountries(resourceParameters, mediaType);
+            var response = await _controller.GetCountries(resourceParameters, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCountries_ReturnsAllCountries_GivenNoMediaType()
+        public async Task GetCountries_ReturnsAllCountries_GivenNoMediaType()
         {
             //Act
-            var response = _controller.GetCountries(resourceParameters, null) as OkObjectResult;
+            var response = await _controller.GetCountries(resourceParameters, null) as OkObjectResult;
             var countries = response.Value as List<CountryDto>;
 
             //Assert
@@ -80,13 +81,13 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCountries_ReturnsAllCountries_GivenJsonMediaType()
+        public async Task GetCountries_ReturnsAllCountries_GivenJsonMediaType()
         {
             //Arrange
             string mediaType = "application/json";
 
             //Act
-            var response = _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
             var countries = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -95,13 +96,13 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCountries_ReturnsAllCountries_GivenHateoasMediaType()
+        public async Task GetCountries_ReturnsAllCountries_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
 
             //Act
-            var response = _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
             var linkedCollection = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -110,14 +111,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCountries_ReturnsCountries_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCountries_ReturnsCountries_GivenJsonMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json";
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
             var countries = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -126,14 +127,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCountries_ReturnsCountries_GivenHateoasMediaTypeAndPagingParameters()
+        public async Task GetCountries_ReturnsCountries_GivenHateoasMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             resourceParameters.PageSize = 2;
 
             //Act
-            var response = _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
             var countries = response.Value as LinkedCollectionResource;
 
             //Assert
@@ -142,26 +143,26 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCountry_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCountry_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             string fields = "Invalid";
 
             //Act
-            var response = _controller.GetCountry(Guid.Empty, fields, null);
+            var response = await _controller.GetCountry(Guid.Empty, fields, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCountry_ReturnsNotFoundResponse_GivenInvalidId()
+        public async Task GetCountry_ReturnsNotFoundResponse_GivenInvalidId()
         {
             //Arrange
             Guid id = new Guid("a1f10f69-61a0-4823-bc55-96e2f04b2e50");
 
             //Act
-            var response = _controller.GetCountry(id, null, null);
+            var response = await _controller.GetCountry(id, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -171,26 +172,26 @@ namespace Recollectable.Tests.Controllers
         [InlineData(null)]
         [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCountry_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCountry_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
 
             //Act
-            var response = _controller.GetCountry(id, null, mediaType);
+            var response = await _controller.GetCountry(id, null, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCountry_ReturnsCountry_GivenNoMediaType()
+        public async Task GetCountry_ReturnsCountry_GivenNoMediaType()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
 
             //Act
-            var response = _controller.GetCountry(id, null, null) as OkObjectResult;
+            var response = await _controller.GetCountry(id, null, null) as OkObjectResult;
             var country = response.Value as CountryDto;
 
             //Assert
@@ -200,14 +201,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCountry_ReturnsCountry_GivenJsonMediaType()
+        public async Task GetCountry_ReturnsCountry_GivenJsonMediaType()
         {
             //Arrange
             string mediaType = "application/json";
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
 
             //Act
-            var response = _controller.GetCountry(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCountry(id, null, mediaType) as OkObjectResult;
             dynamic country = response.Value as ExpandoObject;
 
             //Assert
@@ -217,14 +218,14 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void GetCountry_ReturnsCountry_GivenHateoasMediaType()
+        public async Task GetCountry_ReturnsCountry_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
 
             //Act
-            var response = _controller.GetCountry(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCountry(id, null, mediaType) as OkObjectResult;
             dynamic country = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -234,24 +235,24 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateCountry_ReturnsBadRequestResponse_GivenNoCountry()
+        public async Task CreateCountry_ReturnsBadRequestResponse_GivenNoCountry()
         {
             //Act
-            var response = _controller.CreateCountry(null, null);
+            var response = await _controller.CreateCountry(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
+        public async Task CreateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
         {
             //Arrange
             CountryCreationDto country = new CountryCreationDto();
             _controller.ModelState.AddModelError("Name", "Required");
 
             //Act
-            var response = _controller.CreateCountry(country, null);
+            var response = await _controller.CreateCountry(country, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -260,7 +261,7 @@ namespace Recollectable.Tests.Controllers
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
-        public void CreateCountry_ReturnsCreatedResponse_GivenValidCountry(string mediaType)
+        public async Task CreateCountry_ReturnsCreatedResponse_GivenValidCountry(string mediaType)
         {
             //Arrange
             CountryCreationDto country = new CountryCreationDto
@@ -269,14 +270,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCountry(country, mediaType);
+            var response = await _controller.CreateCountry(country, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
         }
 
         [Fact]
-        public void CreateCountry_CreatesNewCountry_GivenAnyMediaTypeAndValidCountry()
+        public async Task CreateCountry_CreatesNewCountry_GivenAnyMediaTypeAndValidCountry()
         {
             //Arrange
             CountryCreationDto country = new CountryCreationDto
@@ -285,7 +286,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCountry(country, null) as CreatedAtRouteResult;
+            var response = await _controller.CreateCountry(country, null) as CreatedAtRouteResult;
             var returnedCountry = response.Value as CountryDto;
 
             //Assert
@@ -294,7 +295,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateCountry_CreatesNewCountry_GivenHateoasMediaTypeAndValidCountry()
+        public async Task CreateCountry_CreatesNewCountry_GivenHateoasMediaTypeAndValidCountry()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
@@ -304,7 +305,7 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.CreateCountry(country, mediaType) as CreatedAtRouteResult;
+            var response = await _controller.CreateCountry(country, mediaType) as CreatedAtRouteResult;
             dynamic returnedCountry = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -313,57 +314,57 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void BlockCountryCreation_ReturnsConflictResponse_GivenExistingId()
+        public async Task BlockCountryCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
 
             //Act
-            var response = _controller.BlockCountryCreation(id) as StatusCodeResult;
+            var response = await _controller.BlockCountryCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
         }
 
         [Fact]
-        public void BlockCountryCreation_ReturnsNotFoundResponse_GivenUnexistingId()
+        public async Task BlockCountryCreation_ReturnsNotFoundResponse_GivenUnexistingId()
         {
             //Arrange
             Guid id = new Guid("d60ce4c3-7e55-43f0-a0a5-b7cef8e020f8");
 
             //Act
-            var response = _controller.BlockCountryCreation(id);
+            var response = await _controller.BlockCountryCreation(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCountry_ReturnsBadRequestResponse_GivenNoCountry()
+        public async Task UpdateCountry_ReturnsBadRequestResponse_GivenNoCountry()
         {
             //Act
-            var response = _controller.UpdateCountry(Guid.Empty, null);
+            var response = await _controller.UpdateCountry(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCountry()
+        public async Task UpdateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCountry()
         {
             //Arrange
             CountryUpdateDto country = new CountryUpdateDto();
             _controller.ModelState.AddModelError("Name", "Required");
 
             //Act
-            var response = _controller.UpdateCountry(Guid.Empty, country);
+            var response = await _controller.UpdateCountry(Guid.Empty, country);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void UpdateCountry_ReturnsNotFoundResponse_GivenInvalidCountryId()
+        public async Task UpdateCountry_ReturnsNotFoundResponse_GivenInvalidCountryId()
         {
             //Arrange
             Guid id = new Guid("db069604-0ea6-4a05-b7d4-1e6b8470c748");
@@ -373,14 +374,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCountry(id, country);
+            var response = await _controller.UpdateCountry(id, country);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCountry_ReturnsNoContentResponse_GivenValidCountry()
+        public async Task UpdateCountry_ReturnsNoContentResponse_GivenValidCountry()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
@@ -390,14 +391,14 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCountry(id, country);
+            var response = await _controller.UpdateCountry(id, country);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void UpdateCountry_UpdatesExistingCountry_GivenValidCountry()
+        public async Task UpdateCountry_UpdatesExistingCountry_GivenValidCountry()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
@@ -407,39 +408,39 @@ namespace Recollectable.Tests.Controllers
             };
 
             //Act
-            var response = _controller.UpdateCountry(id, country);
+            var response = await _controller.UpdateCountry(id, country);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CountryRepository.GetById(id));
-            Assert.Equal("China", _unitOfWork.CountryRepository.GetById(id).Name);
+            Assert.NotNull(await _unitOfWork.CountryRepository.GetById(id));
+            Assert.Equal("China", (await _unitOfWork.CountryRepository.GetById(id)).Name);
         }
 
         [Fact]
-        public void PartiallyUpdateCountry_ReturnsBadRequestResponse_GivenNoPatchDocument()
+        public async Task PartiallyUpdateCountry_ReturnsBadRequestResponse_GivenNoPatchDocument()
         {
             //Act
-            var response = _controller.PartiallyUpdateCountry(Guid.Empty, null);
+            var response = await _controller.PartiallyUpdateCountry(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCountry_ReturnsNotFoundResponse_GivenInvalidCountryId()
+        public async Task PartiallyUpdateCountry_ReturnsNotFoundResponse_GivenInvalidCountryId()
         {
             //Arrange
             Guid id = new Guid("2368b256-5f1f-49f5-8f01-836df3725a76");
             JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
 
             //Act
-            var response = _controller.PartiallyUpdateCountry(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCountry(id, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCountry_ReturnsUnprocessableEntityObjectResponse_GivenEqualDescriptionAndName()
+        public async Task PartiallyUpdateCountry_ReturnsUnprocessableEntityObjectResponse_GivenEqualDescriptionAndName()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
@@ -448,14 +449,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Description, "China");
 
             //Act
-            var response = _controller.PartiallyUpdateCountry(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCountry(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCountry()
+        public async Task PartiallyUpdateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCountry()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
@@ -463,14 +464,14 @@ namespace Recollectable.Tests.Controllers
             _controller.ModelState.AddModelError("Name", "Required");
 
             //Act
-            var response = _controller.PartiallyUpdateCountry(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCountry(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCountry_ReturnsNoContentResponse_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCountry_ReturnsNoContentResponse_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
@@ -478,14 +479,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Name, "China");
 
             //Act
-            var response = _controller.PartiallyUpdateCountry(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCountry(id, patchDoc);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCountry_UpdatesExistingCountry_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCountry_UpdatesExistingCountry_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
@@ -493,51 +494,51 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Name, "China");
 
             //Act
-            var response = _controller.PartiallyUpdateCountry(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCountry(id, patchDoc);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CountryRepository.GetById(id));
-            Assert.Equal("China", _unitOfWork.CountryRepository.GetById(id).Name);
+            Assert.NotNull(await _unitOfWork.CountryRepository.GetById(id));
+            Assert.Equal("China", (await _unitOfWork.CountryRepository.GetById(id)).Name);
         }
 
         [Fact]
-        public void DeleteCountry_ReturnsNotFoundResponse_GivenInvalidCountryId()
+        public async Task DeleteCountry_ReturnsNotFoundResponse_GivenInvalidCountryId()
         {
             //Arrange
             Guid id = new Guid("08786b17-8443-4873-98b3-8d73cf400fba");
 
             //Act
-            var response = _controller.DeleteCountry(id);
+            var response = await _controller.DeleteCountry(id);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void DeleteCountry_ReturnsNoContentResponse_GivenValidCountryId()
+        public async Task DeleteCountry_ReturnsNoContentResponse_GivenValidCountryId()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
 
             //Act
-            var response = _controller.DeleteCountry(id);
+            var response = await _controller.DeleteCountry(id);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void DeleteCountry_RemovesCountryFromDatabase()
+        public async Task DeleteCountry_RemovesCountryFromDatabase()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
 
             //Act
-            _controller.DeleteCountry(id);
+            await _controller.DeleteCountry(id);
 
             //Assert
-            Assert.Equal(5, _unitOfWork.CountryRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.CountryRepository.GetById(id));
+            Assert.Equal(5, (await _unitOfWork.CountryRepository.Get(resourceParameters)).Count());
+            Assert.Null(await _unitOfWork.CountryRepository.GetById(id));
         }
     }
 }

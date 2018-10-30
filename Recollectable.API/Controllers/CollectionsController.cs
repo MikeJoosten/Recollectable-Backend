@@ -16,6 +16,7 @@ using Recollectable.Core.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
@@ -39,7 +40,7 @@ namespace Recollectable.API.Controllers
 
         [HttpHead]
         [HttpGet(Name = "GetCollections")]
-        public IActionResult GetCollections(CollectionsResourceParameters resourceParameters,
+        public async Task<IActionResult> GetCollections(CollectionsResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CollectionDto, Collection>
@@ -54,7 +55,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectionsFromRepo = _unitOfWork.CollectionRepository.Get(resourceParameters);
+            var collectionsFromRepo = await _unitOfWork.CollectionRepository.Get(resourceParameters);
             var collections = _mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -125,7 +126,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpGet("{id}", Name = "GetCollection")]
-        public IActionResult GetCollection(Guid id, [FromQuery] string fields,
+        public async Task<IActionResult> GetCollection(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<CollectionDto>(fields))
@@ -133,7 +134,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectionFromRepo = _unitOfWork.CollectionRepository.GetById(id);
+            var collectionFromRepo = await _unitOfWork.CollectionRepository.GetById(id);
 
             if (collectionFromRepo == null)
             {
@@ -163,7 +164,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost(Name = "CreateCollection")]
-        public IActionResult CreateCollection([FromBody] CollectionCreationDto collection,
+        public async Task<IActionResult> CreateCollection([FromBody] CollectionCreationDto collection,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (collection == null)
@@ -176,7 +177,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var user = _unitOfWork.UserRepository.GetById(collection.UserId);
+            var user = await _unitOfWork.UserRepository.GetById(collection.UserId);
 
             if (user == null)
             {
@@ -188,7 +189,7 @@ namespace Recollectable.API.Controllers
 
             _unitOfWork.CollectionRepository.Add(newCollection);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception("Creating a collection failed on save.");
             }
@@ -216,9 +217,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost("{id}")]
-        public IActionResult BlockCollectionCreation(Guid id)
+        public async Task<IActionResult> BlockCollectionCreation(Guid id)
         {
-            if (_unitOfWork.CollectionRepository.Exists(id))
+            if (await _unitOfWork.CollectionRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -227,7 +228,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPut("{id}", Name = "UpdateCollection")]
-        public IActionResult UpdateCollection(Guid id, [FromBody] CollectionUpdateDto collection)
+        public async Task<IActionResult> UpdateCollection(Guid id, [FromBody] CollectionUpdateDto collection)
         {
             if (collection == null)
             {
@@ -239,12 +240,12 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!_unitOfWork.UserRepository.Exists(collection.UserId))
+            if (!await _unitOfWork.UserRepository.Exists(collection.UserId))
             {
                 return BadRequest();
             }
 
-            var collectionFromRepo = _unitOfWork.CollectionRepository.GetById(id);
+            var collectionFromRepo = await _unitOfWork.CollectionRepository.GetById(id);
 
             if (collectionFromRepo == null)
             {
@@ -256,7 +257,7 @@ namespace Recollectable.API.Controllers
             _mapper.Map(collection, collectionFromRepo);
             _unitOfWork.CollectionRepository.Update(collectionFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Updating collection {id} failed on save.");
             }
@@ -265,7 +266,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPatch("{id}", Name = "PartiallyUpdateCollection")]
-        public IActionResult PartiallyUpdateCollection(Guid id,
+        public async Task<IActionResult> PartiallyUpdateCollection(Guid id,
             [FromBody] JsonPatchDocument<CollectionUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -273,7 +274,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectionFromRepo = _unitOfWork.CollectionRepository.GetById(id);
+            var collectionFromRepo = await _unitOfWork.CollectionRepository.GetById(id);
 
             if (collectionFromRepo == null)
             {
@@ -290,7 +291,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!_unitOfWork.UserRepository.Exists(patchedCollection.UserId))
+            if (!await _unitOfWork.UserRepository.Exists(patchedCollection.UserId))
             {
                 return BadRequest();
             }
@@ -300,7 +301,7 @@ namespace Recollectable.API.Controllers
             _mapper.Map(patchedCollection, collectionFromRepo);
             _unitOfWork.CollectionRepository.Update(collectionFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Patching collection {id} failed on save.");
             }
@@ -309,9 +310,9 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpDelete("{id}", Name = "DeleteCollection")]
-        public IActionResult DeleteCollection(Guid id)
+        public async Task<IActionResult> DeleteCollection(Guid id)
         {
-            var collectionFromRepo = _unitOfWork.CollectionRepository.GetById(id);
+            var collectionFromRepo = await _unitOfWork.CollectionRepository.GetById(id);
 
             if (collectionFromRepo == null)
             {
@@ -320,7 +321,7 @@ namespace Recollectable.API.Controllers
 
             _unitOfWork.CollectionRepository.Delete(collectionFromRepo);
 
-            if (!_unitOfWork.Save())
+            if (!await _unitOfWork.Save())
             {
                 throw new Exception($"Deleting collection {id} failed on save.");
             }

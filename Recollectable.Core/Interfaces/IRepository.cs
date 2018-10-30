@@ -1,5 +1,6 @@
 ﻿using Recollectable.Core.Shared.Entities;
 using System;
+using System.Threading.Tasks;
 
 namespace Recollectable.Core.Interfaces
 {
@@ -7,11 +8,11 @@ namespace Recollectable.Core.Interfaces
         where TEntity : class
         where TParameters : class
     {
-        PagedList<TEntity> Get(TParameters resourceParameters);
-        TEntity GetById(Guid id);
+        Task<PagedList<TEntity>> Get(TParameters resourceParameters);
+        Task<TEntity> GetById(Guid id);
         void Add(TEntity entity);
         void Update(TEntity entity);
         void Delete(TEntity entity);
-        bool Exists(Guid id);
+        Task<bool> Exists(Guid id);
     }
 }

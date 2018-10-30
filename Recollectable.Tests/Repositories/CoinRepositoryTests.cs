@@ -2,6 +2,7 @@
 using Recollectable.Core.Entities.ResourceParameters;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories
@@ -16,10 +17,10 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void Get_ReturnsAllCoins()
+        public async Task Get_ReturnsAllCoins()
         {
             //Act
-            var result = _unitOfWork.CoinRepository.Get(resourceParameters);
+            var result = await _unitOfWork.CoinRepository.Get(resourceParameters);
 
             //Assert
             Assert.NotNull(result);
@@ -27,10 +28,10 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void Get_OrdersCoinsByCountry()
+        public async Task Get_OrdersCoinsByCountry()
         {
             //Act
-            var result = _unitOfWork.CoinRepository.Get(resourceParameters);
+            var result = await _unitOfWork.CoinRepository.Get(resourceParameters);
 
             //Assert
             Assert.NotNull(result);
@@ -38,13 +39,13 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void GetById_ReturnsCoin_GivenValidCoinId()
+        public async Task GetById_ReturnsCoin_GivenValidCoinId()
         {
             //Arrange
             Guid id = new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3");
 
             //Act
-            var result = _unitOfWork.CoinRepository.GetById(id);
+            var result = await _unitOfWork.CoinRepository.GetById(id);
 
             //Assert
             Assert.NotNull(result);
@@ -53,20 +54,20 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void GetById_ReturnsNull_GivenInvalidCoinId()
+        public async Task GetById_ReturnsNull_GivenInvalidCoinId()
         {
             //Arrange
             Guid id = new Guid("4ab72e1b-c115-4f13-b317-a841f73e44b7");
 
             //Act
-            var result = _unitOfWork.CoinRepository.GetById(id);
+            var result = await _unitOfWork.CoinRepository.GetById(id);
 
             //Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public void Add_AddsNewCoin()
+        public async Task Add_AddsNewCoin()
         {
             //Arrange
             Guid id = new Guid("60e55387-ee18-4e5c-866f-7ca1d2d09c0f");
@@ -80,67 +81,67 @@ namespace Recollectable.Tests.Repositories
 
             //Act
             _unitOfWork.CoinRepository.Add(newCoin);
-            _unitOfWork.Save();
+            await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(7, _unitOfWork.CoinRepository.Get(resourceParameters).Count());
-            Assert.Equal("Cent", _unitOfWork.CoinRepository.GetById(id).Type);
+            Assert.Equal(7, (await _unitOfWork.CoinRepository.Get(resourceParameters)).Count());
+            Assert.Equal("Cent", (await _unitOfWork.CoinRepository.GetById(id)).Type);
         }
 
         [Fact]
-        public void Update_UpdatesExistingCoin()
+        public async Task Update_UpdatesExistingCoin()
         {
             //Arrange
             Guid id = new Guid("be258d41-f9f5-46d3-9738-f9e0123201ac");
-            Coin updatedCoin = _unitOfWork.CoinRepository.GetById(id);
+            Coin updatedCoin = await _unitOfWork.CoinRepository.GetById(id);
             updatedCoin.Type = "Baht";
 
             //Act
             _unitOfWork.CoinRepository.Update(updatedCoin);
-            _unitOfWork.Save();
+            await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(6, _unitOfWork.CoinRepository.Get(resourceParameters).Count());
-            Assert.Equal("Baht", _unitOfWork.CoinRepository.GetById(id).Type);
+            Assert.Equal(6, (await _unitOfWork.CoinRepository.Get(resourceParameters)).Count());
+            Assert.Equal("Baht", (await _unitOfWork.CoinRepository.GetById(id)).Type);
         }
 
         [Fact]
-        public void Delete_RemovesCoinFromDatabase()
+        public async Task Delete_RemovesCoinFromDatabase()
         {
             //Arrange
             Guid id = new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48");
-            Coin coin = _unitOfWork.CoinRepository.GetById(id);
+            Coin coin = await _unitOfWork.CoinRepository.GetById(id);
 
             //Act
             _unitOfWork.CoinRepository.Delete(coin);
-            _unitOfWork.Save();
+            await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(5, _unitOfWork.CoinRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.CoinRepository.GetById(id));
+            Assert.Equal(5, (await _unitOfWork.CoinRepository.Get(resourceParameters)).Count());
+            Assert.Null(await _unitOfWork.CoinRepository.GetById(id));
         }
 
         [Fact]
-        public void Exists_ReturnsTrue_GivenValidCoinId()
+        public async Task Exists_ReturnsTrue_GivenValidCoinId()
         {
             //Arrange
             Guid id = new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3");
 
             //Act
-            var result = _unitOfWork.CoinRepository.Exists(id);
+            var result = await _unitOfWork.CoinRepository.Exists(id);
 
             //Assert
             Assert.True(result);
         }
 
         [Fact]
-        public void Exists_ReturnsFalse_GivenInvalidCoinId()
+        public async Task Exists_ReturnsFalse_GivenInvalidCoinId()
         {
             //Arrange
             Guid id = new Guid("4ab72e1b-c115-4f13-b317-a841f73e44b7");
 
             //Act
-            var result = _unitOfWork.CoinRepository.Exists(id);
+            var result = await _unitOfWork.CoinRepository.Exists(id);
 
             //Assert
             Assert.False(result);
