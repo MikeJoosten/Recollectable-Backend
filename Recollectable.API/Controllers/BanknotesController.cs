@@ -42,8 +42,6 @@ namespace Recollectable.API.Controllers
         /// <summary>
         /// Retrieves banknotes
         /// </summary>
-        /// <param name="resourceParameters"></param>
-        /// <param name="mediaType"></param>
         /// <returns>A list of Banknotes</returns>
         [HttpHead]
         [HttpGet(Name = "GetBanknotes")]

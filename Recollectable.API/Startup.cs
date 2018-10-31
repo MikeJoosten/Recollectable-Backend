@@ -229,6 +229,10 @@ namespace Recollectable.API
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 options.IncludeXmlComments(xmlPath);
 
+                xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name.Replace("API", "Core")}.xml";
+                xmlPath = Path.Combine(AppContext.BaseDirectory.Replace("API", "Core"), xmlFile);
+                options.IncludeXmlComments(xmlPath);
+
                 options.DocumentFilter<HttpRequestsFilter>();
                 options.OperationFilter<FromHeaderAttributeFilter>();
             });
