@@ -42,9 +42,14 @@ namespace Recollectable.API.Controllers
         /// <summary>
         /// Retrieves banknotes
         /// </summary>
-        /// <returns>A list of Banknotes</returns>
+        /// <returns>List of banknotes</returns>
+        /// <response code="200">Returns a list of banknotes</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetBanknotes")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(BanknoteDto), 200)]
+        [ProducesResponseType(400)]
         public async Task<IActionResult> GetBanknotes(CurrenciesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -130,7 +135,21 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested banknote by banknote ID
+        /// </summary>
+        /// <param name="id">Banknote ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested banknote</returns>
+        /// <response code="200">Returns the requested banknote</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting banknote ID</response>
         [HttpGet("{id}", Name = "GetBanknote")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(BanknoteDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetBanknote(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -168,7 +187,29 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        //TODO Add POST Request Body
+        /// <summary>
+        /// Creates a banknote
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     {
+        ///     
+        ///     }
+        /// </remarks>
+        /// <param name="banknote"></param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created banknote</returns>
+        /// <response code="201">Returns the newly created banknote</response>
+        /// <response code="400">Invalid banknote</response>
+        /// <response code="422">Invalid banknote validation</response>
         [HttpPost(Name = "CreateBanknote")]
+        [Consumes("application/json", "application/xml")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(BanknoteDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> CreateBanknote([FromBody] BanknoteCreationDto banknote,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -236,6 +277,13 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Invalid banknote creation request
+        /// </summary>
+        /// <param name="id">Banknote ID</param>
+        /// <returns></returns>
+        /// <response code="404">Unexisting banknote ID</response>
+        /// <response code="409">Already existing banknote ID</response>
         [HttpPost("{id}")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> BlockBanknoteCreation(Guid id)
@@ -248,7 +296,30 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Add PUT Request Body
+        /// <summary>
+        /// Updates a banknote
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     {
+        ///     
+        ///     }
+        /// </remarks>
+        /// <param name="id">Banknote ID</param>
+        /// <param name="banknote"></param>
+        /// <returns></returns>
+        /// <response code="204">Updated the banknote successfully</response>
+        /// <response code="400">Invalid banknote</response>
+        /// <response code="404">Unexisting banknote ID</response>
+        /// <response code="422">Invalid banknote validation</response>
         [HttpPut("{id}", Name = "UpdateBanknote")]
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> UpdateBanknote(Guid id, [FromBody] BanknoteUpdateDto banknote)
         {
             if (banknote == null)
@@ -292,6 +363,19 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Update specific fields of a banknote
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     {
+        ///     
+        ///     }
+        /// </remarks>
+        /// <param name="id"></param>
+        /// <param name="patchDoc"></param>
+        /// <returns></returns>
         [HttpPatch("{id}", Name = "PartiallyUpdateBanknote")]
         public async Task<IActionResult> PartiallyUpdateBanknote(Guid id,
             [FromBody] JsonPatchDocument<BanknoteUpdateDto> patchDoc)
