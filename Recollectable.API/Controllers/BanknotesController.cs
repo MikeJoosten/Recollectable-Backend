@@ -39,6 +39,12 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves banknotes
+        /// </summary>
+        /// <param name="resourceParameters"></param>
+        /// <param name="mediaType"></param>
+        /// <returns>A list of Banknotes</returns>
         [HttpHead]
         [HttpGet(Name = "GetBanknotes")]
         public async Task<IActionResult> GetBanknotes(CurrenciesResourceParameters resourceParameters,
@@ -233,6 +239,7 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpPost("{id}")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> BlockBanknoteCreation(Guid id)
         {
             if (await _unitOfWork.BanknoteRepository.Exists(id))

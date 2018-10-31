@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
+using Recollectable.API.Filters;
 using Recollectable.API.Interfaces;
 using Recollectable.API.Services;
 using Recollectable.Core.Entities.Collectables;
@@ -35,7 +36,9 @@ using Recollectable.Infrastructure.Email;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Recollectable.API
 {
@@ -208,7 +211,26 @@ namespace Recollectable.API
             // Configure Swagger
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new Info { Title = "Recollectable API", Version = "v1" });
+                options.SwaggerDoc("v1", new Info
+                {
+                    Version = "v1",
+                    Title = "Recollectable API",
+                    Description = "Base API for collection management",
+                    TermsOfService = "None",
+                    Contact = new Contact
+                    {
+                        Name = "Mike Joosten",
+                        Email = string.Empty,
+                        Url = "https://www.linkedin.com/in/mike-joosten/"
+                    }
+                });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+
+                options.DocumentFilter<HttpRequestsFilter>();
+                options.OperationFilter<FromHeaderAttributeFilter>();
             });
 
             // Configure Versioning
