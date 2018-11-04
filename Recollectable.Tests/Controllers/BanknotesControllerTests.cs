@@ -271,7 +271,7 @@ namespace Recollectable.Tests.Controllers
             var response = await _controller.CreateBanknote(banknote, null);
 
             //Assert
-            Assert.IsType<BadRequestResult>(response);
+            Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Fact]
@@ -288,7 +288,7 @@ namespace Recollectable.Tests.Controllers
             var response = await _controller.CreateBanknote(banknote, null);
 
             //Assert
-            Assert.IsType<BadRequestResult>(response);
+            Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Theory]

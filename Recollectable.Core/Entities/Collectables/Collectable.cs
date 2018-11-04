@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
 using System;
 using System.Collections.Generic;
@@ -13,9 +12,6 @@ namespace Recollectable.Core.Entities.Collectables
     {
         [Key]
         public Guid Id { get; set; }
-
-        [Required]
-        [MaxLength(100)]
         public string ReleaseDate { get; set; }
 
         [ForeignKey("CountryId")]

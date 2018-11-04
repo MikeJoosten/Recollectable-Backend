@@ -1,5 +1,6 @@
 ﻿using AspNetCoreRateLimit;
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -20,6 +21,10 @@ using Newtonsoft.Json.Serialization;
 using Recollectable.API.Filters;
 using Recollectable.API.Interfaces;
 using Recollectable.API.Services;
+using Recollectable.API.Validators.Collectables;
+using Recollectable.API.Validators.Collection;
+using Recollectable.API.Validators.Location;
+using Recollectable.API.Validators.Users;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
@@ -79,6 +84,14 @@ namespace Recollectable.API
             {
                 options.SerializerSettings.ContractResolver =
                     new CamelCasePropertyNamesContractResolver();
+            })
+            .AddFluentValidation(options => 
+            {
+                options.RegisterValidatorsFromAssemblyContaining<CollectableCreationDtoValidator>();
+                options.RegisterValidatorsFromAssemblyContaining<CollectionCreationDtoValidator>();
+                options.RegisterValidatorsFromAssemblyContaining<CountryCreationDtoValidator>();
+                options.RegisterValidatorsFromAssemblyContaining<UserCreationDtoValidator>();
+                //options.RegisterValidatorsFromAssemblyContaining<UniqueValidator>();
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 

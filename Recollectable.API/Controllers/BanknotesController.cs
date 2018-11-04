@@ -231,7 +231,8 @@ namespace Recollectable.API.Controllers
             }
             else if (banknote.CountryId != Guid.Empty || banknote.Country.Id != Guid.Empty)
             {
-                return BadRequest();
+                ModelState.AddModelError("Error", "Invalid or conflicting country ID detected");
+                return BadRequest(ModelState);
             }
 
             var collectorValue = await _unitOfWork.CollectorValueRepository
@@ -244,7 +245,8 @@ namespace Recollectable.API.Controllers
             else if (banknote.CollectorValueId != Guid.Empty || 
                 banknote.CollectorValue.Id != Guid.Empty)
             {
-                return BadRequest();
+                ModelState.AddModelError("Error", "Invalid or conflicting collector value ID detected");
+                return BadRequest(ModelState);
             }
 
             var newBanknote = _mapper.Map<Banknote>(banknote);

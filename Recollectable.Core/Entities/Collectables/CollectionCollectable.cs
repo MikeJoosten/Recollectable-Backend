@@ -17,8 +17,6 @@ namespace Recollectable.Core.Entities.Collectables
         [ForeignKey("CollectableId")]
         public Collectable Collectable { get; set; }
         public Guid CollectableId { get; set; }
-
-        [MaxLength(50)]
         public string Condition { get; set; }
     }
 }

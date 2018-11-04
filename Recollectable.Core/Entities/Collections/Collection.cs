@@ -13,9 +13,6 @@ namespace Recollectable.Core.Entities.Collections
     {
         [Key]
         public Guid Id { get; set; }
-
-        [Required]
-        [MaxLength(25)]
         public string Type { get; set; }
 
         [XmlIgnore]
