@@ -3,7 +3,7 @@ using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Locations;
-using Recollectable.Core.Shared.Validators;
+using Recollectable.Core.Shared.Extensions;
 
 namespace Recollectable.API.Validators.Location
 {
@@ -21,7 +21,7 @@ namespace Recollectable.API.Validators.Location
             RuleFor(c => c.Name)
                 .NotEmpty().WithMessage("Name is a required field")
                 .MaximumLength(100).WithMessage("Name shouldn't contain more than 100 characters")
-                .SetValidator(new UniqueValidator<Country>(countries)).WithMessage("Name must be unique");
+                .IsUnique(countries).WithMessage("Name must be unique");
         }
     }
 }
