@@ -280,8 +280,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             BanknoteCreationDto banknote = new BanknoteCreationDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("56b08b23-3ef5-4fa7-a607-4d254733a2e8")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -299,8 +298,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             BanknoteCreationDto banknote = new BanknoteCreationDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -317,8 +315,7 @@ namespace Recollectable.Tests.Controllers
             BanknoteCreationDto banknote = new BanknoteCreationDto
             {
                 Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -339,8 +336,7 @@ namespace Recollectable.Tests.Controllers
             BanknoteCreationDto banknote = new BanknoteCreationDto
             {
                 Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -425,8 +421,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             BanknoteUpdateDto banknote = new BanknoteUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("56b08b23-3ef5-4fa7-a607-4d254733a2e8")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -443,8 +438,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("1876de77-90d9-4083-91d2-b6a3e6a1bd1c");
             BanknoteUpdateDto banknote = new BanknoteUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -461,8 +455,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
             BanknoteUpdateDto banknote = new BanknoteUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -480,8 +473,7 @@ namespace Recollectable.Tests.Controllers
             BanknoteUpdateDto banknote = new BanknoteUpdateDto
             {
                 Type = "Euros",
-                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367")
             };
 
             //Act
@@ -553,7 +545,6 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-            patchDoc.Replace(b => b.CollectorValueId, new Guid("56b08b23-3ef5-4fa7-a607-4d254733a2e8"));
 
             //Act
             var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);

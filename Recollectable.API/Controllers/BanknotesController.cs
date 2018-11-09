@@ -225,31 +225,16 @@ namespace Recollectable.API.Controllers
 
             var country = await _unitOfWork.CountryRepository.GetById(banknote.CountryId);
 
-            if (country != null && banknote.Country == null)
+            if (country == null)
             {
-                banknote.Country = country;
-            }
-            else if (banknote.CountryId != Guid.Empty || banknote.Country.Id != Guid.Empty)
-            {
-                ModelState.AddModelError("Error", "Invalid or conflicting country ID detected");
-                return BadRequest(ModelState);
-            }
-
-            var collectorValue = await _unitOfWork.CollectorValueRepository
-                .GetById(banknote.CollectorValueId);
-
-            if (collectorValue != null && banknote.CollectorValue == null)
-            {
-                banknote.CollectorValue = collectorValue;
-            }
-            else if (banknote.CollectorValueId != Guid.Empty || 
-                banknote.CollectorValue.Id != Guid.Empty)
-            {
-                ModelState.AddModelError("Error", "Invalid or conflicting collector value ID detected");
-                return BadRequest(ModelState);
+                return BadRequest();
             }
 
             var newBanknote = _mapper.Map<Banknote>(banknote);
+
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(newBanknote.CollectorValue);
+            newBanknote.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+
             _unitOfWork.BanknoteRepository.Add(newBanknote);
 
             if (!await _unitOfWork.Save())
@@ -339,11 +324,6 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (!await _unitOfWork.CollectorValueRepository.Exists(banknote.CollectorValueId))
-            {
-                return BadRequest();
-            }
-
             var banknoteFromRepo = await _unitOfWork.BanknoteRepository.GetById(id);
 
             if (banknoteFromRepo == null)
@@ -352,7 +332,11 @@ namespace Recollectable.API.Controllers
             }
 
             banknoteFromRepo.CountryId = banknote.CountryId;
-            banknoteFromRepo.CollectorValueId = banknote.CollectorValueId;
+
+            var collectorValue = _mapper.Map<CollectorValue>(banknote.CollectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
+            banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            banknoteFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(banknote, banknoteFromRepo);
             _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
@@ -409,13 +393,12 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (!await _unitOfWork.CollectorValueRepository.Exists(patchedBanknote.CollectorValueId))
-            {
-                return BadRequest();
-            }
-
             banknoteFromRepo.CountryId = patchedBanknote.CountryId;
-            banknoteFromRepo.CollectorValueId = patchedBanknote.CollectorValueId;
+
+            var collectorValue = _mapper.Map<CollectorValue>(patchedBanknote.CollectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
+            banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            banknoteFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(patchedBanknote, banknoteFromRepo);
             _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);

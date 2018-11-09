@@ -174,12 +174,12 @@ namespace Recollectable.API
             // Configure Repositories
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICollectableRepository, CollectableRepository>();
+            services.AddScoped<ICollectorValueRepository, CollectorValueRepository>();
             services.AddScoped<IRepository<User, UsersResourceParameters>, UserRepository>();
             services.AddScoped<IRepository<Collection, CollectionsResourceParameters>, CollectionRepository>();
             services.AddScoped<IRepository<Coin, CurrenciesResourceParameters>, CoinRepository>();
             services.AddScoped<IRepository<Banknote, CurrenciesResourceParameters>, BanknoteRepository>();
             services.AddScoped<IRepository<Country, CountriesResourceParameters>, CountryRepository>();
-            services.AddScoped<IRepository<CollectorValue, CollectorValuesResourceParameters>, CollectorValueRepository>();
 
             // Configure Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

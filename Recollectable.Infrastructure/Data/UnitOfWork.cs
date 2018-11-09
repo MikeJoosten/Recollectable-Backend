@@ -25,9 +25,6 @@ namespace Recollectable.Infrastructure.Data
         public IRepository<Collection, CollectionsResourceParameters> CollectionRepository =>
             new CollectionRepository(_context, _propertyMappingService);
 
-        public IRepository<CollectorValue, CollectorValuesResourceParameters> CollectorValueRepository =>
-            new CollectorValueRepository(_context, _propertyMappingService);
-
         public IRepository<Country, CountriesResourceParameters> CountryRepository =>
             new CountryRepository(_context, _propertyMappingService);
 
@@ -36,6 +33,9 @@ namespace Recollectable.Infrastructure.Data
 
         public ICollectableRepository CollectableRepository =>
             new CollectableRepository(_context, this, _propertyMappingService);
+
+        public ICollectorValueRepository CollectorValueRepository =>
+            new CollectorValueRepository(_context, _propertyMappingService);
 
         public UnitOfWork(RecollectableContext context,
             IPropertyMappingService propertyMappingService)

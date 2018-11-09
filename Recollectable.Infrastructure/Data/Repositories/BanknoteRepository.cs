@@ -74,16 +74,6 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 banknote.Id = Guid.NewGuid();
             }
 
-            if (banknote.CountryId == Guid.Empty)
-            {
-                banknote.CountryId = Guid.NewGuid();
-            }
-
-            if (banknote.CollectorValueId == Guid.Empty)
-            {
-                banknote.CollectorValueId = Guid.NewGuid();
-            }
-
             _context.Banknotes.Add(banknote);
         }
 

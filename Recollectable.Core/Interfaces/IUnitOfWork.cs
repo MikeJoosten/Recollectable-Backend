@@ -10,10 +10,10 @@ namespace Recollectable.Core.Interfaces
     public interface IUnitOfWork
     {
         ICollectableRepository CollectableRepository { get; }
+        ICollectorValueRepository CollectorValueRepository { get; }
         IRepository<Banknote, CurrenciesResourceParameters> BanknoteRepository { get; }
         IRepository<Coin, CurrenciesResourceParameters> CoinRepository { get; }
         IRepository<Collection, CollectionsResourceParameters> CollectionRepository { get; }
-        IRepository<CollectorValue, CollectorValuesResourceParameters> CollectorValueRepository { get; }
         IRepository<Country, CountriesResourceParameters> CountryRepository { get; }
         IRepository<User, UsersResourceParameters> UserRepository { get; }
 

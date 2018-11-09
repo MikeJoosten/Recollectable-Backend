@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Locations;

@@ -7,12 +7,12 @@ using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Interfaces;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectorValueRepository : 
-        IRepository<CollectorValue, CollectorValuesResourceParameters>
+    public class CollectorValueRepository : ICollectorValueRepository
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -39,6 +39,17 @@ namespace Recollectable.Infrastructure.Data.Repositories
         public async Task<CollectorValue> GetById(Guid collectorValueId)
         {
             return await _context.CollectorValues.FirstOrDefaultAsync(c => c.Id == collectorValueId);
+        }
+
+        public async Task<CollectorValue> GetByValues(CollectorValue collectorValue)
+        {
+            return await _context.CollectorValues.Where(c =>
+                c.G4 == collectorValue.G4 && c.VG8 == collectorValue.VG8 && 
+                c.F12 == collectorValue.F12 && c.VF20 == collectorValue.VF20 && 
+                c.XF40 == collectorValue.XF40 && c.AU50 == collectorValue.AU50 &&
+                c.MS60 == collectorValue.MS60 && c.MS63 == collectorValue.MS63 && 
+                c.PF60 == collectorValue.PF60 && c.PF63 == collectorValue.PF63 && 
+                c.PF65 == collectorValue.PF65).FirstOrDefaultAsync();
         }
 
         public void Add(CollectorValue collectorValue)

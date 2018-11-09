@@ -280,8 +280,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("45672556-e04b-4a14-9572-6f87d0267db5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -299,8 +298,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -317,8 +315,7 @@ namespace Recollectable.Tests.Controllers
             CoinCreationDto coin = new CoinCreationDto
             {
                 Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -339,8 +336,7 @@ namespace Recollectable.Tests.Controllers
             CoinCreationDto coin = new CoinCreationDto
             {
                 Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -425,8 +421,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             CoinUpdateDto coin = new CoinUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("45672556-e04b-4a14-9572-6f87d0267db5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -443,8 +438,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("46020ac4-f8c6-4bce-8fce-6c8513a49f28");
             CoinUpdateDto coin = new CoinUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -461,8 +455,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
             CoinUpdateDto coin = new CoinUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
             };
 
             //Act
@@ -480,8 +473,7 @@ namespace Recollectable.Tests.Controllers
             CoinUpdateDto coin = new CoinUpdateDto
             {
                 Type = "Euros",
-                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
+                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367")
             };
 
             //Act
@@ -570,7 +562,6 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
-            patchDoc.Replace(c => c.CollectorValueId, new Guid("45672556-e04b-4a14-9572-6f87d0267db5"));
             patchDoc.Replace(c => c.Subject, "Chinese Coin");
 
             //Act

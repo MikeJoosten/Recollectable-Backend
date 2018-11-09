@@ -18,6 +18,6 @@ namespace Recollectable.Core.Models.Collectables
         public string FrontImagePath { get; set; }
         public string BackImagePath { get; set; }
         public Guid CountryId { get; set; }
-        public Guid CollectorValueId { get; set; }
+        public CollectorValueCreationDto CollectorValue { get; set; }
     }
 }

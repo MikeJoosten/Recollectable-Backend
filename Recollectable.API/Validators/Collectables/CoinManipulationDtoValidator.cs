@@ -18,7 +18,10 @@ namespace Recollectable.API.Validators.Collectables
             RuleFor(c => c.ReleaseDate)
                 .NotEmpty().WithMessage("ReleaseDate is a required field")
                 .MaximumLength(100).WithMessage("ReleaseDate shouldn't contain more than 100 characters");
-                
+
+            RuleFor(c => c.CountryId)
+                .NotEmpty().WithMessage("CountryId is a required field");
+
             RuleFor(c => c.Weight)
                 .MaximumLength(25).WithMessage("Weight shouldn't contain more than 25 characters");
 

@@ -186,30 +186,16 @@ namespace Recollectable.API.Controllers
 
             var country = await _unitOfWork.CountryRepository.GetById(coin.CountryId);
 
-            if (country != null && coin.Country == null)
-            {
-                coin.Country = country;
-            }
-            else if (coin.CountryId != Guid.Empty || 
-                coin.Country.Id != Guid.Empty)
-            {
-                return BadRequest();
-            }
-
-            var collectorValue = await _unitOfWork.CollectorValueRepository
-                .GetById(coin.CollectorValueId);
-
-            if (collectorValue != null && coin.CollectorValue == null)
-            {
-                coin.CollectorValue = collectorValue;
-            }
-            else if (coin.CollectorValueId != Guid.Empty || 
-                coin.CollectorValue.Id != Guid.Empty)
+            if (country == null)
             {
                 return BadRequest();
             }
 
             var newCoin = _mapper.Map<Coin>(coin);
+
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(newCoin.CollectorValue);
+            newCoin.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+
             _unitOfWork.CoinRepository.Add(newCoin);
 
             if (!await _unitOfWork.Save())
@@ -274,11 +260,6 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (!await _unitOfWork.CollectorValueRepository.Exists(coin.CollectorValueId))
-            {
-                return BadRequest();
-            }
-
             var coinFromRepo = await _unitOfWork.CoinRepository.GetById(id);
 
             if (coinFromRepo == null)
@@ -287,7 +268,11 @@ namespace Recollectable.API.Controllers
             }
 
             coinFromRepo.CountryId = coin.CountryId;
-            coinFromRepo.CollectorValueId = coin.CollectorValueId;
+
+            var collectorValue = _mapper.Map<CollectorValue>(coin.CollectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
+            coinFromRepo.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            coinFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(coin, coinFromRepo);
             _unitOfWork.CoinRepository.Update(coinFromRepo);
@@ -337,13 +322,12 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (!await _unitOfWork.CollectorValueRepository.Exists(patchedCoin.CollectorValueId))
-            {
-                return BadRequest();
-            }
-
             coinFromRepo.CountryId = patchedCoin.CountryId;
-            coinFromRepo.CollectorValueId = patchedCoin.CollectorValueId;
+
+            var collectorValue = _mapper.Map<CollectorValue>(patchedCoin.CollectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
+            coinFromRepo.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            coinFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(patchedCoin, coinFromRepo);
             _unitOfWork.CoinRepository.Update(coinFromRepo);

@@ -74,16 +74,6 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 coin.Id = Guid.NewGuid();
             }
 
-            if (coin.CountryId == Guid.Empty)
-            {
-                coin.CountryId = Guid.NewGuid();
-            }
-
-            if (coin.CollectorValueId == Guid.Empty)
-            {
-                coin.CollectorValueId = Guid.NewGuid();
-            }
-
             _context.Coins.Add(coin);
         }
 
