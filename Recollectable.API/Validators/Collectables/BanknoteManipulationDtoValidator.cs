@@ -1,13 +1,26 @@
 ﻿using FluentValidation;
+using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Shared.Validators;
 
 namespace Recollectable.API.Validators.Collectables
 {
     public class BanknoteManipulationDtoValidator<T> : AbstractValidator<T>
         where T : BanknoteManipulationDto
     {
-        public BanknoteManipulationDtoValidator()
+        private readonly IUnitOfWork _unitOfWork;
+
+        public BanknoteManipulationDtoValidator(IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
+
+            var banknotes = _unitOfWork.BanknoteRepository.Get(new CurrenciesResourceParameters()).Result;
+
+            RuleFor(b => b)
+                .SetValidator(new DuplicateValidator<Banknote>(banknotes)).WithMessage("Banknote must be unique");
+
             RuleFor(b => b.FaceValue)
                 .NotEmpty().WithMessage("Face value is a required field");
 

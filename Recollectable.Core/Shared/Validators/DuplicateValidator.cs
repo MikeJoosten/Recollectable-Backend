@@ -4,13 +4,12 @@ using System.Linq;
 
 namespace Recollectable.Core.Shared.Validators
 {
-    public class UniqueValidator<T> : PropertyValidator
-        where T : class
+    public class DuplicateValidator<T> : PropertyValidator
     {
         private readonly PagedList<T> _items;
 
-        public UniqueValidator(PagedList<T> items)
-            : base("{PropertyName} must be unique")
+        public DuplicateValidator(PagedList<T> items)
+            : base("Object must be unique")
         {
             _items = items;
         }
