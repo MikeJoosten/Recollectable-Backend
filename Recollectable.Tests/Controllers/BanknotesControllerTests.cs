@@ -271,23 +271,7 @@ namespace Recollectable.Tests.Controllers
             var response = await _controller.CreateBanknote(banknote, null);
 
             //Assert
-            Assert.IsType<BadRequestObjectResult>(response);
-        }
-
-        [Fact]
-        public async Task CreateBanknote_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
-        {
-            //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
-            };
-
-            //Act
-            var response = await _controller.CreateBanknote(banknote, null);
-
-            //Assert
-            Assert.IsType<BadRequestObjectResult>(response);
+            Assert.IsType<BadRequestResult>(response);
         }
 
         [Theory]
@@ -298,7 +282,11 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             BanknoteCreationDto banknote = new BanknoteCreationDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -315,7 +303,11 @@ namespace Recollectable.Tests.Controllers
             BanknoteCreationDto banknote = new BanknoteCreationDto
             {
                 Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 10
+                }
             };
 
             //Act
@@ -336,7 +328,11 @@ namespace Recollectable.Tests.Controllers
             BanknoteCreationDto banknote = new BanknoteCreationDto
             {
                 Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -416,22 +412,6 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task UpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
-        {
-            //Arrange
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
-            };
-
-            //Act
-            var response = await _controller.UpdateBanknote(Guid.Empty, banknote);
-
-            //Assert
-            Assert.IsType<BadRequestResult>(response);
-        }
-
-        [Fact]
         public async Task UpdateBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
         {
             //Arrange
@@ -455,7 +435,11 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
             BanknoteUpdateDto banknote = new BanknoteUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -473,7 +457,11 @@ namespace Recollectable.Tests.Controllers
             BanknoteUpdateDto banknote = new BanknoteUpdateDto
             {
                 Type = "Euros",
-                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367")
+                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -531,20 +519,6 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
             patchDoc.Replace(b => b.CountryId, new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d"));
-
-            //Act
-            var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
-
-            //Assert
-            Assert.IsType<BadRequestResult>(response);
-        }
-
-        [Fact]
-        public async Task PartiallyUpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
-        {
-            //Arrange
-            Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
 
             //Act
             var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);

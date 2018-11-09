@@ -274,22 +274,6 @@ namespace Recollectable.Tests.Controllers
             Assert.IsType<BadRequestResult>(response);
         }
 
-        [Fact]
-        public async Task CreateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
-        {
-            //Arrange
-            CoinCreationDto coin = new CoinCreationDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
-            };
-
-            //Act
-            var response = await _controller.CreateCoin(coin, null);
-
-            //Assert
-            Assert.IsType<BadRequestResult>(response);
-        }
-
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
@@ -298,7 +282,11 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -315,7 +303,11 @@ namespace Recollectable.Tests.Controllers
             CoinCreationDto coin = new CoinCreationDto
             {
                 Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -336,7 +328,11 @@ namespace Recollectable.Tests.Controllers
             CoinCreationDto coin = new CoinCreationDto
             {
                 Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -416,29 +412,17 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task UpdateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
-        {
-            //Arrange
-            CoinUpdateDto coin = new CoinUpdateDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
-            };
-
-            //Act
-            var response = await _controller.UpdateCoin(Guid.Empty, coin);
-
-            //Assert
-            Assert.IsType<BadRequestResult>(response);
-        }
-
-        [Fact]
         public async Task UpdateCoin_ReturnsNotFoundResponse_GivenInvalidCoinId()
         {
             //Arrange
             Guid id = new Guid("46020ac4-f8c6-4bce-8fce-6c8513a49f28");
             CoinUpdateDto coin = new CoinUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -455,7 +439,11 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
             CoinUpdateDto coin = new CoinUpdateDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3")
+                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -473,7 +461,11 @@ namespace Recollectable.Tests.Controllers
             CoinUpdateDto coin = new CoinUpdateDto
             {
                 Type = "Euros",
-                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367")
+                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
+                CollectorValue = new CollectorValueCreationDto
+                {
+                    G4 = 124
+                }
             };
 
             //Act
@@ -547,21 +539,6 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
             patchDoc.Replace(c => c.CountryId, new Guid("0fa4202c-c244-4be6-bb47-b8e50aacd7cd"));
-            patchDoc.Replace(c => c.Subject, "Chinese Coin");
-
-            //Act
-            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
-
-            //Assert
-            Assert.IsType<BadRequestResult>(response);
-        }
-
-        [Fact]
-        public async Task PartiallyUpdateCoin_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
-        {
-            //Arrange
-            Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
-            JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
             patchDoc.Replace(c => c.Subject, "Chinese Coin");
 
             //Act
