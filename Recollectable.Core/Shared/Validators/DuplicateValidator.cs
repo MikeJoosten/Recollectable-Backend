@@ -1,6 +1,6 @@
-﻿using FluentValidation.Validators;
+﻿using AutoMapper;
+using FluentValidation.Validators;
 using Recollectable.Core.Shared.Entities;
-using System.Linq;
 
 namespace Recollectable.Core.Shared.Validators
 {
@@ -16,10 +16,17 @@ namespace Recollectable.Core.Shared.Validators
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
-            var newValue = context.PropertyValue as string;
-            var property = typeof(T).GetProperty(context.PropertyName);
+            var newItem = Mapper.Map<T>(context.PropertyValue);
 
-            return _items.All(x => property?.GetValue(x).ToString() != newValue);
+            foreach (T item in _items)
+            {
+                if (item.Equals(newItem))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

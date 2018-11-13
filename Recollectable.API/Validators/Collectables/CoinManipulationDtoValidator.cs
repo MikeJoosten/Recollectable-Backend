@@ -1,13 +1,26 @@
 ﻿using FluentValidation;
+using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Shared.Validators;
 
 namespace Recollectable.API.Validators.Collectables
 {
     public class CoinManipulationDtoValidator<T> : AbstractValidator<T>
         where T : CoinManipulationDto
     {
-        public CoinManipulationDtoValidator()
+        private readonly IUnitOfWork _unitOfWork;
+
+        public CoinManipulationDtoValidator(IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
+
+            var coins = _unitOfWork.CoinRepository.Get(new CurrenciesResourceParameters()).Result;
+
+            RuleFor(b => b)
+                .SetValidator(new DuplicateValidator<Coin>(coins)).WithMessage("Coin must be unique");
+
             RuleFor(c => c.FaceValue)
                 .NotEmpty().WithMessage("Face value is a required field");
 

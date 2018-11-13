@@ -11,5 +11,10 @@
         public string ReverseDescription { get; set; }
         public string FrontImagePath { get; set; }
         public string BackImagePath { get; set; }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

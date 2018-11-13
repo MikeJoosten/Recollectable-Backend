@@ -194,7 +194,7 @@ namespace Recollectable.API.Controllers
             var newCoin = _mapper.Map<Coin>(coin);
 
             var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(newCoin.CollectorValue);
-            newCoin.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            newCoin.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
 
             _unitOfWork.CoinRepository.Add(newCoin);
 
@@ -271,7 +271,7 @@ namespace Recollectable.API.Controllers
 
             var collectorValue = _mapper.Map<CollectorValue>(coin.CollectorValue);
             var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
-            coinFromRepo.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            coinFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             coinFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(coin, coinFromRepo);
@@ -326,7 +326,7 @@ namespace Recollectable.API.Controllers
 
             var collectorValue = _mapper.Map<CollectorValue>(patchedCoin.CollectorValue);
             var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
-            coinFromRepo.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            coinFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             coinFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(patchedCoin, coinFromRepo);

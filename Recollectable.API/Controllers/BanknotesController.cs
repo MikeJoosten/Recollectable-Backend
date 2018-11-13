@@ -233,7 +233,7 @@ namespace Recollectable.API.Controllers
             var newBanknote = _mapper.Map<Banknote>(banknote);
 
             var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(newBanknote.CollectorValue);
-            newBanknote.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            newBanknote.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
 
             _unitOfWork.BanknoteRepository.Add(newBanknote);
 
@@ -335,7 +335,7 @@ namespace Recollectable.API.Controllers
 
             var collectorValue = _mapper.Map<CollectorValue>(banknote.CollectorValue);
             var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
-            banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             banknoteFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(banknote, banknoteFromRepo);
@@ -397,7 +397,7 @@ namespace Recollectable.API.Controllers
 
             var collectorValue = _mapper.Map<CollectorValue>(patchedBanknote.CollectorValue);
             var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
-            banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? new Guid() : existingCollectorValue.Id;
+            banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             banknoteFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(patchedBanknote, banknoteFromRepo);
