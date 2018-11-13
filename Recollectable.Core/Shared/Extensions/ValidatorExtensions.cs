@@ -12,5 +12,12 @@ namespace Recollectable.Core.Shared.Extensions
         {
             return ruleBuilder.SetValidator(new UniqueValidator<TProperty>(items));
         }
+
+        public static IRuleBuilder<T, T> IsDuplicate<T, TProperty>
+        (this IRuleBuilder<T, T> ruleBuilder, PagedList<TProperty> items, string message)
+            where TProperty : class
+        {
+            return ruleBuilder.SetValidator(new DuplicateValidator<TProperty>(items)).WithMessage(message);
+        }
     }
 }

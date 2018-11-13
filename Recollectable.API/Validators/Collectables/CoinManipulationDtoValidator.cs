@@ -3,7 +3,7 @@ using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
-using Recollectable.Core.Shared.Validators;
+using Recollectable.Core.Shared.Extensions;
 
 namespace Recollectable.API.Validators.Collectables
 {
@@ -19,7 +19,7 @@ namespace Recollectable.API.Validators.Collectables
             var coins = _unitOfWork.CoinRepository.Get(new CurrenciesResourceParameters()).Result;
 
             RuleFor(b => b)
-                .SetValidator(new DuplicateValidator<Coin>(coins)).WithMessage("Coin must be unique");
+                .IsDuplicate(coins, "Coin must be unique");
 
             RuleFor(c => c.FaceValue)
                 .NotEmpty().WithMessage("Face value is a required field");
