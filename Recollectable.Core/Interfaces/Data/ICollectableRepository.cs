@@ -4,7 +4,7 @@ using Recollectable.Core.Shared.Entities;
 using System;
 using System.Threading.Tasks;
 
-namespace Recollectable.Core.Interfaces
+namespace Recollectable.Core.Interfaces.Data
 {
     public interface ICollectableRepository
     {

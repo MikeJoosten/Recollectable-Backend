@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Recollectable.Core.Interfaces;
+using Recollectable.Infrastructure.Interfaces;
 using System;
 using System.Net;
 using System.Net.Mail;

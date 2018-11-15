@@ -5,7 +5,7 @@ using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using System.Threading.Tasks;
 
-namespace Recollectable.Core.Interfaces
+namespace Recollectable.Core.Interfaces.Data
 {
     public interface IUnitOfWork
     {

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Comparers;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Extensions;
 
@@ -19,7 +19,7 @@ namespace Recollectable.API.Validators.Collectables
             var coins = _unitOfWork.CoinRepository.Get(new CurrenciesResourceParameters()).Result;
 
             RuleFor(b => b)
-                .IsDuplicate(coins, "Coin must be unique");
+                .IsDuplicate(coins, new CurrencyComparer(), "Coin must be unique");
 
             RuleFor(c => c.FaceValue)
                 .NotEmpty().WithMessage("Face value is a required field");

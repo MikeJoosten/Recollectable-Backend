@@ -1,4 +1,4 @@
-﻿using Recollectable.Core.Interfaces;
+﻿using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Collectables;
 
 namespace Recollectable.API.Validators.Collectables

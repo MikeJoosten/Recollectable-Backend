@@ -28,9 +28,6 @@ namespace Recollectable.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
-            //Fluent API
-            builder.Entity<Country>().HasIndex(c => c.Name).IsUnique();
-
             // Seeding Database
             builder.Entity<User>().HasData(
                 new User

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
@@ -17,8 +17,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
 
-        public BanknoteRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public BanknoteRepository(RecollectableContext context, IPropertyMappingService propertyMappingService)
         {
             _context = context;
             _propertyMappingService = propertyMappingService;

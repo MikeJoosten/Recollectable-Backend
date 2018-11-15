@@ -2,10 +2,10 @@
 using Recollectable.Core.Entities.ResourceParameters;
 using System.Threading.Tasks;
 
-namespace Recollectable.Core.Interfaces
+namespace Recollectable.Core.Interfaces.Data
 {
     public interface ICollectorValueRepository : IRepository<CollectorValue, CollectorValuesResourceParameters>
     {
-        Task<CollectorValue> GetByValues(CollectorValue collectorValue);
+        Task<CollectorValue> FindDuplicate(CollectorValue collectorValue);
     }
 }

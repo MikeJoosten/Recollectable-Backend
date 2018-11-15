@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Locations;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;

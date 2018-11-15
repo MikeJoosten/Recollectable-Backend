@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Recollectable.API.Interfaces;
 using Recollectable.API.Services;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;

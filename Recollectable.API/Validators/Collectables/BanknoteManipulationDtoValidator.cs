@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Extensions;
+using System.Collections.Generic;
 
 namespace Recollectable.API.Validators.Collectables
 {
@@ -11,15 +12,17 @@ namespace Recollectable.API.Validators.Collectables
         where T : BanknoteManipulationDto
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEqualityComparer<Currency> _comparer;
 
-        public BanknoteManipulationDtoValidator(IUnitOfWork unitOfWork)
+        public BanknoteManipulationDtoValidator(IUnitOfWork unitOfWork, IEqualityComparer<Currency> comparer)
         {
             _unitOfWork = unitOfWork;
+            _comparer = comparer;
 
             var banknotes = _unitOfWork.BanknoteRepository.Get(new CurrenciesResourceParameters()).Result;
 
             RuleFor(b => b)
-                .IsDuplicate(banknotes, "Banknote must be unique");
+                .IsDuplicate(banknotes, _comparer, "Banknote must be unique");
 
             RuleFor(b => b.FaceValue)
                 .NotEmpty().WithMessage("Face value is a required field");

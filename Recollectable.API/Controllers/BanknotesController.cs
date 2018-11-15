@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
@@ -223,16 +223,14 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var country = await _unitOfWork.CountryRepository.GetById(banknote.CountryId);
-
-            if (country == null)
+            if (!await _unitOfWork.CountryRepository.Exists(banknote.CountryId))
             {
                 return BadRequest();
             }
 
             var newBanknote = _mapper.Map<Banknote>(banknote);
 
-            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(newBanknote.CollectorValue);
+            var existingCollectorValue = _unitOfWork.CollectorValueRepository.FindDuplicate(newBanknote.CollectorValue).Result;
             newBanknote.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
 
             _unitOfWork.BanknoteRepository.Add(newBanknote);
@@ -331,10 +329,8 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            banknoteFromRepo.CountryId = banknote.CountryId;
-
             var collectorValue = _mapper.Map<CollectorValue>(banknote.CollectorValue);
-            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.FindDuplicate(collectorValue);
             banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             banknoteFromRepo.CollectorValue = collectorValue;
 
@@ -393,10 +389,8 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            banknoteFromRepo.CountryId = patchedBanknote.CountryId;
-
             var collectorValue = _mapper.Map<CollectorValue>(patchedBanknote.CollectorValue);
-            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.FindDuplicate(collectorValue);
             banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             banknoteFromRepo.CollectorValue = collectorValue;
 

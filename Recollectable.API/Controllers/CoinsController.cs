@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
@@ -193,7 +193,7 @@ namespace Recollectable.API.Controllers
 
             var newCoin = _mapper.Map<Coin>(coin);
 
-            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(newCoin.CollectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.FindDuplicate(newCoin.CollectorValue);
             newCoin.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
 
             _unitOfWork.CoinRepository.Add(newCoin);
@@ -267,10 +267,8 @@ namespace Recollectable.API.Controllers
                 return NotFound();
             }
 
-            coinFromRepo.CountryId = coin.CountryId;
-
             var collectorValue = _mapper.Map<CollectorValue>(coin.CollectorValue);
-            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.FindDuplicate(collectorValue);
             coinFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             coinFromRepo.CollectorValue = collectorValue;
 
@@ -322,10 +320,8 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            coinFromRepo.CountryId = patchedCoin.CountryId;
-
             var collectorValue = _mapper.Map<CollectorValue>(patchedCoin.CollectorValue);
-            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.GetByValues(collectorValue);
+            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.FindDuplicate(collectorValue);
             coinFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             coinFromRepo.CollectorValue = collectorValue;
 

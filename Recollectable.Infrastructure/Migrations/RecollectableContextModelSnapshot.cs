@@ -120,9 +120,7 @@ namespace Recollectable.Infrastructure.Migrations
                     b.Property<string>("Discriminator")
                         .IsRequired();
 
-                    b.Property<string>("ReleaseDate")
-                        .IsRequired()
-                        .HasMaxLength(100);
+                    b.Property<string>("ReleaseDate");
 
                     b.HasKey("Id");
 
@@ -169,38 +167,38 @@ namespace Recollectable.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<double?>("AU50");
+                    b.Property<double>("AU50");
 
-                    b.Property<double?>("F12");
+                    b.Property<double>("F12");
 
-                    b.Property<double?>("G4");
+                    b.Property<double>("G4");
 
-                    b.Property<double?>("MS60");
+                    b.Property<double>("MS60");
 
-                    b.Property<double?>("MS63");
+                    b.Property<double>("MS63");
 
-                    b.Property<double?>("PF60");
+                    b.Property<double>("PF60");
 
-                    b.Property<double?>("PF63");
+                    b.Property<double>("PF63");
 
-                    b.Property<double?>("PF65");
+                    b.Property<double>("PF65");
 
-                    b.Property<double?>("VF20");
+                    b.Property<double>("VF20");
 
-                    b.Property<double?>("VG8");
+                    b.Property<double>("VG8");
 
-                    b.Property<double?>("XF40");
+                    b.Property<double>("XF40");
 
                     b.HasKey("Id");
 
                     b.ToTable("CollectorValues");
 
                     b.HasData(
-                        new { Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), F12 = 6.48, G4 = 6.48, MS60 = 16.0, MS63 = 18.0, VF20 = 6.48, VG8 = 6.48, XF40 = 15.0 },
-                        new { Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), F12 = 50.0, G4 = 50.0, MS60 = 200.0, MS63 = 200.0, VF20 = 50.0, VG8 = 50.0, XF40 = 50.0 },
-                        new { Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), PF60 = 75.0 },
-                        new { Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), F12 = 760.0, G4 = 760.0, MS60 = 1650.0, MS63 = 1650.0, VF20 = 760.0, VG8 = 760.0, XF40 = 760.0 },
-                        new { Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), F12 = 4.0, G4 = 3.0, MS60 = 40.0, MS63 = 165.0, VF20 = 4.5, VG8 = 3.5, XF40 = 13.5 }
+                        new { Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), AU50 = 0.0, F12 = 6.48, G4 = 6.48, MS60 = 16.0, MS63 = 18.0, PF60 = 0.0, PF63 = 0.0, PF65 = 0.0, VF20 = 6.48, VG8 = 6.48, XF40 = 15.0 },
+                        new { Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), AU50 = 0.0, F12 = 50.0, G4 = 50.0, MS60 = 200.0, MS63 = 200.0, PF60 = 0.0, PF63 = 0.0, PF65 = 0.0, VF20 = 50.0, VG8 = 50.0, XF40 = 50.0 },
+                        new { Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), AU50 = 0.0, F12 = 0.0, G4 = 0.0, MS60 = 0.0, MS63 = 0.0, PF60 = 75.0, PF63 = 0.0, PF65 = 0.0, VF20 = 0.0, VG8 = 0.0, XF40 = 0.0 },
+                        new { Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), AU50 = 0.0, F12 = 760.0, G4 = 760.0, MS60 = 1650.0, MS63 = 1650.0, PF60 = 0.0, PF63 = 0.0, PF65 = 0.0, VF20 = 760.0, VG8 = 760.0, XF40 = 760.0 },
+                        new { Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), AU50 = 0.0, F12 = 4.0, G4 = 3.0, MS60 = 40.0, MS63 = 165.0, PF60 = 0.0, PF63 = 0.0, PF65 = 0.0, VF20 = 4.5, VG8 = 3.5, XF40 = 13.5 }
                     );
                 });
 
@@ -209,9 +207,7 @@ namespace Recollectable.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(25);
+                    b.Property<string>("Type");
 
                     b.Property<Guid>("UserId");
 
@@ -235,14 +231,9 @@ namespace Recollectable.Infrastructure.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50);
+                    b.Property<string>("Name");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Countries");
 
@@ -278,8 +269,8 @@ namespace Recollectable.Infrastructure.Migrations
                     b.ToTable("AspNetRoles");
 
                     b.HasData(
-                        new { Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), ConcurrencyStamp = "bd38c75a-62a7-468a-b0bf-b9bebb67818d", Name = "User", NormalizedName = "USER" },
-                        new { Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), ConcurrencyStamp = "d3db2102-21b9-4908-bd37-93925971018d", Name = "Admin", NormalizedName = "ADMIN" }
+                        new { Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), ConcurrencyStamp = "1df1e88e-58bd-4bbe-9ed2-d2889e073451", Name = "User", NormalizedName = "USER" },
+                        new { Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), ConcurrencyStamp = "d0d95e32-892e-4633-bdd9-d3cab71fb49d", Name = "Admin", NormalizedName = "ADMIN" }
                     );
                 });
 
@@ -294,18 +285,13 @@ namespace Recollectable.Infrastructure.Migrations
                         .IsConcurrencyToken();
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100);
+                    b.Property<string>("FirstName");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100);
+                    b.Property<string>("LastName");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -343,9 +329,9 @@ namespace Recollectable.Infrastructure.Migrations
                     b.ToTable("AspNetUsers");
 
                     b.HasData(
-                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "177eeb3c-2aed-439d-88cf-67a4ec82a31e", Email = "ryan.haywood@gmail.com", EmailConfirmed = true, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = true, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Ryan" },
-                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "b37d5ad3-1ccf-41cb-8756-af2adae3d0cd", Email = "jack.patillo@gmail.com", EmailConfirmed = true, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = true, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Jack" },
-                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "861bddc5-7c37-4bbc-ab2b-7191a5a84a04", Email = "geoff.ramsey@gmail.com", EmailConfirmed = true, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = true, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Geoff" }
+                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "d2071ec4-0afb-4f52-9568-d8cedd94b681", Email = "ryan.haywood@gmail.com", EmailConfirmed = true, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = true, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Ryan" },
+                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "dc1c02cc-c365-4d4b-8702-3670b3fa4789", Email = "jack.patillo@gmail.com", EmailConfirmed = true, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = true, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Jack" },
+                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "e360ef29-9a43-4577-bc74-4bc086237b7c", Email = "geoff.ramsey@gmail.com", EmailConfirmed = true, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = true, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Geoff" }
                     );
                 });
 
@@ -353,32 +339,23 @@ namespace Recollectable.Infrastructure.Migrations
                 {
                     b.HasBaseType("Recollectable.Core.Entities.Collectables.Collectable");
 
-                    b.Property<string>("BackImagePath")
-                        .HasMaxLength(250);
+                    b.Property<string>("BackImagePath");
 
-                    b.Property<string>("Designer")
-                        .HasMaxLength(250);
+                    b.Property<string>("Designer");
 
                     b.Property<int>("FaceValue");
 
-                    b.Property<string>("FrontImagePath")
-                        .HasMaxLength(250);
+                    b.Property<string>("FrontImagePath");
 
-                    b.Property<string>("HeadOfState")
-                        .HasMaxLength(250);
+                    b.Property<string>("HeadOfState");
 
-                    b.Property<string>("ObverseDescription")
-                        .HasMaxLength(250);
+                    b.Property<string>("ObverseDescription");
 
-                    b.Property<string>("ReverseDescription")
-                        .HasMaxLength(250);
+                    b.Property<string>("ReverseDescription");
 
-                    b.Property<string>("Size")
-                        .HasMaxLength(25);
+                    b.Property<string>("Size");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100);
+                    b.Property<string>("Type");
 
                     b.ToTable("Currency");
 
@@ -389,14 +366,11 @@ namespace Recollectable.Infrastructure.Migrations
                 {
                     b.HasBaseType("Recollectable.Core.Entities.Collectables.Currency");
 
-                    b.Property<string>("Color")
-                        .HasMaxLength(250);
+                    b.Property<string>("Color");
 
-                    b.Property<string>("Signature")
-                        .HasMaxLength(250);
+                    b.Property<string>("Signature");
 
-                    b.Property<string>("Watermark")
-                        .HasMaxLength(250);
+                    b.Property<string>("Watermark");
 
                     b.ToTable("Banknote");
 
@@ -412,40 +386,29 @@ namespace Recollectable.Infrastructure.Migrations
                 {
                     b.HasBaseType("Recollectable.Core.Entities.Collectables.Currency");
 
-                    b.Property<string>("EdgeLegend")
-                        .HasMaxLength(100);
+                    b.Property<string>("EdgeLegend");
 
-                    b.Property<string>("EdgeType")
-                        .HasMaxLength(50);
+                    b.Property<string>("EdgeType");
 
-                    b.Property<string>("Metal")
-                        .HasMaxLength(50);
+                    b.Property<string>("Metal");
 
-                    b.Property<string>("MintMark")
-                        .HasMaxLength(50);
+                    b.Property<string>("MintMark");
 
                     b.Property<int>("Mintage");
 
-                    b.Property<string>("Note")
-                        .HasMaxLength(250);
+                    b.Property<string>("Note");
 
-                    b.Property<string>("ObverseInscription")
-                        .HasMaxLength(100);
+                    b.Property<string>("ObverseInscription");
 
-                    b.Property<string>("ObverseLegend")
-                        .HasMaxLength(100);
+                    b.Property<string>("ObverseLegend");
 
-                    b.Property<string>("ReverseInscription")
-                        .HasMaxLength(100);
+                    b.Property<string>("ReverseInscription");
 
-                    b.Property<string>("ReverseLegend")
-                        .HasMaxLength(100);
+                    b.Property<string>("ReverseLegend");
 
-                    b.Property<string>("Subject")
-                        .HasMaxLength(250);
+                    b.Property<string>("Subject");
 
-                    b.Property<string>("Weight")
-                        .HasMaxLength(25);
+                    b.Property<string>("Weight");
 
                     b.ToTable("Coin");
 

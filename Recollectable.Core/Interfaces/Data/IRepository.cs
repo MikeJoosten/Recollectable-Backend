@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Recollectable.Core.Interfaces
+namespace Recollectable.Core.Interfaces.Data
 {
     public interface IRepository<TEntity, TParameters>
         where TEntity : class

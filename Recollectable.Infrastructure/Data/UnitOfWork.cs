@@ -3,7 +3,7 @@ using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data.Repositories;
 using System;
@@ -16,12 +16,6 @@ namespace Recollectable.Infrastructure.Data
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
 
-        public IRepository<Banknote, CurrenciesResourceParameters> BanknoteRepository =>
-            new BanknoteRepository(_context, _propertyMappingService);
-
-        public IRepository<Coin, CurrenciesResourceParameters> CoinRepository =>
-            new CoinRepository(_context, _propertyMappingService);
-
         public IRepository<Collection, CollectionsResourceParameters> CollectionRepository =>
             new CollectionRepository(_context, _propertyMappingService);
 
@@ -33,6 +27,12 @@ namespace Recollectable.Infrastructure.Data
 
         public ICollectableRepository CollectableRepository =>
             new CollectableRepository(_context, this, _propertyMappingService);
+
+        public IRepository<Banknote, CurrenciesResourceParameters> BanknoteRepository =>
+            new BanknoteRepository(_context, _propertyMappingService);
+
+        public IRepository<Coin, CurrenciesResourceParameters> CoinRepository =>
+            new CoinRepository(_context, _propertyMappingService);
 
         public ICollectorValueRepository CollectorValueRepository =>
             new CollectorValueRepository(_context, _propertyMappingService);

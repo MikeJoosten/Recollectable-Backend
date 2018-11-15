@@ -28,6 +28,7 @@ namespace Recollectable.Infrastructure.Migrations
                 {
                     UserName = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(nullable: false),
                     PasswordHash = table.Column<string>(nullable: true),
@@ -40,9 +41,8 @@ namespace Recollectable.Infrastructure.Migrations
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
                     Id = table.Column<Guid>(nullable: false),
-                    FirstName = table.Column<string>(maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(maxLength: 100, nullable: false),
-                    Email = table.Column<string>(maxLength: 256, nullable: false)
+                    FirstName = table.Column<string>(nullable: true),
+                    LastName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -54,17 +54,17 @@ namespace Recollectable.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    G4 = table.Column<double>(nullable: true),
-                    VG8 = table.Column<double>(nullable: true),
-                    F12 = table.Column<double>(nullable: true),
-                    VF20 = table.Column<double>(nullable: true),
-                    XF40 = table.Column<double>(nullable: true),
-                    AU50 = table.Column<double>(nullable: true),
-                    MS60 = table.Column<double>(nullable: true),
-                    MS63 = table.Column<double>(nullable: true),
-                    PF60 = table.Column<double>(nullable: true),
-                    PF63 = table.Column<double>(nullable: true),
-                    PF65 = table.Column<double>(nullable: true)
+                    G4 = table.Column<double>(nullable: false),
+                    VG8 = table.Column<double>(nullable: false),
+                    F12 = table.Column<double>(nullable: false),
+                    VF20 = table.Column<double>(nullable: false),
+                    XF40 = table.Column<double>(nullable: false),
+                    AU50 = table.Column<double>(nullable: false),
+                    MS60 = table.Column<double>(nullable: false),
+                    MS63 = table.Column<double>(nullable: false),
+                    PF60 = table.Column<double>(nullable: false),
+                    PF63 = table.Column<double>(nullable: false),
+                    PF65 = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -76,7 +76,7 @@ namespace Recollectable.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(maxLength: 50, nullable: false),
+                    Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -195,7 +195,7 @@ namespace Recollectable.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Type = table.Column<string>(maxLength: 25, nullable: false),
+                    Type = table.Column<string>(nullable: true),
                     UserId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
@@ -214,34 +214,34 @@ namespace Recollectable.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    ReleaseDate = table.Column<string>(maxLength: 100, nullable: false),
+                    ReleaseDate = table.Column<string>(nullable: true),
                     CountryId = table.Column<Guid>(nullable: false),
                     CollectorValueId = table.Column<Guid>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     FaceValue = table.Column<int>(nullable: true),
-                    Type = table.Column<string>(maxLength: 100, nullable: true),
-                    Size = table.Column<string>(maxLength: 25, nullable: true),
-                    Designer = table.Column<string>(maxLength: 250, nullable: true),
-                    HeadOfState = table.Column<string>(maxLength: 250, nullable: true),
-                    ObverseDescription = table.Column<string>(maxLength: 250, nullable: true),
-                    ReverseDescription = table.Column<string>(maxLength: 250, nullable: true),
-                    FrontImagePath = table.Column<string>(maxLength: 250, nullable: true),
-                    BackImagePath = table.Column<string>(maxLength: 250, nullable: true),
-                    Color = table.Column<string>(maxLength: 250, nullable: true),
-                    Watermark = table.Column<string>(maxLength: 250, nullable: true),
-                    Signature = table.Column<string>(maxLength: 250, nullable: true),
+                    Type = table.Column<string>(nullable: true),
+                    Size = table.Column<string>(nullable: true),
+                    Designer = table.Column<string>(nullable: true),
+                    HeadOfState = table.Column<string>(nullable: true),
+                    ObverseDescription = table.Column<string>(nullable: true),
+                    ReverseDescription = table.Column<string>(nullable: true),
+                    FrontImagePath = table.Column<string>(nullable: true),
+                    BackImagePath = table.Column<string>(nullable: true),
+                    Color = table.Column<string>(nullable: true),
+                    Watermark = table.Column<string>(nullable: true),
+                    Signature = table.Column<string>(nullable: true),
                     Mintage = table.Column<int>(nullable: true),
-                    Weight = table.Column<string>(maxLength: 25, nullable: true),
-                    Metal = table.Column<string>(maxLength: 50, nullable: true),
-                    Note = table.Column<string>(maxLength: 250, nullable: true),
-                    Subject = table.Column<string>(maxLength: 250, nullable: true),
-                    ObverseInscription = table.Column<string>(maxLength: 100, nullable: true),
-                    ObverseLegend = table.Column<string>(maxLength: 100, nullable: true),
-                    ReverseInscription = table.Column<string>(maxLength: 100, nullable: true),
-                    ReverseLegend = table.Column<string>(maxLength: 100, nullable: true),
-                    EdgeType = table.Column<string>(maxLength: 50, nullable: true),
-                    EdgeLegend = table.Column<string>(maxLength: 100, nullable: true),
-                    MintMark = table.Column<string>(maxLength: 50, nullable: true)
+                    Weight = table.Column<string>(nullable: true),
+                    Metal = table.Column<string>(nullable: true),
+                    Note = table.Column<string>(nullable: true),
+                    Subject = table.Column<string>(nullable: true),
+                    ObverseInscription = table.Column<string>(nullable: true),
+                    ObverseLegend = table.Column<string>(nullable: true),
+                    ReverseInscription = table.Column<string>(nullable: true),
+                    ReverseLegend = table.Column<string>(nullable: true),
+                    EdgeType = table.Column<string>(nullable: true),
+                    EdgeLegend = table.Column<string>(nullable: true),
+                    MintMark = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -349,12 +349,6 @@ namespace Recollectable.Infrastructure.Migrations
                 name: "IX_Collections_UserId",
                 table: "Collections",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Countries_Name",
-                table: "Countries",
-                column: "Name",
-                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -31,24 +31,5 @@ namespace Recollectable.Core.Entities.Collectables
         [XmlIgnore]
         [JsonIgnore]
         public List<CollectionCollectable> CollectionCollectables { get; set; }
-
-        public override bool Equals(object obj)
-        {
-            var item = obj as Collectable;
-
-            if (item == null)
-            {
-                return false;
-            }
-
-            return ReleaseDate.Equals(item.ReleaseDate) && 
-                CollectorValue.Equals(item.CollectorValue) &&
-                CountryId.Equals(item.CountryId);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
     }
 }

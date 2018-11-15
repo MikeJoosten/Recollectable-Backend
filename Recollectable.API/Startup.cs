@@ -25,12 +25,13 @@ using Recollectable.API.Validators.Collectables;
 using Recollectable.API.Validators.Collection;
 using Recollectable.API.Validators.Location;
 using Recollectable.API.Validators.Users;
+using Recollectable.Core.Comparers;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Factories;
 using Recollectable.Core.Shared.Interfaces;
@@ -38,6 +39,7 @@ using Recollectable.Core.Shared.Validators;
 using Recollectable.Infrastructure.Data;
 using Recollectable.Infrastructure.Data.Repositories;
 using Recollectable.Infrastructure.Email;
+using Recollectable.Infrastructure.Interfaces;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
@@ -187,6 +189,9 @@ namespace Recollectable.API
             services.AddTransient<ITypeHelperService, TypeHelperService>();
             services.AddSingleton<ITokenFactory, TokenFactory>();
             services.AddSingleton<IEmailService, EmailService>();
+
+            //Configure Comparers
+            services.AddSingleton<IEqualityComparer<Currency>, CurrencyComparer>();
 
             // Configure Auto Mapper
             var configuration = new MapperConfiguration(cfg =>

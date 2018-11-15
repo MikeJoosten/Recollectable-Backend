@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Recollectable.Core.Interfaces
+namespace Recollectable.Infrastructure.Interfaces
 {
     public interface IEmailService
     {

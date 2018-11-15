@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces;
+using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Locations;
 using Recollectable.Core.Shared.Extensions;
 

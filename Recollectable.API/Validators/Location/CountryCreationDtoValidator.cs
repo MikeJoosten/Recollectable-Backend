@@ -1,4 +1,4 @@
-﻿using Recollectable.Core.Interfaces;
+﻿using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Locations;
 
 namespace Recollectable.API.Validators.Location
