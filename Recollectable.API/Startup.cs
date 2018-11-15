@@ -93,7 +93,6 @@ namespace Recollectable.API
                 options.RegisterValidatorsFromAssemblyContaining<CollectionCreationDtoValidator>();
                 options.RegisterValidatorsFromAssemblyContaining<CountryCreationDtoValidator>();
                 options.RegisterValidatorsFromAssemblyContaining<UserCreationDtoValidator>();
-                //options.RegisterValidatorsFromAssemblyContaining<UniqueValidator>();
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 

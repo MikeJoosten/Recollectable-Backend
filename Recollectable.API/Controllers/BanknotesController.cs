@@ -187,18 +187,37 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add POST Request Body
         /// <summary>
         /// Creates a banknote
         /// </summary>
         /// <remarks>
         /// Sample request:
         /// 
+        ///     POST /banknotes
         ///     {
-        ///     
+        ///         "faceValue": 20,
+        ///         "type": "Dollars",
+        ///         "releaseDate": "1979",
+        ///         "size": "152.4mm x 69.85mm",
+        ///         "color": "Deep olive-green on multicolor underprint",
+        ///         "signature": "Lawson-Bouey",
+        ///         "obverseDescription": "Queen Elizabeth II at right, arms at left",
+        ///         "reverseDescription": "Alberta's Lake Moraine and Rocky Mountains",
+        ///         "headOfState": "Queen Elizabeth II",
+        ///         "countryId": "e8a1c283-2300-4f3f-b408-59d0f8ccd893",
+        ///         "collectorValue": {
+        ///             "g4": 15.18,
+        ///             "vG8": 15.18,
+        ///             "f12": 15.18,
+        ///             "vF20": 15.18,
+        ///             "xF40": 15.18,
+        ///             "aU50": 15.18,
+        ///             "mS60": 75,
+        ///             "mS63": 75
+        ///         }
         ///     }
         /// </remarks>
-        /// <param name="banknote"></param>
+        /// <param name="banknote">Custom banknote</param>
         /// <param name="mediaType"></param>
         /// <returns>Newly created banknote</returns>
         /// <response code="201">Returns the newly created banknote</response>
@@ -266,7 +285,6 @@ namespace Recollectable.API.Controllers
         /// Invalid banknote creation request
         /// </summary>
         /// <param name="id">Banknote ID</param>
-        /// <returns></returns>
         /// <response code="404">Unexisting banknote ID</response>
         /// <response code="409">Already existing banknote ID</response>
         [HttpPost("{id}")]
@@ -281,20 +299,38 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        //TODO Add PUT Request Body
         /// <summary>
         /// Updates a banknote
         /// </summary>
         /// <remarks>
         /// Sample request:
         /// 
+        ///     PUT /banknotes/{id}
         ///     {
-        ///     
+        ///         "faceValue": 10,
+        ///         "type": "Pounds",
+        ///         "releaseDate": "1913-1918",
+        ///         "size": "171mm x 103mm",
+        ///         "color": "Dark blue on multicolor underprint",
+        ///         "signature": "J. R. Collins and G. T. Allen",
+        ///         "obverseDescription": "Arms at bottom center",
+        ///         "reverseDescription": "Horse drawn wagons loaded with sacks of grain (Narwonah, N.S.W.) at center",
+        ///         "headOfState": "King George V",
+        ///         "countryId": "81b8ec60-9932-44a2-865b-24c8bd1f5916",
+        ///         "collectorValue": {
+        ///             "g4": 4000,
+        ///             "vG8": 4000,
+        ///             "f12": 20000,
+        ///             "vF20": 20000,
+        ///             "xF40": 75000,
+        ///             "aU50": 75000,
+        ///             "mS60": 75000,
+        ///             "mS63": 75000
+        ///         }
         ///     }
         /// </remarks>
         /// <param name="id">Banknote ID</param>
-        /// <param name="banknote"></param>
-        /// <returns></returns>
+        /// <param name="banknote">Custom banknote</param>
         /// <response code="204">Updated the banknote successfully</response>
         /// <response code="400">Invalid banknote</response>
         /// <response code="404">Unexisting banknote ID</response>
@@ -351,13 +387,16 @@ namespace Recollectable.API.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     {
-        ///     
-        ///     }
+        ///     PATCH /banknotes/{id}
+        ///     [
+        ///	        { "op": "replace", "path": "/type", "value": "Pesos" },
+        ///	        { "op": "copy", "from": "/signature", "path": "/obverseDescription" },
+        ///	        { "op": "move", "from": "/color", "path": "/reverseDescription" },
+        ///	        { "op": "remove", "path": "/signature" }
+        ///     ]
         /// </remarks>
-        /// <param name="id"></param>
-        /// <param name="patchDoc"></param>
-        /// <returns></returns>
+        /// <param name="id">Banknote ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
         [HttpPatch("{id}", Name = "PartiallyUpdateBanknote")]
         public async Task<IActionResult> PartiallyUpdateBanknote(Guid id,
             [FromBody] JsonPatchDocument<BanknoteUpdateDto> patchDoc)

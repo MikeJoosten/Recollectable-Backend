@@ -20,7 +20,7 @@
         }
 
         /// <summary>
-        /// Type name (Available types: Banknote - Coin)
+        /// Type (Available types: Banknote - Coin)
         /// </summary>
         /// <example>Coin</example>
         public string Type { get; set; }
