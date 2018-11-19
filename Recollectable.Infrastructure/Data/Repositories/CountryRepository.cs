@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CountryRepository : IRepository<Country, CountriesResourceParameters>
+    public class CountryRepository : ICountryRepository
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -24,7 +24,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<Country>> Get(CountriesResourceParameters resourceParameters)
+        public async Task<PagedList<Country>> GetCountries(CountriesResourceParameters resourceParameters)
         {
             var countries = await _context.Countries.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<CountryDto, Country>())
@@ -47,12 +47,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public async Task<Country> GetById(Guid countryId)
+        public async Task<Country> GetCountryById(Guid countryId)
         {
             return await _context.Countries.FirstOrDefaultAsync(c => c.Id == countryId);
         }
 
-        public void Add(Country country)
+        public void AddCountry(Country country)
         {
             if (country.Id == Guid.Empty)
             {
@@ -62,9 +62,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Countries.Add(country);
         }
 
-        public void Update(Country country) { }
+        public void UpdateCountry(Country country) { }
 
-        public void Delete(Country country)
+        public void DeleteCountry(Country country)
         {
             _context.Countries.Remove(country);
         }
@@ -72,6 +72,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
         public async Task<bool> Exists(Guid countryId)
         {
             return await _context.Countries.AnyAsync(c => c.Id == countryId);
+        }
+
+        public async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

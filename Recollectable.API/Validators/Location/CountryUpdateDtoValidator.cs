@@ -5,8 +5,8 @@ namespace Recollectable.API.Validators.Location
 {
     public class CountryUpdateDtoValidator : CountryManipulationDtoValidator<CountryUpdateDto>
     {
-        public CountryUpdateDtoValidator(IUnitOfWork unitOfWork)
-            : base(unitOfWork)
+        public CountryUpdateDtoValidator(ICountryRepository repository)
+            : base(repository)
         {
         }
     }

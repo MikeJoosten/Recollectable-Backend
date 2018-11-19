@@ -11,15 +11,15 @@ namespace Recollectable.API.Validators.Collectables
     public class BanknoteManipulationDtoValidator<T> : AbstractValidator<T>
         where T : BanknoteManipulationDto
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IBanknoteRepository _repository;
         private readonly IEqualityComparer<Currency> _comparer;
 
-        public BanknoteManipulationDtoValidator(IUnitOfWork unitOfWork, IEqualityComparer<Currency> comparer)
+        public BanknoteManipulationDtoValidator(IBanknoteRepository repository, IEqualityComparer<Currency> comparer)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _comparer = comparer;
 
-            var banknotes = _unitOfWork.BanknoteRepository.Get(new CurrenciesResourceParameters()).Result;
+            var banknotes = _repository.GetBanknotes(new CurrenciesResourceParameters()).Result;
 
             RuleFor(b => b)
                 .IsDuplicate(banknotes, _comparer, "Banknote must be unique");

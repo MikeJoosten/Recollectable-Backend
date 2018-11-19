@@ -11,7 +11,7 @@ namespace Recollectable.Tests.Repositories
     {
         private CurrenciesResourceParameters resourceParameters;
 
-        public CoinRepositoryTests()
+        /*public CoinRepositoryTests()
         {
             resourceParameters = new CurrenciesResourceParameters();
         }
@@ -145,6 +145,6 @@ namespace Recollectable.Tests.Repositories
 
             //Assert
             Assert.False(result);
-        }
+        }*/
     }
 }

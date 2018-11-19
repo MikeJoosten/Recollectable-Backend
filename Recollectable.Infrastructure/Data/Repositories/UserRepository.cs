@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class UserRepository : IRepository<User, UsersResourceParameters>
+    public class UserRepository : IUserRepository
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -24,7 +24,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<User>> Get(UsersResourceParameters resourceParameters)
+        public async Task<PagedList<User>> GetUsers(UsersResourceParameters resourceParameters)
         {
             var users = await _context.Users
                 .Include(u => u.Collections)
@@ -45,14 +45,14 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public async Task<User> GetById(Guid userId)
+        public async Task<User> GetUserById(Guid userId)
         {
             return await _context.Users
                 .Include(u => u.Collections)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
-        public void Add(User user)
+        public void AddUser(User user)
         {
             if (user.Id == Guid.Empty)
             {
@@ -62,9 +62,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Users.Add(user);
         }
 
-        public void Update(User user) { }
+        public void UpdateUser(User user) { }
 
-        public void Delete(User user)
+        public void DeleteUser(User user)
         {
             _context.Users.Remove(user);
         }
@@ -72,6 +72,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
         public async Task<bool> Exists(Guid userId)
         {
             return await _context.Users.AnyAsync(u => u.Id == userId);
+        }
+
+        public async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

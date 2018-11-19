@@ -16,7 +16,6 @@ namespace Recollectable.Tests
 {
     public class RecollectableTestBase
     {
-        protected readonly IUnitOfWork _unitOfWork;
         protected readonly IPropertyMappingService _propertyMappingService;
         protected readonly ITypeHelperService _typeHelperService;
         protected readonly IMapper _mapper;
@@ -29,7 +28,6 @@ namespace Recollectable.Tests
 
             var _context = new RecollectableContext(options);
             _propertyMappingService = new PropertyMappingService();
-            _unitOfWork = new UnitOfWork(_context, _propertyMappingService);
 
             _typeHelperService = new TypeHelperService();
 

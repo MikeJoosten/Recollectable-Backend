@@ -25,15 +25,20 @@ namespace Recollectable.API.Controllers
     [Route("api/banknotes")]
     public class BanknotesController : Controller
     {
-        private IUnitOfWork _unitOfWork;
+        private IBanknoteRepository _banknoteRepository;
+        private ICountryRepository _countryRepository;
+        private ICollectorValueRepository _collectorValueRepository;
         private IPropertyMappingService _propertyMappingService;
         private ITypeHelperService _typeHelperService;
         private IMapper _mapper;
 
-        public BanknotesController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
+        public BanknotesController(IBanknoteRepository banknoteRepository, ICountryRepository countryRepository,
+            ICollectorValueRepository collectorValueRepository, ITypeHelperService typeHelperService, 
             IPropertyMappingService propertyMappingService, IMapper mapper)
         {
-            _unitOfWork = unitOfWork;
+            _banknoteRepository = banknoteRepository;
+            _countryRepository = countryRepository;
+            _collectorValueRepository = collectorValueRepository;
             _propertyMappingService = propertyMappingService;
             _typeHelperService = typeHelperService;
             _mapper = mapper;
@@ -65,7 +70,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var banknotesFromRepo = await _unitOfWork.BanknoteRepository.Get(resourceParameters);
+            var banknotesFromRepo = await _banknoteRepository.GetBanknotes(resourceParameters);
             var banknotes = _mapper.Map<IEnumerable<BanknoteDto>>(banknotesFromRepo);
 
             if (mediaType == "application/json+hateoas")
@@ -158,7 +163,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var banknoteFromRepo = await _unitOfWork.BanknoteRepository.GetById(id);
+            var banknoteFromRepo = await _banknoteRepository.GetBanknoteById(id);
 
             if (banknoteFromRepo == null)
             {
@@ -242,19 +247,19 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _unitOfWork.CountryRepository.Exists(banknote.CountryId))
+            if (!await _countryRepository.Exists(banknote.CountryId))
             {
                 return BadRequest();
             }
 
             var newBanknote = _mapper.Map<Banknote>(banknote);
 
-            var existingCollectorValue = _unitOfWork.CollectorValueRepository.FindDuplicate(newBanknote.CollectorValue).Result;
+            var existingCollectorValue = await _collectorValueRepository.GetCollectorValueByValues(newBanknote.CollectorValue);
             newBanknote.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
 
-            _unitOfWork.BanknoteRepository.Add(newBanknote);
+            _banknoteRepository.AddBanknote(newBanknote);
 
-            if (!await _unitOfWork.Save())
+            if (!await _banknoteRepository.Save())
             {
                 throw new Exception("Creating a banknote failed on save.");
             }
@@ -291,7 +296,7 @@ namespace Recollectable.API.Controllers
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> BlockBanknoteCreation(Guid id)
         {
-            if (await _unitOfWork.BanknoteRepository.Exists(id))
+            if (await _banknoteRepository.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -353,12 +358,12 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _unitOfWork.CountryRepository.Exists(banknote.CountryId))
+            if (!await _countryRepository.Exists(banknote.CountryId))
             {
                 return BadRequest();
             }
 
-            var banknoteFromRepo = await _unitOfWork.BanknoteRepository.GetById(id);
+            var banknoteFromRepo = await _banknoteRepository.GetBanknoteById(id);
 
             if (banknoteFromRepo == null)
             {
@@ -366,14 +371,14 @@ namespace Recollectable.API.Controllers
             }
 
             var collectorValue = _mapper.Map<CollectorValue>(banknote.CollectorValue);
-            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.FindDuplicate(collectorValue);
+            var existingCollectorValue = await _collectorValueRepository.GetCollectorValueByValues(collectorValue);
             banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             banknoteFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(banknote, banknoteFromRepo);
-            _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
+            _banknoteRepository.UpdateBanknote(banknoteFromRepo);
 
-            if (!await _unitOfWork.Save())
+            if (!await _banknoteRepository.Save())
             {
                 throw new Exception($"Updating banknote {id} failed on save.");
             }
@@ -406,7 +411,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var banknoteFromRepo = await _unitOfWork.BanknoteRepository.GetById(id);
+            var banknoteFromRepo = await _banknoteRepository.GetBanknoteById(id);
 
             if (banknoteFromRepo == null)
             {
@@ -423,20 +428,20 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _unitOfWork.CountryRepository.Exists(patchedBanknote.CountryId))
+            if (!await _countryRepository.Exists(patchedBanknote.CountryId))
             {
                 return BadRequest();
             }
 
             var collectorValue = _mapper.Map<CollectorValue>(patchedBanknote.CollectorValue);
-            var existingCollectorValue = await _unitOfWork.CollectorValueRepository.FindDuplicate(collectorValue);
+            var existingCollectorValue = await _collectorValueRepository.GetCollectorValueByValues(collectorValue);
             banknoteFromRepo.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
             banknoteFromRepo.CollectorValue = collectorValue;
 
             _mapper.Map(patchedBanknote, banknoteFromRepo);
-            _unitOfWork.BanknoteRepository.Update(banknoteFromRepo);
+            _banknoteRepository.UpdateBanknote(banknoteFromRepo);
 
-            if (!await _unitOfWork.Save())
+            if (!await _banknoteRepository.Save())
             {
                 throw new Exception($"Patching banknote {id} failed on save.");
             }
@@ -447,16 +452,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteBanknote")]
         public async Task<IActionResult> DeleteBanknote(Guid id)
         {
-            var banknoteFromRepo = await _unitOfWork.BanknoteRepository.GetById(id);
+            var banknoteFromRepo = await _banknoteRepository.GetBanknoteById(id);
 
             if (banknoteFromRepo == null)
             {
                 return NotFound();
             }
 
-            _unitOfWork.BanknoteRepository.Delete(banknoteFromRepo);
+            _banknoteRepository.DeleteBanknote(banknoteFromRepo);
 
-            if (!await _unitOfWork.Save())
+            if (!await _banknoteRepository.Save())
             {
                 throw new Exception($"Deleting banknote {id} failed on save.");
             }

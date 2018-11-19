@@ -20,7 +20,7 @@ namespace Recollectable.Tests.Controllers
         private readonly BanknotesController _controller;
         private readonly CurrenciesResourceParameters resourceParameters;
 
-        public BanknotesControllerTests()
+        /*public BanknotesControllerTests()
         {
             _controller = new BanknotesController(_unitOfWork, _typeHelperService, 
                 _propertyMappingService, _mapper);
@@ -597,6 +597,6 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.Equal(5, (await _unitOfWork.BanknoteRepository.Get(resourceParameters)).Count());
             Assert.Null(await _unitOfWork.BanknoteRepository.GetById(id));
-        }
+        }*/
     }
 }

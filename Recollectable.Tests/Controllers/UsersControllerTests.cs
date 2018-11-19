@@ -28,7 +28,7 @@ namespace Recollectable.Tests.Controllers
         private Mock<IEmailService> _mockEmailService;
         private Mock<ITokenFactory> _mockTokenFactory;
 
-        public UsersControllerTests()
+        /*public UsersControllerTests()
         {
             _mockUserStore = new Mock<IUserStore<User>>();
             _mockUserManager = new Mock<UserManager<User>>
@@ -799,6 +799,6 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.Equal(5, (await _unitOfWork.UserRepository.Get(resourceParameters)).Count());
             Assert.Null(await _unitOfWork.UserRepository.GetById(id));
-        }
+        }*/
     }
 }

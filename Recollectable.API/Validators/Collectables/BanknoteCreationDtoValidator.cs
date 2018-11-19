@@ -7,8 +7,8 @@ namespace Recollectable.API.Validators.Collectables
 {
     public class BanknoteCreationDtoValidator : BanknoteManipulationDtoValidator<BanknoteCreationDto>
     {
-        public BanknoteCreationDtoValidator(IUnitOfWork unitOfWork, IEqualityComparer<Currency> comparer)
-            : base(unitOfWork, comparer)
+        public BanknoteCreationDtoValidator(IBanknoteRepository repository, IEqualityComparer<Currency> comparer)
+            : base(repository, comparer)
         {
         }
     }

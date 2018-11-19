@@ -15,21 +15,22 @@ namespace Recollectable.Infrastructure.Data.Repositories
     public class CollectableRepository : ICollectableRepository
     {
         private RecollectableContext _context;
-        private IUnitOfWork _unitOfWork;
+        private ICollectionRepository _collectionRepository;
         private IPropertyMappingService _propertyMappingService;
 
         public CollectableRepository(RecollectableContext context, 
-            IUnitOfWork unitOfWork, IPropertyMappingService propertyMappingService)
+            ICollectionRepository collectionRepository, 
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
-            _unitOfWork = unitOfWork;
+            _collectionRepository = collectionRepository;
             _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<CollectionCollectable>> Get(Guid collectionId,
+        public async Task<PagedList<CollectionCollectable>> GetCollectables(Guid collectionId,
             CollectablesResourceParameters resourceParameters)
         {
-            if (!await _unitOfWork.CollectionRepository.Exists(collectionId))
+            if (!await _collectionRepository.Exists(collectionId))
             {
                 return null;
             }
@@ -63,7 +64,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public async Task<CollectionCollectable> GetById(Guid collectionId, Guid Id)
+        public async Task<CollectionCollectable> GetCollectableById(Guid collectionId, Guid Id)
         {
             return await _context.CollectionCollectables
                 .Include(cc => cc.Collectable)
@@ -74,12 +75,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(cc => cc.Id == Id);
         }
 
-        public async Task<Collectable> GetCollectableItem(Guid collectableId)
+        public async Task<Collectable> GetCollectableItem(Guid collectableItemId)
         {
-            return await _context.Collectables.FirstOrDefaultAsync(c => c.Id == collectableId);
+            return await _context.Collectables.FirstOrDefaultAsync(c => c.Id == collectableItemId);
         }
 
-        public void Add(CollectionCollectable collectable)
+        public void AddCollectable(CollectionCollectable collectable)
         {
             if (collectable.Id == Guid.Empty)
             {
@@ -89,9 +90,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.CollectionCollectables.Add(collectable);
         }
 
-        public void Update(CollectionCollectable collectable) { }
+        public void UpdateCollectable(CollectionCollectable collectable) { }
 
-        public void Delete(CollectionCollectable collectable)
+        public void DeleteCollectable(CollectionCollectable collectable)
         {
             _context.CollectionCollectables.Remove(collectable);
         }
@@ -101,6 +102,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
             return await _context.CollectionCollectables
                 .Where(cc => cc.CollectionId == collectionId)
                 .AnyAsync(cc => cc.Id == Id);
+        }
+
+        public async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

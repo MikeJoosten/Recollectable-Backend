@@ -8,13 +8,14 @@ namespace Recollectable.Core.Interfaces.Data
 {
     public interface ICollectableRepository
     {
-        Task<PagedList<CollectionCollectable>> Get(Guid collectionId,
+        Task<PagedList<CollectionCollectable>> GetCollectables(Guid collectionId,
             CollectablesResourceParameters resourceParameters);
-        Task<CollectionCollectable> GetById(Guid collectionId, Guid Id);
-        Task<Collectable> GetCollectableItem(Guid collectableId);
-        void Add(CollectionCollectable collectable);
-        void Update(CollectionCollectable collectable);
-        void Delete(CollectionCollectable collectable);
+        Task<CollectionCollectable> GetCollectableById(Guid collectionId, Guid Id);
+        Task<Collectable> GetCollectableItem(Guid collectableItemId);
+        void AddCollectable(CollectionCollectable collectable);
+        void UpdateCollectable(CollectionCollectable collectable);
+        void DeleteCollectable(CollectionCollectable collectable);
         Task<bool> Exists(Guid collectionId, Guid Id);
+        Task<bool> Save();
     }
 }

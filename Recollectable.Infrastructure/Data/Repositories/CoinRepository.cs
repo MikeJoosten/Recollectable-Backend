@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CoinRepository : IRepository<Coin, CurrenciesResourceParameters>
+    public class CoinRepository : ICoinRepository
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -24,7 +24,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<Coin>> Get(CurrenciesResourceParameters resourceParameters)
+        public async Task<PagedList<Coin>> GetCoins(CurrenciesResourceParameters resourceParameters)
         {
             var coins = await _context.Coins
                 .Include(c => c.Country)
@@ -59,7 +59,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public async Task<Coin> GetById(Guid coinId)
+        public async Task<Coin> GetCoinById(Guid coinId)
         {
             return await _context.Coins
                 .Include(c => c.Country)
@@ -67,7 +67,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(c => c.Id == coinId);
         }
 
-        public void Add(Coin coin)
+        public void AddCoin(Coin coin)
         {
             if (coin.Id == Guid.Empty)
             {
@@ -77,9 +77,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Coins.Add(coin);
         }
 
-        public void Update(Coin coin) { }
+        public void UpdateCoin(Coin coin) { }
 
-        public void Delete(Coin coin)
+        public void DeleteCoin(Coin coin)
         {
             _context.Coins.Remove(coin);
         }
@@ -87,6 +87,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
         public async Task<bool> Exists(Guid coinId)
         {
             return await _context.Coins.AnyAsync(c => c.Id == coinId);
+        }
+
+        public async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Recollectable.Tests.Repositories
     {
         private CountriesResourceParameters resourceParameters;
 
-        public CountryRepositoryTests()
+        /*public CountryRepositoryTests()
         {
             resourceParameters = new CountriesResourceParameters();
         }
@@ -143,6 +143,6 @@ namespace Recollectable.Tests.Repositories
 
             //Assert
             Assert.False(result);
-        }
+        }*/
     }
 }

@@ -9,13 +9,13 @@ namespace Recollectable.API.Validators.Location
     public class CountryManipulationDtoValidator<T> : AbstractValidator<T>
         where T : CountryManipulationDto
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly ICountryRepository _repository;
 
-        public CountryManipulationDtoValidator(IUnitOfWork unitOfWork)
+        public CountryManipulationDtoValidator(ICountryRepository repository)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
 
-            var countries = _unitOfWork.CountryRepository.Get(new CountriesResourceParameters()).Result;
+            var countries = _repository.GetCountries(new CountriesResourceParameters()).Result;
 
             RuleFor(c => c.Name)
                 .NotEmpty().WithMessage("Name is a required field")

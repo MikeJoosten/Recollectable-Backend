@@ -20,7 +20,7 @@ namespace Recollectable.Tests.Controllers
         private readonly CoinsController _controller;
         private readonly CurrenciesResourceParameters resourceParameters;
 
-        public CoinsControllerTests()
+        /*public CoinsControllerTests()
         {
             _controller = new CoinsController(_unitOfWork, _typeHelperService,
                 _propertyMappingService, _mapper);
@@ -620,6 +620,6 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.Equal(5, (await _unitOfWork.CoinRepository.Get(resourceParameters)).Count());
             Assert.Null(await _unitOfWork.CoinRepository.GetById(id));
-        }
+        }*/
     }
 }

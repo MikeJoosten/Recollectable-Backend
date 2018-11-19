@@ -24,7 +24,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<CollectorValue>> Get
+        public async Task<PagedList<CollectorValue>> GetCollectorValues
             (CollectorValuesResourceParameters resourceParameters)
         {
             var collectorValues = await _context.CollectorValues.ApplySort(resourceParameters.OrderBy,
@@ -36,18 +36,18 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public async Task<CollectorValue> GetById(Guid collectorValueId)
+        public async Task<CollectorValue> GetCollectorValueById(Guid collectorValueId)
         {
             return await _context.CollectorValues.FirstOrDefaultAsync(c => c.Id == collectorValueId);
         }
 
-        public async Task<CollectorValue> FindDuplicate(CollectorValue collectorValue)
+        public async Task<CollectorValue> GetCollectorValueByValues(CollectorValue collectorValue)
         {
             return await _context.CollectorValues
                 .SingleOrDefaultAsync(c => new CollectorValueComparer().Equals(c, collectorValue));
         }
 
-        public void Add(CollectorValue collectorValue)
+        public void AddCollectorValue(CollectorValue collectorValue)
         {
             if (collectorValue.Id == Guid.Empty)
             {
@@ -57,9 +57,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.CollectorValues.Add(collectorValue);
         }
 
-        public void Update(CollectorValue collectorValue) { }
+        public void UpdateCollectorValue(CollectorValue collectorValue) { }
 
-        public void Delete(CollectorValue collectorValue)
+        public void DeleteCollectorValue(CollectorValue collectorValue)
         {
             _context.CollectorValues.Remove(collectorValue);
         }
@@ -67,6 +67,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
         public async Task<bool> Exists(Guid collectorValueId)
         {
             return await _context.CollectorValues.AnyAsync(c => c.Id == collectorValueId);
+        }
+
+        public async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

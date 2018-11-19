@@ -20,7 +20,7 @@ namespace Recollectable.Tests.Controllers
         private readonly CountriesController _controller;
         private readonly CountriesResourceParameters resourceParameters;
 
-        public CountriesControllerTests()
+        /*public CountriesControllerTests()
         {
             _controller = new CountriesController(_unitOfWork, _typeHelperService,
                 _propertyMappingService, _mapper);
@@ -539,6 +539,6 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.Equal(5, (await _unitOfWork.CountryRepository.Get(resourceParameters)).Count());
             Assert.Null(await _unitOfWork.CountryRepository.GetById(id));
-        }
+        }*/
     }
 }

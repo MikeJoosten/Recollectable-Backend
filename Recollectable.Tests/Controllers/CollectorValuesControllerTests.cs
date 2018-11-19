@@ -20,7 +20,7 @@ namespace Recollectable.Tests.Controllers
         private readonly CollectorValuesController _controller;
         private readonly CollectorValuesResourceParameters resourceParameters;
 
-        public CollectorValuesControllerTests()
+        /*public CollectorValuesControllerTests()
         {
             _controller = new CollectorValuesController(_unitOfWork, _typeHelperService,
                 _propertyMappingService, _mapper);
@@ -523,6 +523,6 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.Equal(5, (await _unitOfWork.CollectorValueRepository.Get(resourceParameters)).Count());
             Assert.Null(await _unitOfWork.CollectorValueRepository.GetById(id));
-        }
+        }*/
     }
 }

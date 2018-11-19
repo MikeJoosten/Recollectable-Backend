@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class BanknoteRepository : IRepository<Banknote, CurrenciesResourceParameters>
+    public class BanknoteRepository : IBanknoteRepository
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -23,7 +23,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<Banknote>> Get(CurrenciesResourceParameters resourceParameters)
+        public async Task<PagedList<Banknote>> GetBanknotes(CurrenciesResourceParameters resourceParameters)
         {
             var banknotes = await _context.Banknotes
                 .Include(c => c.Country)
@@ -58,7 +58,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public async Task<Banknote> GetById(Guid banknoteId)
+        public async Task<Banknote> GetBanknoteById(Guid banknoteId)
         {
             return await _context.Banknotes
                 .Include(b => b.Country)
@@ -66,7 +66,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(b => b.Id == banknoteId);
         }
 
-        public void Add(Banknote banknote)
+        public void AddBanknote(Banknote banknote)
         {
             if (banknote.Id == Guid.Empty)
             {
@@ -76,9 +76,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Banknotes.Add(banknote);
         }
 
-        public void Update(Banknote banknote) { }
+        public void UpdateBanknote(Banknote banknote) { }
 
-        public void Delete(Banknote banknote)
+        public void DeleteBanknote(Banknote banknote)
         {
             _context.Banknotes.Remove(banknote);
         }
@@ -86,6 +86,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
         public async Task<bool> Exists(Guid banknoteId)
         {
             return await _context.Banknotes.AnyAsync(b => b.Id == banknoteId);
+        }
+
+        public async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

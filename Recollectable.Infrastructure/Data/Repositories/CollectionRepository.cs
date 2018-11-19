@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectionRepository : IRepository<Collection, CollectionsResourceParameters>
+    public class CollectionRepository : ICollectionRepository
     {
         private RecollectableContext _context;
         private IPropertyMappingService _propertyMappingService;
@@ -24,7 +24,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<Collection>> Get(CollectionsResourceParameters resourceParameters)
+        public async Task<PagedList<Collection>> GetCollections(CollectionsResourceParameters resourceParameters)
         {
             var collections = await _context.Collections.ApplySort(resourceParameters.OrderBy,
                 _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>()).ToListAsync();
@@ -46,12 +46,12 @@ namespace Recollectable.Infrastructure.Data.Repositories
                 resourceParameters.PageSize);
         }
 
-        public async Task<Collection> GetById(Guid collectionId)
+        public async Task<Collection> GetCollectionById(Guid collectionId)
         {
             return await _context.Collections.FirstOrDefaultAsync(c => c.Id == collectionId);
         }
 
-        public void Add(Collection collection)
+        public void AddCollection(Collection collection)
         {
             if (collection.Id == Guid.Empty)
             {
@@ -61,9 +61,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             _context.Collections.Add(collection);
         }
 
-        public void Update(Collection collection) { }
+        public void UpdateCollection(Collection collection) { }
 
-        public void Delete(Collection collection)
+        public void DeleteCollection(Collection collection)
         {
             _context.Collections.Remove(collection);
         }
@@ -71,6 +71,11 @@ namespace Recollectable.Infrastructure.Data.Repositories
         public async Task<bool> Exists(Guid collectionId)
         {
             return await _context.Collections.AnyAsync(c => c.Id == collectionId);
+        }
+
+        public async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

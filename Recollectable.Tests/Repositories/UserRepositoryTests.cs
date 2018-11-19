@@ -13,7 +13,7 @@ namespace Recollectable.Tests.Repositories
     {
         private UsersResourceParameters resourceParameters;
 
-        public UserRepositoryTests()
+        /*public UserRepositoryTests()
         {
             resourceParameters = new UsersResourceParameters();
         }
@@ -147,6 +147,6 @@ namespace Recollectable.Tests.Repositories
 
             //Assert
             Assert.False(result);
-        }
+        }*/
     }
 }

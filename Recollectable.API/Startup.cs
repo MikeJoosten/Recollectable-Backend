@@ -27,9 +27,6 @@ using Recollectable.API.Validators.Location;
 using Recollectable.API.Validators.Users;
 using Recollectable.Core.Comparers;
 using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Entities.Collections;
-using Recollectable.Core.Entities.Locations;
-using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Shared.Entities;
@@ -173,14 +170,13 @@ namespace Recollectable.API
             });
 
             // Configure Repositories
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICoinRepository, CoinRepository>();
+            services.AddScoped<IBanknoteRepository, BanknoteRepository>();
             services.AddScoped<ICollectableRepository, CollectableRepository>();
             services.AddScoped<ICollectorValueRepository, CollectorValueRepository>();
-            services.AddScoped<IRepository<User, UsersResourceParameters>, UserRepository>();
-            services.AddScoped<IRepository<Collection, CollectionsResourceParameters>, CollectionRepository>();
-            services.AddScoped<IRepository<Coin, CurrenciesResourceParameters>, CoinRepository>();
-            services.AddScoped<IRepository<Banknote, CurrenciesResourceParameters>, BanknoteRepository>();
-            services.AddScoped<IRepository<Country, CountriesResourceParameters>, CountryRepository>();
+            services.AddScoped<ICollectionRepository, CollectionRepository>();
+            services.AddScoped<ICountryRepository, CountryRepository>();
 
             // Configure Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

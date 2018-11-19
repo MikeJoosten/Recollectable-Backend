@@ -10,13 +10,13 @@ namespace Recollectable.API.Validators.Collectables
     public class CoinManipulationDtoValidator<T> : AbstractValidator<T>
         where T : CoinManipulationDto
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly ICoinRepository _repository;
 
-        public CoinManipulationDtoValidator(IUnitOfWork unitOfWork)
+        public CoinManipulationDtoValidator(ICoinRepository repository)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
 
-            var coins = _unitOfWork.CoinRepository.Get(new CurrenciesResourceParameters()).Result;
+            var coins = _repository.GetCoins(new CurrenciesResourceParameters()).Result;
 
             RuleFor(b => b)
                 .IsDuplicate(coins, new CurrencyComparer(), "Coin must be unique");

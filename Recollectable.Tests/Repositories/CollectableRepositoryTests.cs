@@ -11,7 +11,7 @@ namespace Recollectable.Tests.Repositories
     {
         private CollectablesResourceParameters resourceParameters;
 
-        public CollectableRepositoryTests()
+        /*public CollectableRepositoryTests()
         {
             resourceParameters = new CollectablesResourceParameters();
         }
@@ -198,6 +198,6 @@ namespace Recollectable.Tests.Repositories
 
             //Assert
             Assert.False(result);
-        }
+        }*/
     }
 }

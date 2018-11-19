@@ -5,8 +5,8 @@ namespace Recollectable.API.Validators.Collectables
 {
     public class CoinUpdateDtoValidator : CoinManipulationDtoValidator<CoinUpdateDto>
     {
-        public CoinUpdateDtoValidator(IUnitOfWork unitOfWork)
-            : base(unitOfWork)
+        public CoinUpdateDtoValidator(ICoinRepository repository)
+            : base(repository)
         {
         }
     }
