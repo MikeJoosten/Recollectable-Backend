@@ -3,7 +3,7 @@ using Recollectable.Core.Models.Collectables;
 
 namespace Recollectable.API.Validators.Collectables
 {
-    public class CollectableUpdateDtoValidator : CollectableManipulationDtoValidator<CollectableUpdateDto>
+    public class CollectableUpdateDtoValidator : CollectableManipulationDtoValidator<CollectionCollectableUpdateDto>
     {
         public CollectableUpdateDtoValidator()
         {

@@ -9,7 +9,7 @@ namespace Recollectable.Tests.Repositories
 {
     public class CollectableRepositoryTests : RecollectableTestBase
     {
-        private CollectablesResourceParameters resourceParameters;
+        private CollectionCollectablesResourceParameters resourceParameters;
 
         /*public CollectableRepositoryTests()
         {

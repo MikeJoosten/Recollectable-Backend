@@ -23,10 +23,10 @@ namespace Recollectable.Core.Shared.Entities
             CreateMap<CollectionCreationDto, Collection>();
             CreateMap<CollectionUpdateDto, Collection>();
             CreateMap<Collection, CollectionUpdateDto>();
-            CreateMap<CollectionCollectable, CollectableDto>();
-            CreateMap<CollectableCreationDto, CollectionCollectable>();
-            CreateMap<CollectableUpdateDto, CollectionCollectable>();
-            CreateMap<CollectionCollectable, CollectableUpdateDto>();
+            CreateMap<CollectionCollectable, CollectionCollectableDto>();
+            CreateMap<CollectionCollectableCreationDto, CollectionCollectable>();
+            CreateMap<CollectionCollectableUpdateDto, CollectionCollectable>();
+            CreateMap<CollectionCollectable, CollectionCollectableUpdateDto>();
             CreateMap<Coin, CoinDto>();
             CreateMap<CoinCreationDto, Coin>();
             CreateMap<CoinUpdateDto, Coin>();

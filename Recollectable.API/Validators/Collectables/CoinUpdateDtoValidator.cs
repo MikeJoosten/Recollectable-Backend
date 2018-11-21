@@ -1,13 +1,12 @@
-﻿using Recollectable.Core.Interfaces.Data;
-using Recollectable.Core.Models.Collectables;
+﻿using Recollectable.Core.Models.Collectables;
 
 namespace Recollectable.API.Validators.Collectables
 {
     public class CoinUpdateDtoValidator : CoinManipulationDtoValidator<CoinUpdateDto>
     {
-        public CoinUpdateDtoValidator(ICoinRepository repository)
+        /*public CoinUpdateDtoValidator(ICoinRepository repository)
             : base(repository)
         {
-        }
+        }*/
     }
 }

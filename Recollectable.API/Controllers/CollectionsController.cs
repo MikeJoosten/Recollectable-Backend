@@ -3,16 +3,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Data;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collections;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Shared.Helpers;
 using Recollectable.Core.Shared.Models;
+using Recollectable.Core.Shared.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,19 +25,15 @@ namespace Recollectable.API.Controllers
     [Route("api/collections")]
     public class CollectionsController : Controller
     {
-        private ICollectionRepository _collectionRepository;
-        private IUserRepository _userRepository;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        private ICollectionService _collectionService;
+        private IUserService _userService;
         private IMapper _mapper;
 
-        public CollectionsController(ICollectionRepository collectionRepository, IUserRepository userRepository,
-            ITypeHelperService typeHelperService, IPropertyMappingService propertyMappingService, IMapper mapper)
+        public CollectionsController(ICollectionService collectionService, 
+            IUserService userService, IMapper mapper)
         {
-            _collectionRepository = collectionRepository;
-            _userRepository = userRepository;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _collectionService = collectionService;
+            _userService = userService;
             _mapper = mapper;
         }
 
@@ -46,36 +42,34 @@ namespace Recollectable.API.Controllers
         public async Task<IActionResult> GetCollections(CollectionsResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<CollectionDto, Collection>
-                (resourceParameters.OrderBy))
+            if (!PropertyMappingService.ValidMappingExistsFor<Collection>(resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<CollectionDto>
-                (resourceParameters.Fields))
+            if (!TypeHelper.TypeHasProperties<CollectionDto>(resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var collectionsFromRepo = await _collectionRepository.GetCollections(resourceParameters);
-            var collections = _mapper.Map<IEnumerable<CollectionDto>>(collectionsFromRepo);
+            var retrievedCollections = await _collectionService.FindCollections(resourceParameters);
+            var collections = _mapper.Map<IEnumerable<CollectionDto>>(retrievedCollections);
 
             if (mediaType == "application/json+hateoas")
             {
                 var paginationMetadata = new
                 {
-                    totalCount = collectionsFromRepo.TotalCount,
-                    pageSize = collectionsFromRepo.PageSize,
-                    currentPage = collectionsFromRepo.CurrentPage,
-                    totalPages = collectionsFromRepo.TotalPages
+                    totalCount = retrievedCollections.TotalCount,
+                    pageSize = retrievedCollections.PageSize,
+                    currentPage = retrievedCollections.CurrentPage,
+                    totalPages = retrievedCollections.TotalPages
                 };
 
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 var links = CreateCollectionsLinks(resourceParameters,
-                    collectionsFromRepo.HasNext, collectionsFromRepo.HasPrevious);
+                    retrievedCollections.HasNext, retrievedCollections.HasPrevious);
                 var shapedCollections = collections.ShapeData(resourceParameters.Fields);
 
                 var linkedCollections = shapedCollections.Select(collection =>
@@ -99,20 +93,20 @@ namespace Recollectable.API.Controllers
             }
             else if (mediaType == "application/json")
             {
-                var previousPageLink = collectionsFromRepo.HasPrevious ?
+                var previousPageLink = retrievedCollections.HasPrevious ?
                     CreateCollectionsResourceUri(resourceParameters,
                     ResourceUriType.PreviousPage) : null;
 
-                var nextPageLink = collectionsFromRepo.HasNext ?
+                var nextPageLink = retrievedCollections.HasNext ?
                     CreateCollectionsResourceUri(resourceParameters,
                     ResourceUriType.NextPage) : null;
 
                 var paginationMetadata = new
                 {
-                    totalCount = collectionsFromRepo.TotalCount,
-                    pageSize = collectionsFromRepo.PageSize,
-                    currentPage = collectionsFromRepo.CurrentPage,
-                    totalPages = collectionsFromRepo.TotalPages,
+                    totalCount = retrievedCollections.TotalCount,
+                    pageSize = retrievedCollections.PageSize,
+                    currentPage = retrievedCollections.CurrentPage,
+                    totalPages = retrievedCollections.TotalPages,
                     previousPageLink,
                     nextPageLink,
                 };
@@ -132,19 +126,19 @@ namespace Recollectable.API.Controllers
         public async Task<IActionResult> GetCollection(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<CollectionDto>(fields))
+            if (!TypeHelper.TypeHasProperties<CollectionDto>(fields))
             {
                 return BadRequest();
             }
 
-            var collectionFromRepo = await _collectionRepository.GetCollectionById(id);
+            var retrievedCollection = await _collectionService.FindCollectionById(id);
 
-            if (collectionFromRepo == null)
+            if (retrievedCollection == null)
             {
                 return NotFound();
             }
 
-            var collection = _mapper.Map<CollectionDto>(collectionFromRepo);
+            var collection = _mapper.Map<CollectionDto>(retrievedCollection);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -180,7 +174,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var user = await _userRepository.GetUserById(collection.UserId);
+            var user = await _userService.FindUserById(collection.UserId);
 
             if (user == null)
             {
@@ -190,9 +184,9 @@ namespace Recollectable.API.Controllers
             var newCollection = _mapper.Map<Collection>(collection);
             newCollection.User = user;
 
-            _collectionRepository.AddCollection(newCollection);
+            await _collectionService.CreateCollection(newCollection);
 
-            if (!await _collectionRepository.Save())
+            if (!await _collectionService.Save())
             {
                 throw new Exception("Creating a collection failed on save.");
             }
@@ -222,7 +216,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCollectionCreation(Guid id)
         {
-            if (await _collectionRepository.Exists(id))
+            if (await _collectionService.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -243,24 +237,24 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _userRepository.Exists(collection.UserId))
+            if (!await _userService.Exists(collection.UserId))
             {
                 return BadRequest();
             }
 
-            var collectionFromRepo = await _collectionRepository.GetCollectionById(id);
+            var retrievedCollection = await _collectionService.FindCollectionById(id);
 
-            if (collectionFromRepo == null)
+            if (retrievedCollection == null)
             {
                 return NotFound();
             }
 
-            collectionFromRepo.UserId = collection.UserId;
+            retrievedCollection.UserId = collection.UserId;
 
-            _mapper.Map(collection, collectionFromRepo);
-            _collectionRepository.UpdateCollection(collectionFromRepo);
+            _mapper.Map(collection, retrievedCollection);
+            _collectionService.UpdateCollection(retrievedCollection);
 
-            if (!await _collectionRepository.Save())
+            if (!await _collectionService.Save())
             {
                 throw new Exception($"Updating collection {id} failed on save.");
             }
@@ -277,14 +271,14 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectionFromRepo = await _collectionRepository.GetCollectionById(id);
+            var retrievedCollection = await _collectionService.FindCollectionById(id);
 
-            if (collectionFromRepo == null)
+            if (retrievedCollection == null)
             {
                 return NotFound();
             }
 
-            var patchedCollection = _mapper.Map<CollectionUpdateDto>(collectionFromRepo);
+            var patchedCollection = _mapper.Map<CollectionUpdateDto>(retrievedCollection);
             patchDoc.ApplyTo(patchedCollection, ModelState);
 
             TryValidateModel(patchedCollection);
@@ -294,17 +288,17 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _userRepository.Exists(patchedCollection.UserId))
+            if (!await _userService.Exists(patchedCollection.UserId))
             {
                 return BadRequest();
             }
 
-            collectionFromRepo.UserId = patchedCollection.UserId;
+            retrievedCollection.UserId = patchedCollection.UserId;
 
-            _mapper.Map(patchedCollection, collectionFromRepo);
-            _collectionRepository.UpdateCollection(collectionFromRepo);
+            _mapper.Map(patchedCollection, retrievedCollection);
+            _collectionService.UpdateCollection(retrievedCollection);
 
-            if (!await _collectionRepository.Save())
+            if (!await _collectionService.Save())
             {
                 throw new Exception($"Patching collection {id} failed on save.");
             }
@@ -315,16 +309,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteCollection")]
         public async Task<IActionResult> DeleteCollection(Guid id)
         {
-            var collectionFromRepo = await _collectionRepository.GetCollectionById(id);
+            var retrievedCollection = await _collectionService.FindCollectionById(id);
 
-            if (collectionFromRepo == null)
+            if (retrievedCollection == null)
             {
                 return NotFound();
             }
 
-            _collectionRepository.DeleteCollection(collectionFromRepo);
+            _collectionService.RemoveCollection(retrievedCollection);
 
-            if (!await _collectionRepository.Save())
+            if (!await _collectionService.Save())
             {
                 throw new Exception($"Deleting collection {id} failed on save.");
             }

@@ -1,76 +1,57 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LinqSpecs.Core;
+using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Collections;
-using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Data;
-using Recollectable.Core.Models.Collections;
-using Recollectable.Core.Shared.Entities;
-using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectionRepository : ICollectionRepository
+    public class CollectionRepository : IRepository<Collection>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public CollectionRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public CollectionRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<Collection>> GetCollections(CollectionsResourceParameters resourceParameters)
+        public async Task<IEnumerable<Collection>> GetAll(Specification<Collection> specification = null)
         {
-            var collections = await _context.Collections.ApplySort(resourceParameters.OrderBy,
-                _propertyMappingService.GetPropertyMapping<CollectionDto, Collection>()).ToListAsync();
-
-            if (!string.IsNullOrEmpty(resourceParameters.Type))
-            {
-                var type = resourceParameters.Type.Trim().ToLowerInvariant();
-                collections = collections.Where(c => c.Type.ToLowerInvariant() == type).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(resourceParameters.Search))
-            {
-                var search = resourceParameters.Search.Trim().ToLowerInvariant();
-                collections = collections.Where(c => c.Type.ToLowerInvariant().Contains(search)).ToList();
-            }
-
-            return PagedList<Collection>.Create(collections,
-                resourceParameters.Page,
-                resourceParameters.PageSize);
+            return specification == null ?
+                await _context.Collections.ToListAsync() :
+                await _context.Collections.Where(specification.ToExpression()).ToListAsync();
         }
 
-        public async Task<Collection> GetCollectionById(Guid collectionId)
+        public async Task<Collection> GetSingle(Specification<Collection> specification = null)
         {
-            return await _context.Collections.FirstOrDefaultAsync(c => c.Id == collectionId);
+            return specification == null ?
+                await _context.Collections.FirstOrDefaultAsync() :
+                await _context.Collections.FirstOrDefaultAsync(specification.ToExpression());
         }
 
-        public void AddCollection(Collection collection)
+        public async Task Add(Collection collection)
         {
             if (collection.Id == Guid.Empty)
             {
                 collection.Id = Guid.NewGuid();
             }
 
-            _context.Collections.Add(collection);
+            await _context.Collections.AddAsync(collection);
         }
 
-        public void UpdateCollection(Collection collection) { }
+        public void Update(Collection collection) { }
 
-        public void DeleteCollection(Collection collection)
+        public void Delete(Collection collection)
         {
             _context.Collections.Remove(collection);
         }
 
-        public async Task<bool> Exists(Guid collectionId)
+        public async Task<bool> Exists(Specification<Collection> specification = null)
         {
-            return await _context.Collections.AnyAsync(c => c.Id == collectionId);
+            return await _context.Collections.AnyAsync(specification.ToExpression());
         }
 
         public async Task<bool> Save()

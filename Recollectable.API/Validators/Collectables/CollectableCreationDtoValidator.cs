@@ -2,7 +2,7 @@
 
 namespace Recollectable.API.Validators.Collectables
 {
-    public class CollectableCreationDtoValidator : CollectableManipulationDtoValidator<CollectableCreationDto>
+    public class CollectableCreationDtoValidator : CollectableManipulationDtoValidator<CollectionCollectableCreationDto>
     {
         public CollectableCreationDtoValidator()
         {

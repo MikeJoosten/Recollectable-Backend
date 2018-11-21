@@ -3,16 +3,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Data;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Shared.Helpers;
 using Recollectable.Core.Shared.Models;
+using Recollectable.Core.Shared.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,17 +25,12 @@ namespace Recollectable.API.Controllers
     [Route("api/collector-values")]
     public class CollectorValuesController : Controller
     {
-        private ICollectorValueRepository _collectorValueRepository;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        private ICollectorValueService _collectorValueService;
         private IMapper _mapper;
 
-        public CollectorValuesController(ICollectorValueRepository collectorValueRepository, ITypeHelperService typeHelperService,
-            IPropertyMappingService propertyMappingService, IMapper mapper)
+        public CollectorValuesController(ICollectorValueService collectorValueService, IMapper mapper)
         {
-            _collectorValueRepository = collectorValueRepository;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _collectorValueService = collectorValueService;
             _mapper = mapper;
         }
 
@@ -44,36 +39,35 @@ namespace Recollectable.API.Controllers
         public async Task<IActionResult> GetCollectorValues(CollectorValuesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<CollectorValueDto, CollectorValue>
-                (resourceParameters.OrderBy))
+            if (!PropertyMappingService.ValidMappingExistsFor<CollectorValue>(resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<CollectorValueDto>
+            if (!TypeHelper.TypeHasProperties<CollectorValueDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var collectorValuesFromRepo = await _collectorValueRepository.GetCollectorValues(resourceParameters);
-            var collectorValues = _mapper.Map<IEnumerable<CollectorValueDto>>(collectorValuesFromRepo);
+            var retrievedCollectorValues = await _collectorValueService.FindCollectorValues(resourceParameters);
+            var collectorValues = _mapper.Map<IEnumerable<CollectorValueDto>>(retrievedCollectorValues);
 
             if (mediaType == "application/json+hateoas")
             {
                 var paginationMetadata = new
                 {
-                    totalCount = collectorValuesFromRepo.TotalCount,
-                    pageSize = collectorValuesFromRepo.PageSize,
-                    currentPage = collectorValuesFromRepo.CurrentPage,
-                    totalPages = collectorValuesFromRepo.TotalPages,
+                    totalCount = retrievedCollectorValues.TotalCount,
+                    pageSize = retrievedCollectorValues.PageSize,
+                    currentPage = retrievedCollectorValues.CurrentPage,
+                    totalPages = retrievedCollectorValues.TotalPages,
                 };
 
                 Response.Headers.Add("X-Pagination", 
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 var links = CreateCollectorValuesLinks(resourceParameters,
-                    collectorValuesFromRepo.HasNext, collectorValuesFromRepo.HasPrevious);
+                    retrievedCollectorValues.HasNext, retrievedCollectorValues.HasPrevious);
                 var shapedCollectorValues = collectorValues.ShapeData(resourceParameters.Fields);
 
                 var linkedCollectorValues = shapedCollectorValues.Select(collectorValue =>
@@ -97,20 +91,20 @@ namespace Recollectable.API.Controllers
             }
             else if (mediaType == "application/json")
             {
-                var previousPageLink = collectorValuesFromRepo.HasPrevious ?
+                var previousPageLink = retrievedCollectorValues.HasPrevious ?
                     CreateCollectorValuesResourceUri(resourceParameters,
                     ResourceUriType.PreviousPage) : null;
 
-                var nextPageLink = collectorValuesFromRepo.HasNext ?
+                var nextPageLink = retrievedCollectorValues.HasNext ?
                     CreateCollectorValuesResourceUri(resourceParameters,
                     ResourceUriType.NextPage) : null;
 
                 var paginationMetadata = new
                 {
-                    totalCount = collectorValuesFromRepo.TotalCount,
-                    pageSize = collectorValuesFromRepo.PageSize,
-                    currentPage = collectorValuesFromRepo.CurrentPage,
-                    totalPages = collectorValuesFromRepo.TotalPages,
+                    totalCount = retrievedCollectorValues.TotalCount,
+                    pageSize = retrievedCollectorValues.PageSize,
+                    currentPage = retrievedCollectorValues.CurrentPage,
+                    totalPages = retrievedCollectorValues.TotalPages,
                     previousPageLink,
                     nextPageLink,
                 };
@@ -130,19 +124,19 @@ namespace Recollectable.API.Controllers
         public async Task<IActionResult> GetCollectorValue(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<CollectorValueDto>(fields))
+            if (!TypeHelper.TypeHasProperties<CollectorValueDto>(fields))
             {
                 return BadRequest();
             }
 
-            var collectorValueFromRepo = await _collectorValueRepository.GetCollectorValueById(id);
+            var retrievedCollectorValue = await _collectorValueService.FindCollectorValueById(id);
 
-            if (collectorValueFromRepo == null)
+            if (retrievedCollectorValue == null)
             {
                 return NotFound();
             }
 
-            var collectorValue = _mapper.Map<CollectorValueDto>(collectorValueFromRepo);
+            var collectorValue = _mapper.Map<CollectorValueDto>(retrievedCollectorValue);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -179,9 +173,9 @@ namespace Recollectable.API.Controllers
             }
 
             var newCollectorValue = _mapper.Map<CollectorValue>(collectorValue);
-            _collectorValueRepository.AddCollectorValue(newCollectorValue);
+            await _collectorValueService.CreateCollectorValue(newCollectorValue);
 
-            if (!await _collectorValueRepository.Save())
+            if (!await _collectorValueService.Save())
             {
                 throw new Exception("Creating a collector value failed on save.");
             }
@@ -211,7 +205,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCollectorValueCreation(Guid id)
         {
-            if (await _collectorValueRepository.Exists(id))
+            if (await _collectorValueService.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -233,17 +227,17 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var collectorValueFromRepo = await _collectorValueRepository.GetCollectorValueById(id);
+            var retrievedCollectorValue = await _collectorValueService.FindCollectorValueById(id);
 
-            if (collectorValueFromRepo == null)
+            if (retrievedCollectorValue == null)
             {
                 return NotFound();
             }
 
-            _mapper.Map(collectorValue, collectorValueFromRepo);
-            _collectorValueRepository.UpdateCollectorValue(collectorValueFromRepo);
+            _mapper.Map(collectorValue, retrievedCollectorValue);
+            _collectorValueService.UpdateCollectorValue(retrievedCollectorValue);
 
-            if (!await _collectorValueRepository.Save())
+            if (!await _collectorValueService.Save())
             {
                 throw new Exception($"Updating collector value {id} failed on save.");
             }
@@ -260,14 +254,14 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var collectorValueFromRepo = await _collectorValueRepository.GetCollectorValueById(id);
+            var retrievedCollectorValue = await _collectorValueService.FindCollectorValueById(id);
 
-            if (collectorValueFromRepo == null)
+            if (retrievedCollectorValue == null)
             {
                 return NotFound();
             }
 
-            var patchedCollectorValue = _mapper.Map<CollectorValueUpdateDto>(collectorValueFromRepo);
+            var patchedCollectorValue = _mapper.Map<CollectorValueUpdateDto>(retrievedCollectorValue);
             patchDoc.ApplyTo(patchedCollectorValue, ModelState);
 
             TryValidateModel(patchedCollectorValue);
@@ -277,10 +271,10 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            _mapper.Map(patchedCollectorValue, collectorValueFromRepo);
-            _collectorValueRepository.UpdateCollectorValue(collectorValueFromRepo);
+            _mapper.Map(patchedCollectorValue, retrievedCollectorValue);
+            _collectorValueService.UpdateCollectorValue(retrievedCollectorValue);
 
-            if (!await _collectorValueRepository.Save())
+            if (!await _collectorValueService.Save())
             {
                 throw new Exception($"Patching collector value {id} failed on save.");
             }
@@ -291,16 +285,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteCollectorValue")]
         public async Task<IActionResult> DeleteCollectorValue(Guid id)
         {
-            var collectorValueFromRepo = await _collectorValueRepository.GetCollectorValueById(id);
+            var collectorValueFromRepo = await _collectorValueService.FindCollectorValueById(id);
 
             if (collectorValueFromRepo == null)
             {
                 return NotFound();
             }
 
-            _collectorValueRepository.DeleteCollectorValue(collectorValueFromRepo);
+            _collectorValueService.RemoveCollectorValue(collectorValueFromRepo);
 
-            if (!await _collectorValueRepository.Save())
+            if (!await _collectorValueService.Save())
             {
                 throw new Exception($"Deleting collector value {id} failed on save.");
             }

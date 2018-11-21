@@ -6,16 +6,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Interfaces;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces.Data;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Models.Users;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
+using Recollectable.Core.Shared.Helpers;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Core.Shared.Models;
+using Recollectable.Core.Shared.Services;
 using Recollectable.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -30,21 +31,16 @@ namespace Recollectable.API.Controllers
     //TODO Add Authorization [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
-        private IUserRepository _userRepository;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        private IUserService _userService;
         private UserManager<User> _userManager;
         private ITokenFactory _tokenFactory;
         private IEmailService _emailService;
         private IMapper _mapper;
 
-        public UsersController(IUserRepository userRepository, ITypeHelperService typeHelperService,
-            IPropertyMappingService propertyMappingService, UserManager<User> userManager, 
+        public UsersController(IUserService userService, UserManager<User> userManager, 
             ITokenFactory tokenFactory, IEmailService emailService, IMapper mapper)
         {
-            _userRepository = userRepository;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _userService = userService;
             _userManager = userManager;
             _tokenFactory = tokenFactory;
             _emailService = emailService;
@@ -56,36 +52,34 @@ namespace Recollectable.API.Controllers
         public async Task<IActionResult> GetUsers(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>
-                (resourceParameters.OrderBy))
+            if (!PropertyMappingService.ValidMappingExistsFor<User>(resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<UserDto>
-                (resourceParameters.Fields))
+            if (!TypeHelper.TypeHasProperties<UserDto>(resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var usersFromRepo = await _userRepository.GetUsers(resourceParameters);
-            var users = _mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
+            var retrievedUsers = await _userService.FindUsers(resourceParameters);
+            var users = _mapper.Map<IEnumerable<UserDto>>(retrievedUsers);
 
             if (mediaType == "application/json+hateoas")
             {
                 var paginationMetadata = new
                 {
-                    totalCount = usersFromRepo.TotalCount,
-                    pageSize = usersFromRepo.PageSize,
-                    currentPage = usersFromRepo.CurrentPage,
-                    totalPages = usersFromRepo.TotalPages
+                    totalCount = retrievedUsers.TotalCount,
+                    pageSize = retrievedUsers.PageSize,
+                    currentPage = retrievedUsers.CurrentPage,
+                    totalPages = retrievedUsers.TotalPages
                 };
 
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 var links = CreateUsersLinks(resourceParameters,
-                    usersFromRepo.HasNext, usersFromRepo.HasPrevious);
+                    retrievedUsers.HasNext, retrievedUsers.HasPrevious);
                 var shapedUsers = users.ShapeData(resourceParameters.Fields);
 
                 var linkedUsers = shapedUsers.Select(user =>
@@ -109,20 +103,20 @@ namespace Recollectable.API.Controllers
             }
             else if (mediaType == "application/json")
             {
-                var previousPageLink = usersFromRepo.HasPrevious ?
+                var previousPageLink = retrievedUsers.HasPrevious ?
                     CreateUsersResourceUri(resourceParameters,
                     ResourceUriType.PreviousPage) : null;
 
-                var nextPageLink = usersFromRepo.HasNext ?
+                var nextPageLink = retrievedUsers.HasNext ?
                     CreateUsersResourceUri(resourceParameters,
                     ResourceUriType.NextPage) : null;
 
                 var paginationMetadata = new
                 {
-                    totalCount = usersFromRepo.TotalCount,
-                    pageSize = usersFromRepo.PageSize,
-                    currentPage = usersFromRepo.CurrentPage,
-                    totalPages = usersFromRepo.TotalPages,
+                    totalCount = retrievedUsers.TotalCount,
+                    pageSize = retrievedUsers.PageSize,
+                    currentPage = retrievedUsers.CurrentPage,
+                    totalPages = retrievedUsers.TotalPages,
                     previousPageLink,
                     nextPageLink,
                 };
@@ -142,19 +136,19 @@ namespace Recollectable.API.Controllers
         public async Task<IActionResult> GetUser(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<UserDto>(fields))
+            if (!TypeHelper.TypeHasProperties<UserDto>(fields))
             {
                 return BadRequest();
             }
 
-            var userFromRepo = await _userRepository.GetUserById(id);
+            var retrievedUser = await _userService.FindUserById(id);
 
-            if (userFromRepo == null)
+            if (retrievedUser == null)
             {
                 return NotFound();
             }
 
-            var user = _mapper.Map<UserDto>(userFromRepo);
+            var user = _mapper.Map<UserDto>(retrievedUser);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -206,7 +200,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(result);
             }
 
-            if (!await _userRepository.Save())
+            if (!await _userService.Save())
             {
                 throw new Exception("Creating a user failed on save.");
             }
@@ -239,7 +233,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("register/{id}")]
         public async Task<IActionResult> BlockRegistration(Guid id)
         {
-            if (await _userRepository.Exists(id))
+            if (await _userService.Exists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -406,17 +400,17 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var userFromRepo = await _userRepository.GetUserById(id);
+            var retrievedUser = await _userService.FindUserById(id);
 
-            if (userFromRepo == null)
+            if (retrievedUser == null)
             {
                 return NotFound();
             }
 
-            _mapper.Map(user, userFromRepo);
-            _userRepository.UpdateUser(userFromRepo);
+            _mapper.Map(user, retrievedUser);
+            _userService.UpdateUser(retrievedUser);
 
-            if (!await _userRepository.Save())
+            if (!await _userService.Save())
             {
                 throw new Exception($"Updating user {id} failed on save.");
             }
@@ -433,14 +427,14 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var userFromRepo = await _userRepository.GetUserById(id);
+            var retrievedUser = await _userService.FindUserById(id);
 
-            if (userFromRepo == null)
+            if (retrievedUser == null)
             {
                 return NotFound();
             }
 
-            var patchedUser = _mapper.Map<UserUpdateDto>(userFromRepo);
+            var patchedUser = _mapper.Map<UserUpdateDto>(retrievedUser);
             patchDoc.ApplyTo(patchedUser, ModelState);
 
             TryValidateModel(patchedUser);
@@ -450,10 +444,10 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            _mapper.Map(patchedUser, userFromRepo);
-            _userRepository.UpdateUser(userFromRepo);
+            _mapper.Map(patchedUser, retrievedUser);
+            _userService.UpdateUser(retrievedUser);
 
-            if (!await _userRepository.Save())
+            if (!await _userService.Save())
             {
                 throw new Exception($"Patching user {id} failed on save.");
             }
@@ -464,16 +458,16 @@ namespace Recollectable.API.Controllers
         [HttpDelete("{id}", Name = "DeleteUser")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var userFromRepo = await _userRepository.GetUserById(id);
+            var retrievedUser = await _userService.FindUserById(id);
 
-            if (userFromRepo == null)
+            if (retrievedUser == null)
             {
                 return NotFound();
             }
 
-            _userRepository.DeleteUser(userFromRepo);
+            _userService.RemoveUser(retrievedUser);
 
-            if (!await _userRepository.Save())
+            if (!await _userService.Save())
             {
                 throw new Exception($"Deleting user {id} failed on save.");
             }

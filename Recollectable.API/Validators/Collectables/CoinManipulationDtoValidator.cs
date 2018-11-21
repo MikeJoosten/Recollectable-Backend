@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using Recollectable.Core.Comparers;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Extensions;
 
@@ -10,7 +9,7 @@ namespace Recollectable.API.Validators.Collectables
     public class CoinManipulationDtoValidator<T> : AbstractValidator<T>
         where T : CoinManipulationDto
     {
-        private readonly ICoinRepository _repository;
+        /*private readonly ICoinRepository _repository;
 
         public CoinManipulationDtoValidator(ICoinRepository repository)
         {
@@ -88,6 +87,6 @@ namespace Recollectable.API.Validators.Collectables
 
             RuleFor(c => c.BackImagePath)
                 .MaximumLength(250).WithMessage("BackImagePath shouldn't contain more than 250 characters");
-        }
+        }*/
     }
 }

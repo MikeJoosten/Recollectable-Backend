@@ -4,11 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Recollectable.API.Interfaces;
-using Recollectable.API.Services;
-using Recollectable.Core.Interfaces.Data;
 using Recollectable.Core.Shared.Entities;
-using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;
 using System;
 
@@ -16,8 +12,6 @@ namespace Recollectable.Tests
 {
     public class RecollectableTestBase
     {
-        protected readonly IPropertyMappingService _propertyMappingService;
-        protected readonly ITypeHelperService _typeHelperService;
         protected readonly IMapper _mapper;
 
         public RecollectableTestBase()
@@ -27,9 +21,6 @@ namespace Recollectable.Tests
                 .Options;
 
             var _context = new RecollectableContext(options);
-            _propertyMappingService = new PropertyMappingService();
-
-            _typeHelperService = new TypeHelperService();
 
             var configuration = new MapperConfiguration(cfg =>
                 cfg.AddProfile<RecollectableMappingProfile>());

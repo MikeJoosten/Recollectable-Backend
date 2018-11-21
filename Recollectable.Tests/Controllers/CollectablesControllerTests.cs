@@ -17,8 +17,8 @@ namespace Recollectable.Tests.Controllers
 {
     public class CollectablesControllerTests : RecollectableTestBase
     {
-        private readonly CollectablesController _controller;
-        private readonly CollectablesResourceParameters resourceParameters;
+        //private readonly CollectablesController _controller;
+        private readonly CollectionCollectablesResourceParameters resourceParameters;
 
         /*public CollectablesControllerTests()
         {

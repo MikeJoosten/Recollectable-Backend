@@ -4,7 +4,7 @@ using Recollectable.Core.Models.Collectables;
 namespace Recollectable.API.Validators.Collectables
 {
     public class CollectableManipulationDtoValidator<T> : AbstractValidator<T>
-        where T : CollectableManipulationDto
+        where T : CollectionCollectableManipulationDto
     {
         public CollectableManipulationDtoValidator()
         {

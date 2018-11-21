@@ -1,72 +1,58 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Core.Comparers;
+﻿using LinqSpecs.Core;
+using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Interfaces.Data;
-using Recollectable.Core.Models.Collectables;
-using Recollectable.Core.Shared.Entities;
-using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Interfaces;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectorValueRepository : ICollectorValueRepository
+    public class CollectorValueRepository : IRepository<CollectorValue>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public CollectorValueRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public CollectorValueRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public async Task<PagedList<CollectorValue>> GetCollectorValues
-            (CollectorValuesResourceParameters resourceParameters)
+        public async Task<IEnumerable<CollectorValue>> GetAll(Specification<CollectorValue> specification = null)
         {
-            var collectorValues = await _context.CollectorValues.ApplySort(resourceParameters.OrderBy,
-                _propertyMappingService.GetPropertyMapping<CollectorValueDto, CollectorValue>())
-                .ToListAsync();
-
-            return PagedList<CollectorValue>.Create(collectorValues,
-                resourceParameters.Page,
-                resourceParameters.PageSize);
+            return specification == null ?
+                await _context.CollectorValues.ToListAsync() :
+                await _context.CollectorValues.Where(specification.ToExpression()).ToListAsync();
         }
 
-        public async Task<CollectorValue> GetCollectorValueById(Guid collectorValueId)
+        public async Task<CollectorValue> GetSingle(Specification<CollectorValue> specification = null)
         {
-            return await _context.CollectorValues.FirstOrDefaultAsync(c => c.Id == collectorValueId);
+            return specification == null ?
+                await _context.CollectorValues.FirstOrDefaultAsync() :
+                await _context.CollectorValues.FirstOrDefaultAsync(specification.ToExpression());
         }
 
-        public async Task<CollectorValue> GetCollectorValueByValues(CollectorValue collectorValue)
-        {
-            return await _context.CollectorValues
-                .SingleOrDefaultAsync(c => new CollectorValueComparer().Equals(c, collectorValue));
-        }
-
-        public void AddCollectorValue(CollectorValue collectorValue)
+        public async Task Add(CollectorValue collectorValue)
         {
             if (collectorValue.Id == Guid.Empty)
             {
                 collectorValue.Id = Guid.NewGuid();
             }
 
-            _context.CollectorValues.Add(collectorValue);
+            await _context.CollectorValues.AddAsync(collectorValue);
         }
 
-        public void UpdateCollectorValue(CollectorValue collectorValue) { }
+        public void Update(CollectorValue collectorValue) { }
 
-        public void DeleteCollectorValue(CollectorValue collectorValue)
+        public void Delete(CollectorValue collectorValue)
         {
             _context.CollectorValues.Remove(collectorValue);
         }
 
-        public async Task<bool> Exists(Guid collectorValueId)
+        public async Task<bool> Exists(Specification<CollectorValue> specification = null)
         {
-            return await _context.CollectorValues.AnyAsync(c => c.Id == collectorValueId);
+            return await _context.CollectorValues.AnyAsync(specification.ToExpression());
         }
 
         public async Task<bool> Save()

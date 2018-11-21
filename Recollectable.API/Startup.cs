@@ -19,16 +19,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using Recollectable.API.Filters;
-using Recollectable.API.Interfaces;
-using Recollectable.API.Services;
 using Recollectable.API.Validators.Collectables;
 using Recollectable.API.Validators.Collection;
 using Recollectable.API.Validators.Location;
 using Recollectable.API.Validators.Users;
 using Recollectable.Core.Comparers;
 using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Collections;
+using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Interfaces.Data;
+using Recollectable.Core.Interfaces;
+using Recollectable.Core.Services;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Factories;
 using Recollectable.Core.Shared.Interfaces;
@@ -170,18 +171,26 @@ namespace Recollectable.API
             });
 
             // Configure Repositories
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ICoinRepository, CoinRepository>();
-            services.AddScoped<IBanknoteRepository, BanknoteRepository>();
-            services.AddScoped<ICollectableRepository, CollectableRepository>();
-            services.AddScoped<ICollectorValueRepository, CollectorValueRepository>();
-            services.AddScoped<ICollectionRepository, CollectionRepository>();
-            services.AddScoped<ICountryRepository, CountryRepository>();
+            services.AddScoped<IRepository<User>, UserRepository>();
+            services.AddScoped<IRepository<Coin>, CoinRepository>();
+            services.AddScoped<IRepository<Banknote>, BanknoteRepository>();
+            services.AddScoped<IRepository<Collectable>, CollectableRepository>();
+            services.AddScoped<IRepository<CollectionCollectable>, CollectionCollectableRepository>();
+            services.AddScoped<IRepository<CollectorValue>, CollectorValueRepository>();
+            services.AddScoped<IRepository<Collection>, CollectionRepository>();
+            services.AddScoped<IRepository<Country>, CountryRepository>();
+
+            // Configure Domain Services
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICoinService, CoinService>();
+            services.AddScoped<IBanknoteService, BanknoteService>();
+            services.AddScoped<ICollectionCollectableService, CollectionCollectableService>();
+            services.AddScoped<ICollectorValueService, CollectorValueService>();
+            services.AddScoped<ICollectionService, CollectionService>();
+            services.AddScoped<ICountryService, CountryService>();
 
             // Configure Helper Classes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
-            services.AddTransient<ITypeHelperService, TypeHelperService>();
             services.AddSingleton<ITokenFactory, TokenFactory>();
             services.AddSingleton<IEmailService, EmailService>();
 
