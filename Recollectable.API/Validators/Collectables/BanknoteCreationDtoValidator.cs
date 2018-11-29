@@ -1,14 +1,15 @@
-﻿using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Models.Collectables;
+﻿using Recollectable.API.Models.Collectables;
+using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Interfaces;
 using System.Collections.Generic;
 
 namespace Recollectable.API.Validators.Collectables
 {
     public class BanknoteCreationDtoValidator : BanknoteManipulationDtoValidator<BanknoteCreationDto>
     {
-        /*public BanknoteCreationDtoValidator(IBanknoteRepository repository, IEqualityComparer<Currency> comparer)
-            : base(repository, comparer)
+        public BanknoteCreationDtoValidator(IBanknoteService service, IEqualityComparer<Currency> comparer)
+            : base(service, comparer)
         {
-        }*/
+        }
     }
 }

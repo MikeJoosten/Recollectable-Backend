@@ -1,12 +1,13 @@
-﻿using Recollectable.Core.Models.Locations;
+﻿using Recollectable.API.Models.Locations;
+using Recollectable.Core.Interfaces;
 
 namespace Recollectable.API.Validators.Location
 {
     public class CountryCreationDtoValidator : CountryManipulationDtoValidator<CountryCreationDto>
     {
-        /*public CountryCreationDtoValidator(ICountryRepository repository)
-            : base(repository)
+        public CountryCreationDtoValidator(ICountryService service)
+            : base(service)
         {
-        }*/
+        }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Recollectable.Core.Models.Users;
+using Recollectable.API.Models.Users;
 
 namespace Recollectable.API.Validators.Users
 {

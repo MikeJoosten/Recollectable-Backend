@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Recollectable.API.Controllers;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Models.Locations;
 using Recollectable.Core.Shared.Entities;
 using System;
 using System.Collections.Generic;

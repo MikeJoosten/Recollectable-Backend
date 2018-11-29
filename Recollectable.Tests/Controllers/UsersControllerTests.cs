@@ -6,7 +6,6 @@ using Moq;
 using Recollectable.API.Controllers;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
-using Recollectable.Core.Models.Users;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Interfaces;

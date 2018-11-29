@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Recollectable.Core.Shared.Entities;
+using Recollectable.API.Filters;
 using Recollectable.Infrastructure.Data;
 using System;
 
