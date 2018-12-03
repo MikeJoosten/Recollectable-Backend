@@ -50,21 +50,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             await _context.Coins.AddAsync(coin);
         }
 
-        public void Update(Coin coin) { }
-
         public void Delete(Coin coin)
         {
             _context.Coins.Remove(coin);
-        }
-
-        public async Task<bool> Exists(Specification<Coin> specification = null)
-        {
-            return await _context.Coins.AnyAsync(specification.ToExpression());
-        }
-
-        public async Task<bool> Save()
-        {
-            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

@@ -9,9 +9,6 @@ namespace Recollectable.Core.Interfaces
         Task<IEnumerable<T>> GetAll(Specification<T> specification = null);
         Task<T> GetSingle(Specification<T> specification = null);
         Task Add(T item);
-        void Update(T item);
         void Delete(T item);
-        Task<bool> Exists(Specification<T> specification = null);
-        Task<bool> Save();
     }
 }

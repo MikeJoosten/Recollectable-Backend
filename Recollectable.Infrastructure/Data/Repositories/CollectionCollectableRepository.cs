@@ -56,21 +56,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             await _context.CollectionCollectables.AddAsync(collectable);
         }
 
-        public void Update(CollectionCollectable collectable) { }
-
         public void Delete(CollectionCollectable collectable)
         {
             _context.CollectionCollectables.Remove(collectable);
-        }
-
-        public async Task<bool> Exists(Specification<CollectionCollectable> specification = null)
-        {
-            return await _context.CollectionCollectables.AnyAsync(specification.ToExpression());
-        }
-
-        public async Task<bool> Save()
-        {
-            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

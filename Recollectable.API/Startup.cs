@@ -170,15 +170,8 @@ namespace Recollectable.API
                     .AllowCredentials());
             });
 
-            // Configure Repositories
-            services.AddScoped<IRepository<User>, UserRepository>();
-            services.AddScoped<IRepository<Coin>, CoinRepository>();
-            services.AddScoped<IRepository<Banknote>, BanknoteRepository>();
-            services.AddScoped<IRepository<Collectable>, CollectableRepository>();
-            services.AddScoped<IRepository<CollectionCollectable>, CollectionCollectableRepository>();
-            services.AddScoped<IRepository<CollectorValue>, CollectorValueRepository>();
-            services.AddScoped<IRepository<Collection>, CollectionRepository>();
-            services.AddScoped<IRepository<Country>, CountryRepository>();
+            // Configure Unit of Work
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Configure Domain Services
             services.AddScoped<IUserService, UserService>();

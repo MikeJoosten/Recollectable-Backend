@@ -13,16 +13,16 @@ namespace Recollectable.Core.Services
 {
     public class CollectorValueService : ICollectorValueService
     {
-        private readonly IRepository<CollectorValue> _collectorValueRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CollectorValueService(IRepository<CollectorValue> collectorValueRepository)
+        public CollectorValueService(IUnitOfWork unitOfWork)
         {
-            _collectorValueRepository = collectorValueRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<PagedList<CollectorValue>> FindCollectorValues(CollectorValuesResourceParameters resourceParameters)
         {
-            var collectorValues = await _collectorValueRepository.GetAll();
+            var collectorValues = await _unitOfWork.CollectorValues.GetAll();
 
             collectorValues = collectorValues.OrderBy(resourceParameters.OrderBy,
                 PropertyMappingService.CollectorValuePropertyMapping);
@@ -32,37 +32,35 @@ namespace Recollectable.Core.Services
 
         public async Task<CollectorValue> FindCollectorValueById(Guid id)
         {
-            return await _collectorValueRepository.GetSingle(new CollectorValueById(id));
+            return await _unitOfWork.CollectorValues.GetSingle(new CollectorValueById(id));
         }
 
         public async Task<CollectorValue> FindCollectorValueByValues(CollectorValue collectorValue)
         {
-            return await _collectorValueRepository.GetSingle(new CollectorValueByValues(collectorValue));
+            return await _unitOfWork.CollectorValues.GetSingle(new CollectorValueByValues(collectorValue));
         }
 
         public async Task CreateCollectorValue(CollectorValue collectorValue)
         {
-            await _collectorValueRepository.Add(collectorValue);
+            await _unitOfWork.CollectorValues.Add(collectorValue);
         }
 
-        public void UpdateCollectorValue(CollectorValue collectorValue)
-        {
-            _collectorValueRepository.Update(collectorValue);
-        }
+        public void UpdateCollectorValue(CollectorValue collectorValue) { }
 
         public void RemoveCollectorValue(CollectorValue collectorValue)
         {
-            _collectorValueRepository.Delete(collectorValue);
+            _unitOfWork.CollectorValues.Delete(collectorValue);
         }
 
         public async Task<bool> Exists(Guid id)
         {
-            return await _collectorValueRepository.Exists(new CollectorValueById(id));
+            var collectorValue = await _unitOfWork.CollectorValues.GetSingle(new CollectorValueById(id));
+            return collectorValue != null;
         }
 
         public async Task<bool> Save()
         {
-            return await _collectorValueRepository.Save();
+            return await _unitOfWork.Save();
         }
     }
 }

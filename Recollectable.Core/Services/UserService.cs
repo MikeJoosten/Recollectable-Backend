@@ -13,20 +13,20 @@ namespace Recollectable.Core.Services
 {
     public class UserService : IUserService
     {
-        private readonly IRepository<User> _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UserService(IRepository<User> userRepository)
+        public UserService(IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<PagedList<User>> FindUsers(UsersResourceParameters resourceParameters)
         {
-            var users = await _userRepository.GetAll();
+            var users = await _unitOfWork.Users.GetAll();
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                users = await _userRepository.GetAll(new UserBySearch(resourceParameters.Search));
+                users = await _unitOfWork.Users.GetAll(new UserBySearch(resourceParameters.Search));
             }
 
             users = users.OrderBy(resourceParameters.OrderBy,
@@ -37,32 +37,30 @@ namespace Recollectable.Core.Services
 
         public async Task<User> FindUserById(Guid id)
         {
-            return await _userRepository.GetSingle(new UserById(id));
+            return await _unitOfWork.Users.GetSingle(new UserById(id));
         }
 
         public async Task CreateUser(User user)
         {
-            await _userRepository.Add(user);
+            await _unitOfWork.Users.Add(user);
         }
 
-        public void UpdateUser(User user)
-        {
-            _userRepository.Update(user);
-        }
+        public void UpdateUser(User user) { }
 
         public void RemoveUser(User user)
         {
-            _userRepository.Delete(user);
+            _unitOfWork.Users.Delete(user);
         }
 
         public async Task<bool> Exists(Guid id)
         {
-            return await _userRepository.Exists(new UserById(id));
+            var user = await _unitOfWork.Users.GetSingle(new UserById(id));
+            return user != null;
         }
 
         public async Task<bool> Save()
         {
-            return await _userRepository.Save();
+            return await _unitOfWork.Save();
         }
     }
 }

@@ -13,25 +13,25 @@ namespace Recollectable.Core.Services
 {
     public class CollectionService : ICollectionService
     {
-        private readonly IRepository<Collection> _collectionRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CollectionService(IRepository<Collection> collectionRepository)
+        public CollectionService(IUnitOfWork unitOfWork)
         {
-            _collectionRepository = collectionRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<PagedList<Collection>> FindCollections(CollectionsResourceParameters resourceParameters)
         {
-            var collections = await _collectionRepository.GetAll();
+            var collections = await _unitOfWork.Collections.GetAll();
 
             if (!string.IsNullOrEmpty(resourceParameters.Type))
             {
-                collections = await _collectionRepository.GetAll(new CollectionByType(resourceParameters.Type));
+                collections = await _unitOfWork.Collections.GetAll(new CollectionByType(resourceParameters.Type));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                collections = await _collectionRepository.GetAll(new CollectionBySearch(resourceParameters.Search));
+                collections = await _unitOfWork.Collections.GetAll(new CollectionBySearch(resourceParameters.Search));
             }
 
             collections = collections.OrderBy(resourceParameters.OrderBy,
@@ -42,32 +42,30 @@ namespace Recollectable.Core.Services
 
         public async Task<Collection> FindCollectionById(Guid id)
         {
-            return await _collectionRepository.GetSingle(new CollectionById(id));
+            return await _unitOfWork.Collections.GetSingle(new CollectionById(id));
         }
 
         public async Task CreateCollection(Collection collection)
         {
-            await _collectionRepository.Add(collection);
+            await _unitOfWork.Collections.Add(collection);
         }
 
-        public void UpdateCollection(Collection collection)
-        {
-            _collectionRepository.Update(collection);
-        }
+        public void UpdateCollection(Collection collection) { }
 
         public void RemoveCollection(Collection collection)
         {
-            _collectionRepository.Delete(collection);
+            _unitOfWork.Collections.Delete(collection);
         }
 
         public async Task<bool> Exists(Guid id)
         {
-            return await _collectionRepository.Exists(new CollectionById(id));
+            var collection = await _unitOfWork.Collections.GetSingle(new CollectionById(id));
+            return collection != null;
         }
 
         public async Task<bool> Save()
         {
-            return await _collectionRepository.Save();
+            return await _unitOfWork.Save();
         }
     }
 }

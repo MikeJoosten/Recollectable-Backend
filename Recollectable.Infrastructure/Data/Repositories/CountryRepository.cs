@@ -42,21 +42,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             await _context.Countries.AddAsync(country);
         }
 
-        public void Update(Country country) { }
-
         public void Delete(Country country)
         {
             _context.Countries.Remove(country);
-        }
-
-        public async Task<bool> Exists(Specification<Country> specification = null)
-        {
-            return await _context.Countries.AnyAsync(specification.ToExpression());
-        }
-
-        public async Task<bool> Save()
-        {
-            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

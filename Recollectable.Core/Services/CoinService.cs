@@ -13,30 +13,30 @@ namespace Recollectable.Core.Services
 {
     public class CoinService : ICoinService
     {
-        private readonly IRepository<Coin> _coinRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CoinService(IRepository<Coin> coinRepository)
+        public CoinService(IUnitOfWork unitOfWork)
         {
-            _coinRepository = coinRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<PagedList<Coin>> FindCoins(CurrenciesResourceParameters resourceParameters)
         {
-            var coins = await _coinRepository.GetAll();
+            var coins = await _unitOfWork.Coins.GetAll();
 
             if (!string.IsNullOrEmpty(resourceParameters.Type))
             {
-                coins = await _coinRepository.GetAll(new CoinByType(resourceParameters.Type));
+                coins = await _unitOfWork.Coins.GetAll(new CoinByType(resourceParameters.Type));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Country))
             {
-                coins = await _coinRepository.GetAll(new CoinByCountry(resourceParameters.Country));
+                coins = await _unitOfWork.Coins.GetAll(new CoinByCountry(resourceParameters.Country));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                coins = await _coinRepository.GetAll(new CoinBySearch(resourceParameters.Search));
+                coins = await _unitOfWork.Coins.GetAll(new CoinBySearch(resourceParameters.Search));
             }
 
             coins = coins.OrderBy(resourceParameters.OrderBy, PropertyMappingService.CurrencyPropertyMapping);
@@ -46,32 +46,30 @@ namespace Recollectable.Core.Services
 
         public async Task<Coin> FindCoinById(Guid id)
         {
-            return await _coinRepository.GetSingle(new CoinById(id));
+            return await _unitOfWork.Coins.GetSingle(new CoinById(id));
         }
 
         public async Task CreateCoin(Coin coin)
         {
-            await _coinRepository.Add(coin);
+            await _unitOfWork.Coins.Add(coin);
         }
 
-        public void UpdateCoin(Coin coin)
-        {
-            _coinRepository.Update(coin);
-        }
+        public void UpdateCoin(Coin coin) { }
 
         public void RemoveCoin(Coin coin)
         {
-            _coinRepository.Delete(coin);
+            _unitOfWork.Coins.Delete(coin);
         }
 
         public async Task<bool> Exists(Guid id)
         {
-            return await _coinRepository.Exists(new CoinById(id));
+            var coin = await _unitOfWork.Coins.GetSingle(new CoinById(id));
+            return coin != null;
         }
 
         public async Task<bool> Save()
         {
-            return await _coinRepository.Save();
+            return await _unitOfWork.Save();
         }
     }
 }

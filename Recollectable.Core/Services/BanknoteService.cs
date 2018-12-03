@@ -13,30 +13,30 @@ namespace Recollectable.Core.Services
 {
     public class BanknoteService : IBanknoteService
     {
-        private readonly IRepository<Banknote> _banknoteRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BanknoteService(IRepository<Banknote> banknoteRepository)
+        public BanknoteService(IUnitOfWork unitOfWork)
         {
-            _banknoteRepository = banknoteRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<PagedList<Banknote>> FindBanknotes(CurrenciesResourceParameters resourceParameters)
         {
-            var banknotes = await _banknoteRepository.GetAll();
+            var banknotes = await _unitOfWork.Banknotes.GetAll();
 
             if (!string.IsNullOrEmpty(resourceParameters.Type))
             {
-                banknotes = await _banknoteRepository.GetAll(new BanknoteByType(resourceParameters.Type));
+                banknotes = await _unitOfWork.Banknotes.GetAll(new BanknoteByType(resourceParameters.Type));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Country))
             {
-                banknotes = await _banknoteRepository.GetAll(new BanknoteByCountry(resourceParameters.Country));
+                banknotes = await _unitOfWork.Banknotes.GetAll(new BanknoteByCountry(resourceParameters.Country));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                banknotes = await _banknoteRepository.GetAll(new BanknoteBySearch(resourceParameters.Search));
+                banknotes = await _unitOfWork.Banknotes.GetAll(new BanknoteBySearch(resourceParameters.Search));
             }
 
             banknotes = banknotes.OrderBy(resourceParameters.OrderBy,
@@ -47,32 +47,30 @@ namespace Recollectable.Core.Services
 
         public async Task<Banknote> FindBanknoteById(Guid id)
         {
-            return await _banknoteRepository.GetSingle(new BanknoteById(id));
+            return await _unitOfWork.Banknotes.GetSingle(new BanknoteById(id));
         }
 
         public async Task CreateBanknote(Banknote banknote)
         {
-            await _banknoteRepository.Add(banknote);
+            await _unitOfWork.Banknotes.Add(banknote);
         }
 
-        public void UpdateBanknote(Banknote banknote)
-        {
-            _banknoteRepository.Update(banknote);
-        }
+        public void UpdateBanknote(Banknote banknote) { }
 
         public void RemoveBanknote(Banknote banknote)
         {
-            _banknoteRepository.Delete(banknote);
+            _unitOfWork.Banknotes.Delete(banknote);
         }
 
         public async Task<bool> Exists(Guid id)
         {
-            return await _banknoteRepository.Exists(new BanknoteById(id));
+            var banknote = await _unitOfWork.Banknotes.GetSingle(new BanknoteById(id));
+            return banknote != null;
         }
 
         public async Task<bool> Save()
         {
-            return await _banknoteRepository.Save();
+            return await _unitOfWork.Save();
         }
     }
 }

@@ -50,21 +50,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             await _context.Banknotes.AddAsync(banknote);
         }
 
-        public void Update(Banknote banknote) { }
-
         public void Delete(Banknote banknote)
         {
             _context.Banknotes.Remove(banknote);
-        }
-
-        public async Task<bool> Exists(Specification<Banknote> specification = null)
-        {
-            return await _context.Banknotes.AnyAsync(specification.ToExpression());
-        }
-
-        public async Task<bool> Save()
-        {
-            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }

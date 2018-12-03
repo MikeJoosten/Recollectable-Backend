@@ -12,6 +12,7 @@ namespace Recollectable.Tests
 {
     public class RecollectableTestBase
     {
+        protected readonly RecollectableContext _context;
         protected readonly IMapper _mapper;
 
         public RecollectableTestBase()
@@ -20,7 +21,7 @@ namespace Recollectable.Tests
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            var _context = new RecollectableContext(options);
+            _context = new RecollectableContext(options);
 
             var configuration = new MapperConfiguration(cfg =>
                 cfg.AddProfile<RecollectableMappingProfile>());
@@ -32,12 +33,6 @@ namespace Recollectable.Tests
         public void SetupTestController<T, S>(Controller controller)
         {
             controller.ControllerContext.HttpContext = new DefaultHttpContext();
-
-            var mockUrlHelper = new Mock<IUrlHelper>();
-            mockUrlHelper.Setup(u => u.Link(It.IsAny<string>(), It.IsAny<object>()))
-                .Returns("http://localhost/");
-
-            controller.Url = mockUrlHelper.Object;
 
             var objectValidator = new Mock<IObjectModelValidator>();
             objectValidator.Setup(o => o.Validate(It.IsAny<ActionContext>(), 

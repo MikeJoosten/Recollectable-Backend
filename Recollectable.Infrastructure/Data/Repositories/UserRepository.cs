@@ -46,21 +46,9 @@ namespace Recollectable.Infrastructure.Data.Repositories
             await _context.Users.AddAsync(user);
         }
 
-        public void Update(User user) { }
-
         public void Delete(User user)
         {
             _context.Users.Remove(user);
-        }
-
-        public async Task<bool> Exists(Specification<User> specification = null)
-        {
-            return await _context.Users.AnyAsync(specification.ToExpression());
-        }
-
-        public async Task<bool> Save()
-        {
-            return await _context.SaveChangesAsync() >= 0;
         }
     }
 }
