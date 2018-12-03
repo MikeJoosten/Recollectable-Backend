@@ -57,7 +57,7 @@ namespace Recollectable.Core.Services
             _unitOfWork.Countries.Delete(country);
         }
 
-        public async Task<bool> Exists(Guid id)
+        public async Task<bool> CountryExists(Guid id)
         {
             var country = await _unitOfWork.Countries.GetSingle(new CountryById(id));
             return country != null;

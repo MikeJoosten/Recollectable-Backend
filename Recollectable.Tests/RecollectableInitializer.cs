@@ -368,7 +368,7 @@ namespace Recollectable.Tests
                 {
                     Id = new Guid("25da5d7a-d9bc-4f31-9982-2a44d1facdb1"),
                     CollectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789"),
-                    CollectableId = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb"),
+                    CollectableId = new Guid("3a7fd6a5-d654-4647-8374-eba27001b0d3"),
                     Condition = "VG10"
                 }
             };

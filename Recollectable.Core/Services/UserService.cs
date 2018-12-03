@@ -52,7 +52,7 @@ namespace Recollectable.Core.Services
             _unitOfWork.Users.Delete(user);
         }
 
-        public async Task<bool> Exists(Guid id)
+        public async Task<bool> UserExists(Guid id)
         {
             var user = await _unitOfWork.Users.GetSingle(new UserById(id));
             return user != null;

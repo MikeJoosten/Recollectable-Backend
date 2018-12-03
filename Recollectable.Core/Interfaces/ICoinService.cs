@@ -13,7 +13,7 @@ namespace Recollectable.Core.Interfaces
         Task CreateCoin(Coin coin);
         void UpdateCoin(Coin coin);
         void RemoveCoin(Coin coin);
-        Task<bool> Exists(Guid id);
+        Task<bool> CoinExists(Guid id);
         Task<bool> Save();
     }
 }

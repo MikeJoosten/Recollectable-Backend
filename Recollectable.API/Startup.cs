@@ -87,7 +87,7 @@ namespace Recollectable.API
             })
             .AddFluentValidation(options => 
             {
-                options.RegisterValidatorsFromAssemblyContaining<CollectableCreationDtoValidator>();
+                options.RegisterValidatorsFromAssemblyContaining<CoinCreationDtoValidator>();
                 options.RegisterValidatorsFromAssemblyContaining<CollectionCreationDtoValidator>();
                 options.RegisterValidatorsFromAssemblyContaining<CountryCreationDtoValidator>();
                 options.RegisterValidatorsFromAssemblyContaining<UserCreationDtoValidator>();

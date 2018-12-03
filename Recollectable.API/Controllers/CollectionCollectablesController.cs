@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Models.Collectables;
-using Recollectable.Core.Entities.Collectables;
+using Recollectable.API.Models.Collections;
+using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
@@ -237,7 +237,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCollectableCreation(Guid collectionId, Guid id)
         {
-            if (await _collectableService.Exists(collectionId, id))
+            if (await _collectableService.CollectionCollectableExists(collectionId, id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }

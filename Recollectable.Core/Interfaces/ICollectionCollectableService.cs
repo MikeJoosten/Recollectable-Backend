@@ -1,4 +1,5 @@
 ﻿using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Shared.Entities;
 using System;
@@ -15,7 +16,7 @@ namespace Recollectable.Core.Interfaces
         Task CreateCollectionCollectable(CollectionCollectable collectable);
         void UpdateCollectionCollectable(CollectionCollectable collectable);
         void RemoveCollectionCollectable(CollectionCollectable collectable);
-        Task<bool> Exists(Guid collectionId, Guid id);
+        Task<bool> CollectionCollectableExists(Guid collectionId, Guid id);
         Task<bool> Save();
     }
 }

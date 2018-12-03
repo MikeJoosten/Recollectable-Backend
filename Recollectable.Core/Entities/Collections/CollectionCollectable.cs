@@ -1,9 +1,9 @@
-﻿using Recollectable.Core.Entities.Collections;
+﻿using Recollectable.Core.Entities.Collectables;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Recollectable.Core.Entities.Collectables
+namespace Recollectable.Core.Entities.Collections
 {
     public class CollectionCollectable
     {

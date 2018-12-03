@@ -1,6 +1,6 @@
 ﻿using LinqSpecs.Core;
 using Microsoft.EntityFrameworkCore;
-using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Interfaces;
 using System;
 using System.Collections.Generic;

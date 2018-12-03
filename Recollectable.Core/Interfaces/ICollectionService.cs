@@ -13,7 +13,7 @@ namespace Recollectable.Core.Interfaces
         Task CreateCollection(Collection collection);
         void UpdateCollection(Collection collection);
         void RemoveCollection(Collection collection);
-        Task<bool> Exists(Guid id);
+        Task<bool> CollectionExists(Guid id);
         Task<bool> Save();
     }
 }

@@ -227,7 +227,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCoinCreation(Guid id)
         {
-            if (await _coinService.Exists(id))
+            if (await _coinService.CoinExists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -254,7 +254,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _countryService.Exists(coin.CountryId))
+            if (!await _countryService.CountryExists(coin.CountryId))
             {
                 return BadRequest();
             }
@@ -314,7 +314,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _countryService.Exists(patchedCoin.CountryId))
+            if (!await _countryService.CountryExists(patchedCoin.CountryId))
             {
                 return BadRequest();
             }

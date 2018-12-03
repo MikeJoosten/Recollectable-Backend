@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Recollectable.API.Filters;
+using Recollectable.Core.Interfaces;
 using Recollectable.Infrastructure.Data;
 using System;
 
@@ -12,8 +13,8 @@ namespace Recollectable.Tests
 {
     public class RecollectableTestBase
     {
-        protected readonly RecollectableContext _context;
         protected readonly IMapper _mapper;
+        protected readonly IUnitOfWork _unitOfWork;
 
         public RecollectableTestBase()
         {
@@ -21,7 +22,8 @@ namespace Recollectable.Tests
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            _context = new RecollectableContext(options);
+            var _context = new RecollectableContext(options);
+            _unitOfWork = new UnitOfWork(_context);
 
             var configuration = new MapperConfiguration(cfg =>
                 cfg.AddProfile<RecollectableMappingProfile>());

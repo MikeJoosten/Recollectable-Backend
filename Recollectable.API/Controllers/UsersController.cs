@@ -233,7 +233,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("register/{id}")]
         public async Task<IActionResult> BlockRegistration(Guid id)
         {
-            if (await _userService.Exists(id))
+            if (await _userService.UserExists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }

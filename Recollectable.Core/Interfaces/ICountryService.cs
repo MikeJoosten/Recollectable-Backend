@@ -13,7 +13,7 @@ namespace Recollectable.Core.Interfaces
         Task CreateCountry(Country country);
         void UpdateCountry(Country country);
         void RemoveCountry(Country country);
-        Task<bool> Exists(Guid id);
+        Task<bool> CountryExists(Guid id);
         Task<bool> Save();
     }
 }

@@ -13,7 +13,7 @@ namespace Recollectable.Core.Interfaces
         Task CreateUser(User user);
         void UpdateUser(User user);
         void RemoveUser(User user);
-        Task<bool> Exists(Guid id);
+        Task<bool> UserExists(Guid id);
         Task<bool> Save();
     }
 }

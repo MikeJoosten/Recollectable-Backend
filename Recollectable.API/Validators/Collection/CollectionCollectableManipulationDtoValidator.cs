@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
-using Recollectable.API.Models.Collectables;
+using Recollectable.API.Models.Collections;
 
-namespace Recollectable.API.Validators.Collectables
+namespace Recollectable.API.Validators.Collection
 {
-    public class CollectableManipulationDtoValidator<T> : AbstractValidator<T>
+    public class CollectionCollectableManipulationDtoValidator<T> : AbstractValidator<T>
         where T : CollectionCollectableManipulationDto
     {
-        public CollectableManipulationDtoValidator()
+        public CollectionCollectableManipulationDtoValidator()
         {
             RuleFor(c => c.CollectableId)
                 .NotEmpty().WithMessage("CollectableId is a required field");

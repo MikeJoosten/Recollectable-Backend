@@ -1,4 +1,4 @@
-﻿namespace Recollectable.API.Models.Collectables
+﻿namespace Recollectable.API.Models.Collections
 {
     public class CollectionCollectableCreationDto : CollectionCollectableManipulationDto
     {

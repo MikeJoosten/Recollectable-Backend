@@ -52,7 +52,7 @@ namespace Recollectable.Core.Services
             _unitOfWork.CollectorValues.Delete(collectorValue);
         }
 
-        public async Task<bool> Exists(Guid id)
+        public async Task<bool> CollectorValueExists(Guid id)
         {
             var collectorValue = await _unitOfWork.CollectorValues.GetSingle(new CollectorValueById(id));
             return collectorValue != null;

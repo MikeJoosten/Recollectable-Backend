@@ -29,7 +29,7 @@ namespace Recollectable.Core.Shared.Services
                 { "ReleaseDate", new PropertyMappingValue(new List<string>() { "ReleaseDate" }) }
             };
 
-        public static Dictionary<string, PropertyMappingValue> CollectablePropertyMapping =>
+        public static Dictionary<string, PropertyMappingValue> CollectionCollectablePropertyMapping =>
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id" }) },
@@ -63,7 +63,7 @@ namespace Recollectable.Core.Shared.Services
             new PropertyMapping<Collection>(CollectionPropertyMapping),
             new PropertyMapping<Coin>(CurrencyPropertyMapping),
             new PropertyMapping<Banknote>(CurrencyPropertyMapping),
-            new PropertyMapping<CollectionCollectable>(CollectablePropertyMapping),
+            new PropertyMapping<CollectionCollectable>(CollectionCollectablePropertyMapping),
             new PropertyMapping<Country>(CountryPropertyMapping),
             new PropertyMapping<CollectorValue>(CollectorValuePropertyMapping)
         };

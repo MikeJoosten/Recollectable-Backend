@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace Recollectable.Core.Specifications.Collectables
 {
-    public class CollectableById : Specification<CollectionCollectable>
+    public class CollectableById : Specification<Collectable>
     {
         public Guid Id { get; }
 
@@ -14,7 +14,7 @@ namespace Recollectable.Core.Specifications.Collectables
             Id = id;
         }
 
-        public override Expression<Func<CollectionCollectable, bool>> ToExpression()
+        public override Expression<Func<Collectable, bool>> ToExpression()
         {
             return collectable => collectable.Id == Id;
         }

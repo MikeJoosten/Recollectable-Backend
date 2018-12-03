@@ -62,7 +62,7 @@ namespace Recollectable.Core.Services
             _unitOfWork.Banknotes.Delete(banknote);
         }
 
-        public async Task<bool> Exists(Guid id)
+        public async Task<bool> BanknoteExists(Guid id)
         {
             var banknote = await _unitOfWork.Banknotes.GetSingle(new BanknoteById(id));
             return banknote != null;

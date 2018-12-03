@@ -205,7 +205,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCollectorValueCreation(Guid id)
         {
-            if (await _collectorValueService.Exists(id))
+            if (await _collectorValueService.CollectorValueExists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }

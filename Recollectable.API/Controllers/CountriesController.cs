@@ -213,7 +213,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCountryCreation(Guid id)
         {
-            if (await _countryService.Exists(id))
+            if (await _countryService.CountryExists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }

@@ -13,7 +13,7 @@ namespace Recollectable.Core.Interfaces
         Task CreateBanknote(Banknote banknote);
         void UpdateBanknote(Banknote banknote);
         void RemoveBanknote(Banknote banknote);
-        Task<bool> Exists(Guid id);
+        Task<bool> BanknoteExists(Guid id);
         Task<bool> Save();
     }
 }

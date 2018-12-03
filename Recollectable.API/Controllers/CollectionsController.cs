@@ -216,7 +216,7 @@ namespace Recollectable.API.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCollectionCreation(Guid id)
         {
-            if (await _collectionService.Exists(id))
+            if (await _collectionService.CollectionExists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -237,7 +237,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _userService.Exists(collection.UserId))
+            if (!await _userService.UserExists(collection.UserId))
             {
                 return BadRequest();
             }
@@ -288,7 +288,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _userService.Exists(patchedCollection.UserId))
+            if (!await _userService.UserExists(patchedCollection.UserId))
             {
                 return BadRequest();
             }

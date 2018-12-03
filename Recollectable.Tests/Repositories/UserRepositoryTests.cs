@@ -1,8 +1,6 @@
-﻿using Recollectable.Core.Entities.Collections;
-using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Entities.Users;
+﻿using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Specifications.Users;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -11,18 +9,11 @@ namespace Recollectable.Tests.Repositories
 {
     public class UserRepositoryTests : RecollectableTestBase
     {
-        private UsersResourceParameters resourceParameters;
-
-        /*public UserRepositoryTests()
-        {
-            resourceParameters = new UsersResourceParameters();
-        }
-
         [Fact]
-        public async Task Get_ReturnsAllUsers()
+        public async Task GetAll_ReturnsAllUsers()
         {
             //Act
-            var result = await _unitOfWork.UserRepository.Get(resourceParameters);
+            var result = await _unitOfWork.Users.GetAll();
 
             //Assert
             Assert.NotNull(result);
@@ -30,42 +21,13 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public async Task Get_OrdersUsersByName()
+        public async Task GetSingle_ReturnsUser()
         {
             //Act
-            var result = await _unitOfWork.UserRepository.Get(resourceParameters);
+            var result = await _unitOfWork.Users.GetSingle();
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal("Gavin", result.First().FirstName);
-        }
-
-        [Fact]
-        public async Task GetById_ReturnsUser_GivenValidId()
-        {
-            //Arrange
-            Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-
-            //Act
-            var result = await _unitOfWork.UserRepository.GetById(id);
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Ryan", result.FirstName);
-        }
-
-        [Fact]
-        public async Task GetById_ReturnsNull_GivenInvalidId()
-        {
-            //Arrange
-            Guid id = new Guid("433c33f0-fa1c-443e-9259-0f24057a7127");
-
-            //Act
-            var result = await _unitOfWork.UserRepository.GetById(id);
-
-            //Assert
-            Assert.Null(result);
         }
 
         [Fact]
@@ -77,34 +39,16 @@ namespace Recollectable.Tests.Repositories
             {
                 Id = id,
                 FirstName = "Burnie",
-                LastName = "Burns",
-                Collections = new List<Collection>()
+                LastName = "Burns"
             };
 
             //Act
-            _unitOfWork.UserRepository.Add(newUser);
+            await _unitOfWork.Users.Add(newUser);
             await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(7, (await _unitOfWork.UserRepository.Get(resourceParameters)).Count());
-            Assert.Equal("Burnie", (await _unitOfWork.UserRepository.GetById(id)).FirstName);
-        }
-
-        [Fact]
-        public async Task Update_UpdatesExistingUser()
-        {
-            //Arrange
-            Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-            User updatedUser = await _unitOfWork.UserRepository.GetById(id);
-            updatedUser.FirstName = "Alfredo";
-
-            //Act
-            _unitOfWork.UserRepository.Update(updatedUser);
-            await _unitOfWork.Save();
-
-            //Assert
-            Assert.Equal(6, (await _unitOfWork.UserRepository.Get(resourceParameters)).Count());
-            Assert.Equal("Alfredo", (await _unitOfWork.UserRepository.GetById(id)).FirstName);
+            Assert.Equal(7, (await _unitOfWork.Users.GetAll()).Count());
+            Assert.Equal("Burnie", (await _unitOfWork.Users.GetSingle(new UserById(id))).FirstName);
         }
 
         [Fact]
@@ -112,41 +56,15 @@ namespace Recollectable.Tests.Repositories
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-            User user = await _unitOfWork.UserRepository.GetById(id);
+            User user = await _unitOfWork.Users.GetSingle(new UserById(id));
 
             //Act
-            _unitOfWork.UserRepository.Delete(user);
+            _unitOfWork.Users.Delete(user);
             await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(5, (await _unitOfWork.UserRepository.Get(resourceParameters)).Count());
-            Assert.Null(await _unitOfWork.UserRepository.GetById(id));
+            Assert.Equal(5, (await _unitOfWork.Users.GetAll()).Count());
+            Assert.Null(await _unitOfWork.Users.GetSingle(new UserById(id)));
         }
-
-        [Fact]
-        public async Task Exists_ReturnsTrue_GivenValidUserId()
-        {
-            //Arrange
-            Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-
-            //Act
-            var result = await _unitOfWork.UserRepository.Exists(id);
-
-            //Assert
-            Assert.True(result);
-        }
-
-        [Fact]
-        public async Task Exists_ReturnsFalse_GivenInvalidUserId()
-        {
-            //Arrange
-            Guid id = new Guid("433c33f0-fa1c-443e-9259-0f24057a7127");
-
-            //Act
-            var result = await _unitOfWork.UserRepository.Exists(id);
-
-            //Assert
-            Assert.False(result);
-        }*/
     }
 }

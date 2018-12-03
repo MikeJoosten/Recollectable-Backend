@@ -57,7 +57,7 @@ namespace Recollectable.Core.Services
             _unitOfWork.Collections.Delete(collection);
         }
 
-        public async Task<bool> Exists(Guid id)
+        public async Task<bool> CollectionExists(Guid id)
         {
             var collection = await _unitOfWork.Collections.GetSingle(new CollectionById(id));
             return collection != null;

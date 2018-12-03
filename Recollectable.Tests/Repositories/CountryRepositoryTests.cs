@@ -1,5 +1,5 @@
 ﻿using Recollectable.Core.Entities.Locations;
-using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Specifications.Locations;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,18 +9,11 @@ namespace Recollectable.Tests.Repositories
 {
     public class CountryRepositoryTests : RecollectableTestBase
     {
-        private CountriesResourceParameters resourceParameters;
-
-        /*public CountryRepositoryTests()
-        {
-            resourceParameters = new CountriesResourceParameters();
-        }
-
         [Fact]
-        public async Task Get_ReturnsAllCountries()
+        public async Task GetAll_ReturnsAllCountries()
         {
             //Act
-            var result = await _unitOfWork.CountryRepository.Get(resourceParameters);
+            var result = await _unitOfWork.Countries.GetAll();
 
             //Assert
             Assert.NotNull(result);
@@ -28,42 +21,13 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public async Task Get_OrdersCountriesByName()
+        public async Task GetSingle_ReturnsCountry()
         {
             //Act
-            var result = await _unitOfWork.CountryRepository.Get(resourceParameters);
+            var result = await _unitOfWork.Countries.GetSingle();
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal("Canada", result.First().Name);
-        }
-
-        [Fact]
-        public async Task GetById_ReturnsCountry_GivenValidId()
-        {
-            //Arrange
-            Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-
-            //Act
-            var result = await _unitOfWork.CountryRepository.GetById(id);
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Japan", result.Name);
-        }
-
-        [Fact]
-        public async Task GetById_ReturnsNull_GivenInvalidId()
-        {
-            //Arrange
-            Guid id = new Guid("8eb32be5-1d34-48d6-92ca-9049ef6ab0bc");
-
-            //Act
-            var result = await _unitOfWork.CountryRepository.GetById(id);
-
-            //Assert
-            Assert.Null(result);
         }
 
         [Fact]
@@ -78,29 +42,12 @@ namespace Recollectable.Tests.Repositories
             };
 
             //Act
-            _unitOfWork.CountryRepository.Add(newCountry);
+            await _unitOfWork.Countries.Add(newCountry);
             await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(7, (await _unitOfWork.CountryRepository.Get(resourceParameters)).Count());
-            Assert.Equal("China", (await _unitOfWork.CountryRepository.GetById(id)).Name);
-        }
-
-        [Fact]
-        public async Task Update_UpdatesExistingCountry()
-        {
-            //Arrange
-            Guid id = new Guid("74619fd9-898c-4250-b5c9-833ce2d599c0");
-            Country updatedCountry = await _unitOfWork.CountryRepository.GetById(id);
-            updatedCountry.Name = "China";
-
-            //Act
-            _unitOfWork.CountryRepository.Update(updatedCountry);
-            await _unitOfWork.Save();
-
-            //Assert
-            Assert.Equal(6, (await _unitOfWork.CountryRepository.Get(resourceParameters)).Count());
-            Assert.Equal("China", (await _unitOfWork.CountryRepository.GetById(id)).Name);
+            Assert.Equal(7, (await _unitOfWork.Countries.GetAll()).Count());
+            Assert.Equal("China", (await _unitOfWork.Countries.GetSingle(new CountryById(id))).Name);
         }
 
         [Fact]
@@ -108,41 +55,15 @@ namespace Recollectable.Tests.Repositories
         {
             //Arrange
             Guid id = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3");
-            Country country = await _unitOfWork.CountryRepository.GetById(id);
+            Country country = await _unitOfWork.Countries.GetSingle(new CountryById(id));
 
             //Act
-            _unitOfWork.CountryRepository.Delete(country);
+            _unitOfWork.Countries.Delete(country);
             await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(5, (await _unitOfWork.CountryRepository.Get(resourceParameters)).Count());
-            Assert.Null(await _unitOfWork.CountryRepository.GetById(id));
+            Assert.Equal(5, (await _unitOfWork.Countries.GetAll()).Count());
+            Assert.Null(await _unitOfWork.Countries.GetSingle(new CountryById(id)));
         }
-
-        [Fact]
-        public async Task Exists_ReturnsTrue_GivenValidCountryId()
-        {
-            //Arrange
-            Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-
-            //Act
-            var result = await _unitOfWork.CountryRepository.Exists(id);
-
-            //Assert
-            Assert.True(result);
-        }
-
-        [Fact]
-        public async Task Exists_ReturnsFalse_GivenInvalidCountryId()
-        {
-            //Arrange
-            Guid id = new Guid("8eb32be5-1d34-48d6-92ca-9049ef6ab0bc");
-
-            //Act
-            var result = await _unitOfWork.CountryRepository.Exists(id);
-
-            //Assert
-            Assert.False(result);
-        }*/
     }
 }

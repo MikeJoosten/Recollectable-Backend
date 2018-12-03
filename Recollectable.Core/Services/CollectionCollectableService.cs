@@ -1,10 +1,12 @@
 ﻿using Recollectable.Core.Entities.Collectables;
+using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Extensions;
 using Recollectable.Core.Shared.Services;
 using Recollectable.Core.Specifications.Collectables;
+using Recollectable.Core.Specifications.Collections;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,28 +25,29 @@ namespace Recollectable.Core.Services
         public async Task<PagedList<CollectionCollectable>> FindCollectionCollectables
             (Guid collectionId, CollectionCollectablesResourceParameters resourceParameters)
         {
-            var collectables = await _unitOfWork.CollectionCollectables.GetAll(new CollectableByCollectionId(collectionId));
+            var collection = await _unitOfWork.Collections.GetSingle(new CollectionById(collectionId));
 
-            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            if (collection == null)
             {
-                collectables = await _unitOfWork.CollectionCollectables.GetAll
-                    (new CollectableByCollectionId(collectionId) && new CollectableByType(resourceParameters.Type));
+                return null;
             }
+
+            var collectables = await _unitOfWork.CollectionCollectables.GetAll(new CollectionCollectableByCollectionId(collectionId));
 
             if (!string.IsNullOrEmpty(resourceParameters.Country))
             {
                 collectables = await _unitOfWork.CollectionCollectables.GetAll
-                    (new CollectableByCollectionId(collectionId) && new CollectableByCountry(resourceParameters.Country));
+                    (new CollectionCollectableByCollectionId(collectionId) && new CollectionCollectableByCountry(resourceParameters.Country));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
                 collectables = await _unitOfWork.CollectionCollectables.GetAll
-                    (new CollectableByCollectionId(collectionId) && new CollectableBySearch(resourceParameters.Search));
+                    (new CollectionCollectableByCollectionId(collectionId) && new CollectionCollectableBySearch(resourceParameters.Search));
             }
 
             collectables = collectables.OrderBy(resourceParameters.OrderBy,
-                PropertyMappingService.CollectablePropertyMapping);
+                PropertyMappingService.CollectionCollectablePropertyMapping);
 
             return PagedList<CollectionCollectable>.Create(collectables.ToList(),
                 resourceParameters.Page, resourceParameters.PageSize);
@@ -53,12 +56,12 @@ namespace Recollectable.Core.Services
         public async Task<CollectionCollectable> FindCollectionCollectableById(Guid collectionId, Guid id)
         {
             return await _unitOfWork.CollectionCollectables.GetSingle
-                (new CollectableByCollectionId(collectionId) && new CollectableById(id));
+                (new CollectionCollectableByCollectionId(collectionId) && new CollectionCollectableById(id));
         }
 
         public async Task<Collectable> FindCollectableById(Guid collectableId)
         {
-            return await _unitOfWork.Collectables.GetSingle(new CollectableItemById(collectableId));
+            return await _unitOfWork.Collectables.GetSingle(new CollectableById(collectableId));
         }
 
         public async Task CreateCollectionCollectable(CollectionCollectable collectable)
@@ -73,10 +76,10 @@ namespace Recollectable.Core.Services
             _unitOfWork.CollectionCollectables.Delete(collectable);
         }
 
-        public async Task<bool> Exists(Guid collectionId, Guid id)
+        public async Task<bool> CollectionCollectableExists(Guid collectionId, Guid id)
         {
             var collectionCollectable = await _unitOfWork.CollectionCollectables
-                .GetSingle(new CollectableByCollectionId(collectionId) && new CollectableById(id));
+                .GetSingle(new CollectionCollectableByCollectionId(collectionId) && new CollectionCollectableById(id));
 
             return collectionCollectable != null;
         }

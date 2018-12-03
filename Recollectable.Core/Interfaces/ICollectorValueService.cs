@@ -14,7 +14,7 @@ namespace Recollectable.Core.Interfaces
         Task CreateCollectorValue(CollectorValue collectorValue);
         void UpdateCollectorValue(CollectorValue collectorValue);
         void RemoveCollectorValue(CollectorValue collectorValue);
-        Task<bool> Exists(Guid id);
+        Task<bool> CollectorValueExists(Guid id);
         Task<bool> Save();
     }
 }

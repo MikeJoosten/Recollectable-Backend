@@ -241,7 +241,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _countryService.Exists(banknote.CountryId))
+            if (!await _countryService.CountryExists(banknote.CountryId))
             {
                 return BadRequest();
             }
@@ -290,7 +290,7 @@ namespace Recollectable.API.Controllers
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> BlockBanknoteCreation(Guid id)
         {
-            if (await _banknoteService.Exists(id))
+            if (await _banknoteService.BanknoteExists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -352,7 +352,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _countryService.Exists(banknote.CountryId))
+            if (!await _countryService.CountryExists(banknote.CountryId))
             {
                 return BadRequest();
             }
@@ -422,7 +422,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!await _countryService.Exists(patchedBanknote.CountryId))
+            if (!await _countryService.CountryExists(patchedBanknote.CountryId))
             {
                 return BadRequest();
             }

@@ -61,7 +61,7 @@ namespace Recollectable.Core.Services
             _unitOfWork.Coins.Delete(coin);
         }
 
-        public async Task<bool> Exists(Guid id)
+        public async Task<bool> CoinExists(Guid id)
         {
             var coin = await _unitOfWork.Coins.GetSingle(new CoinById(id));
             return coin != null;
