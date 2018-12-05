@@ -411,7 +411,7 @@ namespace Recollectable.Tests.Controllers
         public async Task UpdateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCountry()
         {
             //Arrange
-            CountryUpdateDto country = new CountryUpdateDto();
+            var country = _builder.BuildUpdateDto();
             _controller.ModelState.AddModelError("Name", "Required");
 
             //Act
@@ -522,11 +522,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-            JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
-            _controller.ModelState.AddModelError("Name", "Required");
 
             var country = _builder.Build();
             _mockCountryService.Setup(c => c.FindCountryById(id)).Returns(Task.FromResult(country));
+
+            JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
+            _controller.ModelState.AddModelError("Name", "Required");
 
             //Act
             var response = await _controller.PartiallyUpdateCountry(id, patchDoc);
@@ -540,11 +541,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-            JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
-            patchDoc.Replace(c => c.Name, "China");
 
             var country = _builder.Build();
             _mockCountryService.Setup(c => c.FindCountryById(id)).Returns(Task.FromResult(country));
+
+            JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
+            patchDoc.Replace(c => c.Name, "China");
 
             //Act
             var response = await _controller.PartiallyUpdateCountry(id, patchDoc);
@@ -558,12 +560,13 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-            JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
-            patchDoc.Replace(c => c.Name, "China");
 
             var country = _builder.WithId(id).Build();
             _mockCountryService.Setup(c => c.FindCountryById(id)).Returns(Task.FromResult(country));
             _mockCountryService.Setup(c => c.UpdateCountry(It.IsAny<Country>()));
+
+            JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
+            patchDoc.Replace(c => c.Name, "China");
 
             //Act
             var response = await _controller.PartiallyUpdateCountry(id, patchDoc);

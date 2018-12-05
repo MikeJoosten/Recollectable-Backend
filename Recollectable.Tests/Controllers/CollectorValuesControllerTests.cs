@@ -31,10 +31,10 @@ namespace Recollectable.Tests.Controllers
             _mockCollectorValueService.Setup(c => c.Save()).Returns(Task.FromResult(true));
 
             _controller = new CollectorValuesController(_mockCollectorValueService.Object, _mapper);
+            SetupTestController(_controller);
 
             _builder = new CollectorValueTestBuilder();
             resourceParameters = new CollectorValuesResourceParameters();
-            SetupTestController(_controller);
         }
 
         [Fact]
@@ -70,8 +70,9 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCollectorValues_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
-            var collectorValues = new List<CollectorValue>();
-            var pagedList = PagedList<CollectorValue>.Create(collectorValues, resourceParameters.Page, resourceParameters.PageSize);
+            var collectorValues = _builder.Build(2);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCollectorValueService
                 .Setup(c => c.FindCollectorValues(resourceParameters))
@@ -88,8 +89,9 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCollectorValues_ReturnsAllCollectorValues_GivenNoMediaType()
         {
             //Arrange
-            var collectorValues = _builder.Build(6);
-            var pagedList = PagedList<CollectorValue>.Create(collectorValues, resourceParameters.Page, resourceParameters.PageSize);
+            var collectorValues = _builder.Build(2);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCollectorValueService
                 .Setup(c => c.FindCollectorValues(resourceParameters))
@@ -101,7 +103,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Count);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -109,8 +111,9 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            var collectorValues = _builder.Build(6);
-            var pagedList = PagedList<CollectorValue>.Create(collectorValues, resourceParameters.Page, resourceParameters.PageSize);
+            var collectorValues = _builder.Build(2);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCollectorValueService
                 .Setup(c => c.FindCollectorValues(resourceParameters))
@@ -122,7 +125,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Count);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -130,8 +133,9 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            var collectorValues = _builder.Build(6);
-            var pagedList = PagedList<CollectorValue>.Create(collectorValues, resourceParameters.Page, resourceParameters.PageSize);
+            var collectorValues = _builder.Build(2);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCollectorValueService
                 .Setup(c => c.FindCollectorValues(resourceParameters))
@@ -143,7 +147,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Value.Count());
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
@@ -151,7 +155,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            var collectorValues = _builder.Build(6);
+            var collectorValues = _builder.Build(4);
             var pagedList = PagedList<CollectorValue>.Create(collectorValues, 1, 2);
 
             _mockCollectorValueService
@@ -172,7 +176,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            var collectorValues = _builder.Build(6);
+            var collectorValues = _builder.Build(4);
             var pagedList = PagedList<CollectorValue>.Create(collectorValues, 1, 2);
 
             _mockCollectorValueService
@@ -219,7 +223,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            var collectorValue = _builder.WithId(id).Build();
+            var collectorValue = _builder.Build();
 
             _mockCollectorValueService
                 .Setup(c => c.FindCollectorValueById(id))
@@ -311,7 +315,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateCollectorValue_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollectorValue()
         {
             //Arrange
-            CollectorValueCreationDto collectorValue = new CollectorValueCreationDto();
+            var collectorValue = _builder.BuildCreationDto();
             _controller.ModelState.AddModelError("G4", "Required");
 
             //Act
@@ -327,10 +331,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateCollectorValue_ReturnsCreatedResponse_GivenValidCollectorValue(string mediaType)
         {
             //Arrange
-            CollectorValueCreationDto collectorValue = new CollectorValueCreationDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildCreationDto();
 
             //Act
             var response = await _controller.CreateCollectorValue(collectorValue, mediaType);
@@ -343,10 +344,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateCollectorValue_CreatesNewCollectorValue_GivenAnyMediaTypeAndValidCollectorValue()
         {
             //Arrange
-            CollectorValueCreationDto collectorValue = new CollectorValueCreationDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildCreationDto();
 
             //Act
             var response = await _controller.CreateCollectorValue(collectorValue, null) as CreatedAtRouteResult;
@@ -362,10 +360,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            CollectorValueCreationDto collectorValue = new CollectorValueCreationDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildCreationDto();
 
             //Act
             var response = await _controller.CreateCollectorValue(collectorValue, mediaType) as CreatedAtRouteResult;
@@ -380,15 +375,18 @@ namespace Recollectable.Tests.Controllers
         public async Task BlockCountryCollectorValue_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
+            Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+
             _mockCollectorValueService
-                .Setup(c => c.CollectorValueExists(Guid.Empty))
+                .Setup(c => c.CollectorValueExists(It.IsAny<Guid>()))
                 .Returns(Task.FromResult(true));
 
             //Act
-            var response = await _controller.BlockCollectorValueCreation(Guid.Empty) as StatusCodeResult;
+            var response = await _controller.BlockCollectorValueCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
+            _mockCollectorValueService.Verify(c => c.CollectorValueExists(id));
         }
 
         [Fact]
@@ -415,7 +413,7 @@ namespace Recollectable.Tests.Controllers
         public async Task UpdateCollectorValue_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollectorValue()
         {
             //Arrange
-            CollectorValueUpdateDto collectorValue = new CollectorValueUpdateDto();
+            var collectorValue = _builder.BuildUpdateDto();
             _controller.ModelState.AddModelError("G4", "Required");
 
             //Act
@@ -429,10 +427,7 @@ namespace Recollectable.Tests.Controllers
         public async Task UpdateCollectorValue_ReturnsNotFoundResponse_GivenInvalidCollectorValueId()
         {
             //Arrange
-            CollectorValueUpdateDto collectorValue = new CollectorValueUpdateDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildUpdateDto();
 
             //Act
             var response = await _controller.UpdateCollectorValue(Guid.Empty, collectorValue);
@@ -446,12 +441,9 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            CollectorValueUpdateDto collectorValue = new CollectorValueUpdateDto
-            {
-                G4 = 18.64
-            };
-
+            var collectorValue = _builder.WithG4(18.64).BuildUpdateDto();
             var retrievedCollectorValue = _builder.Build();
+
             _mockCollectorValueService
                 .Setup(c => c.FindCollectorValueById(id))
                 .Returns(Task.FromResult(retrievedCollectorValue));
@@ -468,12 +460,9 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            CollectorValueUpdateDto collectorValue = new CollectorValueUpdateDto
-            {
-                G4 = 18.64
-            };
-
+            var collectorValue = _builder.WithG4(18.64).BuildUpdateDto();
             var retrievedCollectorValue = _builder.WithId(id).Build();
+
             _mockCollectorValueService
                 .Setup(c => c.FindCollectorValueById(id))
                 .Returns(Task.FromResult(retrievedCollectorValue));
@@ -515,13 +504,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
-            _controller.ModelState.AddModelError("G4", "Required");
 
             var collectorValue = _builder.Build();
-            _mockCollectorValueService
-                .Setup(c => c.FindCollectorValueById(id))
-                .Returns(Task.FromResult(collectorValue));
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).Returns(Task.FromResult(collectorValue));
+
+            JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
+            _controller.ModelState.AddModelError("G4", "Required");
 
             //Act
             var response = await _controller.PartiallyUpdateCollectorValue(id, patchDoc);
@@ -535,13 +523,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
-            patchDoc.Replace(c => c.G4, 18.64);
 
             var collectorValue = _builder.Build();
-            _mockCollectorValueService
-                .Setup(c => c.FindCollectorValueById(id))
-                .Returns(Task.FromResult(collectorValue));
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).Returns(Task.FromResult(collectorValue));
+
+            JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
+            patchDoc.Replace(c => c.G4, 18.64);
 
             //Act
             var response = await _controller.PartiallyUpdateCollectorValue(id, patchDoc);
@@ -555,15 +542,13 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
-            patchDoc.Replace(c => c.G4, 18.64);
 
             var collectorValue = _builder.WithId(id).Build();
-            _mockCollectorValueService
-                .Setup(c => c.FindCollectorValueById(id))
-                .Returns(Task.FromResult(collectorValue));
-
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).Returns(Task.FromResult(collectorValue));
             _mockCollectorValueService.Setup(c => c.UpdateCollectorValue(It.IsAny<CollectorValue>()));
+
+            JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
+            patchDoc.Replace(c => c.G4, 18.64);
 
             //Act
             var response = await _controller.PartiallyUpdateCollectorValue(id, patchDoc);
@@ -575,11 +560,8 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task DeleteCollectorValue_ReturnsNotFoundResponse_GivenInvalidCollectorValueId()
         {
-            //Arrange
-            Guid id = new Guid("db23a489-535a-49c2-8af3-82490b3e50ef");
-
             //Act
-            var response = await _controller.DeleteCollectorValue(id);
+            var response = await _controller.DeleteCollectorValue(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -592,9 +574,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
 
             var collectorValue = _builder.Build();
-            _mockCollectorValueService
-                .Setup(c => c.FindCollectorValueById(id))
-                .Returns(Task.FromResult(collectorValue));
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).Returns(Task.FromResult(collectorValue));
 
             //Act
             var response = await _controller.DeleteCollectorValue(id);
@@ -610,12 +590,8 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
 
             var collectorValue = _builder.WithId(id).Build();
-            _mockCollectorValueService
-                .Setup(c => c.FindCollectorValueById(id))
-                .Returns(Task.FromResult(collectorValue));
-
-            _mockCollectorValueService
-                .Setup(c => c.RemoveCollectorValue(It.IsAny<CollectorValue>()));
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).Returns(Task.FromResult(collectorValue));
+            _mockCollectorValueService.Setup(c => c.RemoveCollectorValue(It.IsAny<CollectorValue>()));
 
             //Act
             await _controller.DeleteCollectorValue(id);

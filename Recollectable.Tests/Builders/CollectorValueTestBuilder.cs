@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Collectables;
+﻿using Recollectable.API.Models.Collectables;
+using Recollectable.Core.Entities.Collectables;
 using System;
 using System.Collections.Generic;
 
@@ -28,6 +29,22 @@ namespace Recollectable.Tests.Builders
         public CollectorValue Build()
         {
             return collectorValue;
+        }
+
+        public CollectorValueCreationDto BuildCreationDto()
+        {
+            return new CollectorValueCreationDto
+            {
+                G4 = collectorValue.G4
+            };
+        }
+
+        public CollectorValueUpdateDto BuildUpdateDto()
+        {
+            return new CollectorValueUpdateDto
+            {
+                G4 = collectorValue.G4
+            };
         }
 
         public List<CollectorValue> Build(int count)
