@@ -1,10 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Recollectable.API.Controllers;
+using Recollectable.API.Models.Collections;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
+using Recollectable.Tests.Builders;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -17,13 +22,21 @@ namespace Recollectable.Tests.Controllers
     public class CollectionsControllerTests : RecollectableTestBase
     {
         private readonly CollectionsController _controller;
+        private readonly Mock<IUserService> _mockUserService;
+        private readonly Mock<ICollectionService> _mockCollectionService;
         private readonly CollectionsResourceParameters resourceParameters;
+        private readonly CollectionTestBuilder _builder;
 
-        /*public CollectionsControllerTests()
+        public CollectionsControllerTests()
         {
-            _controller = new CollectionsController(_unitOfWork, _typeHelperService,
-                _propertyMappingService, _mapper);
+            _mockUserService = new Mock<IUserService>();
+            _mockCollectionService = new Mock<ICollectionService>();
+            _mockCollectionService.Setup(c => c.Save()).Returns(Task.FromResult(true));
+            _mockUserService.Setup(u => u.UserExists(It.IsAny<Guid>())).Returns(Task.FromResult(true));
 
+            _controller = new CollectionsController(_mockCollectionService.Object, _mockUserService.Object, _mapper);
+
+            _builder = new CollectionTestBuilder();
             resourceParameters = new CollectionsResourceParameters();
             SetupTestController<CollectionDto, Collection>(_controller);
         }
@@ -60,6 +73,14 @@ namespace Recollectable.Tests.Controllers
         [InlineData("application/json+hateoas")]
         public async Task GetCollections_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
+            //Arrange
+            var collections = new List<Collection>();
+            var pagedList = PagedList<Collection>.Create(collections, resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
+
             //Act
             var response = await _controller.GetCollections(resourceParameters, mediaType);
 
@@ -70,13 +91,21 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task GetCollections_ReturnsAllCollections_GivenNoMediaType()
         {
+            //Arrange
+            var collections = _builder.Build(6);
+            var pagedList = PagedList<Collection>.Create(collections, resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
+
             //Act
             var response = await _controller.GetCollections(resourceParameters, null) as OkObjectResult;
-            var collections = response.Value as List<CollectionDto>;
+            var result = response.Value as List<CollectionDto>;
 
             //Assert
-            Assert.NotNull(collections);
-            Assert.Equal(6, collections.Count);
+            Assert.NotNull(result);
+            Assert.Equal(6, result.Count);
         }
 
         [Fact]
@@ -84,14 +113,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
+            var collections = _builder.Build(6);
+            var pagedList = PagedList<Collection>.Create(collections, resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
 
             //Act
             var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
-            var collections = response.Value as List<ExpandoObject>;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(collections);
-            Assert.Equal(6, collections.Count);
+            Assert.NotNull(result);
+            Assert.Equal(6, result.Count);
         }
 
         [Fact]
@@ -99,14 +134,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
+            var collections = _builder.Build(6);
+            var pagedList = PagedList<Collection>.Create(collections, resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
 
             //Act
             var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
-            var linkedCollection = response.Value as LinkedCollectionResource;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(linkedCollection);
-            Assert.Equal(6, linkedCollection.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(6, result.Value.Count());
         }
 
         [Fact]
@@ -114,15 +155,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            resourceParameters.PageSize = 2;
+            var collections = _builder.Build(6);
+            var pagedList = PagedList<Collection>.Create(collections, 1, 2);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
 
             //Act
             var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
-            var collections = response.Value as List<ExpandoObject>;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(collections);
-            Assert.Equal(2, collections.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -130,15 +176,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            resourceParameters.PageSize = 2;
+            var collections = _builder.Build(6);
+            var pagedList = PagedList<Collection>.Create(collections, 1, 2);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
 
             //Act
             var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
-            var collections = response.Value as LinkedCollectionResource;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(collections);
-            Assert.Equal(2, collections.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
@@ -157,11 +208,8 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task GetCollection_ReturnsNotFoundResponse_GivenInvalidId()
         {
-            //Arrange
-            Guid id = new Guid("76efa0d4-2ec6-4dbb-80fa-a689fd5fe884");
-
             //Act
-            var response = await _controller.GetCollection(id, null, null);
+            var response = await _controller.GetCollection(Guid.Empty, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -175,6 +223,11 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            var collection = _builder.WithId(id).Build();
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .Returns(Task.FromResult(collection));
 
             //Act
             var response = await _controller.GetCollection(id, null, mediaType);
@@ -188,15 +241,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            var collection = _builder.WithId(id).WithType("Coin").Build();
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .Returns(Task.FromResult(collection));
 
             //Act
             var response = await _controller.GetCollection(id, null, null) as OkObjectResult;
-            var collection = response.Value as CollectionDto;
+            var result = response.Value as CollectionDto;
 
             //Assert
-            Assert.NotNull(collection);
-            Assert.Equal(id, collection.Id);
-            Assert.Equal("Coin", collection.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Coin", result.Type);
         }
 
         [Fact]
@@ -205,15 +263,20 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             string mediaType = "application/json";
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            var collection = _builder.WithId(id).WithType("Coin").Build();
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .Returns(Task.FromResult(collection));
 
             //Act
             var response = await _controller.GetCollection(id, null, mediaType) as OkObjectResult;
-            dynamic collection = response.Value as ExpandoObject;
+            dynamic result = response.Value as ExpandoObject;
 
             //Assert
-            Assert.NotNull(collection);
-            Assert.Equal(id, collection.Id);
-            Assert.Equal("Coin", collection.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Coin", result.Type);
         }
 
         [Fact]
@@ -222,15 +285,20 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            var collection = _builder.WithId(id).WithType("Coin").Build();
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .Returns(Task.FromResult(collection));
 
             //Act
             var response = await _controller.GetCollection(id, null, mediaType) as OkObjectResult;
-            dynamic collection = response.Value as IDictionary<string, object>;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(collection);
-            Assert.Equal(id, collection.Id);
-            Assert.Equal("Coin", collection.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Coin", result.Type);
         }
 
         [Fact]
@@ -279,11 +347,14 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateCollection_ReturnsCreatedResponse_GivenValidCollection(string mediaType)
         {
             //Arrange
+            Guid userId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
             CollectionCreationDto collection = new CollectionCreationDto
             {
                 Type = "Banknote",
-                UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                UserId = userId
             };
+
+            _mockUserService.Setup(u => u.FindUserById(userId)).Returns(Task.FromResult(new User()));
 
             //Act
             var response = await _controller.CreateCollection(collection, mediaType);
@@ -302,6 +373,8 @@ namespace Recollectable.Tests.Controllers
                 Type = "Banknote",
                 UserId = userId
             };
+
+            _mockUserService.Setup(u => u.FindUserById(userId)).Returns(Task.FromResult(new User()));
 
             //Act
             var response = await _controller.CreateCollection(collection, null) as CreatedAtRouteResult;
@@ -325,6 +398,8 @@ namespace Recollectable.Tests.Controllers
                 UserId = userId
             };
 
+            _mockUserService.Setup(u => u.FindUserById(userId)).Returns(Task.FromResult(new User()));
+
             //Act
             var response = await _controller.CreateCollection(collection, mediaType) as CreatedAtRouteResult;
             dynamic returnedCollection = response.Value as IDictionary<string, object>;
@@ -339,10 +414,12 @@ namespace Recollectable.Tests.Controllers
         public async Task BlockCollectionCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
-            Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            _mockCollectionService
+                .Setup(c => c.CollectionExists(Guid.Empty))
+                .Returns(Task.FromResult(true));
 
             //Act
-            var response = await _controller.BlockCollectionCreation(id) as StatusCodeResult;
+            var response = await _controller.BlockCollectionCreation(Guid.Empty) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
@@ -351,11 +428,8 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task BlockCollectionCreation_ReturnsNotFoundResponse_GivenUnexistingId()
         {
-            //Arrange
-            Guid id = new Guid("514d80af-7748-46ed-99cd-a71f6d58315a");
-
             //Act
-            var response = await _controller.BlockCollectionCreation(id);
+            var response = await _controller.BlockCollectionCreation(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -389,12 +463,12 @@ namespace Recollectable.Tests.Controllers
         public async Task UpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
         {
             //Arrange
-            Guid userId = new Guid("4512e2d5-779f-4423-b117-903f85990d4a");
             CollectionUpdateDto collection = new CollectionUpdateDto
             {
-                Type = "Banknote",
-                UserId = userId
+                Type = "Banknote"
             };
+
+            _mockUserService.Setup(u => u.UserExists(It.IsAny<Guid>())).Returns(Task.FromResult(false));
 
             //Act
             var response = await _controller.UpdateCollection(Guid.Empty, collection);
@@ -410,8 +484,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("e69bed8a-1b96-4d74-bff6-4c2894dd7872");
             CollectionUpdateDto collection = new CollectionUpdateDto
             {
-                Type = "Banknote",
-                UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                Type = "Banknote"
             };
 
             //Act
@@ -428,9 +501,14 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
             CollectionUpdateDto collection = new CollectionUpdateDto
             {
-                Type = "Banknote",
-                UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
+                Type = "Banknote"
             };
+
+            var retrievedCollection = _builder.Build();
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .Returns(Task.FromResult(retrievedCollection));
 
             //Act
             var response = await _controller.UpdateCollection(id, collection);
@@ -451,13 +529,15 @@ namespace Recollectable.Tests.Controllers
                 UserId = userId
             };
 
+            var retrievedCollection = _builder.WithId(id).Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).Returns(Task.FromResult(retrievedCollection));
+            _mockCollectionService.Setup(c => c.UpdateCollection(It.IsAny<Collection>()));
+
             //Act
             var response = await _controller.UpdateCollection(id, country);
 
             //Assert
-            Assert.NotNull(await _unitOfWork.CollectionRepository.GetById(id));
-            Assert.Equal("Banknote", (await _unitOfWork.CollectionRepository.GetById(id)).Type);
-            Assert.Equal(userId, (await _unitOfWork.CollectionRepository.GetById(id)).UserId);
+            _mockCollectionService.Verify(c => c.UpdateCollection(retrievedCollection));
         }
 
         [Fact]
@@ -474,11 +554,10 @@ namespace Recollectable.Tests.Controllers
         public async Task PartiallyUpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
         {
             //Arrange
-            Guid id = new Guid("9f8925ae-1bbe-49f1-98d9-193f69a7fc5c");
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
 
             //Act
-            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(Guid.Empty, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -491,6 +570,9 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
             _controller.ModelState.AddModelError("Type", "Required");
+
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).Returns(Task.FromResult(collection));
 
             //Act
             var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
@@ -509,6 +591,10 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Type, "Banknote");
             patchDoc.Replace(c => c.UserId, userId);
 
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).Returns(Task.FromResult(collection));
+            _mockUserService.Setup(u => u.UserExists(It.IsAny<Guid>())).Returns(Task.FromResult(false));
+
             //Act
             var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
@@ -525,6 +611,9 @@ namespace Recollectable.Tests.Controllers
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
             patchDoc.Replace(c => c.Type, "Banknote");
             patchDoc.Replace(c => c.UserId, userId);
+
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).Returns(Task.FromResult(collection));
 
             //Act
             var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
@@ -543,13 +632,14 @@ namespace Recollectable.Tests.Controllers
             patchDoc.Replace(c => c.Type, "Banknote");
             patchDoc.Replace(c => c.UserId, userId);
 
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).Returns(Task.FromResult(collection));
+
             //Act
             var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
-            Assert.NotNull(await _unitOfWork.CollectionRepository.GetById(id));
-            Assert.Equal("Banknote", (await _unitOfWork.CollectionRepository.GetById(id)).Type);
-            Assert.Equal(userId, (await _unitOfWork.CollectionRepository.GetById(id)).UserId);
+            _mockCollectionService.Verify(c => c.UpdateCollection(collection));
         }
 
         [Fact]
@@ -571,6 +661,9 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).Returns(Task.FromResult(collection));
+
             //Act
             var response = await _controller.DeleteCollection(id);
 
@@ -584,12 +677,15 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).Returns(Task.FromResult(collection));
+            _mockCollectionService.Setup(c => c.RemoveCollection(It.IsAny<Collection>()));
+
             //Act
             await _controller.DeleteCollection(id);
 
             //Assert
-            Assert.Equal(5, (await _unitOfWork.CollectionRepository.Get(resourceParameters)).Count());
-            Assert.Null(await _unitOfWork.CollectionRepository.GetById(id));
-        }*/
+            _mockCollectionService.Verify(c => c.RemoveCollection(collection));
+        }
     }
 }

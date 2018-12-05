@@ -183,9 +183,7 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var country = await _countryService.FindCountryById(coin.CountryId);
-
-            if (country == null)
+            if (!await _countryService.CountryExists(coin.CountryId))
             {
                 return BadRequest();
             }

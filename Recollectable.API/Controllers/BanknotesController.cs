@@ -58,8 +58,7 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            if (!TypeHelper.TypeHasProperties<BanknoteDto>
-                (resourceParameters.Fields))
+            if (!TypeHelper.TypeHasProperties<BanknoteDto>(resourceParameters.Fields))
             {
                 return BadRequest();
             }

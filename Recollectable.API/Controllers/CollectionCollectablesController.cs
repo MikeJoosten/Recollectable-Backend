@@ -38,8 +38,8 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpHead]
-        [HttpGet(Name = "GetCollectables")]
-        public async Task<IActionResult> GetCollectables(Guid collectionId, 
+        [HttpGet(Name = "GetCollectionCollectables")]
+        public async Task<IActionResult> GetCollectionCollectables(Guid collectionId, 
             CollectionCollectablesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -77,14 +77,14 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                var links = CreateCollectablesLinks(resourceParameters,
+                var links = CreateCollectionCollectablesLinks(resourceParameters,
                     retrievedCollectables.HasNext, retrievedCollectables.HasPrevious);
                 var shapedCollectables = collectables.ShapeData(resourceParameters.Fields);
 
                 var linkedCollectables = shapedCollectables.Select(collectable =>
                 {
                     var collectableAsDictionary = collectable as IDictionary<string, object>;
-                    var collectableLinks = CreateCollectableLinks((Guid)collectableAsDictionary["Id"],
+                    var collectableLinks = CreateCollectionCollectableLinks((Guid)collectableAsDictionary["Id"],
                         resourceParameters.Fields);
 
                     collectableAsDictionary.Add("links", collectableLinks);
@@ -103,11 +103,11 @@ namespace Recollectable.API.Controllers
             else if (mediaType == "application/json")
             {
                 var previousPageLink = retrievedCollectables.HasPrevious ?
-                    CreateCollectablesResourceUri(resourceParameters,
+                    CreateCollectionCollectablesResourceUri(resourceParameters,
                     ResourceUriType.PreviousPage) : null;
 
                 var nextPageLink = retrievedCollectables.HasNext ?
-                    CreateCollectablesResourceUri(resourceParameters,
+                    CreateCollectionCollectablesResourceUri(resourceParameters,
                     ResourceUriType.NextPage) : null;
 
                 var paginationMetadata = new
@@ -131,8 +131,8 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        [HttpGet("{id}", Name = "GetCollectable")]
-        public async Task<IActionResult> GetCollectable(Guid collectionId, Guid id, 
+        [HttpGet("{id}", Name = "GetCollectionCollectable")]
+        public async Task<IActionResult> GetCollectionCollectable(Guid collectionId, Guid id, 
             [FromQuery] string fields, [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!TypeHelper.TypeHasProperties<CollectionCollectableDto>(fields))
@@ -151,7 +151,7 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
-                var links = CreateCollectableLinks(id, fields);
+                var links = CreateCollectionCollectableLinks(id, fields);
                 var linkedResource = collectable.ShapeData(fields)
                     as IDictionary<string, object>;
 
@@ -169,8 +169,8 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        [HttpPost(Name = "CreateCollectable")]
-        public async Task<IActionResult> CreateCollectable(Guid collectionId, 
+        [HttpPost(Name = "CreateCollectionCollectable")]
+        public async Task<IActionResult> CreateCollectionCollectable(Guid collectionId, 
             [FromBody] CollectionCollectableCreationDto collectable,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -216,26 +216,26 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
-                var links = CreateCollectableLinks(returnedCollectable.Id, null);
+                var links = CreateCollectionCollectableLinks(returnedCollectable.Id, null);
                 var linkedResource = returnedCollectable.ShapeData(null)
                     as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
-                return CreatedAtRoute("GetCollectable",
+                return CreatedAtRoute("GetCollectionCollectable",
                     new { id = returnedCollectable.Id },
                     linkedResource);
             }
             else
             {
-                return CreatedAtRoute("GetCollectable",
+                return CreatedAtRoute("GetCollectionCollectable",
                     new { id = returnedCollectable.Id },
                     returnedCollectable);
             }
         }
 
         [HttpPost("{id}")]
-        public async Task<IActionResult> BlockCollectableCreation(Guid collectionId, Guid id)
+        public async Task<IActionResult> BlockCollectionCollectableCreation(Guid collectionId, Guid id)
         {
             if (await _collectableService.CollectionCollectableExists(collectionId, id))
             {
@@ -245,8 +245,8 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}", Name = "UpdateCollectable")]
-        public async Task<IActionResult> UpdateCollectable(Guid collectionId, Guid id,
+        [HttpPut("{id}", Name = "UpdateCollectionCollectable")]
+        public async Task<IActionResult> UpdateCollectionCollectable(Guid collectionId, Guid id,
             [FromBody] CollectionCollectableUpdateDto collectable)
         {
             if (collectable == null)
@@ -301,8 +301,8 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}", Name = "PartiallyUpdateCollectable")]
-        public async Task<IActionResult> PartiallyUpdateCollectable(Guid collectionId, Guid id,
+        [HttpPatch("{id}", Name = "PartiallyUpdateCollectionCollectable")]
+        public async Task<IActionResult> PartiallyUpdateCollectionCollectable(Guid collectionId, Guid id,
             [FromBody] JsonPatchDocument<CollectionCollectableUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -362,8 +362,8 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}", Name = "DeleteCollectable")]
-        public async Task<IActionResult> DeleteCollectable(Guid collectionId, Guid id)
+        [HttpDelete("{id}", Name = "DeleteCollectionCollectable")]
+        public async Task<IActionResult> DeleteCollectionCollectable(Guid collectionId, Guid id)
         {
             var retrievedCollectable = await _collectableService.FindCollectionCollectableById(collectionId, id);
 
@@ -383,19 +383,19 @@ namespace Recollectable.API.Controllers
         }
 
         [HttpOptions]
-        public IActionResult GetCollectablesOptions()
+        public IActionResult GetCollectionCollectablesOptions()
         {
             Response.Headers.Add("Allow", "GET - OPTIONS - POST - PUT - PATCH - DELETE");
             return Ok();
         }
 
-        private string CreateCollectablesResourceUri(CollectionCollectablesResourceParameters resourceParameters, 
+        private string CreateCollectionCollectablesResourceUri(CollectionCollectablesResourceParameters resourceParameters, 
             ResourceUriType type)
         {
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return Url.Link("GetCollectables", new
+                    return Url.Link("GetCollectionCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -405,7 +405,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return Url.Link("GetCollectables", new
+                    return Url.Link("GetCollectionCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -415,7 +415,7 @@ namespace Recollectable.API.Controllers
                         pageSize = resourceParameters.PageSize
                     });
                 default:
-                    return Url.Link("GetCollectables", new
+                    return Url.Link("GetCollectionCollectables", new
                     {
                         country = resourceParameters.Country,
                         search = resourceParameters.Search,
@@ -427,50 +427,50 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        private IEnumerable<LinkDto> CreateCollectableLinks(Guid id, string fields)
+        private IEnumerable<LinkDto> CreateCollectionCollectableLinks(Guid id, string fields)
         {
             var links = new List<LinkDto>();
 
             if (string.IsNullOrEmpty(fields))
             {
-                links.Add(new LinkDto(Url.Link("GetCollectable",
+                links.Add(new LinkDto(Url.Link("GetCollectionCollectable",
                     new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateCollectable",
+                links.Add(new LinkDto(Url.Link("CreateCollectionCollectable",
                     new { }), "create_collectable", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateCollectable",
+                links.Add(new LinkDto(Url.Link("UpdateCollectionCollectable",
                     new { id }), "update_collectable", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateCollectable",
+                links.Add(new LinkDto(Url.Link("PartiallyUpdateCollectionCollectable",
                     new { id }), "partially_update_collectable", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteCollectable",
+                links.Add(new LinkDto(Url.Link("DeleteCollectionCollectable",
                     new { id }), "delete_collectable", "DELETE"));
             }
 
             return links;
         }
 
-        private IEnumerable<LinkDto> CreateCollectablesLinks
+        private IEnumerable<LinkDto> CreateCollectionCollectablesLinks
             (CollectionCollectablesResourceParameters resourceParameters,
             bool hasNext, bool hasPrevious)
         {
             var links = new List<LinkDto>
             {
-                new LinkDto(CreateCollectablesResourceUri(resourceParameters,
+                new LinkDto(CreateCollectionCollectablesResourceUri(resourceParameters,
                 ResourceUriType.Current), "self", "GET")
             };
 
             if (hasNext)
             {
-                links.Add(new LinkDto(CreateCollectablesResourceUri(resourceParameters,
+                links.Add(new LinkDto(CreateCollectionCollectablesResourceUri(resourceParameters,
                     ResourceUriType.NextPage), "nextPage", "GET"));
             }
 
             if (hasPrevious)
             {
-                links.Add(new LinkDto(CreateCollectablesResourceUri(resourceParameters,
+                links.Add(new LinkDto(CreateCollectionCollectablesResourceUri(resourceParameters,
                     ResourceUriType.PreviousPage), "previousPage", "GET"));
             }
 

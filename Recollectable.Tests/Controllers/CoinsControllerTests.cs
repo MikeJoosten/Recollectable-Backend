@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Recollectable.API.Controllers;
+using Recollectable.API.Models.Collectables;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
+using Recollectable.Tests.Builders;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -17,13 +21,28 @@ namespace Recollectable.Tests.Controllers
     public class CoinsControllerTests : RecollectableTestBase
     {
         private readonly CoinsController _controller;
+        private readonly Mock<ICoinService> _mockCoinService;
+        private readonly Mock<ICountryService> _mockCountryService;
+        private readonly Mock<ICollectorValueService> _mockCollectorValueService;
         private readonly CurrenciesResourceParameters resourceParameters;
+        private readonly CoinTestBuilder _builder;
 
-        /*public CoinsControllerTests()
+        public CoinsControllerTests()
         {
-            _controller = new CoinsController(_unitOfWork, _typeHelperService,
-                _propertyMappingService, _mapper);
+            _mockCoinService = new Mock<ICoinService>();
+            _mockCountryService = new Mock<ICountryService>();
+            _mockCollectorValueService = new Mock<ICollectorValueService>();
+            _mockCoinService.Setup(c => c.Save()).Returns(Task.FromResult(true));
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).Returns(Task.FromResult(true));
 
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValueByValues(It.IsAny<CollectorValue>()))
+                .Returns(Task.FromResult(new CollectorValue()));
+
+            _controller = new CoinsController(_mockCoinService.Object,
+                _mockCountryService.Object, _mockCollectorValueService.Object, _mapper);
+
+            _builder = new CoinTestBuilder();
             resourceParameters = new CurrenciesResourceParameters();
             SetupTestController<CoinDto, Coin>(_controller);
         }
@@ -60,6 +79,14 @@ namespace Recollectable.Tests.Controllers
         [InlineData("application/json+hateoas")]
         public async Task GetCoins_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
+            //Arrange
+            var coins = new List<Coin>();
+            var pagedList = PagedList<Coin>.Create(coins, resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCoinService
+                .Setup(c => c.FindCoins(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
+
             //Act
             var response = await _controller.GetCoins(resourceParameters, mediaType);
 
@@ -70,13 +97,21 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task GetCoins_ReturnsAllCoins_GivenNoMediaType()
         {
+            //Arrange
+            var coins = _builder.Build(6);
+            var pagedList = PagedList<Coin>.Create(coins, resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCoinService
+                .Setup(c => c.FindCoins(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
+
             //Act
             var response = await _controller.GetCoins(resourceParameters, null) as OkObjectResult;
-            var coins = response.Value as List<CoinDto>;
+            var result = response.Value as List<CoinDto>;
 
             //Assert
-            Assert.NotNull(coins);
-            Assert.Equal(6, coins.Count);
+            Assert.NotNull(result);
+            Assert.Equal(6, result.Count);
         }
 
         [Fact]
@@ -84,14 +119,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
+            var coins = _builder.Build(6);
+            var pagedList = PagedList<Coin>.Create(coins, resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCoinService
+                .Setup(c => c.FindCoins(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
 
             //Act
             var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
-            var coins = response.Value as List<ExpandoObject>;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(coins);
-            Assert.Equal(6, coins.Count);
+            Assert.NotNull(result);
+            Assert.Equal(6, result.Count);
         }
 
         [Fact]
@@ -99,14 +140,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
+            var coins = _builder.Build(6);
+            var pagedList = PagedList<Coin>.Create(coins, resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCoinService
+                .Setup(c => c.FindCoins(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
 
             //Act
             var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
-            var linkedCollection = response.Value as LinkedCollectionResource;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(linkedCollection);
-            Assert.Equal(6, linkedCollection.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(6, result.Value.Count());
         }
 
         [Fact]
@@ -114,15 +161,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            resourceParameters.PageSize = 2;
+            var coins = _builder.Build(6);
+            var pagedList = PagedList<Coin>.Create(coins, 1, 2);
+
+            _mockCoinService
+                .Setup(c => c.FindCoins(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
 
             //Act
             var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
-            var coins = response.Value as List<ExpandoObject>;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(coins);
-            Assert.Equal(2, coins.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -130,15 +182,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            resourceParameters.PageSize = 2;
+            var coins = _builder.Build(6);
+            var pagedList = PagedList<Coin>.Create(coins, 1, 2);
+
+            _mockCoinService
+                .Setup(c => c.FindCoins(resourceParameters))
+                .Returns(Task.FromResult(pagedList));
 
             //Act
             var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
-            var coins = response.Value as LinkedCollectionResource;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(coins);
-            Assert.Equal(2, coins.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
@@ -157,11 +214,8 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task GetCoin_ReturnsNotFoundResponse_GivenInvalidId()
         {
-            //Arrange
-            Guid id = new Guid("18a1946a-ca7a-4bf4-a642-f5eb846f7dd5");
-
             //Act
-            var response = await _controller.GetCoin(id, null, null);
+            var response = await _controller.GetCoin(Guid.Empty, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -175,6 +229,11 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
+            var coin = _builder.WithId(id).Build();
+
+            _mockCoinService
+                .Setup(c => c.FindCoinById(id))
+                .Returns(Task.FromResult(coin));
 
             //Act
             var response = await _controller.GetCoin(id, null, mediaType);
@@ -188,15 +247,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
+            var coin = _builder.WithId(id).WithType("Dollars").Build();
+
+            _mockCoinService
+                .Setup(c => c.FindCoinById(id))
+                .Returns(Task.FromResult(coin));
 
             //Act
             var response = await _controller.GetCoin(id, null, null) as OkObjectResult;
-            var coin = response.Value as CoinDto;
+            var result = response.Value as CoinDto;
 
             //Assert
-            Assert.NotNull(coin);
-            Assert.Equal(id, coin.Id);
-            Assert.Equal("Dollars", coin.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Dollars", result.Type);
         }
 
         [Fact]
@@ -205,15 +269,20 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             string mediaType = "application/json";
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
+            var coin = _builder.WithId(id).WithType("Dollars").Build();
+
+            _mockCoinService
+                .Setup(c => c.FindCoinById(id))
+                .Returns(Task.FromResult(coin));
 
             //Act
             var response = await _controller.GetCoin(id, null, mediaType) as OkObjectResult;
-            dynamic coin = response.Value as ExpandoObject;
+            dynamic result = response.Value as ExpandoObject;
 
             //Assert
-            Assert.NotNull(coin);
-            Assert.Equal(id, coin.Id);
-            Assert.Equal("Dollars", coin.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Dollars", result.Type);
         }
 
         [Fact]
@@ -222,15 +291,20 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
+            var coin = _builder.WithId(id).WithType("Dollars").Build();
+
+            _mockCoinService
+                .Setup(c => c.FindCoinById(id))
+                .Returns(Task.FromResult(coin));
 
             //Act
             var response = await _controller.GetCoin(id, null, mediaType) as OkObjectResult;
-            dynamic coin = response.Value as IDictionary<string, object>;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(coin);
-            Assert.Equal(id, coin.Id);
-            Assert.Equal("Dollars", coin.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Dollars", result.Type);
         }
 
         [Fact]
@@ -261,10 +335,11 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateCoin_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
-            CoinCreationDto coin = new CoinCreationDto
-            {
-                CountryId = new Guid("0fa4202c-c244-4be6-bb47-b8e50aacd7cd")
-            };
+            CoinCreationDto coin = new CoinCreationDto();
+
+            _mockCountryService
+                .Setup(c => c.CountryExists(It.IsAny<Guid>()))
+                .Returns(Task.FromResult(false));
 
             //Act
             var response = await _controller.CreateCoin(coin, null);
@@ -281,11 +356,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
             {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValue = new CollectorValueCreationDto
-                {
-                    G4 = 124
-                }
+                Type = "Dollar"
             };
 
             //Act
@@ -301,12 +372,7 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             CoinCreationDto coin = new CoinCreationDto
             {
-                Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValue = new CollectorValueCreationDto
-                {
-                    G4 = 124
-                }
+                Type = "Dollar"
             };
 
             //Act
@@ -316,7 +382,6 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.NotNull(returnedCoin);
             Assert.Equal("Dollar", returnedCoin.Type);
-            Assert.Equal("United States of America", returnedCoin.Country.Name);
         }
 
         [Fact]
@@ -326,12 +391,7 @@ namespace Recollectable.Tests.Controllers
             string mediaType = "application/json+hateoas";
             CoinCreationDto coin = new CoinCreationDto
             {
-                Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValue = new CollectorValueCreationDto
-                {
-                    G4 = 124
-                }
+                Type = "Dollar"
             };
 
             //Act
@@ -341,17 +401,18 @@ namespace Recollectable.Tests.Controllers
             //Assert
             Assert.NotNull(returnedCoin);
             Assert.Equal("Dollar", returnedCoin.Type);
-            Assert.Equal("United States of America", returnedCoin.Country.Name);
         }
 
         [Fact]
         public async Task BlockCoinCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
-            Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
+            _mockCoinService
+                .Setup(c => c.CoinExists(Guid.Empty))
+                .Returns(Task.FromResult(true));
 
             //Act
-            var response = await _controller.BlockCoinCreation(id) as StatusCodeResult;
+            var response = await _controller.BlockCoinCreation(Guid.Empty) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
@@ -360,11 +421,8 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task BlockCoinCreation_ReturnsNotFoundResponse_GivenUnexistingId()
         {
-            //Arrange
-            Guid id = new Guid("ba5b97b2-e8bd-4953-81ca-f107cb1f5b5d");
-
             //Act
-            var response = await _controller.BlockCoinCreation(id);
+            var response = await _controller.BlockCoinCreation(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -398,10 +456,11 @@ namespace Recollectable.Tests.Controllers
         public async Task UpdateCoin_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
-            CoinUpdateDto coin = new CoinUpdateDto
-            {
-                CountryId = new Guid("0fa4202c-c244-4be6-bb47-b8e50aacd7cd")
-            };
+            CoinUpdateDto coin = new CoinUpdateDto();
+
+            _mockCountryService
+                .Setup(c => c.CountryExists(It.IsAny<Guid>()))
+                .Returns(Task.FromResult(false));
 
             //Act
             var response = await _controller.UpdateCoin(Guid.Empty, coin);
@@ -415,14 +474,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("46020ac4-f8c6-4bce-8fce-6c8513a49f28");
-            CoinUpdateDto coin = new CoinUpdateDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValue = new CollectorValueCreationDto
-                {
-                    G4 = 124
-                }
-            };
+            CoinUpdateDto coin = new CoinUpdateDto();
 
             //Act
             var response = await _controller.UpdateCoin(id, coin);
@@ -436,14 +488,10 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
-            CoinUpdateDto coin = new CoinUpdateDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValue = new CollectorValueCreationDto
-                {
-                    G4 = 124
-                }
-            };
+            CoinUpdateDto coin = new CoinUpdateDto();
+
+            var retrievedCoin = _builder.Build();
+            _mockCoinService.Setup(c => c.FindCoinById(id)).Returns(Task.FromResult(retrievedCoin));
 
             //Act
             var response = await _controller.UpdateCoin(id, coin);
@@ -457,23 +505,17 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
-            CoinUpdateDto coin = new CoinUpdateDto
-            {
-                Type = "Euros",
-                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
-                CollectorValue = new CollectorValueCreationDto
-                {
-                    G4 = 124
-                }
-            };
+            CoinUpdateDto coin = new CoinUpdateDto();
+
+            var retrievedCoin = _builder.Build();
+            _mockCoinService.Setup(c => c.FindCoinById(id)).Returns(Task.FromResult(retrievedCoin));
+            _mockCoinService.Setup(c => c.UpdateCoin(It.IsAny<Coin>()));
 
             //Act
             var response = await _controller.UpdateCoin(id, coin);
 
             //Assert
-            Assert.NotNull(await _unitOfWork.CoinRepository.GetById(id));
-            Assert.Equal("Euros", (await _unitOfWork.CoinRepository.GetById(id)).Type);
-            Assert.Equal("France", (await _unitOfWork.CoinRepository.GetById(id)).Country.Name);
+            _mockCoinService.Verify(c => c.UpdateCoin(retrievedCoin));
         }
 
         [Fact]
@@ -490,11 +532,10 @@ namespace Recollectable.Tests.Controllers
         public async Task PartiallyUpdateCoin_ReturnsNotFoundResponse_GivenInvalidCoinId()
         {
             //Arrange
-            Guid id = new Guid("46020ac4-f8c6-4bce-8fce-6c8513a49f28");
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
 
             //Act
-            var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCoin(Guid.Empty, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -508,6 +549,9 @@ namespace Recollectable.Tests.Controllers
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
             patchDoc.Replace(c => c.Subject, "Chinese Coin");
             patchDoc.Replace(c => c.Note, "Chinese Coin");
+
+            var coin = _builder.Build();
+            _mockCoinService.Setup(c => c.FindCoinById(id)).Returns(Task.FromResult(coin));
 
             //Act
             var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
@@ -524,6 +568,9 @@ namespace Recollectable.Tests.Controllers
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
             _controller.ModelState.AddModelError("Type", "Required");
 
+            var coin = _builder.Build();
+            _mockCoinService.Setup(c => c.FindCoinById(id)).Returns(Task.FromResult(coin));
+
             //Act
             var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
@@ -537,8 +584,14 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
-            patchDoc.Replace(c => c.CountryId, new Guid("0fa4202c-c244-4be6-bb47-b8e50aacd7cd"));
             patchDoc.Replace(c => c.Subject, "Chinese Coin");
+
+            _mockCountryService
+                .Setup(c => c.CountryExists(It.IsAny<Guid>()))
+                .Returns(Task.FromResult(false));
+
+            var coin = _builder.Build();
+            _mockCoinService.Setup(c => c.FindCoinById(id)).Returns(Task.FromResult(coin));
 
             //Act
             var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
@@ -555,6 +608,9 @@ namespace Recollectable.Tests.Controllers
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
             patchDoc.Replace(c => c.Subject, "Chinese Coin");
 
+            var coin = _builder.Build();
+            _mockCoinService.Setup(c => c.FindCoinById(id)).Returns(Task.FromResult(coin));
+
             //Act
             var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
@@ -568,17 +624,17 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
             JsonPatchDocument<CoinUpdateDto> patchDoc = new JsonPatchDocument<CoinUpdateDto>();
-            patchDoc.Replace(c => c.Type, "Euros");
-            patchDoc.Replace(c => c.Subject, "Remembrance Coin");
-            patchDoc.Replace(c => c.CountryId, new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"));
+            patchDoc.Replace(c => c.Subject, "Chinese Coin");
+
+            var coin = _builder.Build();
+            _mockCoinService.Setup(c => c.FindCoinById(id)).Returns(Task.FromResult(coin));
+            _mockCoinService.Setup(c => c.UpdateCoin(It.IsAny<Coin>()));
 
             //Act
             var response = await _controller.PartiallyUpdateCoin(id, patchDoc);
 
             //Assert
-            Assert.NotNull(await _unitOfWork.CoinRepository.GetById(id));
-            Assert.Equal("Euros", (await _unitOfWork.CoinRepository.GetById(id)).Type);
-            Assert.Equal("France", (await _unitOfWork.CoinRepository.GetById(id)).Country.Name);
+            _mockCoinService.Verify(b => b.UpdateCoin(coin));
         }
 
         [Fact]
@@ -600,6 +656,9 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
+            var coin = _builder.Build();
+            _mockCoinService.Setup(b => b.FindCoinById(id)).Returns(Task.FromResult(coin));
+
             //Act
             var response = await _controller.DeleteCoin(id);
 
@@ -613,12 +672,15 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
 
+            var coin = _builder.Build();
+            _mockCoinService.Setup(b => b.FindCoinById(id)).Returns(Task.FromResult(coin));
+            _mockCoinService.Setup(b => b.RemoveCoin(It.IsAny<Coin>()));
+
             //Act
             await _controller.DeleteCoin(id);
 
             //Assert
-            Assert.Equal(5, (await _unitOfWork.CoinRepository.Get(resourceParameters)).Count());
-            Assert.Null(await _unitOfWork.CoinRepository.GetById(id));
-        }*/
+            _mockCoinService.Verify(b => b.RemoveCoin(coin));
+        }
     }
 }

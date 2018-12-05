@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Recollectable.API.Controllers;
+using Recollectable.API.Models.Users;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Interfaces;
@@ -23,11 +25,12 @@ namespace Recollectable.Tests.Controllers
         private readonly UsersController _controller;
         private readonly UsersResourceParameters resourceParameters;
         private Mock<UserManager<User>> _mockUserManager;
+        private Mock<IUserService> _mockUserService;
         private Mock<IUserStore<User>> _mockUserStore;
         private Mock<IEmailService> _mockEmailService;
         private Mock<ITokenFactory> _mockTokenFactory;
 
-        /*public UsersControllerTests()
+        public UsersControllerTests()
         {
             _mockUserStore = new Mock<IUserStore<User>>();
             _mockUserManager = new Mock<UserManager<User>>
@@ -47,15 +50,17 @@ namespace Recollectable.Tests.Controllers
             _mockEmailService = new Mock<IEmailService>();
             _mockTokenFactory = new Mock<ITokenFactory>();
 
-            _controller = new UsersController(_unitOfWork, _typeHelperService,
-                _propertyMappingService, _mockUserManager.Object, _mockTokenFactory.Object,
-                _mockEmailService.Object, _mapper);
+            _mockUserService = new Mock<IUserService>();
+            _mockUserService.Setup(c => c.Save()).Returns(Task.FromResult(true));
+
+            _controller = new UsersController(_mockUserService.Object, _mockUserManager.Object, 
+                _mockTokenFactory.Object, _mockEmailService.Object, _mapper);
 
             resourceParameters = new UsersResourceParameters();
             SetupTestController<UserDto, User>(_controller);
         }
 
-        [Fact]
+        /*[Fact]
         public async Task GetUsers_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange

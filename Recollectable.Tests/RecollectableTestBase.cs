@@ -36,6 +36,12 @@ namespace Recollectable.Tests
         {
             controller.ControllerContext.HttpContext = new DefaultHttpContext();
 
+            var mockUrlHelper = new Mock<IUrlHelper>();
+            mockUrlHelper.Setup(u => u.Link(It.IsAny<string>(), It.IsAny<object>()))
+                .Returns("http://localhost/");
+
+            controller.Url = mockUrlHelper.Object;
+
             var objectValidator = new Mock<IObjectModelValidator>();
             objectValidator.Setup(o => o.Validate(It.IsAny<ActionContext>(), 
                 It.IsAny<ValidationStateDictionary>(), It.IsAny<string>(), It.IsAny<object>()));
