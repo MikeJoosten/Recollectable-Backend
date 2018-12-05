@@ -44,7 +44,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new CoinTestBuilder();
             resourceParameters = new CurrenciesResourceParameters();
-            SetupTestController<CoinDto, Coin>(_controller);
+            SetupTestController(_controller);
         }
 
         [Fact]

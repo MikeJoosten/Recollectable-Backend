@@ -34,7 +34,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new CollectorValueTestBuilder();
             resourceParameters = new CollectorValuesResourceParameters();
-            SetupTestController<CollectorValueDto, CollectorValue>(_controller);
+            SetupTestController(_controller);
         }
 
         [Fact]

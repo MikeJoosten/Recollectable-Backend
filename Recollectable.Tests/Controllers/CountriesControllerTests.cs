@@ -31,10 +31,10 @@ namespace Recollectable.Tests.Controllers
             _mockCountryService.Setup(c => c.Save()).Returns(Task.FromResult(true));
 
             _controller = new CountriesController(_mockCountryService.Object, _mapper);
+            SetupTestController(_controller);
 
             _builder = new CountryTestBuilder();
             resourceParameters = new CountriesResourceParameters();
-            SetupTestController<CountryDto, Country>(_controller);
         }
 
         [Fact]
@@ -70,8 +70,9 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCountries_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
-            var countries = new List<Country>();
-            var pagedList = PagedList<Country>.Create(countries, resourceParameters.Page, resourceParameters.PageSize);
+            var countries = _builder.Build(2);
+            var pagedList = PagedList<Country>.Create(countries, 
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCountryService
                 .Setup(c => c.FindCountries(resourceParameters))
@@ -88,8 +89,9 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCountries_ReturnsAllCountries_GivenNoMediaType()
         {
             //Arrange
-            var countries = _builder.Build(6);
-            var pagedList = PagedList<Country>.Create(countries, resourceParameters.Page, resourceParameters.PageSize);
+            var countries = _builder.Build(2);
+            var pagedList = PagedList<Country>.Create(countries, 
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCountryService
                 .Setup(c => c.FindCountries(resourceParameters))
@@ -101,7 +103,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Count);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -109,7 +111,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            var countries = _builder.Build(6);
+            var countries = _builder.Build(2);
             var pagedList = PagedList<Country>.Create(countries, resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCountryService
@@ -122,7 +124,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Count);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -130,7 +132,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            var countries = _builder.Build(6);
+            var countries = _builder.Build(2);
             var pagedList = PagedList<Country>.Create(countries, resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCountryService
@@ -143,7 +145,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Value.Count());
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
@@ -151,7 +153,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            var countries = _builder.Build(6);
+            var countries = _builder.Build(4);
             var pagedList = PagedList<Country>.Create(countries, 1, 2);
 
             _mockCountryService
@@ -172,7 +174,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            var countries = _builder.Build(6);
+            var countries = _builder.Build(4);
             var pagedList = PagedList<Country>.Create(countries, 1, 2);
 
             _mockCountryService
@@ -219,7 +221,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-            var country = _builder.WithId(id).Build();
+            var country = _builder.Build();
 
             _mockCountryService
                 .Setup(c => c.FindCountryById(id))
@@ -311,7 +313,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCountry()
         {
             //Arrange
-            CountryCreationDto country = new CountryCreationDto();
+            var country = _builder.BuildCreationDto();
             _controller.ModelState.AddModelError("Name", "Required");
 
             //Act
@@ -327,10 +329,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateCountry_ReturnsCreatedResponse_GivenValidCountry(string mediaType)
         {
             //Arrange
-            CountryCreationDto country = new CountryCreationDto
-            {
-                Name = "China"
-            };
+            var country = _builder.WithName("China").BuildCreationDto();
 
             //Act
             var response = await _controller.CreateCountry(country, mediaType);
@@ -343,10 +342,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateCountry_CreatesNewCountry_GivenAnyMediaTypeAndValidCountry()
         {
             //Arrange
-            CountryCreationDto country = new CountryCreationDto
-            {
-                Name = "China"
-            };
+            var country = _builder.WithName("China").BuildCreationDto();
 
             //Act
             var response = await _controller.CreateCountry(country, null) as CreatedAtRouteResult;
@@ -362,10 +358,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            CountryCreationDto country = new CountryCreationDto
-            {
-                Name = "China"
-            };
+            var country = _builder.WithName("China").BuildCreationDto();
 
             //Act
             var response = await _controller.CreateCountry(country, mediaType) as CreatedAtRouteResult;
@@ -380,15 +373,18 @@ namespace Recollectable.Tests.Controllers
         public async Task BlockCountryCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
+            Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
+
             _mockCountryService
-                .Setup(c => c.CountryExists(Guid.Empty))
+                .Setup(c => c.CountryExists(It.IsAny<Guid>()))
                 .Returns(Task.FromResult(true));
 
             //Act
-            var response = await _controller.BlockCountryCreation(Guid.Empty) as StatusCodeResult;
+            var response = await _controller.BlockCountryCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
+            _mockCountryService.Verify(c => c.CountryExists(id));
         }
 
         [Fact]
@@ -429,10 +425,7 @@ namespace Recollectable.Tests.Controllers
         public async Task UpdateCountry_ReturnsNotFoundResponse_GivenInvalidCountryId()
         {
             //Arrange
-            CountryUpdateDto country = new CountryUpdateDto
-            {
-                Name = "China"
-            };
+            var country = _builder.WithName("China").BuildUpdateDto();
 
             //Act
             var response = await _controller.UpdateCountry(Guid.Empty, country);
@@ -446,13 +439,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-            CountryUpdateDto country = new CountryUpdateDto
-            {
-                Name = "China"
-            };
-
+            var country = _builder.WithName("China").BuildUpdateDto();
             var retrievedCountry = _builder.Build();
-            _mockCountryService.Setup(c => c.FindCountryById(id)).Returns(Task.FromResult(retrievedCountry));
+
+            _mockCountryService
+                .Setup(c => c.FindCountryById(id))
+                .Returns(Task.FromResult(retrievedCountry));
 
             //Act
             var response = await _controller.UpdateCountry(id, country);
@@ -466,13 +458,13 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-            CountryUpdateDto country = new CountryUpdateDto
-            {
-                Name = "China"
-            };
+            var country = _builder.WithName("China").BuildUpdateDto();
+            var retrievedCountry = _builder.Build();
 
-            var retrievedCountry = _builder.WithId(id).Build();
-            _mockCountryService.Setup(c => c.FindCountryById(id)).Returns(Task.FromResult(retrievedCountry));
+            _mockCountryService
+                .Setup(c => c.FindCountryById(id))
+                .Returns(Task.FromResult(retrievedCountry));
+
             _mockCountryService.Setup(c => c.UpdateCountry(It.IsAny<Country>()));
 
             //Act
@@ -510,12 +502,13 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-            JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
-            patchDoc.Replace(c => c.Name, "China");
-            patchDoc.Replace(c => c.Description, "China");
 
             var country = _builder.Build();
             _mockCountryService.Setup(c => c.FindCountryById(id)).Returns(Task.FromResult(country));
+
+            JsonPatchDocument<CountryUpdateDto> patchDoc = new JsonPatchDocument<CountryUpdateDto>();
+            patchDoc.Replace(c => c.Name, "China");
+            patchDoc.Replace(c => c.Description, "China");
 
             //Act
             var response = await _controller.PartiallyUpdateCountry(id, patchDoc);
@@ -582,11 +575,8 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task DeleteCountry_ReturnsNotFoundResponse_GivenInvalidCountryId()
         {
-            //Arrange
-            Guid id = new Guid("08786b17-8443-4873-98b3-8d73cf400fba");
-
             //Act
-            var response = await _controller.DeleteCountry(id);
+            var response = await _controller.DeleteCountry(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);

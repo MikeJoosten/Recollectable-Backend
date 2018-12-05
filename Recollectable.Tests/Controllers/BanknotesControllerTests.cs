@@ -44,7 +44,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new BanknoteTestBuilder();
             resourceParameters = new CurrenciesResourceParameters();
-            SetupTestController<BanknoteDto, Banknote>(_controller);
+            SetupTestController(_controller);
         }
 
         [Fact]

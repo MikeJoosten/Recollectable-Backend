@@ -38,7 +38,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new CollectionCollectableTestBuilder();
             resourceParameters = new CollectionCollectablesResourceParameters();
-            SetupTestController<CollectionCollectableDto, CollectionCollectable>(_controller);
+            SetupTestController(_controller);
         }
 
         [Fact]

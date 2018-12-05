@@ -32,7 +32,7 @@ namespace Recollectable.Tests
             RecollectableInitializer.Initialize(_context);
         }
 
-        public void SetupTestController<T, S>(Controller controller)
+        public void SetupTestController(Controller controller)
         {
             controller.ControllerContext.HttpContext = new DefaultHttpContext();
 

@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Locations;
+﻿using Recollectable.API.Models.Locations;
+using Recollectable.Core.Entities.Locations;
 using System;
 using System.Collections.Generic;
 
@@ -28,6 +29,22 @@ namespace Recollectable.Tests.Builders
         public Country Build()
         {
             return country;
+        }
+
+        public CountryCreationDto BuildCreationDto()
+        {
+            return new CountryCreationDto
+            {
+                Name = country.Name
+            };
+        }
+
+        public CountryUpdateDto BuildUpdateDto()
+        {
+            return new CountryUpdateDto
+            {
+                Name = country.Name
+            };
         }
 
         public List<Country> Build(int count)

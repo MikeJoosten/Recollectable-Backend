@@ -57,7 +57,7 @@ namespace Recollectable.Tests.Controllers
                 _mockTokenFactory.Object, _mockEmailService.Object, _mapper);
 
             resourceParameters = new UsersResourceParameters();
-            SetupTestController<UserDto, User>(_controller);
+            SetupTestController(_controller);
         }
 
         /*[Fact]
