@@ -32,19 +32,19 @@ namespace Recollectable.Tests.Controllers
             _mockBanknoteService = new Mock<IBanknoteService>();
             _mockCountryService = new Mock<ICountryService>();
             _mockCollectorValueService = new Mock<ICollectorValueService>();
-            _mockBanknoteService.Setup(b => b.Save()).Returns(Task.FromResult(true));
-            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _mockBanknoteService.Setup(b => b.Save()).ReturnsAsync(true);
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).ReturnsAsync(true);
 
             _mockCollectorValueService
                 .Setup(c => c.FindCollectorValueByValues(It.IsAny<CollectorValue>()))
-                .Returns(Task.FromResult(new CollectorValue()));
+                .ReturnsAsync(new CollectorValue());
 
             _controller = new BanknotesController(_mockBanknoteService.Object, 
                 _mockCountryService.Object, _mockCollectorValueService.Object, _mapper);
+            SetupTestController(_controller);
 
             _builder = new BanknoteTestBuilder();
             resourceParameters = new CurrenciesResourceParameters();
-            SetupTestController(_controller);
         }
 
         [Fact]
@@ -80,12 +80,13 @@ namespace Recollectable.Tests.Controllers
         public async Task GetBanknotes_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
-            var banknotes = new List<Banknote>();
-            var pagedList = PagedList<Banknote>.Create(banknotes, resourceParameters.Page, resourceParameters.PageSize);
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes, 
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknotes(resourceParameters))
-                .Returns(Task.FromResult(pagedList));
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetBanknotes(resourceParameters, mediaType);
@@ -98,12 +99,13 @@ namespace Recollectable.Tests.Controllers
         public async Task GetBanknotes_ReturnsAllBanknotes_GivenNoMediaType()
         {
             //Arrange
-            var banknotes = _builder.Build(6);
-            var pagedList = PagedList<Banknote>.Create(banknotes, resourceParameters.Page, resourceParameters.PageSize);
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes,
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknotes(resourceParameters))
-                .Returns(Task.FromResult(pagedList));
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetBanknotes(resourceParameters, null) as OkObjectResult;
@@ -111,7 +113,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Count);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -119,12 +121,13 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            var banknotes = _builder.Build(6);
-            var pagedList = PagedList<Banknote>.Create(banknotes, resourceParameters.Page, resourceParameters.PageSize);
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes,
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknotes(resourceParameters))
-                .Returns(Task.FromResult(pagedList));
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
@@ -132,7 +135,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Count);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -140,12 +143,13 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            var banknotes = _builder.Build(6);
-            var pagedList = PagedList<Banknote>.Create(banknotes, resourceParameters.Page, resourceParameters.PageSize);
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes,
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknotes(resourceParameters))
-                .Returns(Task.FromResult(pagedList));
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
@@ -153,7 +157,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(6, result.Value.Count());
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
@@ -161,12 +165,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            var banknotes = _builder.Build(6);
+            var banknotes = _builder.Build(4);
             var pagedList = PagedList<Banknote>.Create(banknotes, 1, 2);
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknotes(resourceParameters))
-                .Returns(Task.FromResult(pagedList));
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
@@ -182,12 +186,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            var banknotes = _builder.Build(6);
+            var banknotes = _builder.Build(4);
             var pagedList = PagedList<Banknote>.Create(banknotes, 1, 2);
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknotes(resourceParameters))
-                .Returns(Task.FromResult(pagedList));
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
@@ -229,11 +233,11 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            var banknote = _builder.WithId(id).Build();
+            var banknote = _builder.Build();
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknoteById(id))
-                .Returns(Task.FromResult(banknote));
+                .ReturnsAsync(banknote);
 
             //Act
             var response = await _controller.GetBanknote(id, null, mediaType);
@@ -251,7 +255,7 @@ namespace Recollectable.Tests.Controllers
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknoteById(id))
-                .Returns(Task.FromResult(banknote));
+                .ReturnsAsync(banknote);
 
             //Act
             var response = await _controller.GetBanknote(id, null, null) as OkObjectResult;
@@ -273,7 +277,7 @@ namespace Recollectable.Tests.Controllers
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknoteById(id))
-                .Returns(Task.FromResult(banknote));
+                .ReturnsAsync(banknote);
 
             //Act
             var response = await _controller.GetBanknote(id, null, mediaType) as OkObjectResult;
@@ -295,7 +299,7 @@ namespace Recollectable.Tests.Controllers
 
             _mockBanknoteService
                 .Setup(b => b.FindBanknoteById(id))
-                .Returns(Task.FromResult(banknote));
+                .ReturnsAsync(banknote);
 
             //Act
             var response = await _controller.GetBanknote(id, null, mediaType) as OkObjectResult;
@@ -321,7 +325,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateBanknote_ReturnsUnprocessableEntityObjectResponse_GivenInvalidBanknote()
         {
             //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto();
+            var banknote = _builder.BuildCreationDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
@@ -335,17 +339,16 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateBanknote_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto();
-
-            _mockCountryService
-                .Setup(c => c.CountryExists(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(false));
+            Guid countryId = new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d");
+            var banknote = _builder.WithCountryId(countryId).BuildCreationDto();
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).ReturnsAsync(false);
 
             //Act
             var response = await _controller.CreateBanknote(banknote, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+            _mockCountryService.Verify(c => c.CountryExists(countryId));
         }
 
         [Theory]
@@ -354,10 +357,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateBanknote_ReturnsCreatedResponse_GivenValidBanknote(string mediaType)
         {
             //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                Type = "Dollar",
-            };
+            var banknote = _builder.WithType("Dollars").BuildCreationDto();
 
             //Act
             var response = await _controller.CreateBanknote(banknote, mediaType);
@@ -370,10 +370,7 @@ namespace Recollectable.Tests.Controllers
         public async Task CreateBanknote_CreatesNewBanknote_GivenAnyMediaTypeAndValidBanknote()
         {
             //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                Type = "Dollar",
-            };
+            var banknote = _builder.WithType("Dollars").BuildCreationDto();
 
             //Act
             var response = await _controller.CreateBanknote(banknote, null) as CreatedAtRouteResult;
@@ -381,7 +378,7 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(returnedBanknote);
-            Assert.Equal("Dollar", returnedBanknote.Type);
+            Assert.Equal("Dollars", returnedBanknote.Type);
         }
 
         [Fact]
@@ -389,10 +386,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                Type = "Dollar",
-            };
+            var banknote = _builder.WithType("Dollars").BuildCreationDto();
 
             //Act
             var response = await _controller.CreateBanknote(banknote, mediaType) as CreatedAtRouteResult;
@@ -400,22 +394,22 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.NotNull(returnedBanknote);
-            Assert.Equal("Dollar", returnedBanknote.Type);
+            Assert.Equal("Dollars", returnedBanknote.Type);
         }
 
         [Fact]
         public async Task BlockBanknoteCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
-            _mockBanknoteService
-                .Setup(b => b.BanknoteExists(Guid.Empty))
-                .Returns(Task.FromResult(true));
+            Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
+            _mockBanknoteService.Setup(b => b.BanknoteExists(It.IsAny<Guid>())).ReturnsAsync(true);
 
             //Act
-            var response = await _controller.BlockBanknoteCreation(Guid.Empty) as StatusCodeResult;
+            var response = await _controller.BlockBanknoteCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
+            _mockBanknoteService.Verify(c => c.BanknoteExists(id));
         }
 
         [Fact]
@@ -456,24 +450,23 @@ namespace Recollectable.Tests.Controllers
         public async Task UpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto();
-
-            _mockCountryService
-                .Setup(c => c.CountryExists(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(false));
+            Guid countryId = new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d");
+            var banknote = _builder.WithCountryId(countryId).BuildUpdateDto();
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).ReturnsAsync(false);
 
             //Act
             var response = await _controller.UpdateBanknote(Guid.Empty, banknote);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+            _mockCountryService.Verify(c => c.CountryExists(countryId));
         }
 
         [Fact]
         public async Task UpdateBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
         {
             //Arrange
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto();
+            var banknote = _builder.BuildUpdateDto();
 
             //Act
             var response = await _controller.UpdateBanknote(Guid.Empty, banknote);
@@ -487,10 +480,10 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto();
-
+            var banknote = _builder.BuildUpdateDto();
             var retrievedBanknote = _builder.Build();
-            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).Returns(Task.FromResult(retrievedBanknote));
+
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(retrievedBanknote);
 
             //Act
             var response = await _controller.UpdateBanknote(id, banknote);
@@ -504,10 +497,10 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto();
-
+            var banknote = _builder.BuildUpdateDto();
             var retrievedBanknote = _builder.Build();
-            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).Returns(Task.FromResult(retrievedBanknote));
+
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(retrievedBanknote);
             _mockBanknoteService.Setup(b => b.UpdateBanknote(It.IsAny<Banknote>()));
 
             //Act
@@ -545,11 +538,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-            _controller.ModelState.AddModelError("Type", "Required");
 
             var banknote = _builder.Build();
-            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).Returns(Task.FromResult(banknote));
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+
+            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
+            _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
             var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
@@ -563,20 +557,21 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-
-            _mockCountryService
-                .Setup(c => c.CountryExists(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(false));
+            Guid countryId = new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d");
 
             var banknote = _builder.Build();
-            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).Returns(Task.FromResult(banknote));
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).ReturnsAsync(false);
+
+            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
+            patchDoc.Replace(b => b.CountryId, countryId);
 
             //Act
             var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+            _mockCountryService.Verify(c => c.CountryExists(countryId));
         }
 
         [Fact]
@@ -584,10 +579,14 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
+            Guid countryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367");
 
             var banknote = _builder.Build();
-            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).Returns(Task.FromResult(banknote));
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+
+            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
+            patchDoc.Replace(b => b.Type, "Euros");
+            patchDoc.Replace(b => b.CountryId, countryId);
 
             //Act
             var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
@@ -601,10 +600,14 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
+            Guid countryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367");
 
             var banknote = _builder.Build();
-            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).Returns(Task.FromResult(banknote));
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+
+            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
+            patchDoc.Replace(b => b.Type, "Euros");
+            patchDoc.Replace(b => b.CountryId, countryId);
 
             //Act
             var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
@@ -616,11 +619,8 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task DeleteBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
         {
-            //Arrange
-            Guid id = new Guid("2d11b36a-9f6b-42f9-a00a-6e07b8a30f0e");
-
             //Act
-            var response = await _controller.DeleteBanknote(id);
+            var response = await _controller.DeleteBanknote(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -633,7 +633,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
 
             var banknote = _builder.Build();
-            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).Returns(Task.FromResult(banknote));
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
 
             //Act
             var response = await _controller.DeleteBanknote(id);
@@ -649,7 +649,7 @@ namespace Recollectable.Tests.Controllers
             Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
 
             var banknote = _builder.Build();
-            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).Returns(Task.FromResult(banknote));
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
             _mockBanknoteService.Setup(b => b.RemoveBanknote(It.IsAny<Banknote>()));
 
             //Act

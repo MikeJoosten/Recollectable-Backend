@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Collectables;
+﻿using Recollectable.API.Models.Collectables;
+using Recollectable.Core.Entities.Collectables;
 using System;
 using System.Collections.Generic;
 
@@ -25,9 +26,33 @@ namespace Recollectable.Tests.Builders
             return this;
         }
 
+        public CoinTestBuilder WithCountryId(Guid countryId)
+        {
+            coin.CountryId = countryId;
+            return this;
+        }
+
         public Coin Build()
         {
             return coin;
+        }
+
+        public CoinCreationDto BuildCreationDto()
+        {
+            return new CoinCreationDto
+            {
+                Type = coin.Type,
+                CountryId = coin.CountryId
+            };
+        }
+
+        public CoinUpdateDto BuildUpdateDto()
+        {
+            return new CoinUpdateDto
+            {
+                Type = coin.Type,
+                CountryId = coin.CountryId
+            };
         }
 
         public List<Coin> Build(int count)

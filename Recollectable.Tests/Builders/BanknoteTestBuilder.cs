@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Collectables;
+﻿using Recollectable.API.Models.Collectables;
+using Recollectable.Core.Entities.Collectables;
 using System;
 using System.Collections.Generic;
 
@@ -25,9 +26,33 @@ namespace Recollectable.Tests.Builders
             return this;
         }
 
+        public BanknoteTestBuilder WithCountryId(Guid countryId)
+        {
+            banknote.CountryId = countryId;
+            return this;
+        }
+
         public Banknote Build()
         {
             return banknote;
+        }
+
+        public BanknoteCreationDto BuildCreationDto()
+        {
+            return new BanknoteCreationDto
+            {
+                Type = banknote.Type,
+                CountryId = banknote.CountryId
+            };
+        }
+
+        public BanknoteUpdateDto BuildUpdateDto()
+        {
+            return new BanknoteUpdateDto
+            {
+                Type = banknote.Type,
+                CountryId = banknote.CountryId
+            };
         }
 
         public List<Banknote> Build(int count)
