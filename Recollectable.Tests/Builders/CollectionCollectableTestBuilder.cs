@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Collectables;
+﻿using Recollectable.API.Models.Collections;
+using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
 using System;
@@ -29,9 +30,31 @@ namespace Recollectable.Tests.Builders
             return this;
         }
 
+        public CollectionCollectableTestBuilder WithCollectableId(Guid collectableId)
+        {
+            collectionCollectable.CollectableId = collectableId;
+            return this;
+        }
+
         public CollectionCollectable Build()
         {
             return collectionCollectable;
+        }
+
+        public CollectionCollectableCreationDto BuildCreationDto()
+        {
+            return new CollectionCollectableCreationDto
+            {
+                CollectableId = collectionCollectable.CollectableId
+            };
+        }
+
+        public CollectionCollectableUpdateDto BuildUpdateDto()
+        {
+            return new CollectionCollectableUpdateDto
+            {
+                CollectableId = collectionCollectable.CollectableId
+            };
         }
 
         public List<CollectionCollectable> Build(int count)

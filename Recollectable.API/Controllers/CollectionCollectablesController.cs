@@ -268,7 +268,7 @@ namespace Recollectable.API.Controllers
 
             if (collection == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var collectableItem = await _collectableService
@@ -336,7 +336,7 @@ namespace Recollectable.API.Controllers
 
             if (collection == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var collectableItem = await _collectableService
