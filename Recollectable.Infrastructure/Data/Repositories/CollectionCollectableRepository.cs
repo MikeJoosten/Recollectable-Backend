@@ -22,6 +22,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             (Specification<CollectionCollectable> specification = null)
         {
             var collectables = _context.CollectionCollectables
+                .Include(cc => cc.Condition)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.Country)
                 .Include(cc => cc.Collectable)
@@ -36,6 +37,7 @@ namespace Recollectable.Infrastructure.Data.Repositories
             (Specification<CollectionCollectable> specification = null)
         {
             var collectables = _context.CollectionCollectables
+                .Include(cc => cc.Condition)
                 .Include(cc => cc.Collectable)
                 .ThenInclude(c => c.Country)
                 .Include(cc => cc.Collectable)

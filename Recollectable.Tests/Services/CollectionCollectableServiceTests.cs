@@ -133,7 +133,7 @@ namespace Recollectable.Tests.Services
                 Id = id,
                 CollectionId = collectionId,
                 CollectableId = new Guid("dc94e4a0-8ad1-4eec-ad9d-e4c6cf147f48"),
-                Condition = "MS62"
+                ConditionId = new Guid("371da3ae-d2e0-4ee7-abf3-3a7574ae669a")
             };
 
             //Act

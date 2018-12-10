@@ -18,6 +18,7 @@ namespace Recollectable.Infrastructure.Data
         public IRepository<Collectable> Collectables => new CollectableRepository(_context);
         public IRepository<CollectionCollectable> CollectionCollectables => new CollectionCollectableRepository(_context);
         public IRepository<CollectorValue> CollectorValues => new CollectorValueRepository(_context);
+        public IRepository<Condition> Conditions => new ConditionRepository(_context);
         public IRepository<Collection> Collections => new CollectionRepository(_context);
         public IRepository<Country> Countries => new CountryRepository(_context);
         public IRepository<User> Users => new UserRepository(_context);

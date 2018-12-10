@@ -57,6 +57,14 @@ namespace Recollectable.Core.Shared.Services
                 { "Id", new PropertyMappingValue(new List<string>() { "Id" }) }
             };
 
+        public static Dictionary<string, PropertyMappingValue> ConditionPropertyMapping =>
+            new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Id", new PropertyMappingValue(new List<string>() { "Id" }) },
+                { "Grade", new PropertyMappingValue(new List<string>() { "Grade" }) },
+                { "LanguageCode", new PropertyMappingValue(new List<string>() { "LanguageCode" }) }
+            };
+
         private static IList<IPropertyMapping> propertyMappings = new List<IPropertyMapping>
         {
             new PropertyMapping<User>(UserPropertyMapping),
@@ -65,7 +73,8 @@ namespace Recollectable.Core.Shared.Services
             new PropertyMapping<Banknote>(CurrencyPropertyMapping),
             new PropertyMapping<CollectionCollectable>(CollectionCollectablePropertyMapping),
             new PropertyMapping<Country>(CountryPropertyMapping),
-            new PropertyMapping<CollectorValue>(CollectorValuePropertyMapping)
+            new PropertyMapping<CollectorValue>(CollectorValuePropertyMapping),
+            new PropertyMapping<Condition>(ConditionPropertyMapping)
         };
 
         private static Dictionary<string, PropertyMappingValue> GetPropertyMapping<T>()

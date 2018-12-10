@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Users;
 using System;
 using System.Collections.Generic;

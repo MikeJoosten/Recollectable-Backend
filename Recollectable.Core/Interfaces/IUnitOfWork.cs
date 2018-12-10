@@ -13,6 +13,7 @@ namespace Recollectable.Core.Interfaces
         IRepository<Collectable> Collectables { get; }
         IRepository<CollectionCollectable> CollectionCollectables { get; }
         IRepository<CollectorValue> CollectorValues { get; }
+        IRepository<Condition> Conditions { get; }
         IRepository<Collection> Collections { get; }
         IRepository<Country> Countries { get; }
         IRepository<User> Users { get; }
