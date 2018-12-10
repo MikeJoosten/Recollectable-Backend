@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
@@ -8,6 +9,8 @@ using Recollectable.API.Filters;
 using Recollectable.Core.Interfaces;
 using Recollectable.Infrastructure.Data;
 using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Recollectable.Tests
 {
@@ -47,6 +50,24 @@ namespace Recollectable.Tests
                 It.IsAny<ValidationStateDictionary>(), It.IsAny<string>(), It.IsAny<object>()));
 
             controller.ObjectValidator = objectValidator.Object;
+        }
+
+        public void SetupAuthentication(Controller controller)
+        {
+            var mockAuthService = new Mock<IAuthenticationService>();
+
+            mockAuthService
+                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
+                    It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.FromResult((object)null));
+
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            mockServiceProvider
+                .Setup(_ => _.GetService(typeof(IAuthenticationService)))
+                .Returns(mockAuthService.Object);
+
+            controller.ControllerContext.HttpContext.RequestServices = mockServiceProvider.Object;
         }
     }
 }

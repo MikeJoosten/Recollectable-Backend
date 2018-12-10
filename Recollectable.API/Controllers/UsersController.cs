@@ -250,7 +250,8 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var user = await _userManager.FindByNameOrEmailAsync(credentials.UserName);
+            var user = await _userManager.FindByNameAsync(credentials.UserName);
+            user = user ?? await _userManager.FindByEmailAsync(credentials.UserName);
 
             if (user == null)
             {

@@ -11,6 +11,7 @@ using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Interfaces;
+using Recollectable.Tests.Builders;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -23,12 +24,13 @@ namespace Recollectable.Tests.Controllers
     public class UsersControllerTests : RecollectableTestBase
     {
         private readonly UsersController _controller;
+        private readonly Mock<UserManager<User>> _mockUserManager;
+        private readonly Mock<IUserService> _mockUserService;
+        private readonly Mock<IUserStore<User>> _mockUserStore;
+        private readonly Mock<IEmailService> _mockEmailService;
+        private readonly Mock<ITokenFactory> _mockTokenFactory;
         private readonly UsersResourceParameters resourceParameters;
-        private Mock<UserManager<User>> _mockUserManager;
-        private Mock<IUserService> _mockUserService;
-        private Mock<IUserStore<User>> _mockUserStore;
-        private Mock<IEmailService> _mockEmailService;
-        private Mock<ITokenFactory> _mockTokenFactory;
+        private readonly UserTestBuilder _builder;
 
         public UsersControllerTests()
         {
@@ -36,31 +38,28 @@ namespace Recollectable.Tests.Controllers
             _mockUserManager = new Mock<UserManager<User>>
                 (_mockUserStore.Object, null, null, null, null, null, null, null, null);
 
-            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Success);
-            _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Success);
-            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
-                .ReturnsAsync(new User());
-            _mockUserManager.Setup(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Success);
-            _mockUserManager.Setup(x => x.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(u => u.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(u => u.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(u => u.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
 
             _mockEmailService = new Mock<IEmailService>();
             _mockTokenFactory = new Mock<ITokenFactory>();
 
             _mockUserService = new Mock<IUserService>();
-            _mockUserService.Setup(c => c.Save()).Returns(Task.FromResult(true));
+            _mockUserService.Setup(u => u.Save()).Returns(Task.FromResult(true));
 
             _controller = new UsersController(_mockUserService.Object, _mockUserManager.Object, 
                 _mockTokenFactory.Object, _mockEmailService.Object, _mapper);
-
-            resourceParameters = new UsersResourceParameters();
             SetupTestController(_controller);
+            SetupAuthentication(_controller);
+
+            _builder = new UserTestBuilder();
+            resourceParameters = new UsersResourceParameters();
         }
 
-        /*[Fact]
+        [Fact]
         public async Task GetUsers_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
@@ -92,6 +91,15 @@ namespace Recollectable.Tests.Controllers
         [InlineData("application/json+hateoas")]
         public async Task GetUsers_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
+            //Arrange
+            var users = _builder.Build(2);
+            var pagedList = PagedList<User>.Create(users,
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockUserService
+                .Setup(u => u.FindUsers(resourceParameters))
+                .ReturnsAsync(pagedList);
+
             //Act
             var response = await _controller.GetUsers(resourceParameters, mediaType);
 
@@ -102,13 +110,22 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task GetUsers_ReturnsAllUsers_GivenNoMediaType()
         {
+            //Arrange
+            var users = _builder.Build(2);
+            var pagedList = PagedList<User>.Create(users,
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockUserService
+                .Setup(u => u.FindUsers(resourceParameters))
+                .ReturnsAsync(pagedList);
+
             //Act
             var response = await _controller.GetUsers(resourceParameters, null) as OkObjectResult;
-            var users = response.Value as List<UserDto>;
+            var result = response.Value as List<UserDto>;
 
             //Assert
-            Assert.NotNull(users);
-            Assert.Equal(6, users.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -116,14 +133,21 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
+            var users = _builder.Build(2);
+            var pagedList = PagedList<User>.Create(users,
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockUserService
+                .Setup(u => u.FindUsers(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
-            var users = response.Value as List<ExpandoObject>;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(users);
-            Assert.Equal(6, users.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -131,14 +155,21 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
+            var users = _builder.Build(2);
+            var pagedList = PagedList<User>.Create(users,
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockUserService
+                .Setup(u => u.FindUsers(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
-            var linkedCollection = response.Value as LinkedCollectionResource;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(linkedCollection);
-            Assert.Equal(6, linkedCollection.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
@@ -146,15 +177,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json";
-            resourceParameters.PageSize = 2;
+            var users = _builder.Build(4);
+            var pagedList = PagedList<User>.Create(users, 1, 2);
+
+            _mockUserService
+                .Setup(u => u.FindUsers(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
-            var users = response.Value as List<ExpandoObject>;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(users);
-            Assert.Equal(2, users.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -162,15 +198,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            resourceParameters.PageSize = 2;
+            var users = _builder.Build(4);
+            var pagedList = PagedList<User>.Create(users, 1, 2);
+
+            _mockUserService
+                .Setup(u => u.FindUsers(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
             var response = await _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
-            var users = response.Value as LinkedCollectionResource;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(users);
-            Assert.Equal(2, users.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
@@ -189,11 +230,8 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task GetUser_ReturnsNotFoundResponse_GivenInvalidId()
         {
-            //Arrange
-            Guid id = new Guid("72e2cde4-0aec-47e7-9549-f2c578b2c21c");
-
             //Act
-            var response = await _controller.GetUser(id, null, null);
+            var response = await _controller.GetUser(Guid.Empty, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -207,6 +245,11 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+            var user = _builder.Build();
+
+            _mockUserService
+                .Setup(u => u.FindUserById(id))
+                .ReturnsAsync(user);
 
             //Act
             var response = await _controller.GetUser(id, null, mediaType);
@@ -220,15 +263,20 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+            var user = _builder.WithId(id).WithUserName("Ryan").Build();
+
+            _mockUserService
+                .Setup(u => u.FindUserById(id))
+                .ReturnsAsync(user);
 
             //Act
             var response = await _controller.GetUser(id, null, null) as OkObjectResult;
-            var user = response.Value as UserDto;
+            var result = response.Value as UserDto;
 
             //Assert
-            Assert.NotNull(user);
-            Assert.Equal(id, user.Id);
-            Assert.Equal("Ryan Haywood", user.Name);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Ryan", result.UserName);
         }
 
         [Fact]
@@ -237,15 +285,20 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             string mediaType = "application/json";
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+            var user = _builder.WithId(id).WithUserName("Ryan").Build();
+
+            _mockUserService
+                .Setup(u => u.FindUserById(id))
+                .ReturnsAsync(user);
 
             //Act
             var response = await _controller.GetUser(id, null, mediaType) as OkObjectResult;
-            dynamic user = response.Value as ExpandoObject;
+            dynamic result = response.Value as ExpandoObject;
 
             //Assert
-            Assert.NotNull(user);
-            Assert.Equal(id, user.Id);
-            Assert.Equal("Ryan Haywood", user.Name);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Ryan", result.UserName);
         }
 
         [Fact]
@@ -254,15 +307,20 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+            var user = _builder.WithId(id).WithUserName("Ryan").Build();
+
+            _mockUserService
+                .Setup(u => u.FindUserById(id))
+                .ReturnsAsync(user);
 
             //Act
             var response = await _controller.GetUser(id, null, mediaType) as OkObjectResult;
-            dynamic user = response.Value as IDictionary<string, object>;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(user);
-            Assert.Equal(id, user.Id);
-            Assert.Equal("Ryan Haywood", user.Name);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Ryan", result.UserName);
         }
 
         [Fact]
@@ -279,7 +337,7 @@ namespace Recollectable.Tests.Controllers
         public async Task Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidUser()
         {
             //Arrange
-            UserCreationDto user = new UserCreationDto();
+            var user = _builder.BuildCreationDto();
             _controller.ModelState.AddModelError("FirstName", "Required");
 
             //Act
@@ -293,8 +351,8 @@ namespace Recollectable.Tests.Controllers
         public async Task Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidPassword()
         {
             //Arrange
-            UserCreationDto user = new UserCreationDto();
-            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+            var user = _builder.BuildCreationDto();
+            _mockUserManager.Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
 
             //Act
@@ -308,7 +366,7 @@ namespace Recollectable.Tests.Controllers
         public async Task Register_ReturnsUnprocessableEntityObjectResponse_GivenInvalidRole()
         {
             //Arrange
-            UserCreationDto user = new UserCreationDto();
+            var user = _builder.BuildCreationDto();
             _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid role" }));
 
@@ -325,11 +383,7 @@ namespace Recollectable.Tests.Controllers
         public async Task Register_ReturnsCreatedResponse_GivenValidUser(string mediaType)
         {
             //Arrange
-            UserCreationDto user = new UserCreationDto
-            {
-                FirstName = "Kara",
-                LastName = "Eberle"
-            };
+            var user = _builder.WithUserName("Kara").BuildCreationDto();
 
             //Act
             var response = await _controller.Register(user, mediaType);
@@ -342,19 +396,15 @@ namespace Recollectable.Tests.Controllers
         public async Task Register_CreatesNewUser_GivenAnyMediaTypeAndValidUser()
         {
             //Arrange
-            UserCreationDto user = new UserCreationDto
-            {
-                FirstName = "Kara",
-                LastName = "Eberle"
-            };
+            var user = _builder.WithUserName("Kara").BuildCreationDto();
 
             //Act
             var response = await _controller.Register(user, null) as CreatedAtRouteResult;
-            var returnedUser = response.Value as UserDto;
+            var result = response.Value as UserDto;
 
             //Assert
-            Assert.NotNull(returnedUser);
-            Assert.Equal("Kara Eberle", returnedUser.Name);
+            Assert.NotNull(result);
+            Assert.Equal("Kara", result.UserName);
         }
 
         [Fact]
@@ -362,19 +412,15 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            UserCreationDto user = new UserCreationDto
-            {
-                FirstName = "Kara",
-                LastName = "Eberle"
-            };
+            var user = _builder.WithUserName("Kara").BuildCreationDto();
 
             //Act
             var response = await _controller.Register(user, mediaType) as CreatedAtRouteResult;
-            dynamic returnedUser = response.Value as IDictionary<string, object>;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(returnedUser);
-            Assert.Equal("Kara Eberle", returnedUser.Name);
+            Assert.NotNull(result);
+            Assert.Equal("Kara", result.UserName);
         }
 
         [Fact]
@@ -388,13 +434,12 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task Login_ReturnsNotFoundResponse_GivenInvalidUser()
+        public async Task Login_ReturnsNotFoundResponse_GivenInvalidUserName()
         {
             //Arrange
-            CredentialsDto credentials = new CredentialsDto
-            {
-                UserName = "Invalid"
-            };
+            var credentials = _builder.BuildCredentialsDto();
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(null as User);
 
             //Act
             var response = await _controller.Login(credentials);
@@ -404,10 +449,60 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
+        public async Task Login_ReturnsBadRequestResponse_GivenInvalidPassword()
+        {
+            //Arrange
+            var credentials = _builder.BuildCredentialsDto();
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+
+            //Act
+            var response = await _controller.Login(credentials);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
+        [Fact]
+        public async Task Login_ReturnsOkResponse_GivenValidUser()
+        {
+            //Arrange
+            var user = _builder.WithUserName("Ryan").Build();
+            var credentials = _builder.BuildCredentialsDto("password");
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(user);
+            _mockUserManager.Setup(u => u.CheckPasswordAsync(user, credentials.Password)).ReturnsAsync(true);
+            _mockUserManager.Setup(u => u.IsEmailConfirmedAsync(user)).ReturnsAsync(true);
+            _mockUserManager.Setup(u => u.GetRolesAsync(user)).ReturnsAsync(new List<string>());
+
+            //Act
+            var response = await _controller.Login(credentials);
+
+            //Assert
+            Assert.IsType<OkObjectResult>(response);
+        }
+
+        [Fact]
+        public async Task Login_ReturnsLoginInfo_GivenValidUser()
+        {
+            //Arrange
+            var user = _builder.WithUserName("Ryan").Build();
+            var credentials = _builder.BuildCredentialsDto("password");
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(user);
+            _mockUserManager.Setup(u => u.CheckPasswordAsync(user, credentials.Password)).ReturnsAsync(true);
+            _mockUserManager.Setup(u => u.IsEmailConfirmedAsync(user)).ReturnsAsync(true);
+            _mockUserManager.Setup(u => u.GetRolesAsync(user)).ReturnsAsync(new List<string>());
+
+            //Act
+            var response = await _controller.Login(credentials) as OkObjectResult;
+
+            //Assert
+            Assert.NotNull(response.Value);
+        }
+
+        [Fact]
         public async Task ForgotPassword_ReturnsNotFoundResponse_GivenInvalidEmail()
         {
             //Arrange
-            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(null as User);
 
             //Act
@@ -420,11 +515,17 @@ namespace Recollectable.Tests.Controllers
         [Fact]
         public async Task ForgotPassword_ReturnsNoContentResponse_GivenValidEmail()
         {
+            //Arrange
+            var user = _builder.WithEmail("ryan.haywood@gmail.com").Build();
+            _mockUserManager.Setup(u => u.FindByEmailAsync(user.Email))
+                .ReturnsAsync(user);
+
             //Act
-            var response = await _controller.ForgotPassword("ryan.haywood@gmail.com");
+            var response = await _controller.ForgotPassword(user.Email);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
+            _mockUserManager.Verify(u => u.GeneratePasswordResetTokenAsync(user));
         }
 
         [Fact]
@@ -441,7 +542,7 @@ namespace Recollectable.Tests.Controllers
         public async Task ResetPassword_ReturnsUnprocessableEntityObjectResponse_GivenInvalidResetPassword()
         {
             //Arrange
-            ResetPasswordDto resetPassword = new ResetPasswordDto();
+            var resetPassword = _builder.BuildResetPasswordDto();
             _controller.ModelState.AddModelError("Password", "Required");
 
             //Act
@@ -455,8 +556,8 @@ namespace Recollectable.Tests.Controllers
         public async Task ResetPassword_ReturnsNotFoundResponse_GivenInvalidEmail()
         {
             //Arrange
-            ResetPasswordDto resetPassword = new ResetPasswordDto();
-            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+            var resetPassword = _builder.BuildResetPasswordDto();
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(null as User);
 
             //Act
@@ -470,8 +571,8 @@ namespace Recollectable.Tests.Controllers
         public async Task ResetPassword_ReturnsBadRequestResponse_GivenInvalidPassword()
         {
             //Arrange
-            ResetPasswordDto resetPassword = new ResetPasswordDto();
-            _mockUserManager.Setup(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+            var resetPassword = _builder.BuildResetPasswordDto();
+            _mockUserManager.Setup(u => u.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
 
             //Act
@@ -485,11 +586,11 @@ namespace Recollectable.Tests.Controllers
         public async Task ResetPassword_ReturnsNoContentResponse_GivenValidPassword()
         {
             //Arrange
-            ResetPasswordDto resetPassword = new ResetPasswordDto();
-            _mockUserManager.Setup(x => x.IsLockedOutAsync(It.IsAny<User>())).ReturnsAsync(false);
+            var resetPassword = _builder.BuildResetPasswordDto();
+            _mockUserManager.Setup(u => u.IsLockedOutAsync(It.IsAny<User>())).ReturnsAsync(false);
 
             //Act
-            var response = await _controller.ResetPassword("ryan.haywood@gmail.com", "valid token", resetPassword);
+            var response = await _controller.ResetPassword("valid token", "ryan.haywood@gmail.com", resetPassword);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
@@ -524,7 +625,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             ChangedPasswordDto changedPassword = new ChangedPasswordDto();
-            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(null as User);
 
             //Act
@@ -539,7 +640,7 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             ChangedPasswordDto changedPassword = new ChangedPasswordDto();
-            _mockUserManager.Setup(x => x.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+            _mockUserManager.Setup(u => u.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "invalid password" }));
 
             //Act
@@ -553,7 +654,7 @@ namespace Recollectable.Tests.Controllers
         public async Task ChangePassword_ReturnsNoContentResponse_GivenValidPassword()
         {
             //Arrange
-            ChangedPasswordDto changedPassword = new ChangedPasswordDto();
+            var changedPassword = _builder.BuildChangedPasswordDto();
 
             //Act
             var response = await _controller.ChangePassword("ryan.haywood@gmail.com", changedPassword);
@@ -566,7 +667,7 @@ namespace Recollectable.Tests.Controllers
         public async Task ConfirmEmail_ReturnsNotFound_GivenInvalidEmail()
         {
             //Arrange
-            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+            _mockUserManager.Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(null as User);
 
             //Act
@@ -591,22 +692,21 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+            _mockUserService.Setup(u => u.UserExists(It.IsAny<Guid>())).ReturnsAsync(true);
 
             //Act
             var response = await _controller.BlockRegistration(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
+            _mockUserService.Verify(u => u.UserExists(id));
         }
 
         [Fact]
         public async Task BlockRegistration_ReturnsNotFoundResponse_GivenUnexistingId()
         {
-            //Arrange
-            Guid id = new Guid("b6e2ad45-31da-4d0e-ab9f-2193dd539fc6");
-
             //Act
-            var response = await _controller.BlockRegistration(id);
+            var response = await _controller.BlockRegistration(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -640,15 +740,10 @@ namespace Recollectable.Tests.Controllers
         public async Task UpdateUser_ReturnsNotFoundResponse_GivenInvalidUserId()
         {
             //Arrange
-            Guid id = new Guid("a56b3f62-787c-49ba-b16a-cb4cb96a73f8");
-            UserUpdateDto user = new UserUpdateDto
-            {
-                FirstName = "Kara",
-                LastName = "Eberle"
-            };
+            var user = _builder.WithUserName("Kara").BuildUpdateDto();
 
             //Act
-            var response = await _controller.UpdateUser(id, user);
+            var response = await _controller.UpdateUser(Guid.Empty, user);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -659,14 +754,13 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-            UserUpdateDto country = new UserUpdateDto
-            {
-                FirstName = "Kara",
-                LastName = "Eberle"
-            };
+            var user = _builder.WithUserName("Kara").BuildUpdateDto();
+            var retrievedUser = _builder.Build();
+
+            _mockUserService.Setup(u => u.FindUserById(id)).ReturnsAsync(retrievedUser);
 
             //Act
-            var response = await _controller.UpdateUser(id, country);
+            var response = await _controller.UpdateUser(id, user);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
@@ -677,19 +771,17 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-            UserUpdateDto user = new UserUpdateDto
-            {
-                FirstName = "Kara",
-                LastName = "Eberle"
-            };
+            var user = _builder.WithUserName("Kara").BuildUpdateDto();
+            var retrievedUser = _builder.Build();
+
+            _mockUserService.Setup(u => u.FindUserById(id)).ReturnsAsync(retrievedUser);
+            _mockUserService.Setup(u => u.UpdateUser(It.IsAny<User>()));
 
             //Act
             var response = await _controller.UpdateUser(id, user);
 
             //Assert
-            Assert.NotNull(await _unitOfWork.UserRepository.GetById(id));
-            Assert.Equal("Kara", (await _unitOfWork.UserRepository.GetById(id)).FirstName);
-            Assert.Equal("Eberle", (await _unitOfWork.UserRepository.GetById(id)).LastName);
+            _mockUserService.Verify(u => u.UpdateUser(retrievedUser));
         }
 
         [Fact]
@@ -706,11 +798,10 @@ namespace Recollectable.Tests.Controllers
         public async Task PartiallyUpdateUser_ReturnsNotFoundResponse_GivenInvalidUserId()
         {
             //Arrange
-            Guid id = new Guid("ef86c6f8-e838-4a74-824a-a0bd27a95d1a");
             JsonPatchDocument<UserUpdateDto> patchDoc = new JsonPatchDocument<UserUpdateDto>();
 
             //Act
-            var response = await _controller.PartiallyUpdateUser(id, patchDoc);
+            var response = await _controller.PartiallyUpdateUser(Guid.Empty, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -721,6 +812,10 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+
+            var user = _builder.Build();
+            _mockUserService.Setup(c => c.FindUserById(id)).ReturnsAsync(user);
+
             JsonPatchDocument<UserUpdateDto> patchDoc = new JsonPatchDocument<UserUpdateDto>();
             _controller.ModelState.AddModelError("FirstName", "Required");
 
@@ -736,9 +831,12 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+
+            var user = _builder.Build();
+            _mockUserService.Setup(c => c.FindUserById(id)).ReturnsAsync(user);
+
             JsonPatchDocument<UserUpdateDto> patchDoc = new JsonPatchDocument<UserUpdateDto>();
-            patchDoc.Replace(u => u.FirstName, "Kara");
-            patchDoc.Replace(u => u.LastName, "Eberle");
+            patchDoc.Replace(u => u.UserName, "Kara");
 
             //Act
             var response = await _controller.PartiallyUpdateUser(id, patchDoc);
@@ -752,27 +850,26 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+
+            var user = _builder.Build();
+            _mockUserService.Setup(c => c.FindUserById(id)).ReturnsAsync(user);
+            _mockUserService.Setup(c => c.UpdateUser(It.IsAny<User>()));
+
             JsonPatchDocument<UserUpdateDto> patchDoc = new JsonPatchDocument<UserUpdateDto>();
-            patchDoc.Replace(u => u.FirstName, "Kara");
-            patchDoc.Replace(u => u.LastName, "Eberle");
+            patchDoc.Replace(u => u.UserName, "Kara");
 
             //Act
-            var response = _controller.PartiallyUpdateUser(id, patchDoc);
+            var response = await _controller.PartiallyUpdateUser(id, patchDoc);
 
             //Assert
-            Assert.NotNull(await _unitOfWork.UserRepository.GetById(id));
-            Assert.Equal("Kara", (await _unitOfWork.UserRepository.GetById(id)).FirstName);
-            Assert.Equal("Eberle", (await _unitOfWork.UserRepository.GetById(id)).LastName);
+            _mockUserService.Verify(c => c.UpdateUser(user));
         }
 
         [Fact]
         public async Task DeleteUser_ReturnsNotFoundResponse_GivenInvalidUserId()
         {
-            //Arrange
-            Guid id = new Guid("65e2c5ae-3115-467c-8efa-30323924efed");
-
             //Act
-            var response = await _controller.DeleteUser(id);
+            var response = await _controller.DeleteUser(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
@@ -783,6 +880,9 @@ namespace Recollectable.Tests.Controllers
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+
+            var user = _builder.Build();
+            _mockUserService.Setup(c => c.FindUserById(id)).ReturnsAsync(user);
 
             //Act
             var response = await _controller.DeleteUser(id);
@@ -797,12 +897,15 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
 
+            var user = _builder.Build();
+            _mockUserService.Setup(c => c.FindUserById(id)).ReturnsAsync(user);
+            _mockUserService.Setup(c => c.RemoveUser(It.IsAny<User>()));
+
             //Act
             await _controller.DeleteUser(id);
 
             //Assert
-            Assert.Equal(5, (await _unitOfWork.UserRepository.Get(resourceParameters)).Count());
-            Assert.Null(await _unitOfWork.UserRepository.GetById(id));
-        }*/
+            _mockUserService.Verify(c => c.RemoveUser(user));
+        }
     }
 }

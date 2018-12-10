@@ -433,11 +433,11 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.CreateCollectionCollectable(collectionId, collectable, null) as CreatedAtRouteResult;
-            var returnedCollectable = response.Value as CollectionCollectableDto;
+            var result = response.Value as CollectionCollectableDto;
 
             //Assert
-            Assert.NotNull(returnedCollectable);
-            Assert.Equal(collectableId, returnedCollectable.Collectable.Id);
+            Assert.NotNull(result);
+            Assert.Equal(collectableId, result.Collectable.Id);
         }
 
         [Fact]
@@ -459,11 +459,11 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.CreateCollectionCollectable(collectionId, collectable, mediaType) as CreatedAtRouteResult;
-            dynamic returnedCollectable = response.Value as IDictionary<string, object>;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(returnedCollectable);
-            Assert.Equal(collectableId, returnedCollectable.Collectable.Id);
+            Assert.NotNull(result);
+            Assert.Equal(collectableId, result.Collectable.Id);
         }
 
         [Fact]

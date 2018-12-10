@@ -112,7 +112,8 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             string mediaType = "application/json";
             var countries = _builder.Build(2);
-            var pagedList = PagedList<Country>.Create(countries, resourceParameters.Page, resourceParameters.PageSize);
+            var pagedList = PagedList<Country>.Create(countries,
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCountryService
                 .Setup(c => c.FindCountries(resourceParameters))
@@ -133,7 +134,8 @@ namespace Recollectable.Tests.Controllers
             //Arrange
             string mediaType = "application/json+hateoas";
             var countries = _builder.Build(2);
-            var pagedList = PagedList<Country>.Create(countries, resourceParameters.Page, resourceParameters.PageSize);
+            var pagedList = PagedList<Country>.Create(countries,
+                resourceParameters.Page, resourceParameters.PageSize);
 
             _mockCountryService
                 .Setup(c => c.FindCountries(resourceParameters))
