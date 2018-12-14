@@ -179,6 +179,7 @@ namespace Recollectable.API
             services.AddScoped<IBanknoteService, BanknoteService>();
             services.AddScoped<ICollectionCollectableService, CollectionCollectableService>();
             services.AddScoped<ICollectorValueService, CollectorValueService>();
+            services.AddScoped<IConditionService, ConditionService>();
             services.AddScoped<ICollectionService, CollectionService>();
             services.AddScoped<ICountryService, CountryService>();
 
