@@ -24,19 +24,18 @@ namespace Recollectable.Core.Services
         {
             var banknotes = await _unitOfWork.Banknotes.GetAll();
 
-            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            if (!string.IsNullOrEmpty(resourceParameters.Type) || !string.IsNullOrEmpty(resourceParameters.Country))
             {
-                banknotes = await _unitOfWork.Banknotes.GetAll(new BanknoteByType(resourceParameters.Type));
-            }
-
-            if (!string.IsNullOrEmpty(resourceParameters.Country))
-            {
-                banknotes = await _unitOfWork.Banknotes.GetAll(new BanknoteByCountry(resourceParameters.Country));
+                banknotes = await _unitOfWork.Banknotes
+                    .GetAll(new BanknoteByType(resourceParameters.Type) || new BanknoteByCountry(resourceParameters.Country));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                banknotes = await _unitOfWork.Banknotes.GetAll(new BanknoteBySearch(resourceParameters.Search));
+                banknotes = await _unitOfWork.Banknotes
+                    .GetAll(new BanknoteByType(resourceParameters.Type) ||
+                    new BanknoteByCountry(resourceParameters.Country) ||
+                    new BanknoteBySearch(resourceParameters.Search));
             }
 
             banknotes = banknotes.OrderBy(resourceParameters.OrderBy,

@@ -16,6 +16,7 @@ namespace Recollectable.Core.Shared.Services
             new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
         {
                 { "Id", new PropertyMappingValue(new List<string>() { "Id" }) },
+                { "UserName", new PropertyMappingValue(new List<string>() { "UserName" }) },
                 { "Name", new PropertyMappingValue(new List<string>() { "FirstName", "LastName" }) },
                 { "Email", new PropertyMappingValue(new List<string>() { "Email" }) }
         };

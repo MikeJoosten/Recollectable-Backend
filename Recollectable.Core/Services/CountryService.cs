@@ -31,7 +31,8 @@ namespace Recollectable.Core.Services
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                countries = await _unitOfWork.Countries.GetAll(new CountryBySearch(resourceParameters.Search));
+                countries = await _unitOfWork.Countries
+                    .GetAll(new CountryByName(resourceParameters.Name) || new CountryBySearch(resourceParameters.Search));
             }
 
             countries = countries.OrderBy(resourceParameters.OrderBy,

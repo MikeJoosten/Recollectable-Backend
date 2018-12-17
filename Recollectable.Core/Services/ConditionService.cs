@@ -24,19 +24,19 @@ namespace Recollectable.Core.Services
         {
             var conditions = await _unitOfWork.Conditions.GetAll();
 
-            if (!string.IsNullOrEmpty(resourceParameters.Grade))
+            if (!string.IsNullOrEmpty(resourceParameters.Grade) || !string.IsNullOrEmpty(resourceParameters.LanguageCode))
             {
-                conditions = await _unitOfWork.Conditions.GetAll(new ConditionByGrade(resourceParameters.Grade));
-            }
-
-            if (!string.IsNullOrEmpty(resourceParameters.LanguageCode))
-            {
-                conditions = await _unitOfWork.Conditions.GetAll(new ConditionByLanguageCode(resourceParameters.LanguageCode));
+                conditions = await _unitOfWork.Conditions
+                    .GetAll(new ConditionByGrade(resourceParameters.Grade) || 
+                    new ConditionByLanguageCode(resourceParameters.LanguageCode));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                conditions = await _unitOfWork.Conditions.GetAll(new ConditionBySearch(resourceParameters.Search));
+                conditions = await _unitOfWork.Conditions
+                    .GetAll(new ConditionByGrade(resourceParameters.Grade) ||
+                    new ConditionByLanguageCode(resourceParameters.LanguageCode) ||
+                    new ConditionBySearch(resourceParameters.Search));
             }
 
             conditions = conditions.OrderBy(resourceParameters.OrderBy,

@@ -36,14 +36,17 @@ namespace Recollectable.Core.Services
 
             if (!string.IsNullOrEmpty(resourceParameters.Country))
             {
-                collectables = await _unitOfWork.CollectionCollectables.GetAll
-                    (new CollectionCollectableByCollectionId(collectionId) && new CollectionCollectableByCountry(resourceParameters.Country));
+                collectables = await _unitOfWork.CollectionCollectables
+                    .GetAll(new CollectionCollectableByCollectionId(collectionId) && 
+                    new CollectionCollectableByCountry(resourceParameters.Country));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                collectables = await _unitOfWork.CollectionCollectables.GetAll
-                    (new CollectionCollectableByCollectionId(collectionId) && new CollectionCollectableBySearch(resourceParameters.Search));
+                collectables = await _unitOfWork.CollectionCollectables
+                    .GetAll(new CollectionCollectableByCollectionId(collectionId) && 
+                    (new CollectionCollectableByCountry(resourceParameters.Country) || 
+                    new CollectionCollectableBySearch(resourceParameters.Search)));
             }
 
             collectables = collectables.OrderBy(resourceParameters.OrderBy,

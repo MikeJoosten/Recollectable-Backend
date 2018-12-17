@@ -31,7 +31,8 @@ namespace Recollectable.Core.Services
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                collections = await _unitOfWork.Collections.GetAll(new CollectionBySearch(resourceParameters.Search));
+                collections = await _unitOfWork.Collections
+                    .GetAll(new CollectionByType(resourceParameters.Type) || new CollectionBySearch(resourceParameters.Search));
             }
 
             collections = collections.OrderBy(resourceParameters.OrderBy,

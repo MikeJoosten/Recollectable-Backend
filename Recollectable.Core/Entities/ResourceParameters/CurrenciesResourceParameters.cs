@@ -23,18 +23,18 @@
         /// Type (Available types: Banknote - Coin)
         /// </summary>
         /// <example>Coin</example>
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         /// <summary>
         /// Country name
         /// </summary>
         /// <example>Canada</example>
-        public string Country { get; set; }
+        public string Country { get; set; } = string.Empty;
 
         /// <summary>
         /// Search query
         /// </summary>
-        public string Search { get; set; }
+        public string Search { get; set; } = string.Empty;
 
         /// <summary>
         /// Orders by given term (Available terms: Id - Value - Country - ReleaseDate)

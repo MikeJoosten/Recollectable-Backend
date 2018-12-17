@@ -24,19 +24,17 @@ namespace Recollectable.Core.Services
         {
             var coins = await _unitOfWork.Coins.GetAll();
 
-            if (!string.IsNullOrEmpty(resourceParameters.Type))
+            if (!string.IsNullOrEmpty(resourceParameters.Type) || !string.IsNullOrEmpty(resourceParameters.Country))
             {
-                coins = await _unitOfWork.Coins.GetAll(new CoinByType(resourceParameters.Type));
-            }
-
-            if (!string.IsNullOrEmpty(resourceParameters.Country))
-            {
-                coins = await _unitOfWork.Coins.GetAll(new CoinByCountry(resourceParameters.Country));
+                coins = await _unitOfWork.Coins.GetAll(new CoinByType(resourceParameters.Type) || new CoinByCountry(resourceParameters.Country));
             }
 
             if (!string.IsNullOrEmpty(resourceParameters.Search))
             {
-                coins = await _unitOfWork.Coins.GetAll(new CoinBySearch(resourceParameters.Search));
+                coins = await _unitOfWork.Coins
+                    .GetAll(new CoinByType(resourceParameters.Type) || 
+                    new CoinByCountry(resourceParameters.Country) || 
+                    new CoinBySearch(resourceParameters.Search));
             }
 
             coins = coins.OrderBy(resourceParameters.OrderBy, PropertyMappingService.CurrencyPropertyMapping);

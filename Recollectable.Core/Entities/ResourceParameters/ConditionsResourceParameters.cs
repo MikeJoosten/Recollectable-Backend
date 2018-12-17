@@ -13,9 +13,9 @@
             set => _pageSize = (value > maxPageSize) ? maxPageSize : value;
         }
 
-        public string Grade { get; set; }
+        public string Grade { get; set; } = string.Empty;
         public string LanguageCode { get; set; } = "en-US";
-        public string Search { get; set; }
+        public string Search { get; set; } = string.Empty;
         public string OrderBy { get; set; } = "Grade";
         public string Fields { get; set; }
     }
