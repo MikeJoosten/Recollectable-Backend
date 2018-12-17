@@ -43,6 +43,10 @@ namespace Recollectable.API.Filters
             CreateMap<CollectorValueCreationDto, CollectorValue>();
             CreateMap<CollectorValueUpdateDto, CollectorValue>();
             CreateMap<CollectorValue, CollectorValueUpdateDto>();
+            CreateMap<Condition, ConditionDto>();
+            CreateMap<ConditionCreationDto, Condition>();
+            CreateMap<ConditionUpdateDto, Condition>();
+            CreateMap<Condition, ConditionUpdateDto>();
         }
     }
 }

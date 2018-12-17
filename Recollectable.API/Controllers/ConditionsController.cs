@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Recollectable.API.Models.Collections;
@@ -152,6 +154,149 @@ namespace Recollectable.API.Controllers
             {
                 return Ok(condition);
             }
+        }
+
+        [HttpPost(Name = "CreateCondition")]
+        public async Task<IActionResult> CreateCondition([FromBody] ConditionCreationDto country,
+            [FromHeader(Name = "Accept")] string mediaType)
+        {
+            if (country == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
+            var newCountry = _mapper.Map<Condition>(country);
+            await _conditionService.CreateCondition(newCountry);
+
+            if (!await _conditionService.Save())
+            {
+                throw new Exception("Creating a condition failed on save.");
+            }
+
+            var returnedCondition = _mapper.Map<ConditionDto>(newCountry);
+
+            if (mediaType == "application/json+hateoas")
+            {
+                var links = CreateConditionLinks(returnedCondition.Id, null);
+                var linkedResource = returnedCondition.ShapeData(null)
+                    as IDictionary<string, object>;
+
+                linkedResource.Add("links", links);
+
+                return CreatedAtRoute("GetCountry",
+                    new { id = returnedCondition.Id },
+                    linkedResource);
+            }
+            else
+            {
+                return CreatedAtRoute("GetCountry",
+                    new { id = returnedCondition.Id },
+                    returnedCondition);
+            }
+        }
+
+        [HttpPost("{id}")]
+        public async Task<IActionResult> BlockConditionCreation(Guid id)
+        {
+            if (await _conditionService.ConditionExists(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status409Conflict);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPut("{id}", Name = "UpdateCondition")]
+        public async Task<IActionResult> UpdateCondition(Guid id, [FromBody] ConditionUpdateDto condition)
+        {
+            if (condition == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
+            var retrievedCondition = await _conditionService.FindConditionById(id);
+
+            if (retrievedCondition == null)
+            {
+                return NotFound();
+            }
+
+            _mapper.Map(condition, retrievedCondition);
+            _conditionService.UpdateCondition(retrievedCondition);
+
+            if (!await _conditionService.Save())
+            {
+                throw new Exception($"Updating condition {id} failed on save.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}", Name = "PartiallyUpdateCondition")]
+        public async Task<IActionResult> PartiallyUpdateCondition(Guid id,
+            [FromBody] JsonPatchDocument<ConditionUpdateDto> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return BadRequest();
+            }
+
+            var retrievedCondition = await _conditionService.FindConditionById(id);
+
+            if (retrievedCondition == null)
+            {
+                return NotFound();
+            }
+
+            var patchedCondition = _mapper.Map<ConditionUpdateDto>(retrievedCondition);
+            patchDoc.ApplyTo(patchedCondition, ModelState);
+
+            TryValidateModel(patchedCondition);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
+            _mapper.Map(patchedCondition, retrievedCondition);
+            _conditionService.UpdateCondition(retrievedCondition);
+
+            if (!await _conditionService.Save())
+            {
+                throw new Exception($"Patching condition {id} failed on save.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}", Name = "DeleteCondition")]
+        public async Task<IActionResult> DeleteCondition(Guid id)
+        {
+            var retrievedCondition = await _conditionService.FindConditionById(id);
+
+            if (retrievedCondition == null)
+            {
+                return NotFound();
+            }
+
+            _conditionService.RemoveCondition(retrievedCondition);
+
+            if (!await _conditionService.Save())
+            {
+                throw new Exception($"Deleting condition {id} failed on save.");
+            }
+
+            return NoContent();
         }
 
         [HttpOptions]

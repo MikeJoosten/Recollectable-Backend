@@ -1,4 +1,5 @@
-﻿using Recollectable.Core.Entities.Collections;
+﻿using Recollectable.API.Models.Collections;
+using Recollectable.Core.Entities.Collections;
 using System;
 using System.Collections.Generic;
 
@@ -30,7 +31,7 @@ namespace Recollectable.Tests.Builders
             return condition;
         }
 
-        /*public ConditionCreationDto BuildCreationDto()
+        public ConditionCreationDto BuildCreationDto()
         {
             return new ConditionCreationDto
             {
@@ -42,9 +43,9 @@ namespace Recollectable.Tests.Builders
         {
             return new ConditionUpdateDto
             {
-                Name = condition.Name
+                Grade = condition.Grade
             };
-        }*/
+        }
 
         public List<Condition> Build(int count)
         {
