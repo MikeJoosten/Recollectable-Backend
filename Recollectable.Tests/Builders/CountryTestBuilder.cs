@@ -26,6 +26,12 @@ namespace Recollectable.Tests.Builders
             return this;
         }
 
+        public CountryTestBuilder WithDescription(string description)
+        {
+            country.Description = description;
+            return this;
+        }
+
         public Country Build()
         {
             return country;
@@ -35,7 +41,8 @@ namespace Recollectable.Tests.Builders
         {
             return new CountryCreationDto
             {
-                Name = country.Name
+                Name = country.Name,
+                Description = country.Description
             };
         }
 
@@ -43,7 +50,8 @@ namespace Recollectable.Tests.Builders
         {
             return new CountryUpdateDto
             {
-                Name = country.Name
+                Name = country.Name,
+                Description = country.Description
             };
         }
 

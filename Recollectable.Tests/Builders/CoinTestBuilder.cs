@@ -26,6 +26,18 @@ namespace Recollectable.Tests.Builders
             return this;
         }
 
+        public CoinTestBuilder WithNote(string note)
+        {
+            coin.Note = note;
+            return this;
+        }
+
+        public CoinTestBuilder WithSubject(string subject)
+        {
+            coin.Subject = subject;
+            return this;
+        }
+
         public CoinTestBuilder WithCountryId(Guid countryId)
         {
             coin.CountryId = countryId;
@@ -42,6 +54,8 @@ namespace Recollectable.Tests.Builders
             return new CoinCreationDto
             {
                 Type = coin.Type,
+                Note = coin.Note,
+                Subject = coin.Subject,
                 CountryId = coin.CountryId
             };
         }
@@ -51,6 +65,8 @@ namespace Recollectable.Tests.Builders
             return new CoinUpdateDto
             {
                 Type = coin.Type,
+                Note = coin.Note,
+                Subject = coin.Subject,
                 CountryId = coin.CountryId
             };
         }

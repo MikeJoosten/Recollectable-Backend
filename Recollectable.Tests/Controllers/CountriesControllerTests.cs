@@ -312,6 +312,19 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
+        public async Task CreateCountry_ReturnsUnprocessableEntityObjectResponse_GivenEqualDescriptionAndName()
+        {
+            //Arrange
+            var country = _builder.WithName("China").WithDescription("China").BuildCreationDto();
+
+            //Act
+            var response = await _controller.CreateCountry(country, null);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
         public async Task CreateCountry_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCountry()
         {
             //Arrange
@@ -404,6 +417,19 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public async Task UpdateCountry_ReturnsUnprocessableEntityObjectResponse_GivenEqualDescriptionAndName()
+        {
+            //Arrange
+            var country = _builder.WithName("China").WithDescription("China").BuildUpdateDto();
+
+            //Act
+            var response = await _controller.UpdateCountry(Guid.Empty, country);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]

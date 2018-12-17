@@ -322,6 +322,19 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
+        public async Task CreateCoin_ReturnsUnprocessableEntityObjectResponse_GivenEqualSubjectAndNote()
+        {
+            //Arrange
+            var coin = _builder.WithSubject("Chinese Coin").WithNote("Chinese Coin").BuildCreationDto();
+
+            //Act
+            var response = await _controller.CreateCoin(coin, null);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
+        }
+
+        [Fact]
         public async Task CreateCoin_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCoin()
         {
             //Arrange
@@ -430,6 +443,19 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public async Task UpdateCoin_ReturnsUnprocessableEntityObjectResponse_GivenEqualSubjectAndNote()
+        {
+            //Arrange
+            var coin = _builder.WithSubject("Chinese Coin").WithNote("Chinese Coin").BuildUpdateDto();
+
+            //Act
+            var response = await _controller.UpdateCoin(Guid.Empty, coin);
+
+            //Assert
+            Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
