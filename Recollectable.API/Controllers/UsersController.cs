@@ -573,26 +573,23 @@ namespace Recollectable.API.Controllers
         {
             var links = new List<LinkDto>();
 
-            if (string.IsNullOrEmpty(fields))
-            {
-                links.Add(new LinkDto(Url.Link("GetUser",
-                    new { id }), "self", "GET"));
+            links.Add(new LinkDto(Url.Link("GetUser",
+                new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("Register",
-                    new { }), "register_user", "POST"));
+            links.Add(new LinkDto(Url.Link("Register",
+                new { }), "register_user", "POST"));
 
-                links.Add(new LinkDto(Url.Link("Login",
-                    new { }), "login_user", "POST"));
+            links.Add(new LinkDto(Url.Link("Login",
+                new { }), "login_user", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateUser",
-                    new { id }), "update_user", "PUT"));
+            links.Add(new LinkDto(Url.Link("UpdateUser",
+                new { id }), "update_user", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateUser",
-                    new { id }), "partially_update_user", "PATCH"));
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateUser",
+                new { id }), "partially_update_user", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteUser",
-                    new { id }), "delete_user", "DELETE"));
-            }
+            links.Add(new LinkDto(Url.Link("DeleteUser",
+                new { id }), "delete_user", "DELETE"));
 
             return links;
         }

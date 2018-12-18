@@ -406,23 +406,20 @@ namespace Recollectable.API.Controllers
         {
             var links = new List<LinkDto>();
 
-            if (string.IsNullOrEmpty(fields))
-            {
-                links.Add(new LinkDto(Url.Link("GetCoins",
-                    new { id }), "self", "GET"));
+            links.Add(new LinkDto(Url.Link("GetCoins",
+                new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateCoins",
-                    new { }), "create_coins", "POST"));
+            links.Add(new LinkDto(Url.Link("CreateCoins",
+                new { }), "create_coins", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateCoins",
-                    new { id }), "update_coins", "PUT"));
+            links.Add(new LinkDto(Url.Link("UpdateCoins",
+                new { id }), "update_coins", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateCoins",
-                    new { id }), "partially_update_coins", "PATCH"));
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateCoins",
+                new { id }), "partially_update_coins", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteCoins",
-                    new { id }), "delete_coins", "DELETE"));
-            }
+            links.Add(new LinkDto(Url.Link("DeleteCoins",
+                new { id }), "delete_coins", "DELETE"));
 
             return links;
         }

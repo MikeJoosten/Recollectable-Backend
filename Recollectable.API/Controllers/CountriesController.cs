@@ -368,23 +368,20 @@ namespace Recollectable.API.Controllers
         {
             var links = new List<LinkDto>();
 
-            if (string.IsNullOrEmpty(fields))
-            {
-                links.Add(new LinkDto(Url.Link("GetCountry",
-                    new { id }), "self", "GET"));
+            links.Add(new LinkDto(Url.Link("GetCountry",
+                new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateCountry",
-                    new { }), "create_country", "POST"));
+            links.Add(new LinkDto(Url.Link("CreateCountry",
+                new { }), "create_country", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateCountry",
-                    new { id }), "update_country", "PUT"));
+            links.Add(new LinkDto(Url.Link("UpdateCountry",
+                new { id }), "update_country", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateCountry",
-                    new { id }), "partially_update_country", "PATCH"));
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateCountry",
+                new { id }), "partially_update_country", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteCountry",
-                    new { id }), "delete_country", "DELETE"));
-            }
+            links.Add(new LinkDto(Url.Link("DeleteCountry",
+                new { id }), "delete_country", "DELETE"));
 
             return links;
         }

@@ -346,23 +346,20 @@ namespace Recollectable.API.Controllers
         {
             var links = new List<LinkDto>();
 
-            if (string.IsNullOrEmpty(fields))
-            {
-                links.Add(new LinkDto(Url.Link("GetCollectorValue",
-                    new { id }), "self", "GET"));
+            links.Add(new LinkDto(Url.Link("GetCollectorValue",
+                new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateCollectorValue",
-                    new { }), "create_collector_value", "POST"));
+            links.Add(new LinkDto(Url.Link("CreateCollectorValue",
+                new { }), "create_collector_value", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateCollectorValue",
-                    new { id }), "update_collector_value", "PUT"));
+            links.Add(new LinkDto(Url.Link("UpdateCollectorValue",
+                new { id }), "update_collector_value", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateCollectorValue",
-                    new { id }), "partially_update_collector_value", "PATCH"));
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateCollectorValue",
+                new { id }), "partially_update_collector_value", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteCollectorValue",
-                    new { id }), "delete_collector_value", "DELETE"));
-            }
+            links.Add(new LinkDto(Url.Link("DeleteCollectorValue",
+                new { id }), "delete_collector_value", "DELETE"));
 
             return links;
         }

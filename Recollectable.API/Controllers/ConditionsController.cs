@@ -352,23 +352,20 @@ namespace Recollectable.API.Controllers
         {
             var links = new List<LinkDto>();
 
-            if (string.IsNullOrEmpty(fields))
-            {
-                links.Add(new LinkDto(Url.Link("GetCondition",
-                    new { id }), "self", "GET"));
+            links.Add(new LinkDto(Url.Link("GetCondition",
+                new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateCondition",
-                    new { }), "create_condition", "POST"));
+            links.Add(new LinkDto(Url.Link("CreateCondition",
+                new { }), "create_condition", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateCondition",
-                    new { id }), "update_condition", "PUT"));
+            links.Add(new LinkDto(Url.Link("UpdateCondition",
+                new { id }), "update_condition", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateCondition",
-                    new { id }), "partially_update_condition", "PATCH"));
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateCondition",
+                new { id }), "partially_update_condition", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteCondition",
-                    new { id }), "delete_condition", "DELETE"));
-            }
+            links.Add(new LinkDto(Url.Link("DeleteCondition",
+                new { id }), "delete_condition", "DELETE"));
 
             return links;
         }
