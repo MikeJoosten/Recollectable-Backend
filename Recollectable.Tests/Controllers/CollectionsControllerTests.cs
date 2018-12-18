@@ -69,7 +69,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCollections_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -90,7 +89,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollections_ReturnsAllCollections_GivenNoMediaType()
+        public async Task GetCollections_ReturnsAllCollections_GivenAnyMediaType()
         {
             //Arrange
             var collections = _builder.Build(2);
@@ -103,28 +102,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetCollections(resourceParameters, null) as OkObjectResult;
-            var result = response.Value as List<CollectionDto>;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public async Task GetCollections_ReturnsAllCollections_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            var collections = _builder.Build(2);
-            var pagedList = PagedList<Collection>.Create(collections,
-                resourceParameters.Page, resourceParameters.PageSize);
-
-            _mockCollectionService
-                .Setup(c => c.FindCollections(resourceParameters))
-                .ReturnsAsync(pagedList);
-
-            //Act
-            var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -155,7 +132,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollections_ReturnsCollections_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCollections_ReturnsCollections_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json";
@@ -167,7 +144,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollections(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -221,7 +198,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCollection_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -241,28 +217,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollection_ReturnsCollection_GivenNoMediaType()
-        {
-            //Arrange
-            Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
-            var collection = _builder.WithId(id).WithType("Coin").Build();
-
-            _mockCollectionService
-                .Setup(c => c.FindCollectionById(id))
-                .ReturnsAsync(collection);
-
-            //Act
-            var response = await _controller.GetCollection(id, null, null) as OkObjectResult;
-            var result = response.Value as CollectionDto;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Coin", result.Type);
-        }
-
-        [Fact]
-        public async Task GetCollection_ReturnsCollection_GivenJsonMediaType()
+        public async Task GetCollection_ReturnsCollection_GivenAnyMediaType()
         {
             //Arrange
             string mediaType = "application/json";
@@ -274,7 +229,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(collection);
 
             //Act
-            var response = await _controller.GetCollection(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollection(id, null, null) as OkObjectResult;
             dynamic result = response.Value as ExpandoObject;
 
             //Assert

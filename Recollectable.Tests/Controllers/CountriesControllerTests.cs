@@ -65,7 +65,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCountries_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -86,31 +85,9 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCountries_ReturnsAllCountries_GivenNoMediaType()
+        public async Task GetCountries_ReturnsAllCountries_GivenAnyMediaType()
         {
             //Arrange
-            var countries = _builder.Build(2);
-            var pagedList = PagedList<Country>.Create(countries, 
-                resourceParameters.Page, resourceParameters.PageSize);
-
-            _mockCountryService
-                .Setup(c => c.FindCountries(resourceParameters))
-                .ReturnsAsync(pagedList);
-
-            //Act
-            var response = await _controller.GetCountries(resourceParameters, null) as OkObjectResult;
-            var result = response.Value as List<CountryDto>;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public async Task GetCountries_ReturnsAllCountries_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
             var countries = _builder.Build(2);
             var pagedList = PagedList<Country>.Create(countries,
                 resourceParameters.Page, resourceParameters.PageSize);
@@ -120,7 +97,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCountries(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -151,10 +128,9 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCountries_ReturnsCountries_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCountries_ReturnsCountries_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
             var countries = _builder.Build(4);
             var pagedList = PagedList<Country>.Create(countries, 1, 2);
 
@@ -163,7 +139,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetCountries(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCountries(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -217,7 +193,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCountry_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -237,7 +212,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCountry_ReturnsCountry_GivenNoMediaType()
+        public async Task GetCountry_ReturnsCountry_GivenAnyMediaType()
         {
             //Arrange
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
@@ -249,28 +224,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetCountry(id, null, null) as OkObjectResult;
-            var result = response.Value as CountryDto;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Japan", result.Name);
-        }
-
-        [Fact]
-        public async Task GetCountry_ReturnsCountry_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
-            var country = _builder.WithId(id).WithName("Japan").Build();
-
-            _mockCountryService
-                .Setup(c => c.FindCountryById(id))
-                .ReturnsAsync(country);
-
-            //Act
-            var response = await _controller.GetCountry(id, null, mediaType) as OkObjectResult;
             dynamic result = response.Value as ExpandoObject;
 
             //Assert

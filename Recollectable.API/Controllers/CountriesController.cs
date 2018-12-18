@@ -34,7 +34,7 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
-        //TODO ExpandoObject to XML + Error when no ID in resourceParameters.Fields
+        //TODO Error when no ID in resourceParameters.Fields (HATEOAS)
         [HttpHead]
         [HttpGet(Name = "GetCountries")]
         public async Task<IActionResult> GetCountries(CountriesResourceParameters resourceParameters,
@@ -52,6 +52,7 @@ namespace Recollectable.API.Controllers
 
             var retrievedCountries = await _countryService.FindCountries(resourceParameters);
             var countries = _mapper.Map<IEnumerable<CountryDto>>(retrievedCountries);
+            var shapedCountries = countries.ShapeData(resourceParameters.Fields);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -68,7 +69,6 @@ namespace Recollectable.API.Controllers
 
                 var links = CreateCountriesLinks(resourceParameters,
                     retrievedCountries.HasNext, retrievedCountries.HasPrevious);
-                var shapedCountries = countries.ShapeData(resourceParameters.Fields);
 
                 var linkedCountries = shapedCountries.Select(country =>
                 {
@@ -89,7 +89,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else if (mediaType == "application/json")
+            else
             {
                 var previousPageLink = retrievedCountries.HasPrevious ?
                     CreateCountriesResourceUri(resourceParameters,
@@ -112,15 +112,10 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                return Ok(countries.ShapeData(resourceParameters.Fields));
-            }
-            else
-            {
-                return Ok(countries);
+                return Ok(shapedCountries);
             }
         }
 
-        //TODO ExpandoObject to XML
         [HttpGet("{id}", Name = "GetCountry")]
         public async Task<IActionResult> GetCountry(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -138,28 +133,23 @@ namespace Recollectable.API.Controllers
             }
 
             var country = _mapper.Map<CountryDto>(retrievedCountry);
+            var shapedCountry = country.ShapeData(fields);
 
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateCountryLinks(id, fields);
-                var linkedResource = country.ShapeData(fields)
-                    as IDictionary<string, object>;
+                var linkedResource = shapedCountry as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
                 return Ok(linkedResource);
             }
-            else if (mediaType == "application/json")
-            {
-                return Ok(country.ShapeData(fields));
-            }
             else
             {
-                return Ok(country);
+                return Ok(shapedCountry);
             }
         }
 
-        //TODO ExpandoObject to XML
         [HttpPost(Name = "CreateCountry")]
         public async Task<IActionResult> CreateCountry([FromBody] CountryCreationDto country,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -193,8 +183,7 @@ namespace Recollectable.API.Controllers
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateCountryLinks(returnedCountry.Id, null);
-                var linkedResource = returnedCountry.ShapeData(null)
-                    as IDictionary<string, object>;
+                var linkedResource = returnedCountry.ShapeData(null) as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 

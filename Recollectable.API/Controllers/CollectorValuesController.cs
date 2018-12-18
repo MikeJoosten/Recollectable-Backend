@@ -52,6 +52,7 @@ namespace Recollectable.API.Controllers
 
             var retrievedCollectorValues = await _collectorValueService.FindCollectorValues(resourceParameters);
             var collectorValues = _mapper.Map<IEnumerable<CollectorValueDto>>(retrievedCollectorValues);
+            var shapedCollectorValues = collectorValues.ShapeData(resourceParameters.Fields);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -68,7 +69,6 @@ namespace Recollectable.API.Controllers
 
                 var links = CreateCollectorValuesLinks(resourceParameters,
                     retrievedCollectorValues.HasNext, retrievedCollectorValues.HasPrevious);
-                var shapedCollectorValues = collectorValues.ShapeData(resourceParameters.Fields);
 
                 var linkedCollectorValues = shapedCollectorValues.Select(collectorValue =>
                 {
@@ -89,7 +89,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else if (mediaType == "application/json")
+            else
             {
                 var previousPageLink = retrievedCollectorValues.HasPrevious ?
                     CreateCollectorValuesResourceUri(resourceParameters,
@@ -112,11 +112,7 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                return Ok(collectorValues.ShapeData(resourceParameters.Fields));
-            }
-            else
-            {
-                return Ok(collectorValues);
+                return Ok(shapedCollectorValues);
             }
         }
 
@@ -137,24 +133,20 @@ namespace Recollectable.API.Controllers
             }
 
             var collectorValue = _mapper.Map<CollectorValueDto>(retrievedCollectorValue);
+            var shapedCollectorValue = collectorValue.ShapeData(fields);
 
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateCollectorValueLinks(id, fields);
-                var linkedResource = collectorValue.ShapeData(fields)
-                    as IDictionary<string, object>;
+                var linkedResource = shapedCollectorValue as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
                 return Ok(linkedResource);
             }
-            else if (mediaType == "application/json")
-            {
-                return Ok(collectorValue.ShapeData(fields));
-            }
             else
             {
-                return Ok(collectorValue);
+                return Ok(shapedCollectorValue);
             }
         }
 
@@ -185,8 +177,7 @@ namespace Recollectable.API.Controllers
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateCollectorValueLinks(returnedCollectorValue.Id, null);
-                var linkedResource = returnedCollectorValue.ShapeData(null)
-                    as IDictionary<string, object>;
+                var linkedResource = returnedCollectorValue.ShapeData(null) as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 

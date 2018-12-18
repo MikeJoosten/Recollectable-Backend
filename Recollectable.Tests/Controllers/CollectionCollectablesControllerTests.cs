@@ -79,7 +79,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCollectionCollectables_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -102,7 +101,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollectionCollectables_ReturnsAllCollectionCollectables_GivenNoMediaType()
+        public async Task GetCollectionCollectables_ReturnsAllCollectionCollectables_GivenAnyMediaType()
         {
             //Arrange
             Guid collectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789");
@@ -117,30 +116,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetCollectionCollectables(collectionId, resourceParameters, null) as OkObjectResult;
-            var result = response.Value as List<CollectionCollectableDto>;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public async Task GetCollectionCollectables_ReturnsAllCollectionCollectables_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            Guid collectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789");
-
-            var collectionCollectables = _builder.Build(2);
-            var pagedList = PagedList<CollectionCollectable>.Create(collectionCollectables,
-                resourceParameters.Page, resourceParameters.PageSize);
-
-            _mockCollectableService
-                .Setup(c => c.FindCollectionCollectables(collectionId, resourceParameters))
-                .ReturnsAsync(pagedList);
-
-            //Act
-            var response = await _controller.GetCollectionCollectables(collectionId, resourceParameters, mediaType) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -173,10 +148,9 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollectionCollectables_ReturnsCollectionCollectables_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCollectionCollectables_ReturnsCollectionCollectables_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
             Guid collectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789");
 
             var collectionCollectables = _builder.Build(4);
@@ -187,7 +161,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetCollectionCollectables(collectionId, resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollectionCollectables(collectionId, resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -243,7 +217,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCollectionCollectable_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -264,29 +237,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollectionCollectable_ReturnsCollectionCollectable_GivenNoMediaType()
-        {
-            //Arrange
-            Guid id = new Guid("355e785b-dd47-4fb7-b112-1fb34d189569");
-            Guid collectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789");
-            var collectionCollectable = _builder.WithId(id).WithCountryName("Mexico").Build();
-
-            _mockCollectableService
-                .Setup(c => c.FindCollectionCollectableById(collectionId, id))
-                .ReturnsAsync(collectionCollectable);
-
-            //Act
-            var response = await _controller.GetCollectionCollectable(collectionId, id, null, null) as OkObjectResult;
-            var result = response.Value as CollectionCollectableDto;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Mexico", result.Collectable.Country.Name);
-        }
-
-        [Fact]
-        public async Task GetCollectionCollectable_ReturnsCollectionCollectable_GivenJsonMediaType()
+        public async Task GetCollectionCollectable_ReturnsCollectionCollectable_GivenAnyMediaType()
         {
             //Arrange
             string mediaType = "application/json";
@@ -299,7 +250,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(collectionCollectable);
 
             //Act
-            var response = await _controller.GetCollectionCollectable(collectionId, id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollectionCollectable(collectionId, id, null, null) as OkObjectResult;
             dynamic result = response.Value as ExpandoObject;
 
             //Assert

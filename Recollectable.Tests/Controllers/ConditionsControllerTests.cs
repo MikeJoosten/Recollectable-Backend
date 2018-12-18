@@ -65,7 +65,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetConditions_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -86,7 +85,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetConditions_ReturnsAllConditions_GivenNoMediaType()
+        public async Task GetConditions_ReturnsAllConditions_GivenAnyMediaType()
         {
             //Arrange
             var conditions = _builder.Build(2);
@@ -99,28 +98,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetConditions(resourceParameters, null) as OkObjectResult;
-            var result = response.Value as List<ConditionDto>;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public async Task GetConditions_ReturnsAllConditions_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            var conditions = _builder.Build(2);
-            var pagedList = PagedList<Condition>.Create(conditions,
-                resourceParameters.Page, resourceParameters.PageSize);
-
-            _mockConditionService
-                .Setup(c => c.FindConditions(resourceParameters))
-                .ReturnsAsync(pagedList);
-
-            //Act
-            var response = await _controller.GetConditions(resourceParameters, mediaType) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -151,7 +128,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetConditions_ReturnsConditions_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetConditions_ReturnsConditions_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json";
@@ -163,7 +140,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetConditions(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetConditions(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -217,7 +194,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCondition_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -237,31 +213,9 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCondition_ReturnsCondition_GivenNoMediaType()
+        public async Task GetCondition_ReturnsCondition_GivenAnyMediaType()
         {
             //Arrange
-            Guid id = new Guid("64dc0403-db60-479a-bce4-8662e3a16e55");
-            var condition = _builder.WithId(id).WithGrade("XF48").Build();
-
-            _mockConditionService
-                .Setup(c => c.FindConditionById(id))
-                .ReturnsAsync(condition);
-
-            //Act
-            var response = await _controller.GetCondition(id, null, null) as OkObjectResult;
-            var result = response.Value as ConditionDto;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("XF48", result.Grade);
-        }
-
-        [Fact]
-        public async Task GetCondition_ReturnsCondition_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
             Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
             var condition = _builder.WithId(id).WithGrade("XF48").Build();
 
@@ -270,7 +224,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(condition);
 
             //Act
-            var response = await _controller.GetCondition(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCondition(id, null, null) as OkObjectResult;
             dynamic result = response.Value as ExpandoObject;
 
             //Assert

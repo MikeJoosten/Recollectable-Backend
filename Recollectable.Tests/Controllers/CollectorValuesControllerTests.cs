@@ -65,7 +65,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCollectorValues_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -86,28 +85,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollectorValues_ReturnsAllCollectorValues_GivenNoMediaType()
-        {
-            //Arrange
-            var collectorValues = _builder.Build(2);
-            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
-                resourceParameters.Page, resourceParameters.PageSize);
-
-            _mockCollectorValueService
-                .Setup(c => c.FindCollectorValues(resourceParameters))
-                .ReturnsAsync(pagedList);
-
-            //Act
-            var response = await _controller.GetCollectorValues(resourceParameters, null) as OkObjectResult;
-            var result = response.Value as List<CollectorValueDto>;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public async Task GetCollectorValues_ReturnsAllCollectorValues_GivenJsonMediaType()
+        public async Task GetCollectorValues_ReturnsAllCollectorValues_GivenAnyMediaType()
         {
             //Arrange
             string mediaType = "application/json";
@@ -120,7 +98,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetCollectorValues(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollectorValues(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -151,7 +129,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollectorValues_ReturnsCollectorValues_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCollectorValues_ReturnsCollectorValues_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json";
@@ -163,7 +141,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetCollectorValues(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollectorValues(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -217,7 +195,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCollectorValue_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -237,7 +214,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCollectorValue_ReturnsCollectorValue_GivenNoMediaType()
+        public async Task GetCollectorValue_ReturnsCollectorValue_GivenAnyMediaType()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
@@ -249,28 +226,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetCollectorValue(id, null, null) as OkObjectResult;
-            var result = response.Value as CollectorValueDto;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal(15.54, result.G4);
-        }
-
-        [Fact]
-        public async Task GetCollectorValue_ReturnsCollectorValue_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            var collectorValue = _builder.WithId(id).WithG4(15.54).Build();
-
-            _mockCollectorValueService
-                .Setup(c => c.FindCollectorValueById(id))
-                .ReturnsAsync(collectorValue);
-
-            //Act
-            var response = await _controller.GetCollectorValue(id, null, mediaType) as OkObjectResult;
             dynamic result = response.Value as ExpandoObject;
 
             //Assert

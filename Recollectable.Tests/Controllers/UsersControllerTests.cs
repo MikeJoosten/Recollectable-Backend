@@ -87,7 +87,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetUsers_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -108,7 +107,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetUsers_ReturnsAllUsers_GivenNoMediaType()
+        public async Task GetUsers_ReturnsAllUsers_GivenAnyMediaType()
         {
             //Arrange
             var users = _builder.Build(2);
@@ -121,28 +120,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetUsers(resourceParameters, null) as OkObjectResult;
-            var result = response.Value as List<UserDto>;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public async Task GetUsers_ReturnsAllUsers_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            var users = _builder.Build(2);
-            var pagedList = PagedList<User>.Create(users,
-                resourceParameters.Page, resourceParameters.PageSize);
-
-            _mockUserService
-                .Setup(u => u.FindUsers(resourceParameters))
-                .ReturnsAsync(pagedList);
-
-            //Act
-            var response = await _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -173,10 +150,9 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetUsers_ReturnsUsers_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetUsers_ReturnsUsers_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
             var users = _builder.Build(4);
             var pagedList = PagedList<User>.Create(users, 1, 2);
 
@@ -185,7 +161,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetUsers(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetUsers(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -239,7 +215,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetUser_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -259,7 +234,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetUser_ReturnsUser_GivenNoMediaType()
+        public async Task GetUser_ReturnsUser_GivenAnyMediaType()
         {
             //Arrange
             Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
@@ -271,28 +246,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetUser(id, null, null) as OkObjectResult;
-            var result = response.Value as UserDto;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Ryan", result.UserName);
-        }
-
-        [Fact]
-        public async Task GetUser_ReturnsUser_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-            var user = _builder.WithId(id).WithUserName("Ryan").Build();
-
-            _mockUserService
-                .Setup(u => u.FindUserById(id))
-                .ReturnsAsync(user);
-
-            //Act
-            var response = await _controller.GetUser(id, null, mediaType) as OkObjectResult;
             dynamic result = response.Value as ExpandoObject;
 
             //Assert

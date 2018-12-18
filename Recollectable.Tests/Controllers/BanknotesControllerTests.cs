@@ -75,7 +75,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetBanknotes_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -96,7 +95,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetBanknotes_ReturnsAllBanknotes_GivenNoMediaType()
+        public async Task GetBanknotes_ReturnsAllBanknotes_GivenAnyMediaType()
         {
             //Arrange
             var banknotes = _builder.Build(2);
@@ -109,28 +108,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetBanknotes(resourceParameters, null) as OkObjectResult;
-            var result = response.Value as List<BanknoteDto>;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public async Task GetBanknotes_ReturnsAllBanknotes_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            var banknotes = _builder.Build(2);
-            var pagedList = PagedList<Banknote>.Create(banknotes,
-                resourceParameters.Page, resourceParameters.PageSize);
-
-            _mockBanknoteService
-                .Setup(b => b.FindBanknotes(resourceParameters))
-                .ReturnsAsync(pagedList);
-
-            //Act
-            var response = await _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -161,10 +138,9 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetBanknotes_ReturnsBanknotes_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetBanknotes_ReturnsBanknotes_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
             var banknotes = _builder.Build(4);
             var pagedList = PagedList<Banknote>.Create(banknotes, 1, 2);
 
@@ -173,7 +149,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetBanknotes(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -227,7 +203,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetBanknote_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -247,7 +222,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetBanknote_ReturnsBanknote_GivenNoMediaType()
+        public async Task GetBanknote_ReturnsBanknote_GivenAnyMediaType()
         {
             //Arrange
             Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
@@ -259,28 +234,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetBanknote(id, null, null) as OkObjectResult;
-            var result = response.Value as BanknoteDto;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Dollars", result.Type);
-        }
-
-        [Fact]
-        public async Task GetBanknote_ReturnsBanknote_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
-            var banknote = _builder.WithId(id).WithType("Dollars").Build();
-
-            _mockBanknoteService
-                .Setup(b => b.FindBanknoteById(id))
-                .ReturnsAsync(banknote);
-
-            //Act
-            var response = await _controller.GetBanknote(id, null, mediaType) as OkObjectResult;
             dynamic result = response.Value as ExpandoObject;
 
             //Assert

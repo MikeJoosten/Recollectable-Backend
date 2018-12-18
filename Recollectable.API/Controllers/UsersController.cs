@@ -64,6 +64,7 @@ namespace Recollectable.API.Controllers
 
             var retrievedUsers = await _userService.FindUsers(resourceParameters);
             var users = _mapper.Map<IEnumerable<UserDto>>(retrievedUsers);
+            var shapedUsers = users.ShapeData(resourceParameters.Fields);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -80,7 +81,6 @@ namespace Recollectable.API.Controllers
 
                 var links = CreateUsersLinks(resourceParameters,
                     retrievedUsers.HasNext, retrievedUsers.HasPrevious);
-                var shapedUsers = users.ShapeData(resourceParameters.Fields);
 
                 var linkedUsers = shapedUsers.Select(user =>
                 {
@@ -101,7 +101,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else if (mediaType == "application/json")
+            else
             {
                 var previousPageLink = retrievedUsers.HasPrevious ?
                     CreateUsersResourceUri(resourceParameters,
@@ -124,11 +124,7 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                return Ok(users.ShapeData(resourceParameters.Fields));
-            }
-            else
-            {
-                return Ok(users);
+                return Ok(shapedUsers);
             }
         }
 
@@ -149,24 +145,20 @@ namespace Recollectable.API.Controllers
             }
 
             var user = _mapper.Map<UserDto>(retrievedUser);
+            var shapedUser = user.ShapeData(fields);
 
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateUserLinks(id, fields);
-                var linkedResource = user.ShapeData(fields)
-                    as IDictionary<string, object>;
+                var linkedResource = shapedUser as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
                 return Ok(linkedResource);
             }
-            else if (mediaType == "application/json")
-            {
-                return Ok(user.ShapeData(fields));
-            }
             else
             {
-                return Ok(user);
+                return Ok(shapedUser);
             }
         }
 
@@ -217,8 +209,7 @@ namespace Recollectable.API.Controllers
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateUserLinks(returnedUser.Id, null);
-                var linkedResource = returnedUser.ShapeData(null)
-                    as IDictionary<string, object>;
+                var linkedResource = returnedUser.ShapeData(null) as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 

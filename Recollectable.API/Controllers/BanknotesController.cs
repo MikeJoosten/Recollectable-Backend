@@ -65,6 +65,7 @@ namespace Recollectable.API.Controllers
 
             var retrievedBanknotes = await _banknoteService.FindBanknotes(resourceParameters);
             var banknotes = _mapper.Map<IEnumerable<BanknoteDto>>(retrievedBanknotes);
+            var shapedBanknotes = banknotes.ShapeData(resourceParameters.Fields);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -81,7 +82,6 @@ namespace Recollectable.API.Controllers
 
                 var links = CreateBanknotesLinks(resourceParameters,
                     retrievedBanknotes.HasNext, retrievedBanknotes.HasPrevious);
-                var shapedBanknotes = banknotes.ShapeData(resourceParameters.Fields);
 
                 var linkedBanknotes = shapedBanknotes.Select(banknote =>
                 {
@@ -102,7 +102,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else if (mediaType == "application/json")
+            else
             {
                 var previousPageLink = retrievedBanknotes.HasPrevious ?
                     CreateBanknotesResourceUri(resourceParameters,
@@ -125,11 +125,7 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                return Ok(banknotes.ShapeData(resourceParameters.Fields));
-            }
-            else
-            {
-                return Ok(banknotes);
+                return Ok(shapedBanknotes);
             }
         }
 
@@ -164,24 +160,20 @@ namespace Recollectable.API.Controllers
             }
 
             var banknote = _mapper.Map<BanknoteDto>(retrievedBanknote);
+            var shapedBanknote = banknote.ShapeData(fields);
 
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateBanknoteLinks(id, fields);
-                var linkedResource = banknote.ShapeData(fields)
-                    as IDictionary<string, object>;
+                var linkedResource = shapedBanknote as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
                 return Ok(linkedResource);
             }
-            else if (mediaType == "application/json")
-            {
-                return Ok(banknote.ShapeData(fields));
-            }
             else
             {
-                return Ok(banknote);
+                return Ok(shapedBanknote);
             }
         }
 
@@ -262,8 +254,7 @@ namespace Recollectable.API.Controllers
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateBanknoteLinks(returnedBanknote.Id, null);
-                var linkedResource = returnedBanknote.ShapeData(null)
-                    as IDictionary<string, object>;
+                var linkedResource = returnedBanknote.ShapeData(null) as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 

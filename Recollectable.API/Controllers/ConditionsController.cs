@@ -50,6 +50,7 @@ namespace Recollectable.API.Controllers
 
             var retrievedConditions = await _conditionService.FindConditions(resourceParameters);
             var conditions = _mapper.Map<IEnumerable<ConditionDto>>(retrievedConditions);
+            var shapedConditions = conditions.ShapeData(resourceParameters.Fields);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -66,7 +67,6 @@ namespace Recollectable.API.Controllers
 
                 var links = CreateConditionsLinks(resourceParameters,
                     retrievedConditions.HasNext, retrievedConditions.HasPrevious);
-                var shapedConditions = conditions.ShapeData(resourceParameters.Fields);
 
                 var linkedConditions = shapedConditions.Select(country =>
                 {
@@ -87,7 +87,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else if (mediaType == "application/json")
+            else
             {
                 var previousPageLink = retrievedConditions.HasPrevious ?
                     CreateConditionsResourceUri(resourceParameters,
@@ -110,11 +110,7 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                return Ok(conditions.ShapeData(resourceParameters.Fields));
-            }
-            else
-            {
-                return Ok(conditions);
+                return Ok(shapedConditions);
             }
         }
 
@@ -135,24 +131,20 @@ namespace Recollectable.API.Controllers
             }
 
             var condition = _mapper.Map<ConditionDto>(retrievedCondition);
+            var shapedCondition = condition.ShapeData(fields);
 
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateConditionLinks(id, fields);
-                var linkedResource = condition.ShapeData(fields)
-                    as IDictionary<string, object>;
+                var linkedResource = shapedCondition as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
                 return Ok(linkedResource);
             }
-            else if (mediaType == "application/json")
-            {
-                return Ok(condition.ShapeData(fields));
-            }
             else
             {
-                return Ok(condition);
+                return Ok(shapedCondition);
             }
         }
 
@@ -183,8 +175,7 @@ namespace Recollectable.API.Controllers
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateConditionLinks(returnedCondition.Id, null);
-                var linkedResource = returnedCondition.ShapeData(null)
-                    as IDictionary<string, object>;
+                var linkedResource = returnedCondition.ShapeData(null) as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 

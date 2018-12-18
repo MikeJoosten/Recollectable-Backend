@@ -57,6 +57,7 @@ namespace Recollectable.API.Controllers
 
             var retrievedCoins = await _coinService.FindCoins(resourceParameters);
             var coins = _mapper.Map<IEnumerable<CoinDto>>(retrievedCoins);
+            var shapedCoins = coins.ShapeData(resourceParameters.Fields);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -73,7 +74,6 @@ namespace Recollectable.API.Controllers
 
                 var links = CreateCoinsLinks(resourceParameters,
                     retrievedCoins.HasNext, retrievedCoins.HasPrevious);
-                var shapedCoins = coins.ShapeData(resourceParameters.Fields);
 
                 var linkedCoins = shapedCoins.Select(coin =>
                 {
@@ -94,7 +94,7 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else if (mediaType == "application/json")
+            else
             {
                 var previousPageLink = retrievedCoins.HasPrevious ?
                     CreateCoinsResourceUri(resourceParameters,
@@ -117,11 +117,7 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                return Ok(coins.ShapeData(resourceParameters.Fields));
-            }
-            else
-            {
-                return Ok(coins);
+                return Ok(shapedCoins);
             }
         }
 
@@ -142,24 +138,20 @@ namespace Recollectable.API.Controllers
             }
 
             var coin = _mapper.Map<CoinDto>(retrievedCoin);
+            var shapedCoin = coin.ShapeData(fields);
 
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateCoinLinks(id, fields);
-                var linkedResource = coin.ShapeData(fields)
-                    as IDictionary<string, object>;
+                var linkedResource = shapedCoin as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
                 return Ok(linkedResource);
             }
-            else if (mediaType == "application/json")
-            {
-                return Ok(coin.ShapeData(fields));
-            }
             else
             {
-                return Ok(coin);
+                return Ok(shapedCoin);
             }
         }
 
@@ -205,8 +197,7 @@ namespace Recollectable.API.Controllers
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateCoinLinks(returnedCoin.Id, null);
-                var linkedResource = returnedCoin.ShapeData(null)
-                    as IDictionary<string, object>;
+                var linkedResource = returnedCoin.ShapeData(null) as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 

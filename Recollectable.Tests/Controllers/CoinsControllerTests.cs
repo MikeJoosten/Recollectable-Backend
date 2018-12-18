@@ -75,7 +75,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCoins_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -96,7 +95,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCoins_ReturnsAllCoins_GivenNoMediaType()
+        public async Task GetCoins_ReturnsAllCoins_GivenAnyMediaType()
         {
             //Arrange
             var coins = _builder.Build(2);
@@ -109,28 +108,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetCoins(resourceParameters, null) as OkObjectResult;
-            var result = response.Value as List<CoinDto>;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public async Task GetCoins_ReturnsAllCoins_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            var coins = _builder.Build(2);
-            var pagedList = PagedList<Coin>.Create(coins,
-                resourceParameters.Page, resourceParameters.PageSize);
-
-            _mockCoinService
-                .Setup(c => c.FindCoins(resourceParameters))
-                .ReturnsAsync(pagedList);
-
-            //Act
-            var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -161,10 +138,9 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCoins_ReturnsCoins_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCoins_ReturnsCoins_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
             var coins = _builder.Build(4);
             var pagedList = PagedList<Coin>.Create(coins, 1, 2);
 
@@ -173,7 +149,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(pagedList);
 
             //Act
-            var response = await _controller.GetCoins(resourceParameters, mediaType) as OkObjectResult;
+            var response = await _controller.GetCoins(resourceParameters, null) as OkObjectResult;
             var result = response.Value as List<ExpandoObject>;
 
             //Assert
@@ -227,7 +203,6 @@ namespace Recollectable.Tests.Controllers
 
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
         public async Task GetCoin_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
@@ -247,7 +222,7 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCoin_ReturnsCoin_GivenNoMediaType()
+        public async Task GetCoin_ReturnsCoin_GivenAnyMediaType()
         {
             //Arrange
             Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
@@ -259,28 +234,6 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.GetCoin(id, null, null) as OkObjectResult;
-            var result = response.Value as CoinDto;
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Dollars", result.Type);
-        }
-
-        [Fact]
-        public async Task GetCoin_ReturnsCoin_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            Guid id = new Guid("a4b0f559-449f-414c-943e-5e69b6c522fb");
-            var coin = _builder.WithId(id).WithType("Dollars").Build();
-
-            _mockCoinService
-                .Setup(c => c.FindCoinById(id))
-                .ReturnsAsync(coin);
-
-            //Act
-            var response = await _controller.GetCoin(id, null, mediaType) as OkObjectResult;
             dynamic result = response.Value as ExpandoObject;
 
             //Assert

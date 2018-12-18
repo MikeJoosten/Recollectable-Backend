@@ -61,7 +61,7 @@ namespace Recollectable.API
         {
             services.AddMvc(options => {
                 options.ReturnHttpNotAcceptable = true;
-                options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+                options.OutputFormatters.Add(new CustomXmlFormatter());
                 options.InputFormatters.Add(new XmlSerializerInputFormatter(options));
 
                 var jsonOutputFormatter = options.OutputFormatters
