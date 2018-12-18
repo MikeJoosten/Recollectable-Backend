@@ -57,6 +57,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new UserTestBuilder();
             resourceParameters = new UsersResourceParameters();
+            resourceParameters.Fields = "Id, UserName";
         }
 
         [Fact]
@@ -83,6 +84,27 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public async Task GetUsers_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            var users = _builder.Build(2);
+            var pagedList = PagedList<User>.Create(users,
+                resourceParameters.Page, resourceParameters.PageSize);
+            resourceParameters.Fields = "UserName";
+
+            _mockUserService
+                .Setup(u => u.FindUsers(resourceParameters))
+                .ReturnsAsync(pagedList);
+
+            //Act
+            var response = await _controller.GetUsers(resourceParameters, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Theory]
@@ -213,6 +235,26 @@ namespace Recollectable.Tests.Controllers
             Assert.IsType<NotFoundResult>(response);
         }
 
+        [Fact]
+        public async Task GetCoin_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+            var user = _builder.WithId(id).WithUserName("Ryan").Build();
+            resourceParameters.Fields = "UserName";
+
+            _mockUserService
+                .Setup(u => u.FindUserById(id))
+                .ReturnsAsync(user);
+
+            //Act
+            var response = await _controller.GetUser(id, resourceParameters.Fields, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
@@ -227,7 +269,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(user);
 
             //Act
-            var response = await _controller.GetUser(id, null, mediaType);
+            var response = await _controller.GetUser(id, resourceParameters.Fields, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -267,7 +309,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(user);
 
             //Act
-            var response = await _controller.GetUser(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetUser(id, resourceParameters.Fields, mediaType) as OkObjectResult;
             dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert

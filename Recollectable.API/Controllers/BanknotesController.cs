@@ -69,6 +69,11 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var paginationMetadata = new
                 {
                     totalCount = retrievedBanknotes.TotalCount,
@@ -164,6 +169,11 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var links = CreateBanknoteLinks(id, fields);
                 var linkedResource = shapedBanknote as IDictionary<string, object>;
 
@@ -505,23 +515,20 @@ namespace Recollectable.API.Controllers
         {
             var links = new List<LinkDto>();
 
-            if (string.IsNullOrEmpty(fields))
-            {
-                links.Add(new LinkDto(Url.Link("GetBanknote",
-                    new { id }), "self", "GET"));
+            links.Add(new LinkDto(Url.Link("GetBanknote",
+                new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateBanknote",
-                    new { }), "create_banknote", "POST"));
+            links.Add(new LinkDto(Url.Link("CreateBanknote",
+                new { }), "create_banknote", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateBanknote",
-                    new { id }), "update_banknote", "PUT"));
+            links.Add(new LinkDto(Url.Link("UpdateBanknote",
+                new { id }), "update_banknote", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateBanknote",
-                    new { id }), "partially_update_banknote", "PATCH"));
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateBanknote",
+                new { id }), "partially_update_banknote", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteBanknote",
-                    new { id }), "delete_banknote", "DELETE"));
-            }
+            links.Add(new LinkDto(Url.Link("DeleteBanknote",
+                new { id }), "delete_banknote", "DELETE"));
 
             return links;
         }

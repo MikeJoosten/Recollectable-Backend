@@ -35,6 +35,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new ConditionTestBuilder();
             resourceParameters = new ConditionsResourceParameters();
+            resourceParameters.Fields = "Id, Grade";
         }
 
         [Fact]
@@ -61,6 +62,27 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public async Task GetConditions_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            var conditions = _builder.Build(2);
+            var pagedList = PagedList<Condition>.Create(conditions,
+                resourceParameters.Page, resourceParameters.PageSize);
+            resourceParameters.Fields = "Grade";
+
+            _mockConditionService
+                .Setup(c => c.FindConditions(resourceParameters))
+                .ReturnsAsync(pagedList);
+
+            //Act
+            var response = await _controller.GetConditions(resourceParameters, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Theory]
@@ -131,7 +153,6 @@ namespace Recollectable.Tests.Controllers
         public async Task GetConditions_ReturnsConditions_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
             var conditions = _builder.Build(4);
             var pagedList = PagedList<Condition>.Create(conditions, 1, 2);
 
@@ -192,6 +213,26 @@ namespace Recollectable.Tests.Controllers
             Assert.IsType<NotFoundResult>(response);
         }
 
+        [Fact]
+        public async Task GetCondition_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid id = new Guid("8cef5964-01a4-40c7-9f16-28af109094d4");
+            var condition = _builder.WithId(id).WithGrade("XF48").Build();
+            resourceParameters.Fields = "Grade";
+
+            _mockConditionService
+                .Setup(c => c.FindConditionById(id))
+                .ReturnsAsync(condition);
+
+            //Act
+            var response = await _controller.GetCondition(id, resourceParameters.Fields, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
@@ -206,7 +247,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(condition);
 
             //Act
-            var response = await _controller.GetCondition(id, null, mediaType);
+            var response = await _controller.GetCondition(id, resourceParameters.Fields, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -246,7 +287,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(condition);
 
             //Act
-            var response = await _controller.GetCondition(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCondition(id, resourceParameters.Fields, mediaType) as OkObjectResult;
             dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert

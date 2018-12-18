@@ -61,6 +61,11 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var paginationMetadata = new
                 {
                     totalCount = retrievedCoins.TotalCount,
@@ -142,6 +147,11 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var links = CreateCoinLinks(id, fields);
                 var linkedResource = shapedCoin as IDictionary<string, object>;
 

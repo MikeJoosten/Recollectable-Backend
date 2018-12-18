@@ -45,6 +45,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new BanknoteTestBuilder();
             resourceParameters = new CurrenciesResourceParameters();
+            resourceParameters.Fields = "Id, Type";
         }
 
         [Fact]
@@ -71,6 +72,27 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public async Task GetBanknotes_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes,
+                resourceParameters.Page, resourceParameters.PageSize);
+            resourceParameters.Fields = "Type";
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknotes(resourceParameters))
+                .ReturnsAsync(pagedList);
+
+            //Act
+            var response = await _controller.GetBanknotes(resourceParameters, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Theory]
@@ -201,6 +223,26 @@ namespace Recollectable.Tests.Controllers
             Assert.IsType<NotFoundResult>(response);
         }
 
+        [Fact]
+        public async Task GetBanknote_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
+            var banknote = _builder.WithId(id).WithType("Dollars").Build();
+            resourceParameters.Fields = "Type";
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknoteById(id))
+                .ReturnsAsync(banknote);
+
+            //Act
+            var response = await _controller.GetBanknote(id, resourceParameters.Fields, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
@@ -215,7 +257,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(banknote);
 
             //Act
-            var response = await _controller.GetBanknote(id, null, mediaType);
+            var response = await _controller.GetBanknote(id, resourceParameters.Fields, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -255,7 +297,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(banknote);
 
             //Act
-            var response = await _controller.GetBanknote(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetBanknote(id, resourceParameters.Fields, mediaType) as OkObjectResult;
             dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert

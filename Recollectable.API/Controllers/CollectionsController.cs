@@ -58,6 +58,11 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var paginationMetadata = new
                 {
                     totalCount = retrievedCollections.TotalCount,
@@ -139,6 +144,11 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var links = CreateCollectionLinks(id, fields);
                 var linkedResource = shapedCollection as IDictionary<string, object>;
 

@@ -39,6 +39,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new CollectionCollectableTestBuilder();
             resourceParameters = new CollectionCollectablesResourceParameters();
+            resourceParameters.Fields = "Id, Collectable";
         }
 
         [Fact]
@@ -75,6 +76,29 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public async Task GetCollectionCollectables_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid collectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789");
+
+            var collectionCollectables = _builder.Build(2);
+            var pagedList = PagedList<CollectionCollectable>.Create(collectionCollectables,
+                resourceParameters.Page, resourceParameters.PageSize);
+            resourceParameters.Fields = "Collectable";
+
+            _mockCollectableService
+                .Setup(c => c.FindCollectionCollectables(collectionId, resourceParameters))
+                .ReturnsAsync(pagedList);
+
+            //Act
+            var response = await _controller.GetCollectionCollectables(collectionId, resourceParameters, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Theory]
@@ -215,6 +239,27 @@ namespace Recollectable.Tests.Controllers
             Assert.IsType<NotFoundResult>(response);
         }
 
+        [Fact]
+        public async Task GetCollectionCollectable_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid id = new Guid("355e785b-dd47-4fb7-b112-1fb34d189569");
+            Guid collectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789");
+            var collectionCollectable = _builder.WithId(id).WithCountryName("Mexico").Build();
+            resourceParameters.Fields = "Collectable";
+
+            _mockCollectableService
+                .Setup(c => c.FindCollectionCollectableById(collectionId, id))
+                .ReturnsAsync(collectionCollectable);
+
+            //Act
+            var response = await _controller.GetCollectionCollectable(collectionId, id, resourceParameters.Fields, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
@@ -230,7 +275,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(collectionCollectable);
 
             //Act
-            var response = await _controller.GetCollectionCollectable(collectionId, id, null, mediaType);
+            var response = await _controller.GetCollectionCollectable(collectionId, id, resourceParameters.Fields, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -273,7 +318,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(collectionCollectable);
 
             //Act
-            var response = await _controller.GetCollectionCollectable(collectionId, id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCollectionCollectable(collectionId, id, resourceParameters.Fields, mediaType) as OkObjectResult;
             dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert

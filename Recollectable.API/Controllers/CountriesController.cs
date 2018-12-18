@@ -34,7 +34,6 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
-        //TODO Error when no ID in resourceParameters.Fields (HATEOAS)
         [HttpHead]
         [HttpGet(Name = "GetCountries")]
         public async Task<IActionResult> GetCountries(CountriesResourceParameters resourceParameters,
@@ -56,6 +55,11 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var paginationMetadata = new
                 {
                     totalCount = retrievedCountries.TotalCount,
@@ -137,6 +141,11 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var links = CreateCountryLinks(id, fields);
                 var linkedResource = shapedCountry as IDictionary<string, object>;
 

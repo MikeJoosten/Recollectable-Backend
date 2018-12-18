@@ -45,6 +45,7 @@ namespace Recollectable.Tests.Controllers
 
             _builder = new CoinTestBuilder();
             resourceParameters = new CurrenciesResourceParameters();
+            resourceParameters.Fields = "Id, Type";
         }
 
         [Fact]
@@ -71,6 +72,27 @@ namespace Recollectable.Tests.Controllers
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public async Task GetCoins_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            var coins = _builder.Build(2);
+            var pagedList = PagedList<Coin>.Create(coins,
+                resourceParameters.Page, resourceParameters.PageSize);
+            resourceParameters.Fields = "Type";
+
+            _mockCoinService
+                .Setup(c => c.FindCoins(resourceParameters))
+                .ReturnsAsync(pagedList);
+
+            //Act
+            var response = await _controller.GetCoins(resourceParameters, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Theory]
@@ -201,6 +223,26 @@ namespace Recollectable.Tests.Controllers
             Assert.IsType<NotFoundResult>(response);
         }
 
+        [Fact]
+        public async Task GetCoin_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
+            var coin = _builder.WithId(id).WithType("Dollars").Build();
+            resourceParameters.Fields = "Type";
+
+            _mockCoinService
+                .Setup(c => c.FindCoinById(id))
+                .ReturnsAsync(coin);
+
+            //Act
+            var response = await _controller.GetCoin(id, resourceParameters.Fields, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
@@ -215,7 +257,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(coin);
 
             //Act
-            var response = await _controller.GetCoin(id, null, mediaType);
+            var response = await _controller.GetCoin(id, resourceParameters.Fields, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
@@ -255,7 +297,7 @@ namespace Recollectable.Tests.Controllers
                 .ReturnsAsync(coin);
 
             //Act
-            var response = await _controller.GetCoin(id, null, mediaType) as OkObjectResult;
+            var response = await _controller.GetCoin(id, resourceParameters.Fields, mediaType) as OkObjectResult;
             dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
