@@ -33,6 +33,12 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves conditions
+        /// </summary>
+        /// <returns>List of conditions</returns>
+        /// <response code="200">Returns a list of conditions</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetConditions")]
         public async Task<IActionResult> GetConditions(ConditionsResourceParameters resourceParameters,
@@ -73,13 +79,13 @@ namespace Recollectable.API.Controllers
                 var links = CreateConditionsLinks(resourceParameters,
                     retrievedConditions.HasNext, retrievedConditions.HasPrevious);
 
-                var linkedConditions = shapedConditions.Select(country =>
+                var linkedConditions = shapedConditions.Select(condition =>
                 {
-                    var conditionAsDictionary = country as IDictionary<string, object>;
-                    var countryLinks = CreateConditionLinks((Guid)conditionAsDictionary["Id"],
+                    var conditionAsDictionary = condition as IDictionary<string, object>;
+                    var conditionLinks = CreateConditionLinks((Guid)conditionAsDictionary["Id"],
                         resourceParameters.Fields);
 
-                    conditionAsDictionary.Add("links", countryLinks);
+                    conditionAsDictionary.Add("links", conditionLinks);
 
                     return conditionAsDictionary;
                 });
@@ -119,6 +125,16 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested condition by condition ID
+        /// </summary>
+        /// <param name="id">Condition ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested condition</returns>
+        /// <response code="200">Returns the requested condition</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting condition ID</response>
         [HttpGet("{id}", Name = "GetCondition")]
         public async Task<IActionResult> GetCondition(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -158,11 +174,29 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Creates a condition
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /conditions
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="condition">Custom condition</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created condition</returns>
+        /// <response code="201">Returns the newly created condition</response>
+        /// <response code="400">Invalid condition</response>
+        /// <response code="422">Invalid condition validation</response>
         [HttpPost(Name = "CreateCondition")]
-        public async Task<IActionResult> CreateCondition([FromBody] ConditionCreationDto country,
+        public async Task<IActionResult> CreateCondition([FromBody] ConditionCreationDto condition,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (country == null)
+            if (condition == null)
             {
                 return BadRequest();
             }
@@ -172,15 +206,15 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var newCountry = _mapper.Map<Condition>(country);
-            await _conditionService.CreateCondition(newCountry);
+            var newCondition = _mapper.Map<Condition>(condition);
+            await _conditionService.CreateCondition(newCondition);
 
             if (!await _conditionService.Save())
             {
                 throw new Exception("Creating a condition failed on save.");
             }
 
-            var returnedCondition = _mapper.Map<ConditionDto>(newCountry);
+            var returnedCondition = _mapper.Map<ConditionDto>(newCondition);
 
             if (mediaType == "application/json+hateoas")
             {
@@ -189,18 +223,24 @@ namespace Recollectable.API.Controllers
 
                 linkedResource.Add("links", links);
 
-                return CreatedAtRoute("GetCountry",
+                return CreatedAtRoute("GetCondition",
                     new { id = returnedCondition.Id },
                     linkedResource);
             }
             else
             {
-                return CreatedAtRoute("GetCountry",
+                return CreatedAtRoute("GetCondition",
                     new { id = returnedCondition.Id },
                     returnedCondition);
             }
         }
 
+        /// <summary>
+        /// Invalid condition creation request
+        /// </summary>
+        /// <param name="id">Condition ID</param>
+        /// <response code="404">Unexisting condition ID</response>
+        /// <response code="409">Already existing condition ID</response>
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockConditionCreation(Guid id)
         {
@@ -212,6 +252,24 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Updates a condition
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /conditions/{id}
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="id">Condition ID</param>
+        /// <param name="condition">Custom condition</param>
+        /// <response code="204">Updated the condition successfully</response>
+        /// <response code="400">Invalid condition</response>
+        /// <response code="404">Unexisting condition ID</response>
+        /// <response code="422">Invalid condition validation</response>
         [HttpPut("{id}", Name = "UpdateCondition")]
         public async Task<IActionResult> UpdateCondition(Guid id, [FromBody] ConditionUpdateDto condition)
         {
@@ -243,6 +301,24 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Update specific fields of a condition
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH /conditions/{id}
+        ///     [
+        ///	        
+        ///     ]
+        /// </remarks>
+        /// <param name="id">Condition ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the condition successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting condition ID</response>
+        /// <response code="422">Invalid condition validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCondition")]
         public async Task<IActionResult> PartiallyUpdateCondition(Guid id,
             [FromBody] JsonPatchDocument<ConditionUpdateDto> patchDoc)
@@ -280,6 +356,12 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a condition
+        /// </summary>
+        /// <param name="id">Condition ID</param>
+        /// <response code="204">Removed the condition successfully</response>
+        /// <response code="404">Unexisting condition ID</response>
         [HttpDelete("{id}", Name = "DeleteCondition")]
         public async Task<IActionResult> DeleteCondition(Guid id)
         {

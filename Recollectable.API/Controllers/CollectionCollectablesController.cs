@@ -37,6 +37,15 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves collectables of a certain collection
+        /// </summary>
+        /// <returns>List of collectables</returns>
+        /// <param name="collectionId">Collection ID</param>
+        /// <param name="resourceParameters"></param>
+        /// <param name="mediaType"></param>
+        /// <response code="200">Returns a list of collectables</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetCollectionCollectables")]
         public async Task<IActionResult> GetCollectionCollectables(Guid collectionId, 
@@ -132,6 +141,17 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested collectable by collection and collectable ID
+        /// </summary>
+        /// <param name="collectionId">Collection ID</param>
+        /// <param name="id">Collectable ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested collectable</returns>
+        /// <response code="200">Returns the requested collectable</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting collection or collectable ID</response>
         [HttpGet("{id}", Name = "GetCollectionCollectable")]
         public async Task<IActionResult> GetCollectionCollectable(Guid collectionId, Guid id, 
             [FromQuery] string fields, [FromHeader(Name = "Accept")] string mediaType)
@@ -171,6 +191,25 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Creates a collectable
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /{collectionId}/collectables
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="collectionId">Collection ID</param>
+        /// <param name="collectable">Custom collectable</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created collectable</returns>
+        /// <response code="201">Returns the newly created collectable</response>
+        /// <response code="400">Invalid collectable</response>
+        /// <response code="422">Invalid collectable validation</response>
         [HttpPost(Name = "CreateCollectionCollectable")]
         public async Task<IActionResult> CreateCollectionCollectable(Guid collectionId, 
             [FromBody] CollectionCollectableCreationDto collectable,
@@ -235,6 +274,13 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Invalid collectable creation request
+        /// </summary>
+        /// <param name="collectionId">Collection ID</param>
+        /// <param name="id">Collectable ID</param>
+        /// <response code="404">Unexisting collectable ID</response>
+        /// <response code="409">Already existing collectable ID</response>
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCollectionCollectableCreation(Guid collectionId, Guid id)
         {
@@ -246,6 +292,25 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Updates a collectable
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /{collectionId}/collectables/{id}
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="collectionId">Collection ID</param>
+        /// <param name="id">Collectable ID</param>
+        /// <param name="collectable">Custom collectable</param>
+        /// <response code="204">Updated the collectable successfully</response>
+        /// <response code="400">Invalid collectable</response>
+        /// <response code="404">Unexisting collectable or collection ID</response>
+        /// <response code="422">Invalid collectable validation</response>
         [HttpPut("{id}", Name = "UpdateCollectionCollectable")]
         public async Task<IActionResult> UpdateCollectionCollectable(Guid collectionId, Guid id,
             [FromBody] CollectionCollectableUpdateDto collectable)
@@ -302,6 +367,25 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Update specific fields of a collectable
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH /{collectionId}/collectables/{id}
+        ///     [
+        ///	        
+        ///     ]
+        /// </remarks>
+        /// <param name="collectionId">Collection ID</param>
+        /// <param name="id">Collectable ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the collectable successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting collectable or collection ID</response>
+        /// <response code="422">Invalid collectable validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCollectionCollectable")]
         public async Task<IActionResult> PartiallyUpdateCollectionCollectable(Guid collectionId, Guid id,
             [FromBody] JsonPatchDocument<CollectionCollectableUpdateDto> patchDoc)
@@ -363,6 +447,13 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a collectable
+        /// </summary>
+        /// <param name="collectionId">Collection ID</param>
+        /// <param name="id">Collectable ID</param>
+        /// <response code="204">Removed the collectable successfully</response>
+        /// <response code="404">Unexisting collectable or collection ID</response>
         [HttpDelete("{id}", Name = "DeleteCollectionCollectable")]
         public async Task<IActionResult> DeleteCollectionCollectable(Guid collectionId, Guid id)
         {

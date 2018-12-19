@@ -47,6 +47,12 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves users
+        /// </summary>
+        /// <returns>List of users</returns>
+        /// <response code="200">Returns a list of users</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetUsers")]
         public async Task<IActionResult> GetUsers(UsersResourceParameters resourceParameters,
@@ -133,6 +139,16 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested user by user ID
+        /// </summary>
+        /// <param name="id">User ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested user</returns>
+        /// <response code="200">Returns the requested user</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting user ID</response>
         [HttpGet("{id}", Name = "GetUser")]
         public async Task<IActionResult> GetUser(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -172,6 +188,24 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Creates a user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /register
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="user">Custom user</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created user</returns>
+        /// <response code="201">Returns the newly created user</response>
+        /// <response code="400">Invalid user</response>
+        /// <response code="422">Invalid user validation</response>
         [AllowAnonymous]
         [HttpPost("register", Name = "Register")]
         public async Task<IActionResult> Register([FromBody] UserCreationDto user,
@@ -231,6 +265,12 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Invalid user creation request
+        /// </summary>
+        /// <param name="id">User ID</param>
+        /// <response code="404">Unexisting user ID</response>
+        /// <response code="409">Already existing user ID</response>
         [HttpPost("register/{id}")]
         public async Task<IActionResult> BlockRegistration(Guid id)
         {
@@ -242,6 +282,7 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Create Swagger comments
         [AllowAnonymous]
         [HttpPost("login", Name = "Login")]
         public async Task<IActionResult> Login([FromBody] CredentialsDto credentials)
@@ -389,6 +430,24 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Updates a user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /users/{id}
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="id">User ID</param>
+        /// <param name="user">Custom user</param>
+        /// <response code="204">Updated the user successfully</response>
+        /// <response code="400">Invalid user</response>
+        /// <response code="404">Unexisting user ID</response>
+        /// <response code="422">Invalid user validation</response>
         [HttpPut("{id}", Name = "UpdateUser")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto user)
         {
@@ -420,6 +479,24 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Update specific fields of a user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH /users/{id}
+        ///     [
+        ///	        
+        ///     ]
+        /// </remarks>
+        /// <param name="id">User ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the user successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting user ID</response>
+        /// <response code="422">Invalid user validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateUser")]
         public async Task<IActionResult> PartiallyUpdateUser(Guid id,
             [FromBody] JsonPatchDocument<UserUpdateDto> patchDoc)
@@ -457,6 +534,12 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a user
+        /// </summary>
+        /// <param name="id">User ID</param>
+        /// <response code="204">Removed the user successfully</response>
+        /// <response code="404">Unexisting user ID</response>
         [HttpDelete("{id}", Name = "DeleteUser")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {

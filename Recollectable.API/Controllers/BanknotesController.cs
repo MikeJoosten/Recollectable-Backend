@@ -396,6 +396,10 @@ namespace Recollectable.API.Controllers
         /// </remarks>
         /// <param name="id">Banknote ID</param>
         /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the banknote successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting banknote ID</response>
+        /// <response code="422">Invalid banknote validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateBanknote")]
         public async Task<IActionResult> PartiallyUpdateBanknote(Guid id,
             [FromBody] JsonPatchDocument<BanknoteUpdateDto> patchDoc)
@@ -443,6 +447,12 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a banknote
+        /// </summary>
+        /// <param name="id">Banknote ID</param>
+        /// <response code="204">Removed the banknote successfully</response>
+        /// <response code="404">Unexisting banknote ID</response>
         [HttpDelete("{id}", Name = "DeleteBanknote")]
         public async Task<IActionResult> DeleteBanknote(Guid id)
         {

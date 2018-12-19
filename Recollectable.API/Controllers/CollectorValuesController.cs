@@ -34,6 +34,12 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves collector values
+        /// </summary>
+        /// <returns>List of collector values</returns>
+        /// <response code="200">Returns a list of collector values</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetCollectorValues")]
         public async Task<IActionResult> GetCollectorValues(CollectorValuesResourceParameters resourceParameters,
@@ -121,6 +127,16 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested collector value by collector value ID
+        /// </summary>
+        /// <param name="id">Collector value ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested collector value</returns>
+        /// <response code="200">Returns the requested collector value</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting collector value ID</response>
         [HttpGet("{id}", Name = "GetCollectorValue")]
         public async Task<IActionResult> GetCollectorValue(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -160,6 +176,24 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Creates a collector value
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /collector-values
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="collectorValue">Custom collector value</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created collector value</returns>
+        /// <response code="201">Returns the newly created collector value</response>
+        /// <response code="400">Invalid collector value</response>
+        /// <response code="422">Invalid collector value validation</response>
         [HttpPost(Name = "CreateCollectorValue")]
         public async Task<IActionResult> CreateCollectorValue([FromBody] CollectorValueCreationDto collectorValue,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -203,6 +237,12 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Invalid collector value creation request
+        /// </summary>
+        /// <param name="id">Collector value ID</param>
+        /// <response code="404">Unexisting collector value ID</response>
+        /// <response code="409">Already existing collector value ID</response>
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCollectorValueCreation(Guid id)
         {
@@ -214,6 +254,24 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Updates a collector value
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /collector-values/{id}
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="id">Collector value ID</param>
+        /// <param name="collectorValue">Custom collector value</param>
+        /// <response code="204">Updated the collector value successfully</response>
+        /// <response code="400">Invalid collector value</response>
+        /// <response code="404">Unexisting collector value ID</response>
+        /// <response code="422">Invalid collector value validation</response>
         [HttpPut("{id}", Name = "UpdateCollectorValue")]
         public async Task<IActionResult> UpdateCollectorValue
             (Guid id, [FromBody] CollectorValueUpdateDto collectorValue)
@@ -246,6 +304,24 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Update specific fields of a collector value
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH /collector-values/{id}
+        ///     [
+        ///	        
+        ///     ]
+        /// </remarks>
+        /// <param name="id">Collector value ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the collector value successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting collector value ID</response>
+        /// <response code="422">Invalid collector value validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCollectorValue")]
         public async Task<IActionResult> PartiallyUpdateCollectorValue(Guid id,
             [FromBody] JsonPatchDocument<CollectorValueUpdateDto> patchDoc)
@@ -283,6 +359,12 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a collector value
+        /// </summary>
+        /// <param name="id">Collector value ID</param>
+        /// <response code="204">Removed the collector value successfully</response>
+        /// <response code="404">Unexisting collector value ID</response>
         [HttpDelete("{id}", Name = "DeleteCollectorValue")]
         public async Task<IActionResult> DeleteCollectorValue(Guid id)
         {

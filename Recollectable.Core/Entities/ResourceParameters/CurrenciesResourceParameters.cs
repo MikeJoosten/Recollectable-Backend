@@ -20,9 +20,9 @@
         }
 
         /// <summary>
-        /// Type (Available types: Banknote - Coin)
+        /// Type
         /// </summary>
-        /// <example>Coin</example>
+        /// <example>Dollars</example>
         public string Type { get; set; } = string.Empty;
 
         /// <summary>

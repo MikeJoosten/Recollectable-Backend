@@ -34,7 +34,12 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
-        //Check ExpandoObject instead of resourceParameters
+        /// <summary>
+        /// Retrieves countries
+        /// </summary>
+        /// <returns>List of countries</returns>
+        /// <response code="200">Returns a list of countries</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetCountries")]
         public async Task<IActionResult> GetCountries(CountriesResourceParameters resourceParameters,
@@ -121,6 +126,16 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested country by country ID
+        /// </summary>
+        /// <param name="id">Country ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested country</returns>
+        /// <response code="200">Returns the requested country</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting country ID</response>
         [HttpGet("{id}", Name = "GetCountry")]
         public async Task<IActionResult> GetCountry(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -160,6 +175,24 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Creates a country
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /countries
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="country">Custom country</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created country</returns>
+        /// <response code="201">Returns the newly created country</response>
+        /// <response code="400">Invalid country</response>
+        /// <response code="422">Invalid country validation</response>
         [HttpPost(Name = "CreateCountry")]
         public async Task<IActionResult> CreateCountry([FromBody] CountryCreationDto country,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -209,6 +242,12 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Invalid country creation request
+        /// </summary>
+        /// <param name="id">Country ID</param>
+        /// <response code="404">Unexisting country ID</response>
+        /// <response code="409">Already existing country ID</response>
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCountryCreation(Guid id)
         {
@@ -220,6 +259,24 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Updates a country
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /countries/{id}
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="id">Country ID</param>
+        /// <param name="country">Custom country</param>
+        /// <response code="204">Updated the country successfully</response>
+        /// <response code="400">Invalid country</response>
+        /// <response code="404">Unexisting country ID</response>
+        /// <response code="422">Invalid country validation</response>
         [HttpPut("{id}", Name = "UpdateCountry")]
         public async Task<IActionResult> UpdateCountry(Guid id, [FromBody] CountryUpdateDto country)
         {
@@ -257,6 +314,24 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Update specific fields of a country
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH /countries/{id}
+        ///     [
+        ///	        
+        ///     ]
+        /// </remarks>
+        /// <param name="id">Country ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the country successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting country ID</response>
+        /// <response code="422">Invalid country validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCountry")]
         public async Task<IActionResult> PartiallyUpdateCountry(Guid id, 
             [FromBody] JsonPatchDocument<CountryUpdateDto> patchDoc)
@@ -300,6 +375,12 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a country
+        /// </summary>
+        /// <param name="id">Country ID</param>
+        /// <response code="204">Removed the country successfully</response>
+        /// <response code="404">Unexisting country ID</response>
         [HttpDelete("{id}", Name = "DeleteCountry")]
         public async Task<IActionResult> DeleteCountry(Guid id)
         {

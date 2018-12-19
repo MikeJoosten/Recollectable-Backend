@@ -39,6 +39,12 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves coins
+        /// </summary>
+        /// <returns>List of coins</returns>
+        /// <response code="200">Returns a list of coins</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetCoins")]
         public async Task<IActionResult> GetCoins(CurrenciesResourceParameters resourceParameters,
@@ -126,6 +132,16 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested coin by coin ID
+        /// </summary>
+        /// <param name="id">Coin ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested coin</returns>
+        /// <response code="200">Returns the requested coin</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting coin ID</response>
         [HttpGet("{id}", Name = "GetCoin")]
         public async Task<IActionResult> GetCoin(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -165,6 +181,24 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Creates a coin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /coins
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="coin">Custom coin</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created coin</returns>
+        /// <response code="201">Returns the newly created coin</response>
+        /// <response code="400">Invalid coin</response>
+        /// <response code="422">Invalid coin validation</response>
         [HttpPost(Name = "CreateCoin")]
         public async Task<IActionResult> CreateCoin([FromBody] CoinCreationDto coin,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -223,6 +257,12 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Invalid coin creation request
+        /// </summary>
+        /// <param name="id">Coin ID</param>
+        /// <response code="404">Unexisting coin ID</response>
+        /// <response code="409">Already existing coin ID</response>
         [HttpPost("{id}")]
         public async Task<IActionResult> BlockCoinCreation(Guid id)
         {
@@ -234,6 +274,24 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Updates a coin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /coins/{id}
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="id">Coin ID</param>
+        /// <param name="coin">Custom coin</param>
+        /// <response code="204">Updated the coin successfully</response>
+        /// <response code="400">Invalid coin</response>
+        /// <response code="404">Unexisting coin ID</response>
+        /// <response code="422">Invalid coin validation</response>
         [HttpPut("{id}", Name = "UpdateCoin")]
         public async Task<IActionResult> UpdateCoin(Guid id, [FromBody] CoinUpdateDto coin)
         {
@@ -281,6 +339,24 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Update specific fields of a coin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH /coins/{id}
+        ///     [
+        ///	        
+        ///     ]
+        /// </remarks>
+        /// <param name="id">Coin ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the coin successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting coin ID</response>
+        /// <response code="422">Invalid coin validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCoin")]
         public async Task<IActionResult> PartiallyUpdateCoin(Guid id,
             [FromBody] JsonPatchDocument<CoinUpdateDto> patchDoc)
@@ -334,6 +410,12 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a coin
+        /// </summary>
+        /// <param name="id">Coin ID</param>
+        /// <response code="204">Removed the coin successfully</response>
+        /// <response code="404">Unexisting coin ID</response>
         [HttpDelete("{id}", Name = "DeleteCoin")]
         public async Task<IActionResult> DeleteCoin(Guid id)
         {
