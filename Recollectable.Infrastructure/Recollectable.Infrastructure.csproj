@@ -21,6 +21,8 @@
     <Compile Remove="Migrations\20181029103155_initial.cs" />
     <Compile Remove="Migrations\20181029104134_initial.cs" />
     <Compile Remove="Migrations\20181029104156_seed.cs" />
+    <Compile Remove="Migrations\20181114105536_initial.cs" />
+    <Compile Remove="Migrations\20181114105831_seed.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +44,15 @@
     <Reference Include="Microsoft.AspNetCore.Mvc.Abstractions">
       <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.mvc.abstractions\2.1.1\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Abstractions.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Migrations\20181218155404_initial.Designer.cs">
+      <DependentUpon>20181218155404_initial.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Migrations\20181218155426_seed.Designer.cs">
+      <DependentUpon>20181218155426_seed.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

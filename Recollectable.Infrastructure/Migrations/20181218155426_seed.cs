@@ -12,8 +12,8 @@ namespace Recollectable.Infrastructure.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), "1df1e88e-58bd-4bbe-9ed2-d2889e073451", "User", "USER" },
-                    { new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), "d0d95e32-892e-4633-bdd9-d3cab71fb49d", "Admin", "ADMIN" }
+                    { new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), "5846a5a9-3362-4a0d-b30f-de28c60267eb", "Admin", "ADMIN" },
+                    { new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), "3e08623b-1f76-49ba-b2d0-bed011492b99", "User", "USER" }
                 });
 
             migrationBuilder.InsertData(
@@ -21,9 +21,9 @@ namespace Recollectable.Infrastructure.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), 0, "d2071ec4-0afb-4f52-9568-d8cedd94b681", "ryan.haywood@gmail.com", true, "Ryan", "Haywood", true, null, "RYAN.HAYWOOD@GMAIL.COM", "ryan", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Ryan" },
-                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), 0, "dc1c02cc-c365-4d4b-8702-3670b3fa4789", "jack.patillo@gmail.com", true, "Jack", "Patillo", true, null, "JACK.PATILLO@GMAIL.COM", "JACK", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Jack" },
-                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), 0, "e360ef29-9a43-4577-bc74-4bc086237b7c", "geoff.ramsey@gmail.com", true, "Geoff", "Ramsey", true, null, "GEOFF.RAMSEY@GMAIL.COM", "GEOFF", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Geoff" }
+                    { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), 0, "396c0691-a06a-4637-9f73-ab3cc3912b38", "geoff.ramsey@gmail.com", true, "Geoff", "Ramsey", true, null, "GEOFF.RAMSEY@GMAIL.COM", "GEOFF", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Geoff" },
+                    { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), 0, "d3f00b4c-49ce-4051-bf7b-8360dc5929dc", "ryan.haywood@gmail.com", true, "Ryan", "Haywood", true, null, "RYAN.HAYWOOD@GMAIL.COM", "ryan", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Ryan" },
+                    { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), 0, "65f91f23-e371-4a8a-80a6-8becc57b0350", "jack.patillo@gmail.com", true, "Jack", "Patillo", true, null, "JACK.PATILLO@GMAIL.COM", "JACK", "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", null, false, "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", false, "Jack" }
                 });
 
             migrationBuilder.InsertData(
@@ -32,10 +32,21 @@ namespace Recollectable.Infrastructure.Migrations
                 values: new object[,]
                 {
                     { new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), 0.0, 6.48, 6.48, 16.0, 18.0, 0.0, 0.0, 0.0, 6.48, 6.48, 15.0 },
-                    { new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), 0.0, 50.0, 50.0, 200.0, 200.0, 0.0, 0.0, 0.0, 50.0, 50.0, 50.0 },
-                    { new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), 0.0, 0.0, 0.0, 0.0, 0.0, 75.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
+                    { new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), 0.0, 4.0, 3.0, 40.0, 165.0, 0.0, 0.0, 0.0, 4.5, 3.5, 13.5 },
                     { new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), 0.0, 760.0, 760.0, 1650.0, 1650.0, 0.0, 0.0, 0.0, 760.0, 760.0, 760.0 },
-                    { new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), 0.0, 4.0, 3.0, 40.0, 165.0, 0.0, 0.0, 0.0, 4.5, 3.5, 13.5 }
+                    { new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), 0.0, 0.0, 0.0, 0.0, 0.0, 75.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
+                    { new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), 0.0, 50.0, 50.0, 200.0, 200.0, 0.0, 0.0, 0.0, 50.0, 50.0, 50.0 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Conditions",
+                columns: new[] { "Id", "Grade", "LanguageCode" },
+                values: new object[,]
+                {
+                    { new Guid("b5ef8ac8-c2ce-4926-a66a-e5f66f7b0dcb"), "Uncirculated", "en-GB" },
+                    { new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732"), "VF24", "en-US" },
+                    { new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae"), "Fine", "en-GB" },
+                    { new Guid("4e35ee38-1778-41ca-a858-5a2414de499c"), "MS62", "en-US" }
                 });
 
             migrationBuilder.InsertData(
@@ -96,15 +107,15 @@ namespace Recollectable.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "CollectionCollectables",
-                columns: new[] { "Id", "CollectableId", "CollectionId", "Condition" },
+                columns: new[] { "Id", "CollectableId", "CollectionId", "ConditionId" },
                 values: new object[,]
                 {
-                    { new Guid("1078b50b-1d89-4b24-b071-67af06348875"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), "MS62" },
-                    { new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), "Uncirculated" },
-                    { new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), "VF24" },
-                    { new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), "Fine" },
-                    { new Guid("583a957b-124f-49cb-955c-87d758819e87"), new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), "VF24" },
-                    { new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), "Fine" }
+                    { new Guid("1078b50b-1d89-4b24-b071-67af06348875"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("4e35ee38-1778-41ca-a858-5a2414de499c") },
+                    { new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("b5ef8ac8-c2ce-4926-a66a-e5f66f7b0dcb") },
+                    { new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732") },
+                    { new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae") },
+                    { new Guid("583a957b-124f-49cb-955c-87d758819e87"), new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732") },
+                    { new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae") }
                 });
         }
 
@@ -158,17 +169,17 @@ namespace Recollectable.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "AspNetRoles",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), "d0d95e32-892e-4633-bdd9-d3cab71fb49d" });
+                keyValues: new object[] { new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), "5846a5a9-3362-4a0d-b30f-de28c60267eb" });
 
             migrationBuilder.DeleteData(
                 table: "AspNetRoles",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), "1df1e88e-58bd-4bbe-9ed2-d2889e073451" });
+                keyValues: new object[] { new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), "3e08623b-1f76-49ba-b2d0-bed011492b99" });
 
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "dc1c02cc-c365-4d4b-8702-3670b3fa4789" });
+                keyValues: new object[] { new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), "65f91f23-e371-4a8a-80a6-8becc57b0350" });
 
             migrationBuilder.DeleteData(
                 table: "Collectables",
@@ -211,14 +222,34 @@ namespace Recollectable.Infrastructure.Migrations
                 keyValue: new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"));
 
             migrationBuilder.DeleteData(
-                table: "AspNetUsers",
-                keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "d2071ec4-0afb-4f52-9568-d8cedd94b681" });
+                table: "Conditions",
+                keyColumn: "Id",
+                keyValue: new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732"));
+
+            migrationBuilder.DeleteData(
+                table: "Conditions",
+                keyColumn: "Id",
+                keyValue: new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae"));
+
+            migrationBuilder.DeleteData(
+                table: "Conditions",
+                keyColumn: "Id",
+                keyValue: new Guid("4e35ee38-1778-41ca-a858-5a2414de499c"));
+
+            migrationBuilder.DeleteData(
+                table: "Conditions",
+                keyColumn: "Id",
+                keyValue: new Guid("b5ef8ac8-c2ce-4926-a66a-e5f66f7b0dcb"));
 
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumns: new[] { "Id", "ConcurrencyStamp" },
-                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "e360ef29-9a43-4577-bc74-4bc086237b7c" });
+                keyValues: new object[] { new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), "d3f00b4c-49ce-4051-bf7b-8360dc5929dc" });
+
+            migrationBuilder.DeleteData(
+                table: "AspNetUsers",
+                keyColumns: new[] { "Id", "ConcurrencyStamp" },
+                keyValues: new object[] { new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), "396c0691-a06a-4637-9f73-ab3cc3912b38" });
 
             migrationBuilder.DeleteData(
                 table: "CollectorValues",

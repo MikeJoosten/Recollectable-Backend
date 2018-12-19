@@ -34,6 +34,7 @@ namespace Recollectable.API.Controllers
             _mapper = mapper;
         }
 
+        //Check ExpandoObject instead of resourceParameters
         [HttpHead]
         [HttpGet(Name = "GetCountries")]
         public async Task<IActionResult> GetCountries(CountriesResourceParameters resourceParameters,
@@ -55,7 +56,7 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
-                if (!resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                if (!string.IsNullOrEmpty(resourceParameters.Fields) && !resourceParameters.Fields.ToLowerInvariant().Contains("id"))
                 {
                     return BadRequest("Field parameter 'id' is required");
                 }
@@ -141,7 +142,7 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
-                if (!fields.ToLowerInvariant().Contains("id"))
+                if (!string.IsNullOrEmpty(fields) && !fields.ToLowerInvariant().Contains("id"))
                 {
                     return BadRequest("Field parameter 'id' is required");
                 }

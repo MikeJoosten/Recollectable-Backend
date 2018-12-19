@@ -133,35 +133,6 @@ namespace Recollectable.Infrastructure.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("Collectable");
                 });
 
-            modelBuilder.Entity("Recollectable.Core.Entities.Collectables.CollectionCollectable", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<Guid>("CollectableId");
-
-                    b.Property<Guid>("CollectionId");
-
-                    b.Property<string>("Condition");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CollectableId");
-
-                    b.HasIndex("CollectionId");
-
-                    b.ToTable("CollectionCollectables");
-
-                    b.HasData(
-                        new { Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "MS62" },
-                        new { Id = new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), Condition = "Fine" },
-                        new { Id = new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "Uncirculated" },
-                        new { Id = new Guid("583a957b-124f-49cb-955c-87d758819e87"), CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), Condition = "VF24" },
-                        new { Id = new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), Condition = "Fine" },
-                        new { Id = new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "VF24" }
-                    );
-                });
-
             modelBuilder.Entity("Recollectable.Core.Entities.Collectables.CollectorValue", b =>
                 {
                     b.Property<Guid>("Id")
@@ -224,6 +195,58 @@ namespace Recollectable.Infrastructure.Migrations
                     );
                 });
 
+            modelBuilder.Entity("Recollectable.Core.Entities.Collections.CollectionCollectable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<Guid>("CollectableId");
+
+                    b.Property<Guid>("CollectionId");
+
+                    b.Property<Guid>("ConditionId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CollectableId");
+
+                    b.HasIndex("CollectionId");
+
+                    b.HasIndex("ConditionId");
+
+                    b.ToTable("CollectionCollectables");
+
+                    b.HasData(
+                        new { Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("4e35ee38-1778-41ca-a858-5a2414de499c") },
+                        new { Id = new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), ConditionId = new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae") },
+                        new { Id = new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("b5ef8ac8-c2ce-4926-a66a-e5f66f7b0dcb") },
+                        new { Id = new Guid("583a957b-124f-49cb-955c-87d758819e87"), CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), ConditionId = new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732") },
+                        new { Id = new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), ConditionId = new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae") },
+                        new { Id = new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732") }
+                    );
+                });
+
+            modelBuilder.Entity("Recollectable.Core.Entities.Collections.Condition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Grade");
+
+                    b.Property<string>("LanguageCode");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Conditions");
+
+                    b.HasData(
+                        new { Id = new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae"), Grade = "Fine", LanguageCode = "en-GB" },
+                        new { Id = new Guid("b5ef8ac8-c2ce-4926-a66a-e5f66f7b0dcb"), Grade = "Uncirculated", LanguageCode = "en-GB" },
+                        new { Id = new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732"), Grade = "VF24", LanguageCode = "en-US" },
+                        new { Id = new Guid("4e35ee38-1778-41ca-a858-5a2414de499c"), Grade = "MS62", LanguageCode = "en-US" }
+                    );
+                });
+
             modelBuilder.Entity("Recollectable.Core.Entities.Locations.Country", b =>
                 {
                     b.Property<Guid>("Id")
@@ -269,8 +292,8 @@ namespace Recollectable.Infrastructure.Migrations
                     b.ToTable("AspNetRoles");
 
                     b.HasData(
-                        new { Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), ConcurrencyStamp = "1df1e88e-58bd-4bbe-9ed2-d2889e073451", Name = "User", NormalizedName = "USER" },
-                        new { Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), ConcurrencyStamp = "d0d95e32-892e-4633-bdd9-d3cab71fb49d", Name = "Admin", NormalizedName = "ADMIN" }
+                        new { Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), ConcurrencyStamp = "3e08623b-1f76-49ba-b2d0-bed011492b99", Name = "User", NormalizedName = "USER" },
+                        new { Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), ConcurrencyStamp = "5846a5a9-3362-4a0d-b30f-de28c60267eb", Name = "Admin", NormalizedName = "ADMIN" }
                     );
                 });
 
@@ -329,9 +352,9 @@ namespace Recollectable.Infrastructure.Migrations
                     b.ToTable("AspNetUsers");
 
                     b.HasData(
-                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "d2071ec4-0afb-4f52-9568-d8cedd94b681", Email = "ryan.haywood@gmail.com", EmailConfirmed = true, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = true, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Ryan" },
-                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "dc1c02cc-c365-4d4b-8702-3670b3fa4789", Email = "jack.patillo@gmail.com", EmailConfirmed = true, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = true, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Jack" },
-                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "e360ef29-9a43-4577-bc74-4bc086237b7c", Email = "geoff.ramsey@gmail.com", EmailConfirmed = true, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = true, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Geoff" }
+                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "d3f00b4c-49ce-4051-bf7b-8360dc5929dc", Email = "ryan.haywood@gmail.com", EmailConfirmed = true, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = true, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Ryan" },
+                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "65f91f23-e371-4a8a-80a6-8becc57b0350", Email = "jack.patillo@gmail.com", EmailConfirmed = true, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = true, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Jack" },
+                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "396c0691-a06a-4637-9f73-ab3cc3912b38", Email = "geoff.ramsey@gmail.com", EmailConfirmed = true, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = true, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Geoff" }
                     );
                 });
 
@@ -479,7 +502,15 @@ namespace Recollectable.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Recollectable.Core.Entities.Collectables.CollectionCollectable", b =>
+            modelBuilder.Entity("Recollectable.Core.Entities.Collections.Collection", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.User", "User")
+                        .WithMany("Collections")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Recollectable.Core.Entities.Collections.CollectionCollectable", b =>
                 {
                     b.HasOne("Recollectable.Core.Entities.Collectables.Collectable", "Collectable")
                         .WithMany("CollectionCollectables")
@@ -490,13 +521,10 @@ namespace Recollectable.Infrastructure.Migrations
                         .WithMany("CollectionCollectables")
                         .HasForeignKey("CollectionId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
 
-            modelBuilder.Entity("Recollectable.Core.Entities.Collections.Collection", b =>
-                {
-                    b.HasOne("Recollectable.Core.Entities.Users.User", "User")
-                        .WithMany("Collections")
-                        .HasForeignKey("UserId")
+                    b.HasOne("Recollectable.Core.Entities.Collections.Condition", "Condition")
+                        .WithMany()
+                        .HasForeignKey("ConditionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

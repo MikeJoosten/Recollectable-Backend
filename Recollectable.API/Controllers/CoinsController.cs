@@ -61,7 +61,7 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
-                if (!resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                if (!string.IsNullOrEmpty(resourceParameters.Fields) && !resourceParameters.Fields.ToLowerInvariant().Contains("id"))
                 {
                     return BadRequest("Field parameter 'id' is required");
                 }
@@ -147,7 +147,7 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
-                if (!fields.ToLowerInvariant().Contains("id"))
+                if (!string.IsNullOrEmpty(fields) && !fields.ToLowerInvariant().Contains("id"))
                 {
                     return BadRequest("Field parameter 'id' is required");
                 }
@@ -409,16 +409,16 @@ namespace Recollectable.API.Controllers
             links.Add(new LinkDto(Url.Link("GetCoins",
                 new { id }), "self", "GET"));
 
-            links.Add(new LinkDto(Url.Link("CreateCoins",
+            links.Add(new LinkDto(Url.Link("CreateCoin",
                 new { }), "create_coins", "POST"));
 
-            links.Add(new LinkDto(Url.Link("UpdateCoins",
+            links.Add(new LinkDto(Url.Link("UpdateCoin",
                 new { id }), "update_coins", "PUT"));
 
-            links.Add(new LinkDto(Url.Link("PartiallyUpdateCoins",
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateCoin",
                 new { id }), "partially_update_coins", "PATCH"));
 
-            links.Add(new LinkDto(Url.Link("DeleteCoins",
+            links.Add(new LinkDto(Url.Link("DeleteCoin",
                 new { id }), "delete_coins", "DELETE"));
 
             return links;
