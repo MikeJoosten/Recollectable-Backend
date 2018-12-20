@@ -41,6 +41,9 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetConditions")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(ConditionDto), 200)]
+        [ProducesResponseType(400)]
         public async Task<IActionResult> GetConditions(ConditionsResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -136,6 +139,10 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid query parameter</response>
         /// <response code="404">Unexisting condition ID</response>
         [HttpGet("{id}", Name = "GetCondition")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(ConditionDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetCondition(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -193,6 +200,11 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid condition</response>
         /// <response code="422">Invalid condition validation</response>
         [HttpPost(Name = "CreateCondition")]
+        [Consumes("application/json", "application/xml")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(ConditionDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> CreateCondition([FromBody] ConditionCreationDto condition,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -242,6 +254,7 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting condition ID</response>
         /// <response code="409">Already existing condition ID</response>
         [HttpPost("{id}")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> BlockConditionCreation(Guid id)
         {
             if (await _conditionService.ConditionExists(id))
@@ -271,6 +284,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting condition ID</response>
         /// <response code="422">Invalid condition validation</response>
         [HttpPut("{id}", Name = "UpdateCondition")]
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> UpdateCondition(Guid id, [FromBody] ConditionUpdateDto condition)
         {
             if (condition == null)
@@ -320,6 +338,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting condition ID</response>
         /// <response code="422">Invalid condition validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCondition")]
+        [Consumes("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> PartiallyUpdateCondition(Guid id,
             [FromBody] JsonPatchDocument<ConditionUpdateDto> patchDoc)
         {
@@ -363,6 +386,8 @@ namespace Recollectable.API.Controllers
         /// <response code="204">Removed the condition successfully</response>
         /// <response code="404">Unexisting condition ID</response>
         [HttpDelete("{id}", Name = "DeleteCondition")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteCondition(Guid id)
         {
             var retrievedCondition = await _conditionService.FindConditionById(id);

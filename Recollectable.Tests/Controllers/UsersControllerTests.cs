@@ -488,9 +488,11 @@ namespace Recollectable.Tests.Controllers
 
             //Act
             var response = await _controller.Login(credentials) as OkObjectResult;
+            var result = response.Value as Login;
 
             //Assert
-            Assert.NotNull(response.Value);
+            Assert.NotNull(result);
+            Assert.Equal("Ryan", result.UserName);
         }
 
         [Fact]

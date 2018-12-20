@@ -10,7 +10,16 @@ namespace Recollectable.API.Controllers
     //TODO Add Authorization [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
+        /// <summary>
+        /// Retrieves the main HATEOAS links
+        /// </summary>
+        /// <param name="mediaType"></param>
+        /// <response code="200">Returns the HATEOAS links</response>
+        /// <response code="204">No application/json+hateoas media type detected</response>
         [HttpGet(Name = "GetHome")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(204)]
         public IActionResult GetHome([FromHeader(Name = "Accept")] string mediaType)
         {
             if (mediaType == "application/json+hateoas")

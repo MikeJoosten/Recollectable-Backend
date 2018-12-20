@@ -55,6 +55,9 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetUsers")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(UserDto), 200)]
+        [ProducesResponseType(400)]
         public async Task<IActionResult> GetUsers(UsersResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -150,6 +153,10 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid query parameter</response>
         /// <response code="404">Unexisting user ID</response>
         [HttpGet("{id}", Name = "GetUser")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(UserDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetUser(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -208,6 +215,11 @@ namespace Recollectable.API.Controllers
         /// <response code="422">Invalid user validation</response>
         [AllowAnonymous]
         [HttpPost("register", Name = "Register")]
+        [Consumes("application/json", "application/xml")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(UserDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> Register([FromBody] UserCreationDto user,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -272,6 +284,7 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting user ID</response>
         /// <response code="409">Already existing user ID</response>
         [HttpPost("register/{id}")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> BlockRegistration(Guid id)
         {
             if (await _userService.UserExists(id))
@@ -282,9 +295,21 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        //TODO Create Swagger comments
+        /// <summary>
+        /// Retrieves login details of a user
+        /// </summary>
+        /// <param name="credentials">Login credentials</param>
+        /// <returns>Returns login details with authentication token</returns>
+        /// <response code="200">Returns the login details</response>
+        /// <response code="400">Invalid credentials</response>
+        /// <response code="404">Unexisting username</response>
         [AllowAnonymous]
         [HttpPost("login", Name = "Login")]
+        [Consumes("application/json", "application/xml")]
+        [Produces("application/json", "application/xml")]
+        [ProducesResponseType(typeof(Login), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> Login([FromBody] CredentialsDto credentials)
         {
             if (credentials == null)
@@ -307,20 +332,28 @@ namespace Recollectable.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = new
+            var response = new Login
             {
-                userName = user.UserName,
-                roles = _userManager.GetRolesAsync(user).Result,
-                auth_token = _tokenFactory.GenerateToken(credentials.UserName, identity).Result,
-                expires_in = (int)JwtTokenProviderOptions.Expiration.TotalSeconds
+                UserName = user.UserName,
+                Roles = _userManager.GetRolesAsync(user).Result,
+                AuthToken = _tokenFactory.GenerateToken(credentials.UserName, identity).Result,
+                ExpiresIn = (int)JwtTokenProviderOptions.Expiration.TotalSeconds
             };
 
             await HttpContext.SignInAsync("Identity.Application", new ClaimsPrincipal(identity));
             return Ok(response);
         }
 
+        /// <summary>
+        /// Request a password reset
+        /// </summary>
+        /// <param name="email">User's email address</param>
+        /// <response code="204">Sent password reset mail successfully</response>
+        /// <response code="404">Unexisting email address</response>
         [AllowAnonymous]
         [HttpGet("{email}/forgot_password")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> ForgotPassword(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -340,8 +373,23 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Reset password
+        /// </summary>
+        /// <param name="token">Password reset token</param>
+        /// <param name="email">User's email address</param>
+        /// <param name="resetPassword">Reset and confirmation password</param>
+        /// <response code="204">Password reset successfully</response>
+        /// <response code="400">Invalid password</response>
+        /// <response code="404">Unexisting email address</response>
+        /// <response code="422">Invalid password validation</response>
         [AllowAnonymous]
         [HttpPost("/{email}/reset_password")]
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> ResetPassword(string token, string email, [FromBody] ResetPasswordDto resetPassword)
         {
             if (resetPassword == null)
@@ -380,8 +428,22 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Change password
+        /// </summary>
+        /// <param name="email">User's email address</param>
+        /// <param name="changedPassword">Necessary passwords</param>
+        /// <response code="204">Password changed successfully</response>
+        /// <response code="400">Invalid password</response>
+        /// <response code="404">Unexisting email address</response>
+        /// <response code="422">Invalid password validation</response>
         [Authorize(Roles = "User")]
         [HttpPost("/{email}/change_password")]
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> ChangePassword(string email, [FromBody] ChangedPasswordDto changedPassword)
         {
             if (changedPassword == null)
@@ -415,8 +477,17 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Verifies a user's email address
+        /// </summary>
+        /// <param name="token">Email verification token</param>
+        /// <param name="email">User's email address</param>
+        /// <response code="204">Verified user's email address successfully</response>
+        /// <response code="404">Unexisting email address</response>
         [AllowAnonymous]
         [HttpGet("{email}/confirm_account")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -449,6 +520,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting user ID</response>
         /// <response code="422">Invalid user validation</response>
         [HttpPut("{id}", Name = "UpdateUser")]
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto user)
         {
             if (user == null)
@@ -498,6 +574,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting user ID</response>
         /// <response code="422">Invalid user validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateUser")]
+        [Consumes("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> PartiallyUpdateUser(Guid id,
             [FromBody] JsonPatchDocument<UserUpdateDto> patchDoc)
         {
@@ -541,6 +622,8 @@ namespace Recollectable.API.Controllers
         /// <response code="204">Removed the user successfully</response>
         /// <response code="404">Unexisting user ID</response>
         [HttpDelete("{id}", Name = "DeleteUser")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var retrievedUser = await _userService.FindUserById(id);

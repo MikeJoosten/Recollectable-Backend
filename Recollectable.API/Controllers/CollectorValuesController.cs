@@ -42,6 +42,9 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetCollectorValues")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CollectorValueDto), 200)]
+        [ProducesResponseType(400)]
         public async Task<IActionResult> GetCollectorValues(CollectorValuesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -138,6 +141,10 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid query parameter</response>
         /// <response code="404">Unexisting collector value ID</response>
         [HttpGet("{id}", Name = "GetCollectorValue")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CoinDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetCollectorValue(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -195,6 +202,11 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid collector value</response>
         /// <response code="422">Invalid collector value validation</response>
         [HttpPost(Name = "CreateCollectorValue")]
+        [Consumes("application/json", "application/xml")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CollectorValueDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> CreateCollectorValue([FromBody] CollectorValueCreationDto collectorValue,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -244,6 +256,7 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting collector value ID</response>
         /// <response code="409">Already existing collector value ID</response>
         [HttpPost("{id}")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> BlockCollectorValueCreation(Guid id)
         {
             if (await _collectorValueService.CollectorValueExists(id))
@@ -273,6 +286,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting collector value ID</response>
         /// <response code="422">Invalid collector value validation</response>
         [HttpPut("{id}", Name = "UpdateCollectorValue")]
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> UpdateCollectorValue
             (Guid id, [FromBody] CollectorValueUpdateDto collectorValue)
         {
@@ -323,6 +341,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting collector value ID</response>
         /// <response code="422">Invalid collector value validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCollectorValue")]
+        [Consumes("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> PartiallyUpdateCollectorValue(Guid id,
             [FromBody] JsonPatchDocument<CollectorValueUpdateDto> patchDoc)
         {
@@ -366,6 +389,8 @@ namespace Recollectable.API.Controllers
         /// <response code="204">Removed the collector value successfully</response>
         /// <response code="404">Unexisting collector value ID</response>
         [HttpDelete("{id}", Name = "DeleteCollectorValue")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteCollectorValue(Guid id)
         {
             var collectorValueFromRepo = await _collectorValueService.FindCollectorValueById(id);

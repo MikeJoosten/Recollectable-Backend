@@ -401,6 +401,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting banknote ID</response>
         /// <response code="422">Invalid banknote validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateBanknote")]
+        [Consumes("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> PartiallyUpdateBanknote(Guid id,
             [FromBody] JsonPatchDocument<BanknoteUpdateDto> patchDoc)
         {
@@ -454,6 +459,8 @@ namespace Recollectable.API.Controllers
         /// <response code="204">Removed the banknote successfully</response>
         /// <response code="404">Unexisting banknote ID</response>
         [HttpDelete("{id}", Name = "DeleteBanknote")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteBanknote(Guid id)
         {
             var retrievedBanknote = await _banknoteService.FindBanknoteById(id);

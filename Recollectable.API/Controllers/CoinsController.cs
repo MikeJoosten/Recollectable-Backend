@@ -47,6 +47,9 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetCoins")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CoinDto), 200)]
+        [ProducesResponseType(400)]
         public async Task<IActionResult> GetCoins(CurrenciesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -143,6 +146,10 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid query parameter</response>
         /// <response code="404">Unexisting coin ID</response>
         [HttpGet("{id}", Name = "GetCoin")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CoinDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetCoin(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -200,6 +207,11 @@ namespace Recollectable.API.Controllers
         /// <response code="400">Invalid coin</response>
         /// <response code="422">Invalid coin validation</response>
         [HttpPost(Name = "CreateCoin")]
+        [Consumes("application/json", "application/xml")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CoinDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> CreateCoin([FromBody] CoinCreationDto coin,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -264,6 +276,7 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting coin ID</response>
         /// <response code="409">Already existing coin ID</response>
         [HttpPost("{id}")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> BlockCoinCreation(Guid id)
         {
             if (await _coinService.CoinExists(id))
@@ -293,6 +306,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting coin ID</response>
         /// <response code="422">Invalid coin validation</response>
         [HttpPut("{id}", Name = "UpdateCoin")]
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> UpdateCoin(Guid id, [FromBody] CoinUpdateDto coin)
         {
             if (coin == null)
@@ -358,6 +376,11 @@ namespace Recollectable.API.Controllers
         /// <response code="404">Unexisting coin ID</response>
         /// <response code="422">Invalid coin validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCoin")]
+        [Consumes("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> PartiallyUpdateCoin(Guid id,
             [FromBody] JsonPatchDocument<CoinUpdateDto> patchDoc)
         {
@@ -417,6 +440,8 @@ namespace Recollectable.API.Controllers
         /// <response code="204">Removed the coin successfully</response>
         /// <response code="404">Unexisting coin ID</response>
         [HttpDelete("{id}", Name = "DeleteCoin")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteCoin(Guid id)
         {
             var retrievedCoin = await _coinService.FindCoinById(id);
