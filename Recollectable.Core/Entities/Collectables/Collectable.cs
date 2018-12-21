@@ -13,9 +13,6 @@ namespace Recollectable.Core.Entities.Collectables
     {
         [Key]
         public Guid Id { get; set; }
-
-        [Required]
-        [MaxLength(100)]
         public string ReleaseDate { get; set; }
 
         [ForeignKey("CountryId")]

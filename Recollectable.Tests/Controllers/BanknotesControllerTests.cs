@@ -1,15 +1,19 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Recollectable.API.Controllers;
+using Recollectable.API.Models.Collectables;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
+using Recollectable.Tests.Builders;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Controllers
@@ -17,620 +21,637 @@ namespace Recollectable.Tests.Controllers
     public class BanknotesControllerTests : RecollectableTestBase
     {
         private readonly BanknotesController _controller;
+        private readonly Mock<IBanknoteService> _mockBanknoteService;
+        private readonly Mock<ICountryService> _mockCountryService;
+        private readonly Mock<ICollectorValueService> _mockCollectorValueService;
         private readonly CurrenciesResourceParameters resourceParameters;
+        private readonly BanknoteTestBuilder _builder;
 
         public BanknotesControllerTests()
         {
-            _controller = new BanknotesController(_unitOfWork, _typeHelperService, 
-                _propertyMappingService, _mapper);
+            _mockBanknoteService = new Mock<IBanknoteService>();
+            _mockCountryService = new Mock<ICountryService>();
+            _mockCollectorValueService = new Mock<ICollectorValueService>();
+            _mockBanknoteService.Setup(b => b.Save()).ReturnsAsync(true);
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).ReturnsAsync(true);
 
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValueByValues(It.IsAny<CollectorValue>()))
+                .ReturnsAsync(new CollectorValue());
+
+            _controller = new BanknotesController(_mockBanknoteService.Object, 
+                _mockCountryService.Object, _mockCollectorValueService.Object, _mapper);
+            SetupTestController(_controller);
+
+            _builder = new BanknoteTestBuilder();
             resourceParameters = new CurrenciesResourceParameters();
-            SetupTestController<BanknoteDto, Banknote>(_controller);
+            resourceParameters.Fields = "Id, Type";
         }
 
         [Fact]
-        public void GetBanknotes_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
+        public async Task GetBanknotes_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
             resourceParameters.OrderBy = "Invalid";
 
             //Act
-            var response = _controller.GetBanknotes(resourceParameters, null);
+            var response = await _controller.GetBanknotes(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetBanknotes_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetBanknotes_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             resourceParameters.Fields = "Invalid";
 
             //Act
-            var response = _controller.GetBanknotes(resourceParameters, null);
+            var response = await _controller.GetBanknotes(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
+        [Fact]
+        public async Task GetBanknotes_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes,
+                resourceParameters.Page, resourceParameters.PageSize);
+            resourceParameters.Fields = "Type";
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknotes(resourceParameters))
+                .ReturnsAsync(pagedList);
+
+            //Act
+            var response = await _controller.GetBanknotes(resourceParameters, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetBanknotes_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetBanknotes_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
+            //Arrange
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes, 
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknotes(resourceParameters))
+                .ReturnsAsync(pagedList);
+
             //Act
-            var response = _controller.GetBanknotes(resourceParameters, mediaType);
+            var response = await _controller.GetBanknotes(resourceParameters, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetBanknotes_ReturnsAllBanknotes_GivenNoMediaType()
-        {
-            //Act
-            var response = _controller.GetBanknotes(resourceParameters, null) as OkObjectResult;
-            var banknotes = response.Value as List<BanknoteDto>;
-
-            //Assert
-            Assert.NotNull(banknotes);
-            Assert.Equal(6, banknotes.Count);
-        }
-
-        [Fact]
-        public void GetBanknotes_ReturnsAllBanknotes_GivenJsonMediaType()
+        public async Task GetBanknotes_ReturnsAllBanknotes_GivenAnyMediaType()
         {
             //Arrange
-            string mediaType = "application/json";
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes,
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknotes(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
-            var banknotes = response.Value as List<ExpandoObject>;
+            var response = await _controller.GetBanknotes(resourceParameters, null) as OkObjectResult;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(banknotes);
-            Assert.Equal(6, banknotes.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
-        public void GetBanknotes_ReturnsAllBanknotes_GivenHateoasMediaType()
+        public async Task GetBanknotes_ReturnsAllBanknotes_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
+            var banknotes = _builder.Build(2);
+            var pagedList = PagedList<Banknote>.Create(banknotes,
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknotes(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
-            var linkedCollection = response.Value as LinkedCollectionResource;
+            var response = await _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(linkedCollection);
-            Assert.Equal(6, linkedCollection.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
-        public void GetBanknotes_ReturnsBanknotes_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetBanknotes_ReturnsBanknotes_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
-            resourceParameters.PageSize = 2;
+            var banknotes = _builder.Build(4);
+            var pagedList = PagedList<Banknote>.Create(banknotes, 1, 2);
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknotes(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
-            var banknotes = response.Value as List<ExpandoObject>;
+            var response = await _controller.GetBanknotes(resourceParameters, null) as OkObjectResult;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(banknotes);
-            Assert.Equal(2, banknotes.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
-        public void GetBanknotes_ReturnsBanknotes_GivenHateoasMediaTypeAndPagingParameters()
+        public async Task GetBanknotes_ReturnsBanknotes_GivenHateoasMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            resourceParameters.PageSize = 2;
+            var banknotes = _builder.Build(4);
+            var pagedList = PagedList<Banknote>.Create(banknotes, 1, 2);
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknotes(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
-            var banknotes = response.Value as LinkedCollectionResource;
+            var response = await _controller.GetBanknotes(resourceParameters, mediaType) as OkObjectResult;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(banknotes);
-            Assert.Equal(2, banknotes.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
-        public void GetBanknote_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetBanknote_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             string fields = "Invalid";
 
             //Act
-            var response = _controller.GetBanknote(Guid.Empty, fields, null);
+            var response = await _controller.GetBanknote(Guid.Empty, fields, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetBanknote_ReturnsNotFoundResponse_GivenInvalidId()
+        public async Task GetBanknote_ReturnsNotFoundResponse_GivenInvalidId()
         {
-            //Arrange
-            Guid id = new Guid("64c21a8d-048b-4b2a-8b88-2b2d7919c0be");
-
             //Act
-            var response = _controller.GetBanknote(id, null, null);
+            var response = await _controller.GetBanknote(Guid.Empty, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
+        [Fact]
+        public async Task GetBanknote_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
+            var banknote = _builder.WithId(id).WithType("Dollars").Build();
+            resourceParameters.Fields = "Type";
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknoteById(id))
+                .ReturnsAsync(banknote);
+
+            //Act
+            var response = await _controller.GetBanknote(id, resourceParameters.Fields, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetBanknote_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetBanknote_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
+            var banknote = _builder.Build();
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknoteById(id))
+                .ReturnsAsync(banknote);
 
             //Act
-            var response = _controller.GetBanknote(id, null, mediaType);
+            var response = await _controller.GetBanknote(id, resourceParameters.Fields, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetBanknote_ReturnsBanknote_GivenNoMediaType()
+        public async Task GetBanknote_ReturnsBanknote_GivenAnyMediaType()
         {
             //Arrange
             Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
+            var banknote = _builder.WithId(id).WithType("Dollars").Build();
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknoteById(id))
+                .ReturnsAsync(banknote);
 
             //Act
-            var response = _controller.GetBanknote(id, null, null) as OkObjectResult;
-            var banknote = response.Value as BanknoteDto;
+            var response = await _controller.GetBanknote(id, null, null) as OkObjectResult;
+            dynamic result = response.Value as ExpandoObject;
 
             //Assert
-            Assert.NotNull(banknote);
-            Assert.Equal(id, banknote.Id);
-            Assert.Equal("Dollars", banknote.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Dollars", result.Type);
         }
 
         [Fact]
-        public void GetBanknote_ReturnsBanknote_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
-
-            //Act
-            var response = _controller.GetBanknote(id, null, mediaType) as OkObjectResult;
-            dynamic banknote = response.Value as ExpandoObject;
-
-            //Assert
-            Assert.NotNull(banknote);
-            Assert.Equal(id, banknote.Id);
-            Assert.Equal("Dollars", banknote.Type);
-        }
-
-        [Fact]
-        public void GetBanknote_ReturnsBanknote_GivenHateoasMediaType()
+        public async Task GetBanknote_ReturnsBanknote_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
+            var banknote = _builder.WithId(id).WithType("Dollars").Build();
+
+            _mockBanknoteService
+                .Setup(b => b.FindBanknoteById(id))
+                .ReturnsAsync(banknote);
 
             //Act
-            var response = _controller.GetBanknote(id, null, mediaType) as OkObjectResult;
-            dynamic banknote = response.Value as IDictionary<string, object>;
+            var response = await _controller.GetBanknote(id, resourceParameters.Fields, mediaType) as OkObjectResult;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(banknote);
-            Assert.Equal(id, banknote.Id);
-            Assert.Equal("Dollars", banknote.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Dollars", result.Type);
         }
 
         [Fact]
-        public void CreateBanknote_ReturnsBadRequestResponse_GivenNoBanknote()
+        public async Task CreateBanknote_ReturnsBadRequestResponse_GivenNoBanknote()
         {
             //Act
-            var response = _controller.CreateBanknote(null, null);
+            var response = await _controller.CreateBanknote(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateBanknote_ReturnsUnprocessableEntityObjectResponse_GivenInvalidBanknote()
+        public async Task CreateBanknote_ReturnsUnprocessableEntityObjectResponse_GivenInvalidBanknote()
         {
             //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto();
+            var banknote = _builder.BuildCreationDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.CreateBanknote(banknote, null);
+            var response = await _controller.CreateBanknote(banknote, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void CreateBanknote_ReturnsBadRequestResponse_GivenInvalidCountryId()
+        public async Task CreateBanknote_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                CountryId = new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d")
-            };
+            Guid countryId = new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d");
+            var banknote = _builder.WithCountryId(countryId).BuildCreationDto();
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).ReturnsAsync(false);
 
             //Act
-            var response = _controller.CreateBanknote(banknote, null);
+            var response = await _controller.CreateBanknote(banknote, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
-        }
-
-        [Fact]
-        public void CreateBanknote_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
-        {
-            //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("56b08b23-3ef5-4fa7-a607-4d254733a2e8")
-            };
-
-            //Act
-            var response = _controller.CreateBanknote(banknote, null);
-
-            //Assert
-            Assert.IsType<BadRequestResult>(response);
+            _mockCountryService.Verify(c => c.CountryExists(countryId));
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
-        public void CreateBanknote_ReturnsCreatedResponse_GivenValidBanknote(string mediaType)
+        public async Task CreateBanknote_ReturnsCreatedResponse_GivenValidBanknote(string mediaType)
         {
             //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
-            };
+            var banknote = _builder.WithType("Dollars").BuildCreationDto();
 
             //Act
-            var response = _controller.CreateBanknote(banknote, mediaType);
+            var response = await _controller.CreateBanknote(banknote, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
         }
 
         [Fact]
-        public void CreateBanknote_CreatesNewBanknote_GivenAnyMediaTypeAndValidBanknote()
+        public async Task CreateBanknote_CreatesNewBanknote_GivenAnyMediaTypeAndValidBanknote()
         {
             //Arrange
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
-            };
+            var banknote = _builder.WithType("Dollars").BuildCreationDto();
 
             //Act
-            var response = _controller.CreateBanknote(banknote, null) as CreatedAtRouteResult;
+            var response = await _controller.CreateBanknote(banknote, null) as CreatedAtRouteResult;
             var returnedBanknote = response.Value as BanknoteDto;
 
             //Assert
             Assert.NotNull(returnedBanknote);
-            Assert.Equal("Dollar", returnedBanknote.Type);
-            Assert.Equal("United States of America", returnedBanknote.Country.Name);
+            Assert.Equal("Dollars", returnedBanknote.Type);
         }
 
         [Fact]
-        public void CreateBanknote_CreatesNewBanknote_GivenHateoasMediaTypeAndValidBanknote()
+        public async Task CreateBanknote_CreatesNewBanknote_GivenHateoasMediaTypeAndValidBanknote()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            BanknoteCreationDto banknote = new BanknoteCreationDto
-            {
-                Type = "Dollar",
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
-            };
+            var banknote = _builder.WithType("Dollars").BuildCreationDto();
 
             //Act
-            var response = _controller.CreateBanknote(banknote, mediaType) as CreatedAtRouteResult;
+            var response = await _controller.CreateBanknote(banknote, mediaType) as CreatedAtRouteResult;
             dynamic returnedBanknote = response.Value as IDictionary<string, object>;
 
             //Assert
             Assert.NotNull(returnedBanknote);
-            Assert.Equal("Dollar", returnedBanknote.Type);
-            Assert.Equal("United States of America", returnedBanknote.Country.Name);
+            Assert.Equal("Dollars", returnedBanknote.Type);
         }
 
         [Fact]
-        public void BlockBanknoteCreation_ReturnsConflictResponse_GivenExistingId()
+        public async Task BlockBanknoteCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
             Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
+            _mockBanknoteService.Setup(b => b.BanknoteExists(It.IsAny<Guid>())).ReturnsAsync(true);
 
             //Act
-            var response = _controller.BlockBanknoteCreation(id) as StatusCodeResult;
+            var response = await _controller.BlockBanknoteCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
+            _mockBanknoteService.Verify(c => c.BanknoteExists(id));
         }
 
         [Fact]
-        public void BlockBanknoteCreation_ReturnsNotFoundResponse_GivenUnexistingId()
+        public async Task BlockBanknoteCreation_ReturnsNotFoundResponse_GivenUnexistingId()
         {
-            //Arrange
-            Guid id = new Guid("03c0e206-8222-4c4a-a8e2-4c2e1cae8ad1");
-
             //Act
-            var response = _controller.BlockBanknoteCreation(id);
+            var response = await _controller.BlockBanknoteCreation(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateBanknote_ReturnsBadRequestResponse_GivenNoBanknote()
+        public async Task UpdateBanknote_ReturnsBadRequestResponse_GivenNoBanknote()
         {
             //Act
-            var response = _controller.UpdateBanknote(Guid.Empty, null);
+            var response = await _controller.UpdateBanknote(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateBanknote_ReturnsUnprocessableEntityObjectResponse_GivenInvalidBanknote()
+        public async Task UpdateBanknote_ReturnsUnprocessableEntityObjectResponse_GivenInvalidBanknote()
         {
             //Arrange
             BanknoteUpdateDto banknote = new BanknoteUpdateDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.UpdateBanknote(Guid.Empty, banknote);
+            var response = await _controller.UpdateBanknote(Guid.Empty, banknote);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void UpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCountryId()
+        public async Task UpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto
-            {
-                CountryId = new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d")
-            };
+            Guid countryId = new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d");
+            var banknote = _builder.WithCountryId(countryId).BuildUpdateDto();
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).ReturnsAsync(false);
 
             //Act
-            var response = _controller.UpdateBanknote(Guid.Empty, banknote);
+            var response = await _controller.UpdateBanknote(Guid.Empty, banknote);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+            _mockCountryService.Verify(c => c.CountryExists(countryId));
         }
 
         [Fact]
-        public void UpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
+        public async Task UpdateBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
         {
             //Arrange
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("56b08b23-3ef5-4fa7-a607-4d254733a2e8")
-            };
+            var banknote = _builder.BuildUpdateDto();
 
             //Act
-            var response = _controller.UpdateBanknote(Guid.Empty, banknote);
-
-            //Assert
-            Assert.IsType<BadRequestResult>(response);
-        }
-
-        [Fact]
-        public void UpdateBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
-        {
-            //Arrange
-            Guid id = new Guid("1876de77-90d9-4083-91d2-b6a3e6a1bd1c");
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
-            };
-
-            //Act
-            var response = _controller.UpdateBanknote(id, banknote);
+            var response = await _controller.UpdateBanknote(Guid.Empty, banknote);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateBanknote_ReturnsNoContentResponse_GivenValidBanknote()
+        public async Task UpdateBanknote_ReturnsNoContentResponse_GivenValidBanknote()
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto
-            {
-                CountryId = new Guid("c8f2031e-c780-4d27-bf13-1ee48a7207a3"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
-            };
+            var banknote = _builder.BuildUpdateDto();
+            var retrievedBanknote = _builder.Build();
+
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(retrievedBanknote);
 
             //Act
-            var response = _controller.UpdateBanknote(id, banknote);
+            var response = await _controller.UpdateBanknote(id, banknote);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void UpdateBanknote_UpdatesExistingBanknote_GivenValidBanknote()
+        public async Task UpdateBanknote_UpdatesExistingBanknote_GivenValidBanknote()
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            BanknoteUpdateDto banknote = new BanknoteUpdateDto
-            {
-                Type = "Euros",
-                CountryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"),
-                CollectorValueId = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5")
-            };
+            var banknote = _builder.BuildUpdateDto();
+            var retrievedBanknote = _builder.Build();
+
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(retrievedBanknote);
+            _mockBanknoteService.Setup(b => b.UpdateBanknote(It.IsAny<Banknote>()));
 
             //Act
-            var response = _controller.UpdateBanknote(id, banknote);
+            var response = await _controller.UpdateBanknote(id, banknote);
 
             //Assert
-            Assert.NotNull(_unitOfWork.BanknoteRepository.GetById(id));
-            Assert.Equal("Euros", _unitOfWork.BanknoteRepository.GetById(id).Type);
-            Assert.Equal("France", _unitOfWork.BanknoteRepository.GetById(id).Country.Name);
+            _mockBanknoteService.Verify(b => b.UpdateBanknote(retrievedBanknote));
         }
 
         [Fact]
-        public void PartiallyUpdateBanknote_ReturnsBadRequestResponse_GivenNoPatchDocument()
+        public async Task PartiallyUpdateBanknote_ReturnsBadRequestResponse_GivenNoPatchDocument()
         {
             //Act
-            var response = _controller.PartiallyUpdateBanknote(Guid.Empty, null);
+            var response = await _controller.PartiallyUpdateBanknote(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
+        public async Task PartiallyUpdateBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
         {
             //Arrange
-            Guid id = new Guid("1876de77-90d9-4083-91d2-b6a3e6a1bd1c");
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
 
             //Act
-            var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
+            var response = await _controller.PartiallyUpdateBanknote(Guid.Empty, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateBanknote_ReturnsUnprocessableEntityObjectResponse_GivenInvalidBanknote()
+        public async Task PartiallyUpdateBanknote_ReturnsUnprocessableEntityObjectResponse_GivenInvalidBanknote()
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
+
+            var banknote = _builder.Build();
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
+            var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCountryId()
+        public async Task PartiallyUpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCountryId()
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
+            Guid countryId = new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d");
+
+            var banknote = _builder.Build();
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+            _mockCountryService.Setup(c => c.CountryExists(It.IsAny<Guid>())).ReturnsAsync(false);
+
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-            patchDoc.Replace(b => b.CountryId, new Guid("e4d31596-b6e0-4ac6-9c18-9bfe5102780d"));
+            patchDoc.Replace(b => b.CountryId, countryId);
 
             //Act
-            var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
+            var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+            _mockCountryService.Verify(c => c.CountryExists(countryId));
         }
 
         [Fact]
-        public void PartiallyUpdateBanknote_ReturnsBadRequestResponse_GivenInvalidCollectorValueId()
+        public async Task PartiallyUpdateBanknote_ReturnsNoContentResponse_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
+            Guid countryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367");
+
+            var banknote = _builder.Build();
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-            patchDoc.Replace(b => b.CollectorValueId, new Guid("56b08b23-3ef5-4fa7-a607-4d254733a2e8"));
+            patchDoc.Replace(b => b.Type, "Euros");
+            patchDoc.Replace(b => b.CountryId, countryId);
 
             //Act
-            var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
-
-            //Assert
-            Assert.IsType<BadRequestResult>(response);
-        }
-
-        [Fact]
-        public void PartiallyUpdateBanknote_ReturnsNoContentResponse_GivenValidPatchDocument()
-        {
-            //Arrange
-            Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
-            JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
-
-            //Act
-            var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
+            var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateBanknote_UpdatesExistingBanknote_GivenValidPatchDocument()
+        public async Task PartiallyUpdateBanknote_UpdatesExistingBanknote_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("28c83ea6-665c-41a0-acb0-92a057228fd4");
+            Guid countryId = new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367");
+
+            var banknote = _builder.Build();
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+
             JsonPatchDocument<BanknoteUpdateDto> patchDoc = new JsonPatchDocument<BanknoteUpdateDto>();
             patchDoc.Replace(b => b.Type, "Euros");
-            patchDoc.Replace(b => b.CountryId, new Guid("1b38bfce-567c-4d49-9dd2-e0fbef480367"));
+            patchDoc.Replace(b => b.CountryId, countryId);
 
             //Act
-            var response = _controller.PartiallyUpdateBanknote(id, patchDoc);
+            var response = await _controller.PartiallyUpdateBanknote(id, patchDoc);
 
             //Assert
-            Assert.NotNull(_unitOfWork.BanknoteRepository.GetById(id));
-            Assert.Equal("Euros", _unitOfWork.BanknoteRepository.GetById(id).Type);
-            Assert.Equal("France", _unitOfWork.BanknoteRepository.GetById(id).Country.Name);
+            _mockBanknoteService.Verify(b => b.UpdateBanknote(banknote));
         }
 
         [Fact]
-        public void DeleteBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
+        public async Task DeleteBanknote_ReturnsNotFoundResponse_GivenInvalidBanknoteId()
         {
-            //Arrange
-            Guid id = new Guid("2d11b36a-9f6b-42f9-a00a-6e07b8a30f0e");
-
             //Act
-            var response = _controller.DeleteBanknote(id);
+            var response = await _controller.DeleteBanknote(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void DeleteBanknote_ReturnsNoContentResponse_GivenValidBanknoteId()
+        public async Task DeleteBanknote_ReturnsNoContentResponse_GivenValidBanknoteId()
         {
             //Arrange
             Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
 
+            var banknote = _builder.Build();
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+
             //Act
-            var response = _controller.DeleteBanknote(id);
+            var response = await _controller.DeleteBanknote(id);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void DeleteBanknote_RemovesBanknoteFromDatabase()
+        public async Task DeleteBanknote_RemovesBanknoteFromDatabase()
         {
             //Arrange
             Guid id = new Guid("54826cab-0395-4304-8c2f-6c3bdc82237f");
 
+            var banknote = _builder.Build();
+            _mockBanknoteService.Setup(b => b.FindBanknoteById(id)).ReturnsAsync(banknote);
+            _mockBanknoteService.Setup(b => b.RemoveBanknote(It.IsAny<Banknote>()));
+
             //Act
-            _controller.DeleteBanknote(id);
+            await _controller.DeleteBanknote(id);
 
             //Assert
-            Assert.Equal(5, _unitOfWork.BanknoteRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.BanknoteRepository.GetById(id));
+            _mockBanknoteService.Verify(b => b.RemoveBanknote(banknote));
         }
     }
 }

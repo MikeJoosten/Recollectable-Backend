@@ -3,76 +3,85 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Interfaces;
+using Recollectable.API.Models.Locations;
 using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
-using Recollectable.Core.Models.Locations;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Shared.Helpers;
 using Recollectable.Core.Shared.Models;
+using Recollectable.Core.Shared.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
     //TODO Add Authorization
+    [ApiVersion("1.0")]
     [Route("api/countries")]
     public class CountriesController : Controller
     {
-        private IUnitOfWork _unitOfWork;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        private ICountryService _countryService;
         private IMapper _mapper;
 
-        public CountriesController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
-            IPropertyMappingService propertyMappingService, IMapper mapper)
+        public CountriesController(ICountryService countryService, IMapper mapper)
         {
-            _unitOfWork = unitOfWork;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _countryService = countryService;
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves countries
+        /// </summary>
+        /// <returns>List of countries</returns>
+        /// <response code="200">Returns a list of countries</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetCountries")]
-        public IActionResult GetCountries(CountriesResourceParameters resourceParameters,
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CountryDto), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetCountries(CountriesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<CountryDto, Country>
-                (resourceParameters.OrderBy))
+            if (!PropertyMappingService.ValidMappingExistsFor<Country>(resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<CountryDto>
-                (resourceParameters.Fields))
+            if (!TypeHelper.TypeHasProperties<CountryDto>(resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var countriesFromRepo = _unitOfWork.CountryRepository.Get(resourceParameters);
-            var countries = _mapper.Map<IEnumerable<CountryDto>>(countriesFromRepo);
+            var retrievedCountries = await _countryService.FindCountries(resourceParameters);
+            var countries = _mapper.Map<IEnumerable<CountryDto>>(retrievedCountries);
+            var shapedCountries = countries.ShapeData(resourceParameters.Fields);
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!string.IsNullOrEmpty(resourceParameters.Fields) && !resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var paginationMetadata = new
                 {
-                    totalCount = countriesFromRepo.TotalCount,
-                    pageSize = countriesFromRepo.PageSize,
-                    currentPage = countriesFromRepo.CurrentPage,
-                    totalPages = countriesFromRepo.TotalPages
+                    totalCount = retrievedCountries.TotalCount,
+                    pageSize = retrievedCountries.PageSize,
+                    currentPage = retrievedCountries.CurrentPage,
+                    totalPages = retrievedCountries.TotalPages
                 };
 
                 Response.Headers.Add("X-Pagination", 
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 var links = CreateCountriesLinks(resourceParameters,
-                    countriesFromRepo.HasNext, countriesFromRepo.HasPrevious);
-                var shapedCountries = countries.ShapeData(resourceParameters.Fields);
+                    retrievedCountries.HasNext, retrievedCountries.HasPrevious);
 
                 var linkedCountries = shapedCountries.Select(country =>
                 {
@@ -93,22 +102,22 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else if (mediaType == "application/json")
+            else
             {
-                var previousPageLink = countriesFromRepo.HasPrevious ?
+                var previousPageLink = retrievedCountries.HasPrevious ?
                     CreateCountriesResourceUri(resourceParameters,
                     ResourceUriType.PreviousPage) : null;
 
-                var nextPageLink = countriesFromRepo.HasNext ?
+                var nextPageLink = retrievedCountries.HasNext ?
                     CreateCountriesResourceUri(resourceParameters,
                     ResourceUriType.NextPage) : null;
 
                 var paginationMetadata = new
                 {
-                    totalCount = countriesFromRepo.TotalCount,
-                    pageSize = countriesFromRepo.PageSize,
-                    currentPage = countriesFromRepo.CurrentPage,
-                    totalPages = countriesFromRepo.TotalPages,
+                    totalCount = retrievedCountries.TotalCount,
+                    pageSize = retrievedCountries.PageSize,
+                    currentPage = retrievedCountries.CurrentPage,
+                    totalPages = retrievedCountries.TotalPages,
                     previousPageLink,
                     nextPageLink,
                 };
@@ -116,54 +125,88 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                return Ok(countries.ShapeData(resourceParameters.Fields));
-            }
-            else
-            {
-                return Ok(countries);
+                return Ok(shapedCountries);
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested country by country ID
+        /// </summary>
+        /// <param name="id">Country ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested country</returns>
+        /// <response code="200">Returns the requested country</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting country ID</response>
         [HttpGet("{id}", Name = "GetCountry")]
-        public IActionResult GetCountry(Guid id, [FromQuery] string fields,
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CountryDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> GetCountry(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<CountryDto>(fields))
+            if (!TypeHelper.TypeHasProperties<CountryDto>(fields))
             {
                 return BadRequest();
             }
 
-            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
+            var retrievedCountry = await _countryService.FindCountryById(id);
 
-            if (countryFromRepo == null)
+            if (retrievedCountry == null)
             {
                 return NotFound();
             }
 
-            var country = _mapper.Map<CountryDto>(countryFromRepo);
+            var country = _mapper.Map<CountryDto>(retrievedCountry);
+            var shapedCountry = country.ShapeData(fields);
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!string.IsNullOrEmpty(fields) && !fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var links = CreateCountryLinks(id, fields);
-                var linkedResource = country.ShapeData(fields)
-                    as IDictionary<string, object>;
+                var linkedResource = shapedCountry as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
                 return Ok(linkedResource);
             }
-            else if (mediaType == "application/json")
-            {
-                return Ok(country.ShapeData(fields));
-            }
             else
             {
-                return Ok(country);
+                return Ok(shapedCountry);
             }
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Creates a country
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /countries
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="country">Custom country</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created country</returns>
+        /// <response code="201">Returns the newly created country</response>
+        /// <response code="400">Invalid country</response>
+        /// <response code="422">Invalid country validation</response>
         [HttpPost(Name = "CreateCountry")]
-        public IActionResult CreateCountry([FromBody] CountryCreationDto country,
+        [Consumes("application/json", "application/xml")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CountryDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
+        public async Task<IActionResult> CreateCountry([FromBody] CountryCreationDto country,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (country == null)
@@ -183,9 +226,9 @@ namespace Recollectable.API.Controllers
             }
 
             var newCountry = _mapper.Map<Country>(country);
-            _unitOfWork.CountryRepository.Add(newCountry);
+            await _countryService.CreateCountry(newCountry);
 
-            if (!_unitOfWork.Save())
+            if (!await _countryService.Save())
             {
                 throw new Exception("Creating a country failed on save.");
             }
@@ -195,8 +238,7 @@ namespace Recollectable.API.Controllers
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateCountryLinks(returnedCountry.Id, null);
-                var linkedResource = returnedCountry.ShapeData(null)
-                    as IDictionary<string, object>;
+                var linkedResource = returnedCountry.ShapeData(null) as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
@@ -212,10 +254,17 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Invalid country creation request
+        /// </summary>
+        /// <param name="id">Country ID</param>
+        /// <response code="404">Unexisting country ID</response>
+        /// <response code="409">Already existing country ID</response>
         [HttpPost("{id}")]
-        public IActionResult BlockCountryCreation(Guid id)
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<IActionResult> BlockCountryCreation(Guid id)
         {
-            if (_unitOfWork.CountryRepository.Exists(id))
+            if (await _countryService.CountryExists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -223,8 +272,31 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Updates a country
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /countries/{id}
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="id">Country ID</param>
+        /// <param name="country">Custom country</param>
+        /// <response code="204">Updated the country successfully</response>
+        /// <response code="400">Invalid country</response>
+        /// <response code="404">Unexisting country ID</response>
+        /// <response code="422">Invalid country validation</response>
         [HttpPut("{id}", Name = "UpdateCountry")]
-        public IActionResult UpdateCountry(Guid id, [FromBody] CountryUpdateDto country)
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
+        public async Task<IActionResult> UpdateCountry(Guid id, [FromBody] CountryUpdateDto country)
         {
             if (country == null)
             {
@@ -242,17 +314,17 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
+            var retrievedCountry = await _countryService.FindCountryById(id);
 
-            if (countryFromRepo == null)
+            if (retrievedCountry == null)
             {
                 return NotFound();
             }
 
-            _mapper.Map(country, countryFromRepo);
-            _unitOfWork.CountryRepository.Update(countryFromRepo);
+            _mapper.Map(country, retrievedCountry);
+            _countryService.UpdateCountry(retrievedCountry);
 
-            if (!_unitOfWork.Save())
+            if (!await _countryService.Save())
             {
                 throw new Exception($"Updating country {id} failed on save.");
             }
@@ -260,8 +332,31 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Update specific fields of a country
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH /countries/{id}
+        ///     [
+        ///	        
+        ///     ]
+        /// </remarks>
+        /// <param name="id">Country ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the country successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting country ID</response>
+        /// <response code="422">Invalid country validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCountry")]
-        public IActionResult PartiallyUpdateCountry(Guid id, 
+        [Consumes("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
+        public async Task<IActionResult> PartiallyUpdateCountry(Guid id, 
             [FromBody] JsonPatchDocument<CountryUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -269,14 +364,14 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
+            var retrievedCountry = await _countryService.FindCountryById(id);
 
-            if (countryFromRepo == null)
+            if (retrievedCountry == null)
             {
                 return NotFound();
             }
 
-            var patchedCountry = _mapper.Map<CountryUpdateDto>(countryFromRepo);
+            var patchedCountry = _mapper.Map<CountryUpdateDto>(retrievedCountry);
             patchDoc.ApplyTo(patchedCountry, ModelState);
 
             if (patchedCountry.Description?.ToLowerInvariant() == patchedCountry.Name?.ToLowerInvariant())
@@ -292,10 +387,10 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            _mapper.Map(patchedCountry, countryFromRepo);
-            _unitOfWork.CountryRepository.Update(countryFromRepo);
+            _mapper.Map(patchedCountry, retrievedCountry);
+            _countryService.UpdateCountry(retrievedCountry);
 
-            if (!_unitOfWork.Save())
+            if (!await _countryService.Save())
             {
                 throw new Exception($"Patching country {id} failed on save.");
             }
@@ -303,19 +398,27 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a country
+        /// </summary>
+        /// <param name="id">Country ID</param>
+        /// <response code="204">Removed the country successfully</response>
+        /// <response code="404">Unexisting country ID</response>
         [HttpDelete("{id}", Name = "DeleteCountry")]
-        public IActionResult DeleteCountry(Guid id)
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DeleteCountry(Guid id)
         {
-            var countryFromRepo = _unitOfWork.CountryRepository.GetById(id);
+            var retrievedCountry = await _countryService.FindCountryById(id);
 
-            if (countryFromRepo == null)
+            if (retrievedCountry == null)
             {
                 return NotFound();
             }
 
-            _unitOfWork.CountryRepository.Delete(countryFromRepo);
+            _countryService.RemoveCountry(retrievedCountry);
             
-            if (!_unitOfWork.Save())
+            if (!await _countryService.Save())
             {
                 throw new Exception($"Deleting country {id} failed on save.");
             }
@@ -372,23 +475,20 @@ namespace Recollectable.API.Controllers
         {
             var links = new List<LinkDto>();
 
-            if (string.IsNullOrEmpty(fields))
-            {
-                links.Add(new LinkDto(Url.Link("GetCountry",
-                    new { id }), "self", "GET"));
+            links.Add(new LinkDto(Url.Link("GetCountry",
+                new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateCountry",
-                    new { }), "create_country", "POST"));
+            links.Add(new LinkDto(Url.Link("CreateCountry",
+                new { }), "create_country", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateCountry",
-                    new { id }), "update_country", "PUT"));
+            links.Add(new LinkDto(Url.Link("UpdateCountry",
+                new { id }), "update_country", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateCountry",
-                    new { id }), "partially_update_country", "PATCH"));
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateCountry",
+                new { id }), "partially_update_country", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteCountry",
-                    new { id }), "delete_country", "DELETE"));
-            }
+            links.Add(new LinkDto(Url.Link("DeleteCountry",
+                new { id }), "delete_country", "DELETE"));
 
             return links;
         }

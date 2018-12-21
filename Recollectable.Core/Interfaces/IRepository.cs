@@ -1,17 +1,14 @@
-﻿using Recollectable.Core.Shared.Entities;
-using System;
+﻿using LinqSpecs.Core;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Recollectable.Core.Interfaces
 {
-    public interface IRepository<TEntity, TParameters>
-        where TEntity : class
-        where TParameters : class
+    public interface IRepository<T> where T : class
     {
-        PagedList<TEntity> Get(TParameters resourceParameters);
-        TEntity GetById(Guid id);
-        void Add(TEntity entity);
-        void Update(TEntity entity);
-        void Delete(TEntity entity);
-        bool Exists(Guid id);
+        Task<IEnumerable<T>> GetAll(Specification<T> specification = null);
+        Task<T> GetSingle(Specification<T> specification = null);
+        Task Add(T item);
+        void Delete(T item);
     }
 }

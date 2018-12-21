@@ -30,7 +30,7 @@ namespace Recollectable.Core.Shared.Entities
             AddRange(items);
         }
 
-        public static PagedList<T> Create(IQueryable<T> source, int page, int pageSize)
+        public static PagedList<T> Create(List<T> source, int page, int pageSize)
         {
             var count = source.Count();
             var items = source.Skip((page - 1) * pageSize).Take(pageSize).ToList();

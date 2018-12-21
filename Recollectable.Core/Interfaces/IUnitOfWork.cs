@@ -1,22 +1,24 @@
 ﻿using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.Locations;
-using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
+using System.Threading.Tasks;
 
 namespace Recollectable.Core.Interfaces
 {
     public interface IUnitOfWork
     {
-        ICollectableRepository CollectableRepository { get; }
-        IRepository<Banknote, CurrenciesResourceParameters> BanknoteRepository { get; }
-        IRepository<Coin, CurrenciesResourceParameters> CoinRepository { get; }
-        IRepository<Collection, CollectionsResourceParameters> CollectionRepository { get; }
-        IRepository<CollectorValue, CollectorValuesResourceParameters> CollectorValueRepository { get; }
-        IRepository<Country, CountriesResourceParameters> CountryRepository { get; }
-        IRepository<User, UsersResourceParameters> UserRepository { get; }
+        IRepository<Coin> Coins { get; }
+        IRepository<Banknote> Banknotes { get; }
+        IRepository<Collectable> Collectables { get; }
+        IRepository<CollectionCollectable> CollectionCollectables { get; }
+        IRepository<CollectorValue> CollectorValues { get; }
+        IRepository<Condition> Conditions { get; }
+        IRepository<Collection> Collections { get; }
+        IRepository<Country> Countries { get; }
+        IRepository<User> Users { get; }
 
-        bool Save();
+        Task<bool> Save();
         void Dispose();
     }
 }

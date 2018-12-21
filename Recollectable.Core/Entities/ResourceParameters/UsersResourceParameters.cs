@@ -13,8 +13,8 @@
             set => _pageSize = (value > maxPageSize) ? maxPageSize : value;
         }
 
-        public string Search { get; set; }
-        public string OrderBy { get; set; } = "Name";
+        public string Search { get; set; } = string.Empty;
+        public string OrderBy { get; set; } = "UserName";
         public string Fields { get; set; }
     }
 }

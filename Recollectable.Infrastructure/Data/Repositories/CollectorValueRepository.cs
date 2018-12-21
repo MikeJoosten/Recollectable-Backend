@@ -1,64 +1,51 @@
-﻿using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Entities.ResourceParameters;
+﻿using LinqSpecs.Core;
+using Microsoft.EntityFrameworkCore;
+using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Interfaces;
-using Recollectable.Core.Models.Collectables;
-using Recollectable.Core.Shared.Entities;
-using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CollectorValueRepository : 
-        IRepository<CollectorValue, CollectorValuesResourceParameters>
+    public class CollectorValueRepository : IRepository<CollectorValue>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public CollectorValueRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public CollectorValueRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<CollectorValue> Get
-            (CollectorValuesResourceParameters resourceParameters)
+        public async Task<IEnumerable<CollectorValue>> GetAll(Specification<CollectorValue> specification = null)
         {
-            var collectorValues = _context.CollectorValues.ApplySort(resourceParameters.OrderBy,
-                _propertyMappingService.GetPropertyMapping<CollectorValueDto, CollectorValue>());
-
-            return PagedList<CollectorValue>.Create(collectorValues,
-                resourceParameters.Page,
-                resourceParameters.PageSize);
+            return specification == null ?
+                await _context.CollectorValues.ToListAsync() :
+                await _context.CollectorValues.Where(specification.ToExpression()).ToListAsync();
         }
 
-        public CollectorValue GetById(Guid collectorValueId)
+        public async Task<CollectorValue> GetSingle(Specification<CollectorValue> specification = null)
         {
-            return _context.CollectorValues.FirstOrDefault(c => c.Id == collectorValueId);
+            return specification == null ?
+                await _context.CollectorValues.FirstOrDefaultAsync() :
+                await _context.CollectorValues.FirstOrDefaultAsync(specification.ToExpression());
         }
 
-        public void Add(CollectorValue collectorValue)
+        public async Task Add(CollectorValue collectorValue)
         {
             if (collectorValue.Id == Guid.Empty)
             {
                 collectorValue.Id = Guid.NewGuid();
             }
 
-            _context.CollectorValues.Add(collectorValue);
+            await _context.CollectorValues.AddAsync(collectorValue);
         }
-
-        public void Update(CollectorValue collectorValue) { }
 
         public void Delete(CollectorValue collectorValue)
         {
             _context.CollectorValues.Remove(collectorValue);
-        }
-
-        public bool Exists(Guid collectorValueId)
-        {
-            return _context.CollectorValues.Any(c => c.Id == collectorValueId);
         }
     }
 }

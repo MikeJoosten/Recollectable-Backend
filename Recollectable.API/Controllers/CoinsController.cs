@@ -3,76 +3,91 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Recollectable.API.Interfaces;
+using Recollectable.API.Models.Collectables;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Interfaces;
-using Recollectable.Core.Models.Collectables;
 using Recollectable.Core.Shared.Entities;
 using Recollectable.Core.Shared.Enums;
 using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
+using Recollectable.Core.Shared.Helpers;
 using Recollectable.Core.Shared.Models;
+using Recollectable.Core.Shared.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.API.Controllers
 {
     //TODO Add Authorization
+    [ApiVersion("1.0")]
     [Route("api/coins")]
     public class CoinsController : Controller
     {
-        private IUnitOfWork _unitOfWork;
-        private IPropertyMappingService _propertyMappingService;
-        private ITypeHelperService _typeHelperService;
+        private ICoinService _coinService;
+        private ICountryService _countryService;
+        private ICollectorValueService _collectorValueService;
         private IMapper _mapper;
 
-        public CoinsController(IUnitOfWork unitOfWork, ITypeHelperService typeHelperService,
-            IPropertyMappingService propertyMappingService, IMapper mapper)
+        public CoinsController(ICoinService coinService, ICountryService countryService,
+            ICollectorValueService collectorValueService, IMapper mapper)
         {
-            _unitOfWork = unitOfWork;
-            _propertyMappingService = propertyMappingService;
-            _typeHelperService = typeHelperService;
+            _coinService = coinService;
+            _countryService = countryService;
+            _collectorValueService = collectorValueService;
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves coins
+        /// </summary>
+        /// <returns>List of coins</returns>
+        /// <response code="200">Returns a list of coins</response>
+        /// <response code="400">Invalid query parameter</response>
         [HttpHead]
         [HttpGet(Name = "GetCoins")]
-        public IActionResult GetCoins(CurrenciesResourceParameters resourceParameters,
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CoinDto), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetCoins(CurrenciesResourceParameters resourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<CoinDto, Coin>
-                (resourceParameters.OrderBy))
+            if (!PropertyMappingService.ValidMappingExistsFor<Coin>(resourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            if (!_typeHelperService.TypeHasProperties<CoinDto>
+            if (!TypeHelper.TypeHasProperties<CoinDto>
                 (resourceParameters.Fields))
             {
                 return BadRequest();
             }
 
-            var coinsFromRepo = _unitOfWork.CoinRepository.Get(resourceParameters);
-            var coins = _mapper.Map<IEnumerable<CoinDto>>(coinsFromRepo);
+            var retrievedCoins = await _coinService.FindCoins(resourceParameters);
+            var coins = _mapper.Map<IEnumerable<CoinDto>>(retrievedCoins);
+            var shapedCoins = coins.ShapeData(resourceParameters.Fields);
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!string.IsNullOrEmpty(resourceParameters.Fields) && !resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var paginationMetadata = new
                 {
-                    totalCount = coinsFromRepo.TotalCount,
-                    pageSize = coinsFromRepo.PageSize,
-                    currentPage = coinsFromRepo.CurrentPage,
-                    totalPages = coinsFromRepo.TotalPages
+                    totalCount = retrievedCoins.TotalCount,
+                    pageSize = retrievedCoins.PageSize,
+                    currentPage = retrievedCoins.CurrentPage,
+                    totalPages = retrievedCoins.TotalPages
                 };
 
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
                 var links = CreateCoinsLinks(resourceParameters,
-                    coinsFromRepo.HasNext, coinsFromRepo.HasPrevious);
-                var shapedCoins = coins.ShapeData(resourceParameters.Fields);
+                    retrievedCoins.HasNext, retrievedCoins.HasPrevious);
 
                 var linkedCoins = shapedCoins.Select(coin =>
                 {
@@ -93,22 +108,22 @@ namespace Recollectable.API.Controllers
 
                 return Ok(linkedCollectionResource);
             }
-            else if (mediaType == "application/json")
+            else
             {
-                var previousPageLink = coinsFromRepo.HasPrevious ?
+                var previousPageLink = retrievedCoins.HasPrevious ?
                     CreateCoinsResourceUri(resourceParameters,
                     ResourceUriType.PreviousPage) : null;
 
-                var nextPageLink = coinsFromRepo.HasNext ?
+                var nextPageLink = retrievedCoins.HasNext ?
                     CreateCoinsResourceUri(resourceParameters,
                     ResourceUriType.NextPage) : null;
 
                 var paginationMetadata = new
                 {
-                    totalCount = coinsFromRepo.TotalCount,
-                    pageSize = coinsFromRepo.PageSize,
-                    currentPage = coinsFromRepo.CurrentPage,
-                    totalPages = coinsFromRepo.TotalPages,
+                    totalCount = retrievedCoins.TotalCount,
+                    pageSize = retrievedCoins.PageSize,
+                    currentPage = retrievedCoins.CurrentPage,
+                    totalPages = retrievedCoins.TotalPages,
                     previousPageLink,
                     nextPageLink,
                 };
@@ -116,54 +131,88 @@ namespace Recollectable.API.Controllers
                 Response.Headers.Add("X-Pagination",
                     JsonConvert.SerializeObject(paginationMetadata));
 
-                return Ok(coins.ShapeData(resourceParameters.Fields));
-            }
-            else
-            {
-                return Ok(coins);
+                return Ok(shapedCoins);
             }
         }
 
+        /// <summary>
+        /// Retrieves the requested coin by coin ID
+        /// </summary>
+        /// <param name="id">Coin ID</param>
+        /// <param name="fields">Returned fields</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Requested coin</returns>
+        /// <response code="200">Returns the requested coin</response>
+        /// <response code="400">Invalid query parameter</response>
+        /// <response code="404">Unexisting coin ID</response>
         [HttpGet("{id}", Name = "GetCoin")]
-        public IActionResult GetCoin(Guid id, [FromQuery] string fields,
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CoinDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> GetCoin(Guid id, [FromQuery] string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
-            if (!_typeHelperService.TypeHasProperties<CoinDto>(fields))
+            if (!TypeHelper.TypeHasProperties<CoinDto>(fields))
             {
                 return BadRequest();
             }
 
-            var coinFromRepo = _unitOfWork.CoinRepository.GetById(id);
+            var retrievedCoin = await _coinService.FindCoinById(id);
 
-            if (coinFromRepo == null)
+            if (retrievedCoin == null)
             {
                 return NotFound();
             }
 
-            var coin = _mapper.Map<CoinDto>(coinFromRepo);
+            var coin = _mapper.Map<CoinDto>(retrievedCoin);
+            var shapedCoin = coin.ShapeData(fields);
 
             if (mediaType == "application/json+hateoas")
             {
+                if (!string.IsNullOrEmpty(fields) && !fields.ToLowerInvariant().Contains("id"))
+                {
+                    return BadRequest("Field parameter 'id' is required");
+                }
+
                 var links = CreateCoinLinks(id, fields);
-                var linkedResource = coin.ShapeData(fields)
-                    as IDictionary<string, object>;
+                var linkedResource = shapedCoin as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
                 return Ok(linkedResource);
             }
-            else if (mediaType == "application/json")
-            {
-                return Ok(coin.ShapeData(fields));
-            }
             else
             {
-                return Ok(coin);
+                return Ok(shapedCoin);
             }
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Creates a coin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /coins
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="coin">Custom coin</param>
+        /// <param name="mediaType"></param>
+        /// <returns>Newly created coin</returns>
+        /// <response code="201">Returns the newly created coin</response>
+        /// <response code="400">Invalid coin</response>
+        /// <response code="422">Invalid coin validation</response>
         [HttpPost(Name = "CreateCoin")]
-        public IActionResult CreateCoin([FromBody] CoinCreationDto coin,
+        [Consumes("application/json", "application/xml")]
+        [Produces("application/json", "application/json+hateoas", "application/xml")]
+        [ProducesResponseType(typeof(CoinDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
+        public async Task<IActionResult> CreateCoin([FromBody] CoinCreationDto coin,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (coin == null)
@@ -182,35 +231,19 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var country = _unitOfWork.CountryRepository.GetById(coin.CountryId);
-
-            if (country != null && coin.Country == null)
-            {
-                coin.Country = country;
-            }
-            else if (coin.CountryId != Guid.Empty || 
-                coin.Country.Id != Guid.Empty)
-            {
-                return BadRequest();
-            }
-
-            var collectorValue = _unitOfWork.CollectorValueRepository
-                .GetById(coin.CollectorValueId);
-
-            if (collectorValue != null && coin.CollectorValue == null)
-            {
-                coin.CollectorValue = collectorValue;
-            }
-            else if (coin.CollectorValueId != Guid.Empty || 
-                coin.CollectorValue.Id != Guid.Empty)
+            if (!await _countryService.CountryExists(coin.CountryId))
             {
                 return BadRequest();
             }
 
             var newCoin = _mapper.Map<Coin>(coin);
-            _unitOfWork.CoinRepository.Add(newCoin);
 
-            if (!_unitOfWork.Save())
+            var existingCollectorValue = await _collectorValueService.FindCollectorValueByValues(newCoin.CollectorValue);
+            newCoin.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
+
+            await _coinService.CreateCoin(newCoin);
+
+            if (!await _coinService.Save())
             {
                 throw new Exception("Creating a coin failed on save.");
             }
@@ -220,8 +253,7 @@ namespace Recollectable.API.Controllers
             if (mediaType == "application/json+hateoas")
             {
                 var links = CreateCoinLinks(returnedCoin.Id, null);
-                var linkedResource = returnedCoin.ShapeData(null)
-                    as IDictionary<string, object>;
+                var linkedResource = returnedCoin.ShapeData(null) as IDictionary<string, object>;
 
                 linkedResource.Add("links", links);
 
@@ -237,10 +269,17 @@ namespace Recollectable.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Invalid coin creation request
+        /// </summary>
+        /// <param name="id">Coin ID</param>
+        /// <response code="404">Unexisting coin ID</response>
+        /// <response code="409">Already existing coin ID</response>
         [HttpPost("{id}")]
-        public IActionResult BlockCoinCreation(Guid id)
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<IActionResult> BlockCoinCreation(Guid id)
         {
-            if (_unitOfWork.CoinRepository.Exists(id))
+            if (await _coinService.CoinExists(id))
             {
                 return new StatusCodeResult(StatusCodes.Status409Conflict);
             }
@@ -248,8 +287,31 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Updates a coin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /coins/{id}
+        ///     {
+        ///         
+        ///     }
+        /// </remarks>
+        /// <param name="id">Coin ID</param>
+        /// <param name="coin">Custom coin</param>
+        /// <response code="204">Updated the coin successfully</response>
+        /// <response code="400">Invalid coin</response>
+        /// <response code="404">Unexisting coin ID</response>
+        /// <response code="422">Invalid coin validation</response>
         [HttpPut("{id}", Name = "UpdateCoin")]
-        public IActionResult UpdateCoin(Guid id, [FromBody] CoinUpdateDto coin)
+        [Consumes("application/json", "application/xml")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
+        public async Task<IActionResult> UpdateCoin(Guid id, [FromBody] CoinUpdateDto coin)
         {
             if (coin == null)
             {
@@ -267,30 +329,27 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!_unitOfWork.CountryRepository.Exists(coin.CountryId))
+            if (!await _countryService.CountryExists(coin.CountryId))
             {
                 return BadRequest();
             }
 
-            if (!_unitOfWork.CollectorValueRepository.Exists(coin.CollectorValueId))
-            {
-                return BadRequest();
-            }
+            var retrievedCoin = await _coinService.FindCoinById(id);
 
-            var coinFromRepo = _unitOfWork.CoinRepository.GetById(id);
-
-            if (coinFromRepo == null)
+            if (retrievedCoin == null)
             {
                 return NotFound();
             }
 
-            coinFromRepo.CountryId = coin.CountryId;
-            coinFromRepo.CollectorValueId = coin.CollectorValueId;
+            var collectorValue = _mapper.Map<CollectorValue>(coin.CollectorValue);
+            var existingCollectorValue = await _collectorValueService.FindCollectorValueByValues(collectorValue);
+            retrievedCoin.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
+            retrievedCoin.CollectorValue = collectorValue;
 
-            _mapper.Map(coin, coinFromRepo);
-            _unitOfWork.CoinRepository.Update(coinFromRepo);
+            _mapper.Map(coin, retrievedCoin);
+            _coinService.UpdateCoin(retrievedCoin);
 
-            if (!_unitOfWork.Save())
+            if (!await _coinService.Save())
             {
                 throw new Exception($"Updating coin {id} failed on save.");
             }
@@ -298,8 +357,31 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        //TODO Add Sample request
+        /// <summary>
+        /// Update specific fields of a coin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH /coins/{id}
+        ///     [
+        ///	        
+        ///     ]
+        /// </remarks>
+        /// <param name="id">Coin ID</param>
+        /// <param name="patchDoc">JSON patch document</param>
+        /// <response code="204">Updated the coin successfully</response>
+        /// <response code="400">Invalid patch document</response>
+        /// <response code="404">Unexisting coin ID</response>
+        /// <response code="422">Invalid coin validation</response>
         [HttpPatch("{id}", Name = "PartiallyUpdateCoin")]
-        public IActionResult PartiallyUpdateCoin(Guid id,
+        [Consumes("application/json")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
+        public async Task<IActionResult> PartiallyUpdateCoin(Guid id,
             [FromBody] JsonPatchDocument<CoinUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -307,14 +389,14 @@ namespace Recollectable.API.Controllers
                 return BadRequest();
             }
 
-            var coinFromRepo = _unitOfWork.CoinRepository.GetById(id);
+            var retrievedCoin = await _coinService.FindCoinById(id);
 
-            if (coinFromRepo == null)
+            if (retrievedCoin == null)
             {
                 return NotFound();
             }
 
-            var patchedCoin = _mapper.Map<CoinUpdateDto>(coinFromRepo);
+            var patchedCoin = _mapper.Map<CoinUpdateDto>(retrievedCoin);
             patchDoc.ApplyTo(patchedCoin, ModelState);
 
             if (patchedCoin.Note?.ToLowerInvariant() == patchedCoin.Subject?.ToLowerInvariant())
@@ -330,23 +412,20 @@ namespace Recollectable.API.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            if (!_unitOfWork.CountryRepository.Exists(patchedCoin.CountryId))
+            if (!await _countryService.CountryExists(patchedCoin.CountryId))
             {
                 return BadRequest();
             }
 
-            if (!_unitOfWork.CollectorValueRepository.Exists(patchedCoin.CollectorValueId))
-            {
-                return BadRequest();
-            }
+            var collectorValue = _mapper.Map<CollectorValue>(patchedCoin.CollectorValue);
+            var existingCollectorValue = await _collectorValueService.FindCollectorValueByValues(collectorValue);
+            retrievedCoin.CollectorValueId = existingCollectorValue == null ? Guid.NewGuid() : existingCollectorValue.Id;
+            retrievedCoin.CollectorValue = collectorValue;
 
-            coinFromRepo.CountryId = patchedCoin.CountryId;
-            coinFromRepo.CollectorValueId = patchedCoin.CollectorValueId;
+            _mapper.Map(patchedCoin, retrievedCoin);
+            _coinService.UpdateCoin(retrievedCoin);
 
-            _mapper.Map(patchedCoin, coinFromRepo);
-            _unitOfWork.CoinRepository.Update(coinFromRepo);
-
-            if (!_unitOfWork.Save())
+            if (!await _coinService.Save())
             {
                 throw new Exception($"Patching coin {id} failed on save.");
             }
@@ -354,19 +433,27 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Removes a coin
+        /// </summary>
+        /// <param name="id">Coin ID</param>
+        /// <response code="204">Removed the coin successfully</response>
+        /// <response code="404">Unexisting coin ID</response>
         [HttpDelete("{id}", Name = "DeleteCoin")]
-        public IActionResult DeleteCoin(Guid id)
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DeleteCoin(Guid id)
         {
-            var coinFromRepo = _unitOfWork.CoinRepository.GetById(id);
+            var retrievedCoin = await _coinService.FindCoinById(id);
 
-            if (coinFromRepo == null)
+            if (retrievedCoin == null)
             {
                 return NotFound();
             }
 
-            _unitOfWork.CoinRepository.Delete(coinFromRepo);
+            _coinService.RemoveCoin(retrievedCoin);
 
-            if (!_unitOfWork.Save())
+            if (!await _coinService.Save())
             {
                 throw new Exception($"Deleting coin {id} failed on save.");
             }
@@ -426,23 +513,20 @@ namespace Recollectable.API.Controllers
         {
             var links = new List<LinkDto>();
 
-            if (string.IsNullOrEmpty(fields))
-            {
-                links.Add(new LinkDto(Url.Link("GetCoins",
-                    new { id }), "self", "GET"));
+            links.Add(new LinkDto(Url.Link("GetCoins",
+                new { id }), "self", "GET"));
 
-                links.Add(new LinkDto(Url.Link("CreateCoins",
-                    new { }), "create_coins", "POST"));
+            links.Add(new LinkDto(Url.Link("CreateCoin",
+                new { }), "create_coins", "POST"));
 
-                links.Add(new LinkDto(Url.Link("UpdateCoins",
-                    new { id }), "update_coins", "PUT"));
+            links.Add(new LinkDto(Url.Link("UpdateCoin",
+                new { id }), "update_coins", "PUT"));
 
-                links.Add(new LinkDto(Url.Link("PartiallyUpdateCoins",
-                    new { id }), "partially_update_coins", "PATCH"));
+            links.Add(new LinkDto(Url.Link("PartiallyUpdateCoin",
+                new { id }), "partially_update_coins", "PATCH"));
 
-                links.Add(new LinkDto(Url.Link("DeleteCoins",
-                    new { id }), "delete_coins", "DELETE"));
-            }
+            links.Add(new LinkDto(Url.Link("DeleteCoin",
+                new { id }), "delete_coins", "DELETE"));
 
             return links;
         }

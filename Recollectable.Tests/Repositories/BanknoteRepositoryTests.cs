@@ -1,25 +1,19 @@
 ﻿using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Entities.ResourceParameters;
+using Recollectable.Core.Specifications.Collectables;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Repositories
 {
     public class BanknoteRepositoryTests : RecollectableTestBase
     {
-        private CurrenciesResourceParameters resourceParameters;
-
-        public BanknoteRepositoryTests()
-        {
-            resourceParameters = new CurrenciesResourceParameters();
-        }
-
         [Fact]
-        public void Get_ReturnsAllBanknotes()
+        public async Task GetAll_ReturnsAllBanknotes()
         {
             //Act
-            var result = _unitOfWork.BanknoteRepository.Get(resourceParameters);
+            var result = await _unitOfWork.Banknotes.GetAll();
 
             //Assert
             Assert.NotNull(result);
@@ -27,46 +21,17 @@ namespace Recollectable.Tests.Repositories
         }
 
         [Fact]
-        public void Get_OrdersCollectionsByCountry()
+        public async Task GetSingle_ReturnsBanknote()
         {
             //Act
-            var result = _unitOfWork.BanknoteRepository.Get(resourceParameters);
+            var result = await _unitOfWork.Banknotes.GetSingle();
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal("Canada", result.First().Country.Name);
         }
 
         [Fact]
-        public void GetById_ReturnsBanknote_GivenValidBanknoteId()
-        {
-            //Arrange
-            Guid id = new Guid("3da0c34f-dbfb-41a3-801f-97b7f4cdde89");
-
-            //Act
-            var result = _unitOfWork.BanknoteRepository.GetById(id);
-
-            //Assert
-            Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
-            Assert.Equal("Pounds", result.Type);
-        }
-
-        [Fact]
-        public void GetById_ReturnsNull_GivenInvalidBanknoteId()
-        {
-            //Arrange
-            Guid id = new Guid("358a071b-9bf7-49d8-ac50-3296684e3ea7");
-
-            //Act
-            var result = _unitOfWork.BanknoteRepository.GetById(id);
-
-            //Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public void Add_AddsNewBanknote()
+        public async Task Add_AddsNewBanknote()
         {
             //Arrange
             Guid id = new Guid("86dbe5cf-df75-41a5-af56-6e2f2de181a4");
@@ -79,71 +44,28 @@ namespace Recollectable.Tests.Repositories
             };
 
             //Act
-            _unitOfWork.BanknoteRepository.Add(newBanknote);
-            _unitOfWork.Save();
+            await _unitOfWork.Banknotes.Add(newBanknote);
+            await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(7, _unitOfWork.BanknoteRepository.Get(resourceParameters).Count());
-            Assert.Equal("Euros", _unitOfWork.BanknoteRepository.GetById(id).Type);
+            Assert.Equal(7, (await _unitOfWork.Banknotes.GetAll()).Count());
+            Assert.Equal("Euros", (await _unitOfWork.Banknotes.GetSingle(new BanknoteById(id))).Type);
         }
 
         [Fact]
-        public void Update_UpdatesExistingBanknote()
-        {
-            //Arrange
-            Guid id = new Guid("48d9049b-04f0-4c24-a1c3-c3668878013e");
-            Banknote updatedBanknote = _unitOfWork.BanknoteRepository.GetById(id);
-            updatedBanknote.Type = "Euros";
-
-            //Act
-            _unitOfWork.BanknoteRepository.Update(updatedBanknote);
-            _unitOfWork.Save();
-
-            //Assert
-            Assert.Equal(6, _unitOfWork.BanknoteRepository.Get(resourceParameters).Count());
-            Assert.Equal("Euros", _unitOfWork.BanknoteRepository.GetById(id).Type);
-        }
-
-        [Fact]
-        public void Delete_RemovesBanknoteFromDatabase()
+        public async Task Delete_RemovesBanknoteFromDatabase()
         {
             //Arrange
             Guid id = new Guid("0acf8863-1bec-49a6-b761-ce27dd219e7c");
-            Banknote banknote = _unitOfWork.BanknoteRepository.GetById(id);
+            Banknote banknote = await _unitOfWork.Banknotes.GetSingle(new BanknoteById(id));
 
             //Act
-            _unitOfWork.BanknoteRepository.Delete(banknote);
-            _unitOfWork.Save();
+            _unitOfWork.Banknotes.Delete(banknote);
+            await _unitOfWork.Save();
 
             //Assert
-            Assert.Equal(5, _unitOfWork.BanknoteRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.BanknoteRepository.GetById(id));
-        }
-
-        [Fact]
-        public void Exists_ReturnsTrue_GivenValidBanknoteId()
-        {
-            //Arrange
-            Guid id = new Guid("3da0c34f-dbfb-41a3-801f-97b7f4cdde89");
-
-            //Act
-            var result = _unitOfWork.BanknoteRepository.Exists(id);
-
-            //Assert
-            Assert.True(result);
-        }
-
-        [Fact]
-        public void Exists_ReturnsFalse_GivenInvalidBanknoteId()
-        {
-            //Arrange
-            Guid id = new Guid("358a071b-9bf7-49d8-ac50-3296684e3ea7");
-
-            //Act
-            var result = _unitOfWork.BanknoteRepository.Exists(id);
-
-            //Assert
-            Assert.False(result);
+            Assert.Equal(5, (await _unitOfWork.Banknotes.GetAll()).Count());
+            Assert.Null(await _unitOfWork.Banknotes.GetSingle(new BanknoteById(id)));
         }
     }
 }

@@ -1,75 +1,54 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Recollectable.Core.Entities.ResourceParameters;
+﻿using LinqSpecs.Core;
+using Microsoft.EntityFrameworkCore;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces;
-using Recollectable.Core.Models.Users;
-using Recollectable.Core.Shared.Entities;
-using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class UserRepository : IRepository<User, UsersResourceParameters>
+    public class UserRepository : IRepository<User>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public UserRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public UserRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<User> Get(UsersResourceParameters resourceParameters)
+        public async Task<IEnumerable<User>> GetAll(Specification<User> specification = null)
         {
-            var users = _context.Users
-                .Include(u => u.Collections)
-                .ApplySort(resourceParameters.OrderBy,
-                    _propertyMappingService.GetPropertyMapping<UserDto, User>());
+            var users = _context.Users.Include(u => u.Collections);
 
-            if (!string.IsNullOrEmpty(resourceParameters.Search))
-            {
-                var search = resourceParameters.Search.Trim().ToLowerInvariant();
-                users = users.Where(u => u.FirstName.ToLowerInvariant().Contains(search)
-                    || u.LastName.ToLowerInvariant().Contains(search)
-                    || u.Email.ToLowerInvariant().Contains(search));
-            }
-
-            return PagedList<User>.Create(users,
-                resourceParameters.Page,
-                resourceParameters.PageSize);
+            return specification == null ? 
+                await users.ToListAsync() : 
+                await users.Where(specification.ToExpression()).ToListAsync();
         }
 
-        public User GetById(Guid userId)
+        public async Task<User> GetSingle(Specification<User> specification = null)
         {
-            return _context.Users
-                .Include(u => u.Collections)
-                .FirstOrDefault(u => u.Id == userId);
+            var users = _context.Users.Include(u => u.Collections);
+
+            return specification == null ?
+                await users.FirstOrDefaultAsync() :
+                await users.FirstOrDefaultAsync(specification.ToExpression());
         }
 
-        public void Add(User user)
+        public async Task Add(User user)
         {
             if (user.Id == Guid.Empty)
             {
                 user.Id = Guid.NewGuid();
             }
 
-            _context.Users.Add(user);
+            await _context.Users.AddAsync(user);
         }
-
-        public void Update(User user) { }
 
         public void Delete(User user)
         {
             _context.Users.Remove(user);
-        }
-
-        public bool Exists(Guid userId)
-        {
-            return _context.Users.Any(u => u.Id == userId);
         }
     }
 }

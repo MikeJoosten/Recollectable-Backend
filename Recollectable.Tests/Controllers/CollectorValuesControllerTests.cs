@@ -1,15 +1,19 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Recollectable.API.Controllers;
+using Recollectable.API.Models.Collectables;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Models.Collectables;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
+using Recollectable.Tests.Builders;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Controllers
@@ -17,241 +21,302 @@ namespace Recollectable.Tests.Controllers
     public class CollectorValuesControllerTests : RecollectableTestBase
     {
         private readonly CollectorValuesController _controller;
+        private readonly Mock<ICollectorValueService> _mockCollectorValueService;
         private readonly CollectorValuesResourceParameters resourceParameters;
+        private readonly CollectorValueTestBuilder _builder;
 
         public CollectorValuesControllerTests()
         {
-            _controller = new CollectorValuesController(_unitOfWork, _typeHelperService,
-                _propertyMappingService, _mapper);
+            _mockCollectorValueService = new Mock<ICollectorValueService>();
+            _mockCollectorValueService.Setup(c => c.Save()).ReturnsAsync(true);
 
+            _controller = new CollectorValuesController(_mockCollectorValueService.Object, _mapper);
+            SetupTestController(_controller);
+
+            _builder = new CollectorValueTestBuilder();
             resourceParameters = new CollectorValuesResourceParameters();
-            SetupTestController<CollectorValueDto, CollectorValue>(_controller);
+            resourceParameters.Fields = "Id, G4";
         }
 
         [Fact]
-        public void GetCollectorValues_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
+        public async Task GetCollectorValues_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
             resourceParameters.OrderBy = "Invalid";
 
             //Act
-            var response = _controller.GetCollectorValues(resourceParameters, null);
+            var response = await _controller.GetCollectorValues(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCollectorValues_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCollectorValues_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             resourceParameters.Fields = "Invalid";
 
             //Act
-            var response = _controller.GetCollectorValues(resourceParameters, null);
+            var response = await _controller.GetCollectorValues(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
+        [Fact]
+        public async Task GetCollectorValues_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            var collectorValues = _builder.Build(2);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues,
+                resourceParameters.Page, resourceParameters.PageSize);
+            resourceParameters.Fields = "G4";
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValues(resourceParameters))
+                .ReturnsAsync(pagedList);
+
+            //Act
+            var response = await _controller.GetCollectorValues(resourceParameters, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCollectorValues_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCollectorValues_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
+            //Arrange
+            var collectorValues = _builder.Build(2);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValues(resourceParameters))
+                .ReturnsAsync(pagedList);
+
             //Act
-            var response = _controller.GetCollectorValues(resourceParameters, mediaType);
+            var response = await _controller.GetCollectorValues(resourceParameters, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCollectorValues_ReturnsAllCollectorValues_GivenNoMediaType()
-        {
-            //Act
-            var response = _controller.GetCollectorValues(resourceParameters, null) as OkObjectResult;
-            var collectorValues = response.Value as List<CollectorValueDto>;
-
-            //Assert
-            Assert.NotNull(collectorValues);
-            Assert.Equal(6, collectorValues.Count);
-        }
-
-        [Fact]
-        public void GetCollectorValues_ReturnsAllCollectorValues_GivenJsonMediaType()
+        public async Task GetCollectorValues_ReturnsAllCollectorValues_GivenAnyMediaType()
         {
             //Arrange
             string mediaType = "application/json";
+            var collectorValues = _builder.Build(2);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValues(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetCollectorValues(resourceParameters, mediaType) as OkObjectResult;
-            var collectorValues = response.Value as List<ExpandoObject>;
+            var response = await _controller.GetCollectorValues(resourceParameters, null) as OkObjectResult;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(collectorValues);
-            Assert.Equal(6, collectorValues.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
-        public void GetCollectorValues_ReturnsAllCollectorValues_GivenHateoasMediaType()
+        public async Task GetCollectorValues_ReturnsAllCollectorValues_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
+            var collectorValues = _builder.Build(2);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValues(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetCollectorValues(resourceParameters, mediaType) as OkObjectResult;
-            var linkedCollection = response.Value as LinkedCollectionResource;
+            var response = await _controller.GetCollectorValues(resourceParameters, mediaType) as OkObjectResult;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(linkedCollection);
-            Assert.Equal(6, linkedCollection.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
-        public void GetCollectorValues_ReturnsCollectorValues_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCollectorValues_ReturnsCollectorValues_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json";
-            resourceParameters.PageSize = 2;
+            var collectorValues = _builder.Build(4);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 1, 2);
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValues(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetCollectorValues(resourceParameters, mediaType) as OkObjectResult;
-            var collectorValues = response.Value as List<ExpandoObject>;
+            var response = await _controller.GetCollectorValues(resourceParameters, null) as OkObjectResult;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(collectorValues);
-            Assert.Equal(2, collectorValues.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
-        public void GetCollectorValues_ReturnsCollectorValues_GivenHateoasMediaTypeAndPagingParameters()
+        public async Task GetCollectorValues_ReturnsCollectorValues_GivenHateoasMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            resourceParameters.PageSize = 2;
+            var collectorValues = _builder.Build(4);
+            var pagedList = PagedList<CollectorValue>.Create(collectorValues, 1, 2);
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValues(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetCollectorValues(resourceParameters, mediaType) as OkObjectResult;
-            var collectorValues = response.Value as LinkedCollectionResource;
+            var response = await _controller.GetCollectorValues(resourceParameters, mediaType) as OkObjectResult;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(collectorValues);
-            Assert.Equal(2, collectorValues.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
-        public void GetCollectorValue_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCollectorValue_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             string fields = "Invalid";
 
             //Act
-            var response = _controller.GetCollectorValue(Guid.Empty, fields, null);
+            var response = await _controller.GetCollectorValue(Guid.Empty, fields, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCollectorValue_ReturnsNotFoundResponse_GivenInvalidId()
+        public async Task GetCollectorValue_ReturnsNotFoundResponse_GivenInvalidId()
         {
-            //Arrange
-            Guid id = new Guid("650f3296-894a-486a-b259-aea82a935981");
-
             //Act
-            var response = _controller.GetCollectorValue(id, null, null);
+            var response = await _controller.GetCollectorValue(Guid.Empty, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
+        [Fact]
+        public async Task GetCollectorValue_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+            var collectorValue = _builder.WithId(id).WithG4(15.54).Build();
+            resourceParameters.Fields = "G4";
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValueById(id))
+                .ReturnsAsync(collectorValue);
+
+            //Act
+            var response = await _controller.GetCollectorValue(id, resourceParameters.Fields, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCollectorValue_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCollectorValue_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+            var collectorValue = _builder.Build();
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValueById(id))
+                .ReturnsAsync(collectorValue);
 
             //Act
-            var response = _controller.GetCollectorValue(id, null, mediaType);
+            var response = await _controller.GetCollectorValue(id, resourceParameters.Fields, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCollectorValue_ReturnsCollectorValue_GivenNoMediaType()
+        public async Task GetCollectorValue_ReturnsCollectorValue_GivenAnyMediaType()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+            var collectorValue = _builder.WithId(id).WithG4(15.54).Build();
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValueById(id))
+                .ReturnsAsync(collectorValue);
 
             //Act
-            var response = _controller.GetCollectorValue(id, null, null) as OkObjectResult;
-            var collectorValue = response.Value as CollectorValueDto;
+            var response = await _controller.GetCollectorValue(id, null, null) as OkObjectResult;
+            dynamic result = response.Value as ExpandoObject;
 
             //Assert
-            Assert.NotNull(collectorValue);
-            Assert.Equal(id, collectorValue.Id);
-            Assert.Equal(15.54, collectorValue.G4);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal(15.54, result.G4);
         }
 
         [Fact]
-        public void GetCollectorValue_ReturnsCollectorValue_GivenJsonMediaType()
-        {
-            //Arrange
-            string mediaType = "application/json";
-            Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-
-            //Act
-            var response = _controller.GetCollectorValue(id, null, mediaType) as OkObjectResult;
-            dynamic collectorValue = response.Value as ExpandoObject;
-
-            //Assert
-            Assert.NotNull(collectorValue);
-            Assert.Equal(id, collectorValue.Id);
-            Assert.Equal(15.54, collectorValue.G4);
-        }
-
-        [Fact]
-        public void GetCollectorValue_ReturnsCollectorValue_GivenHateoasMediaType()
+        public async Task GetCollectorValue_ReturnsCollectorValue_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+            var collectorValue = _builder.WithId(id).WithG4(15.54).Build();
+
+            _mockCollectorValueService
+                .Setup(c => c.FindCollectorValueById(id))
+                .ReturnsAsync(collectorValue);
 
             //Act
-            var response = _controller.GetCollectorValue(id, null, mediaType) as OkObjectResult;
-            dynamic collectorValue = response.Value as IDictionary<string, object>;
+            var response = await _controller.GetCollectorValue(id, resourceParameters.Fields, mediaType) as OkObjectResult;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(collectorValue);
-            Assert.Equal(id, collectorValue.Id);
-            Assert.Equal(15.54, collectorValue.G4);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal(15.54, result.G4);
         }
 
         [Fact]
-        public void CreateCollectorValue_ReturnsBadRequestResponse_GivenNoCollection()
+        public async Task CreateCollectorValue_ReturnsBadRequestResponse_GivenNoCollection()
         {
             //Act
-            var response = _controller.CreateCollectorValue(null, null);
+            var response = await _controller.CreateCollectorValue(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateCollectorValue_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollectorValue()
+        public async Task CreateCollectorValue_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollectorValue()
         {
             //Arrange
-            CollectorValueCreationDto collectorValue = new CollectorValueCreationDto();
+            var collectorValue = _builder.BuildCreationDto();
             _controller.ModelState.AddModelError("G4", "Required");
 
             //Act
-            var response = _controller.CreateCollectorValue(collectorValue, null);
+            var response = await _controller.CreateCollectorValue(collectorValue, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
@@ -260,268 +325,268 @@ namespace Recollectable.Tests.Controllers
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
-        public void CreateCollectorValue_ReturnsCreatedResponse_GivenValidCollectorValue(string mediaType)
+        public async Task CreateCollectorValue_ReturnsCreatedResponse_GivenValidCollectorValue(string mediaType)
         {
             //Arrange
-            CollectorValueCreationDto collectorValue = new CollectorValueCreationDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildCreationDto();
 
             //Act
-            var response = _controller.CreateCollectorValue(collectorValue, mediaType);
+            var response = await _controller.CreateCollectorValue(collectorValue, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
         }
 
         [Fact]
-        public void CreateCollectorValue_CreatesNewCollectorValue_GivenAnyMediaTypeAndValidCollectorValue()
+        public async Task CreateCollectorValue_CreatesNewCollectorValue_GivenAnyMediaTypeAndValidCollectorValue()
         {
             //Arrange
-            CollectorValueCreationDto collectorValue = new CollectorValueCreationDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildCreationDto();
 
             //Act
-            var response = _controller.CreateCollectorValue(collectorValue, null) as CreatedAtRouteResult;
-            var returnedCollectorValue = response.Value as CollectorValueDto;
+            var response = await _controller.CreateCollectorValue(collectorValue, null) as CreatedAtRouteResult;
+            var result = response.Value as CollectorValueDto;
 
             //Assert
-            Assert.NotNull(returnedCollectorValue);
-            Assert.Equal(18.64, returnedCollectorValue.G4);
+            Assert.NotNull(result);
+            Assert.Equal(18.64, result.G4);
         }
 
         [Fact]
-        public void CreateCollectorValue_CreatesNewCollectorValue_GivenHateoasMediaTypeAndValidCollectorValue()
+        public async Task CreateCollectorValue_CreatesNewCollectorValue_GivenHateoasMediaTypeAndValidCollectorValue()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            CollectorValueCreationDto collectorValue = new CollectorValueCreationDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildCreationDto();
 
             //Act
-            var response = _controller.CreateCollectorValue(collectorValue, mediaType) as CreatedAtRouteResult;
-            dynamic returnedCollectorValue = response.Value as IDictionary<string, object>;
+            var response = await _controller.CreateCollectorValue(collectorValue, mediaType) as CreatedAtRouteResult;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(returnedCollectorValue);
-            Assert.Equal(18.64, returnedCollectorValue.G4);
+            Assert.NotNull(result);
+            Assert.Equal(18.64, result.G4);
         }
 
         [Fact]
-        public void BlockCountryCollectorValue_ReturnsConflictResponse_GivenExistingId()
+        public async Task BlockCountryCollectorValue_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+            _mockCollectorValueService.Setup(c => c.CollectorValueExists(It.IsAny<Guid>())).ReturnsAsync(true);
 
             //Act
-            var response = _controller.BlockCollectorValueCreation(id) as StatusCodeResult;
+            var response = await _controller.BlockCollectorValueCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
+            _mockCollectorValueService.Verify(c => c.CollectorValueExists(id));
         }
 
         [Fact]
-        public void BlockCollectorValueCreation_ReturnsNotFoundResponse_GivenUnexistingId()
+        public async Task BlockCollectorValueCreation_ReturnsNotFoundResponse_GivenUnexistingId()
         {
-            //Arrange
-            Guid id = new Guid("3323fa30-f1a9-47d2-8c26-e354b508eba6");
-
             //Act
-            var response = _controller.BlockCollectorValueCreation(id);
+            var response = await _controller.BlockCollectorValueCreation(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCollectorValue_ReturnsBadRequestResponse_GivenNoCollectorValue()
+        public async Task UpdateCollectorValue_ReturnsBadRequestResponse_GivenNoCollectorValue()
         {
             //Act
-            var response = _controller.UpdateCollectorValue(Guid.Empty, null);
+            var response = await _controller.UpdateCollectorValue(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateCollectorValue_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollectorValue()
+        public async Task UpdateCollectorValue_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollectorValue()
         {
             //Arrange
-            CollectorValueUpdateDto collectorValue = new CollectorValueUpdateDto();
+            var collectorValue = _builder.BuildUpdateDto();
             _controller.ModelState.AddModelError("G4", "Required");
 
             //Act
-            var response = _controller.UpdateCollectorValue(Guid.Empty, collectorValue);
+            var response = await _controller.UpdateCollectorValue(Guid.Empty, collectorValue);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void UpdateCollectorValue_ReturnsNotFoundResponse_GivenInvalidCollectorValueId()
+        public async Task UpdateCollectorValue_ReturnsNotFoundResponse_GivenInvalidCollectorValueId()
         {
             //Arrange
-            Guid id = new Guid("358e52b6-3ad9-4ada-8f09-04919e30fd65");
-            CollectorValueUpdateDto collectorValue = new CollectorValueUpdateDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildUpdateDto();
 
             //Act
-            var response = _controller.UpdateCollectorValue(id, collectorValue);
+            var response = await _controller.UpdateCollectorValue(Guid.Empty, collectorValue);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCollectorValue_ReturnsNoContentResponse_GivenValidCollectorValue()
+        public async Task UpdateCollectorValue_ReturnsNoContentResponse_GivenValidCollectorValue()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            CollectorValueUpdateDto collectorValue = new CollectorValueUpdateDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildUpdateDto();
+            var retrievedCollectorValue = _builder.Build();
+
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).ReturnsAsync(retrievedCollectorValue);
 
             //Act
-            var response = _controller.UpdateCollectorValue(id, collectorValue);
+            var response = await _controller.UpdateCollectorValue(id, collectorValue);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void UpdateCollectorValue_UpdatesExistingCollectorValue_GivenValidCollectorValue()
+        public async Task UpdateCollectorValue_UpdatesExistingCollectorValue_GivenValidCollectorValue()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
-            CollectorValueUpdateDto collectorValue = new CollectorValueUpdateDto
-            {
-                G4 = 18.64
-            };
+            var collectorValue = _builder.WithG4(18.64).BuildUpdateDto();
+            var retrievedCollectorValue = _builder.WithId(id).Build();
+
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).ReturnsAsync(retrievedCollectorValue);
+            _mockCollectorValueService.Setup(c => c.UpdateCollectorValue(It.IsAny<CollectorValue>()));
 
             //Act
-            var response = _controller.UpdateCollectorValue(id, collectorValue);
+            var response = await _controller.UpdateCollectorValue(id, collectorValue);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CollectorValueRepository.GetById(id));
-            Assert.Equal(18.64, _unitOfWork.CollectorValueRepository.GetById(id).G4);
+            _mockCollectorValueService.Verify(c => c.UpdateCollectorValue(retrievedCollectorValue));
         }
 
         [Fact]
-        public void PartiallyUpdateCollectorValue_ReturnsBadRequestResponse_GivenNoPatchDocument()
+        public async Task PartiallyUpdateCollectorValue_ReturnsBadRequestResponse_GivenNoPatchDocument()
         {
             //Act
-            var response = _controller.PartiallyUpdateCollectorValue(Guid.Empty, null);
+            var response = await _controller.PartiallyUpdateCollectorValue(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollectorValue_ReturnsNotFoundResponse_GivenInvalidCollectorValueId()
+        public async Task PartiallyUpdateCollectorValue_ReturnsNotFoundResponse_GivenInvalidCollectorValueId()
         {
             //Arrange
-            Guid id = new Guid("615ad0ae-0c91-4e39-99e1-c9f74b92a7e8");
             JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
 
             //Act
-            var response = _controller.PartiallyUpdateCollectorValue(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollectorValue(Guid.Empty, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollectorValue_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollectorValue()
+        public async Task PartiallyUpdateCollectorValue_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollectorValue()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+
+            var collectorValue = _builder.Build();
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).ReturnsAsync(collectorValue);
+
             JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
             _controller.ModelState.AddModelError("G4", "Required");
 
             //Act
-            var response = _controller.PartiallyUpdateCollectorValue(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollectorValue(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollectorValue_ReturnsNoContentResponse_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCollectorValue_ReturnsNoContentResponse_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+
+            var collectorValue = _builder.Build();
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).ReturnsAsync(collectorValue);
+
             JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
             patchDoc.Replace(c => c.G4, 18.64);
 
             //Act
-            var response = _controller.PartiallyUpdateCollectorValue(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollectorValue(id, patchDoc);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollectorValue_UpdatesExistingCollectorValue_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCollectorValue_UpdatesExistingCollectorValue_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
+
+            var collectorValue = _builder.WithId(id).Build();
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).ReturnsAsync(collectorValue);
+            _mockCollectorValueService.Setup(c => c.UpdateCollectorValue(It.IsAny<CollectorValue>()));
+
             JsonPatchDocument<CollectorValueUpdateDto> patchDoc = new JsonPatchDocument<CollectorValueUpdateDto>();
             patchDoc.Replace(c => c.G4, 18.64);
 
             //Act
-            var response = _controller.PartiallyUpdateCollectorValue(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollectorValue(id, patchDoc);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CollectorValueRepository.GetById(id));
-            Assert.Equal(18.64, _unitOfWork.CollectorValueRepository.GetById(id).G4);
+            _mockCollectorValueService.Verify(c => c.UpdateCollectorValue(collectorValue));
         }
 
         [Fact]
-        public void DeleteCollectorValue_ReturnsNotFoundResponse_GivenInvalidCollectorValueId()
+        public async Task DeleteCollectorValue_ReturnsNotFoundResponse_GivenInvalidCollectorValueId()
         {
-            //Arrange
-            Guid id = new Guid("db23a489-535a-49c2-8af3-82490b3e50ef");
-
             //Act
-            var response = _controller.DeleteCollectorValue(id);
+            var response = await _controller.DeleteCollectorValue(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void DeleteCollectorValue_ReturnsNoContentResponse_GivenValidCollectorValueId()
+        public async Task DeleteCollectorValue_ReturnsNoContentResponse_GivenValidCollectorValueId()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
 
+            var collectorValue = _builder.Build();
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).ReturnsAsync(collectorValue);
+
             //Act
-            var response = _controller.DeleteCollectorValue(id);
+            var response = await _controller.DeleteCollectorValue(id);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void DeleteCollectorValue_RemovesCollectorValueFromDatabase()
+        public async Task DeleteCollectorValue_RemovesCollectorValueFromDatabase()
         {
             //Arrange
             Guid id = new Guid("843a6427-48ab-421c-ba35-3159b1b024a5");
 
+            var collectorValue = _builder.WithId(id).Build();
+            _mockCollectorValueService.Setup(c => c.FindCollectorValueById(id)).ReturnsAsync(collectorValue);
+            _mockCollectorValueService.Setup(c => c.RemoveCollectorValue(It.IsAny<CollectorValue>()));
+
             //Act
-            _controller.DeleteCollectorValue(id);
+            await _controller.DeleteCollectorValue(id);
 
             //Assert
-            Assert.Equal(5, _unitOfWork.CollectorValueRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.CollectorValueRepository.GetById(id));
+            _mockCollectorValueService.Verify(c => c.RemoveCollectorValue(collectorValue));
         }
     }
 }
