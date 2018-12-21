@@ -1,24 +1,23 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Recollectable.API.Interfaces;
-using Recollectable.API.Services;
+using Recollectable.API.Filters;
 using Recollectable.Core.Interfaces;
-using Recollectable.Core.Shared.Entities;
-using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Infrastructure.Data;
 using System;
-using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Recollectable.Tests
 {
     public class RecollectableTestBase
     {
+        protected readonly IMapper _mapper;
         protected readonly IUnitOfWork _unitOfWork;
-        protected readonly Mock<IControllerService> _mockControllerService;
 
         public RecollectableTestBase()
         {
@@ -27,23 +26,16 @@ namespace Recollectable.Tests
                 .Options;
 
             var _context = new RecollectableContext(options);
-            var _propertyMappingService = new PropertyMappingService();
-            _unitOfWork = new UnitOfWork(_context, _propertyMappingService);
-
-            _mockControllerService = new Mock<IControllerService>();
-            var _typeHelperService = new TypeHelperService();
-            _mockControllerService.SetupGet(c => c.TypeHelperService).Returns(_typeHelperService);
-            _mockControllerService.SetupGet(c => c.PropertyMappingService).Returns(_propertyMappingService);
+            _unitOfWork = new UnitOfWork(_context);
 
             var configuration = new MapperConfiguration(cfg =>
                 cfg.AddProfile<RecollectableMappingProfile>());
-            IMapper mapper = configuration.CreateMapper();
-            _mockControllerService.SetupGet(c => c.Mapper).Returns(mapper);
+            _mapper = configuration.CreateMapper();
 
             RecollectableInitializer.Initialize(_context);
         }
 
-        public void SetupTestController<T, S>(Controller controller)
+        public void SetupTestController(Controller controller)
         {
             controller.ControllerContext.HttpContext = new DefaultHttpContext();
 
@@ -58,6 +50,24 @@ namespace Recollectable.Tests
                 It.IsAny<ValidationStateDictionary>(), It.IsAny<string>(), It.IsAny<object>()));
 
             controller.ObjectValidator = objectValidator.Object;
+        }
+
+        public void SetupAuthentication(Controller controller)
+        {
+            var mockAuthService = new Mock<IAuthenticationService>();
+
+            mockAuthService
+                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
+                    It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.FromResult((object)null));
+
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            mockServiceProvider
+                .Setup(_ => _.GetService(typeof(IAuthenticationService)))
+                .Returns(mockAuthService.Object);
+
+            controller.ControllerContext.HttpContext.RequestServices = mockServiceProvider.Object;
         }
     }
 }

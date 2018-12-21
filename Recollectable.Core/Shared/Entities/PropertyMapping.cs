@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Recollectable.Core.Shared.Entities
 {
-    public class PropertyMapping<TSource, TDestination> : IPropertyMapping
+    public class PropertyMapping<T> : IPropertyMapping
     {
         public Dictionary<string, PropertyMappingValue> _mappingDictionary { get; private set; }
 

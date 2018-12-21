@@ -1,21 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="Microsoft.AspNetCore.Mvc.Abstractions">
       <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.mvc.abstractions\2.1.1\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Abstractions.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens">
+      <HintPath>..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.identitymodel.tokens\5.2.0\lib\netstandard1.4\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\newtonsoft.json\11.0.2\lib\netstandard2.0\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IdentityModel.Tokens.Jwt">
+      <HintPath>..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\system.identitymodel.tokens.jwt\5.2.0\lib\netstandard1.4\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="7.0.1" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.18" />
+    <PackageReference Include="AutoMapper" Version="8.0.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="8.1.2" />
+    <PackageReference Include="LinqSpecs.Core" Version="2.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.3.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.3.0" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.9" />
   </ItemGroup>
 
 </Project>

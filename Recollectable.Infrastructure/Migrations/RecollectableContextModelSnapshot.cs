@@ -15,9 +15,98 @@ namespace Recollectable.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.3-rtm-32065")
+                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ClaimType");
+
+                    b.Property<string>("ClaimValue");
+
+                    b.Property<Guid>("RoleId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ClaimType");
+
+                    b.Property<string>("ClaimValue");
+
+                    b.Property<Guid>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider");
+
+                    b.Property<string>("ProviderKey");
+
+                    b.Property<string>("ProviderDisplayName");
+
+                    b.Property<Guid>("UserId");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId");
+
+                    b.Property<Guid>("RoleId");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles");
+
+                    b.HasData(
+                        new { UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), RoleId = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea") },
+                        new { UserId = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), RoleId = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c") },
+                        new { UserId = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), RoleId = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c") }
+                    );
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId");
+
+                    b.Property<string>("LoginProvider");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Value");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens");
+                });
 
             modelBuilder.Entity("Recollectable.Core.Entities.Collectables.Collectable", b =>
                 {
@@ -31,9 +120,7 @@ namespace Recollectable.Infrastructure.Migrations
                     b.Property<string>("Discriminator")
                         .IsRequired();
 
-                    b.Property<string>("ReleaseDate")
-                        .IsRequired()
-                        .HasMaxLength(100);
+                    b.Property<string>("ReleaseDate");
 
                     b.HasKey("Id");
 
@@ -46,72 +133,43 @@ namespace Recollectable.Infrastructure.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("Collectable");
                 });
 
-            modelBuilder.Entity("Recollectable.Core.Entities.Collectables.CollectionCollectable", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<Guid>("CollectableId");
-
-                    b.Property<Guid>("CollectionId");
-
-                    b.Property<string>("Condition");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CollectableId");
-
-                    b.HasIndex("CollectionId");
-
-                    b.ToTable("CollectionCollectables");
-
-                    b.HasData(
-                        new { Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "MS62" },
-                        new { Id = new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), Condition = "Fine" },
-                        new { Id = new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "Uncirculated" },
-                        new { Id = new Guid("583a957b-124f-49cb-955c-87d758819e87"), CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), Condition = "VF24" },
-                        new { Id = new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), Condition = "Fine" },
-                        new { Id = new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), Condition = "VF24" }
-                    );
-                });
-
             modelBuilder.Entity("Recollectable.Core.Entities.Collectables.CollectorValue", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<double?>("AU50");
+                    b.Property<double>("AU50");
 
-                    b.Property<double?>("F12");
+                    b.Property<double>("F12");
 
-                    b.Property<double?>("G4");
+                    b.Property<double>("G4");
 
-                    b.Property<double?>("MS60");
+                    b.Property<double>("MS60");
 
-                    b.Property<double?>("MS63");
+                    b.Property<double>("MS63");
 
-                    b.Property<double?>("PF60");
+                    b.Property<double>("PF60");
 
-                    b.Property<double?>("PF63");
+                    b.Property<double>("PF63");
 
-                    b.Property<double?>("PF65");
+                    b.Property<double>("PF65");
 
-                    b.Property<double?>("VF20");
+                    b.Property<double>("VF20");
 
-                    b.Property<double?>("VG8");
+                    b.Property<double>("VG8");
 
-                    b.Property<double?>("XF40");
+                    b.Property<double>("XF40");
 
                     b.HasKey("Id");
 
                     b.ToTable("CollectorValues");
 
                     b.HasData(
-                        new { Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), F12 = 6.48, G4 = 6.48, MS60 = 16.0, MS63 = 18.0, VF20 = 6.48, VG8 = 6.48, XF40 = 15.0 },
-                        new { Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), F12 = 50.0, G4 = 50.0, MS60 = 200.0, MS63 = 200.0, VF20 = 50.0, VG8 = 50.0, XF40 = 50.0 },
-                        new { Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), PF60 = 75.0 },
-                        new { Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), F12 = 760.0, G4 = 760.0, MS60 = 1650.0, MS63 = 1650.0, VF20 = 760.0, VG8 = 760.0, XF40 = 760.0 },
-                        new { Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), F12 = 4.0, G4 = 3.0, MS60 = 40.0, MS63 = 165.0, VF20 = 4.5, VG8 = 3.5, XF40 = 13.5 }
+                        new { Id = new Guid("3ba282c2-4648-49f1-83ad-045ed612f31a"), AU50 = 0.0, F12 = 6.48, G4 = 6.48, MS60 = 16.0, MS63 = 18.0, PF60 = 0.0, PF63 = 0.0, PF65 = 0.0, VF20 = 6.48, VG8 = 6.48, XF40 = 15.0 },
+                        new { Id = new Guid("e92b30b7-5a08-41aa-8407-f10b6efa1571"), AU50 = 0.0, F12 = 50.0, G4 = 50.0, MS60 = 200.0, MS63 = 200.0, PF60 = 0.0, PF63 = 0.0, PF65 = 0.0, VF20 = 50.0, VG8 = 50.0, XF40 = 50.0 },
+                        new { Id = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), AU50 = 0.0, F12 = 0.0, G4 = 0.0, MS60 = 0.0, MS63 = 0.0, PF60 = 75.0, PF63 = 0.0, PF65 = 0.0, VF20 = 0.0, VG8 = 0.0, XF40 = 0.0 },
+                        new { Id = new Guid("08aeaba0-a480-4dd8-b7be-8215ddb7fca4"), AU50 = 0.0, F12 = 760.0, G4 = 760.0, MS60 = 1650.0, MS63 = 1650.0, PF60 = 0.0, PF63 = 0.0, PF65 = 0.0, VF20 = 760.0, VG8 = 760.0, XF40 = 760.0 },
+                        new { Id = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), AU50 = 0.0, F12 = 4.0, G4 = 3.0, MS60 = 40.0, MS63 = 165.0, PF60 = 0.0, PF63 = 0.0, PF65 = 0.0, VF20 = 4.5, VG8 = 3.5, XF40 = 13.5 }
                     );
                 });
 
@@ -120,9 +178,7 @@ namespace Recollectable.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(25);
+                    b.Property<string>("Type");
 
                     b.Property<Guid>("UserId");
 
@@ -139,6 +195,58 @@ namespace Recollectable.Infrastructure.Migrations
                     );
                 });
 
+            modelBuilder.Entity("Recollectable.Core.Entities.Collections.CollectionCollectable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<Guid>("CollectableId");
+
+                    b.Property<Guid>("CollectionId");
+
+                    b.Property<Guid>("ConditionId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CollectableId");
+
+                    b.HasIndex("CollectionId");
+
+                    b.HasIndex("ConditionId");
+
+                    b.ToTable("CollectionCollectables");
+
+                    b.HasData(
+                        new { Id = new Guid("1078b50b-1d89-4b24-b071-67af06348875"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("4e35ee38-1778-41ca-a858-5a2414de499c") },
+                        new { Id = new Guid("b9104c81-4779-404f-95be-bd2605d3cbc8"), CollectableId = new Guid("4c8e3fe4-aa96-4c33-9e4e-7ab284a653d5"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), ConditionId = new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae") },
+                        new { Id = new Guid("c46c2819-af81-4a35-8e50-96f16abe6614"), CollectableId = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("b5ef8ac8-c2ce-4926-a66a-e5f66f7b0dcb") },
+                        new { Id = new Guid("583a957b-124f-49cb-955c-87d758819e87"), CollectableId = new Guid("ad95d611-1778-4f9d-990f-ded3c914d7b1"), CollectionId = new Guid("e24235ad-b12d-40b9-8fbc-15d1c858dc3d"), ConditionId = new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732") },
+                        new { Id = new Guid("6138b11e-769a-4a97-9e82-1ea5538cea92"), CollectableId = new Guid("14db50bc-7b1a-4b65-8d6f-bf5e3412c610"), CollectionId = new Guid("9e83160d-49e8-4c76-b264-709fb44b3b60"), ConditionId = new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae") },
+                        new { Id = new Guid("c2781a82-f8e9-45c8-84ef-c2643b11c20f"), CollectableId = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectionId = new Guid("84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79"), ConditionId = new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732") }
+                    );
+                });
+
+            modelBuilder.Entity("Recollectable.Core.Entities.Collections.Condition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Grade");
+
+                    b.Property<string>("LanguageCode");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Conditions");
+
+                    b.HasData(
+                        new { Id = new Guid("24f7b017-43cb-4fdb-a7a0-2d0169c4d5ae"), Grade = "Fine", LanguageCode = "en-GB" },
+                        new { Id = new Guid("b5ef8ac8-c2ce-4926-a66a-e5f66f7b0dcb"), Grade = "Uncirculated", LanguageCode = "en-GB" },
+                        new { Id = new Guid("0853d1fe-a59f-4e5f-8e93-e31ec69fd732"), Grade = "VF24", LanguageCode = "en-US" },
+                        new { Id = new Guid("4e35ee38-1778-41ca-a858-5a2414de499c"), Grade = "MS62", LanguageCode = "en-US" }
+                    );
+                });
+
             modelBuilder.Entity("Recollectable.Core.Entities.Locations.Country", b =>
                 {
                     b.Property<Guid>("Id")
@@ -146,9 +254,7 @@ namespace Recollectable.Infrastructure.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50);
+                    b.Property<string>("Name");
 
                     b.HasKey("Id");
 
@@ -162,31 +268,93 @@ namespace Recollectable.Infrastructure.Migrations
                     );
                 });
 
+            modelBuilder.Entity("Recollectable.Core.Entities.Users.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken();
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles");
+
+                    b.HasData(
+                        new { Id = new Guid("0e031ce4-ce3f-4b73-b3fb-75e4703b8d3c"), ConcurrencyStamp = "3e08623b-1f76-49ba-b2d0-bed011492b99", Name = "User", NormalizedName = "USER" },
+                        new { Id = new Guid("0257e71c-37ee-4eca-8ed4-dee17f4d2cea"), ConcurrencyStamp = "5846a5a9-3362-4a0d-b30f-de28c60267eb", Name = "Admin", NormalizedName = "ADMIN" }
+                    );
+                });
+
             modelBuilder.Entity("Recollectable.Core.Entities.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("AccessFailedCount");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken();
+
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(250);
+                        .HasMaxLength(256);
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100);
+                    b.Property<bool>("EmailConfirmed");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100);
+                    b.Property<string>("FirstName");
+
+                    b.Property<string>("LastName");
+
+                    b.Property<bool>("LockoutEnabled");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("PasswordHash");
+
+                    b.Property<string>("PhoneNumber");
+
+                    b.Property<bool>("PhoneNumberConfirmed");
+
+                    b.Property<string>("SecurityStamp");
+
+                    b.Property<bool>("TwoFactorEnabled");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256);
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("NormalizedEmail")
+                        .HasName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers");
 
                     b.HasData(
-                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), Email = "ryan.haywood@gmail.com", FirstName = "Ryan", LastName = "Haywood" },
-                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), Email = "jack.patillo@gmail.com", FirstName = "Jack", LastName = "Patillo" },
-                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), Email = "geoff.ramsey@gmail.com", FirstName = "Geoff", LastName = "Ramsey" }
+                        new { Id = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1"), AccessFailedCount = 0, ConcurrencyStamp = "d3f00b4c-49ce-4051-bf7b-8360dc5929dc", Email = "ryan.haywood@gmail.com", EmailConfirmed = true, FirstName = "Ryan", LastName = "Haywood", LockoutEnabled = true, NormalizedEmail = "RYAN.HAYWOOD@GMAIL.COM", NormalizedUserName = "ryan", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Ryan" },
+                        new { Id = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158"), AccessFailedCount = 0, ConcurrencyStamp = "65f91f23-e371-4a8a-80a6-8becc57b0350", Email = "jack.patillo@gmail.com", EmailConfirmed = true, FirstName = "Jack", LastName = "Patillo", LockoutEnabled = true, NormalizedEmail = "JACK.PATILLO@GMAIL.COM", NormalizedUserName = "JACK", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Jack" },
+                        new { Id = new Guid("e640b01f-9eb8-407f-a8f9-68197a7fe48e"), AccessFailedCount = 0, ConcurrencyStamp = "396c0691-a06a-4637-9f73-ab3cc3912b38", Email = "geoff.ramsey@gmail.com", EmailConfirmed = true, FirstName = "Geoff", LastName = "Ramsey", LockoutEnabled = true, NormalizedEmail = "GEOFF.RAMSEY@GMAIL.COM", NormalizedUserName = "GEOFF", PasswordHash = "AQAAAAEAACcQAAAAELwS6EP+EIxLwIETUOFZqrcBwoIGtfFj8jZfzxvARPsm9FJxn3HIWgxrq5+A8Rie7A==", PhoneNumberConfirmed = false, SecurityStamp = "EI5SZZYU4EEWLBVXIJGX6PFPIHJETER3", TwoFactorEnabled = false, UserName = "Geoff" }
                     );
                 });
 
@@ -194,32 +362,23 @@ namespace Recollectable.Infrastructure.Migrations
                 {
                     b.HasBaseType("Recollectable.Core.Entities.Collectables.Collectable");
 
-                    b.Property<string>("BackImagePath")
-                        .HasMaxLength(250);
+                    b.Property<string>("BackImagePath");
 
-                    b.Property<string>("Designer")
-                        .HasMaxLength(250);
+                    b.Property<string>("Designer");
 
                     b.Property<int>("FaceValue");
 
-                    b.Property<string>("FrontImagePath")
-                        .HasMaxLength(250);
+                    b.Property<string>("FrontImagePath");
 
-                    b.Property<string>("HeadOfState")
-                        .HasMaxLength(250);
+                    b.Property<string>("HeadOfState");
 
-                    b.Property<string>("ObverseDescription")
-                        .HasMaxLength(250);
+                    b.Property<string>("ObverseDescription");
 
-                    b.Property<string>("ReverseDescription")
-                        .HasMaxLength(250);
+                    b.Property<string>("ReverseDescription");
 
-                    b.Property<string>("Size")
-                        .HasMaxLength(25);
+                    b.Property<string>("Size");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100);
+                    b.Property<string>("Type");
 
                     b.ToTable("Currency");
 
@@ -230,14 +389,11 @@ namespace Recollectable.Infrastructure.Migrations
                 {
                     b.HasBaseType("Recollectable.Core.Entities.Collectables.Currency");
 
-                    b.Property<string>("Color")
-                        .HasMaxLength(250);
+                    b.Property<string>("Color");
 
-                    b.Property<string>("Signature")
-                        .HasMaxLength(250);
+                    b.Property<string>("Signature");
 
-                    b.Property<string>("Watermark")
-                        .HasMaxLength(250);
+                    b.Property<string>("Watermark");
 
                     b.ToTable("Banknote");
 
@@ -253,40 +409,29 @@ namespace Recollectable.Infrastructure.Migrations
                 {
                     b.HasBaseType("Recollectable.Core.Entities.Collectables.Currency");
 
-                    b.Property<string>("EdgeLegend")
-                        .HasMaxLength(100);
+                    b.Property<string>("EdgeLegend");
 
-                    b.Property<string>("EdgeType")
-                        .HasMaxLength(50);
+                    b.Property<string>("EdgeType");
 
-                    b.Property<string>("Metal")
-                        .HasMaxLength(50);
+                    b.Property<string>("Metal");
 
-                    b.Property<string>("MintMark")
-                        .HasMaxLength(50);
+                    b.Property<string>("MintMark");
 
                     b.Property<int>("Mintage");
 
-                    b.Property<string>("Note")
-                        .HasMaxLength(250);
+                    b.Property<string>("Note");
 
-                    b.Property<string>("ObverseInscription")
-                        .HasMaxLength(100);
+                    b.Property<string>("ObverseInscription");
 
-                    b.Property<string>("ObverseLegend")
-                        .HasMaxLength(100);
+                    b.Property<string>("ObverseLegend");
 
-                    b.Property<string>("ReverseInscription")
-                        .HasMaxLength(100);
+                    b.Property<string>("ReverseInscription");
 
-                    b.Property<string>("ReverseLegend")
-                        .HasMaxLength(100);
+                    b.Property<string>("ReverseLegend");
 
-                    b.Property<string>("Subject")
-                        .HasMaxLength(250);
+                    b.Property<string>("Subject");
 
-                    b.Property<string>("Weight")
-                        .HasMaxLength(25);
+                    b.Property<string>("Weight");
 
                     b.ToTable("Coin");
 
@@ -297,6 +442,51 @@ namespace Recollectable.Infrastructure.Migrations
                         new { Id = new Guid("4e6b10c3-0758-4a33-9b10-861d23b57ac2"), CollectorValueId = new Guid("26aabce7-03cb-470f-9e4e-2d65095a37c9"), CountryId = new Guid("18d9e209-e798-44ed-bf2e-65798f8717c0"), ReleaseDate = "2009", FaceValue = 1, HeadOfState = "Rafael Correa", Size = "39 mm.", Type = "Sucre", Metal = "0.999 Silver 0.9925 oz. ASW", Mintage = 200, Subject = "Independence 200th Anniversary", Weight = "31.10 g." },
                         new { Id = new Guid("db0c31f2-5707-4111-8cb5-87f9201e7941"), CollectorValueId = new Guid("8bf1ae62-5493-4e08-83b8-65bf9c267c32"), CountryId = new Guid("5626595c-a6b1-44ba-b60d-87b5b35fe208"), ReleaseDate = "1924", Designer = "Adolph A. Weinman", FaceValue = 1, HeadOfState = "Calvin Coolidge", Size = "17.8 mm.", Type = "Dime", Metal = "0.900 Silver 0.0723 oz. ASW", Mintage = 24010000, Weight = "2.5 g." }
                     );
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Recollectable.Core.Entities.Users.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Recollectable.Core.Entities.Collectables.Collectable", b =>
@@ -312,7 +502,15 @@ namespace Recollectable.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Recollectable.Core.Entities.Collectables.CollectionCollectable", b =>
+            modelBuilder.Entity("Recollectable.Core.Entities.Collections.Collection", b =>
+                {
+                    b.HasOne("Recollectable.Core.Entities.Users.User", "User")
+                        .WithMany("Collections")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Recollectable.Core.Entities.Collections.CollectionCollectable", b =>
                 {
                     b.HasOne("Recollectable.Core.Entities.Collectables.Collectable", "Collectable")
                         .WithMany("CollectionCollectables")
@@ -323,13 +521,10 @@ namespace Recollectable.Infrastructure.Migrations
                         .WithMany("CollectionCollectables")
                         .HasForeignKey("CollectionId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
 
-            modelBuilder.Entity("Recollectable.Core.Entities.Collections.Collection", b =>
-                {
-                    b.HasOne("Recollectable.Core.Entities.Users.User", "User")
-                        .WithMany("Collections")
-                        .HasForeignKey("UserId")
+                    b.HasOne("Recollectable.Core.Entities.Collections.Condition", "Condition")
+                        .WithMany()
+                        .HasForeignKey("ConditionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

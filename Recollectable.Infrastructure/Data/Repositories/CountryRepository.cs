@@ -1,74 +1,50 @@
-﻿using Recollectable.Core.Entities.Locations;
-using Recollectable.Core.Entities.ResourceParameters;
+﻿using LinqSpecs.Core;
+using Microsoft.EntityFrameworkCore;
+using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Interfaces;
-using Recollectable.Core.Models.Locations;
-using Recollectable.Core.Shared.Entities;
-using Recollectable.Core.Shared.Extensions;
-using Recollectable.Core.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Recollectable.Infrastructure.Data.Repositories
 {
-    public class CountryRepository : IRepository<Country, CountriesResourceParameters>
+    public class CountryRepository : IRepository<Country>
     {
         private RecollectableContext _context;
-        private IPropertyMappingService _propertyMappingService;
 
-        public CountryRepository(RecollectableContext context,
-            IPropertyMappingService propertyMappingService)
+        public CountryRepository(RecollectableContext context)
         {
             _context = context;
-            _propertyMappingService = propertyMappingService;
         }
 
-        public PagedList<Country> Get(CountriesResourceParameters resourceParameters)
+        public async Task<IEnumerable<Country>> GetAll(Specification<Country> specification = null)
         {
-            var countries = _context.Countries.ApplySort(resourceParameters.OrderBy,
-                _propertyMappingService.GetPropertyMapping<CountryDto, Country>());
-
-            if (!string.IsNullOrEmpty(resourceParameters.Name))
-            {
-                var name = resourceParameters.Name.Trim().ToLowerInvariant();
-                countries = countries.Where(c => c.Name.ToLowerInvariant() == name);
-            }
-
-            if (!string.IsNullOrEmpty(resourceParameters.Search))
-            {
-                var search = resourceParameters.Search.Trim().ToLowerInvariant();
-                countries = countries.Where(c => c.Name.ToLowerInvariant().Contains(search));
-            }
-
-            return PagedList<Country>.Create(countries,
-                resourceParameters.Page,
-                resourceParameters.PageSize);
+            return specification == null ? 
+                await _context.Countries.ToListAsync() : 
+                await _context.Countries.Where(specification.ToExpression()).ToListAsync();
         }
 
-        public Country GetById(Guid countryId)
+        public async Task<Country> GetSingle(Specification<Country> specification = null)
         {
-            return _context.Countries.FirstOrDefault(c => c.Id == countryId);
+            return specification == null ?
+                await _context.Countries.FirstOrDefaultAsync() :
+                await _context.Countries.FirstOrDefaultAsync(specification.ToExpression());
         }
 
-        public void Add(Country country)
+        public async Task Add(Country country)
         {
             if (country.Id == Guid.Empty)
             {
                 country.Id = Guid.NewGuid();
             }
 
-            _context.Countries.Add(country);
+            await _context.Countries.AddAsync(country);
         }
-
-        public void Update(Country country) { }
 
         public void Delete(Country country)
         {
             _context.Countries.Remove(country);
-        }
-
-        public bool Exists(Guid countryId)
-        {
-            return _context.Countries.Any(c => c.Id == countryId);
         }
     }
 }

@@ -1,15 +1,20 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Recollectable.API.Controllers;
+using Recollectable.API.Models.Collections;
 using Recollectable.Core.Entities.Collections;
 using Recollectable.Core.Entities.ResourceParameters;
-using Recollectable.Core.Models.Collections;
+using Recollectable.Core.Entities.Users;
+using Recollectable.Core.Interfaces;
 using Recollectable.Core.Shared.Entities;
+using Recollectable.Tests.Builders;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Recollectable.Tests.Controllers
@@ -17,293 +22,353 @@ namespace Recollectable.Tests.Controllers
     public class CollectionsControllerTests : RecollectableTestBase
     {
         private readonly CollectionsController _controller;
+        private readonly Mock<IUserService> _mockUserService;
+        private readonly Mock<ICollectionService> _mockCollectionService;
         private readonly CollectionsResourceParameters resourceParameters;
+        private readonly CollectionTestBuilder _builder;
 
         public CollectionsControllerTests()
         {
-            _controller = new CollectionsController(_unitOfWork, _mockControllerService.Object);
-            resourceParameters = new CollectionsResourceParameters();
+            _mockUserService = new Mock<IUserService>();
+            _mockCollectionService = new Mock<ICollectionService>();
+            _mockCollectionService.Setup(c => c.Save()).ReturnsAsync(true);
+            _mockUserService.Setup(u => u.UserExists(It.IsAny<Guid>())).ReturnsAsync(true);
 
-            SetupTestController<CollectionDto, Collection>(_controller);
+            _controller = new CollectionsController(_mockCollectionService.Object, _mockUserService.Object, _mapper);
+            SetupTestController(_controller);
+
+            _builder = new CollectionTestBuilder();
+            resourceParameters = new CollectionsResourceParameters();
+            resourceParameters.Fields = "Id, Type";
         }
 
         [Fact]
-        public void GetCollections_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
+        public async Task GetCollections_ReturnsBadRequestResponse_GivenInvalidOrderByParameter()
         {
             //Arrange
             resourceParameters.OrderBy = "Invalid";
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, null);
+            var response = await _controller.GetCollections(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCollections_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCollections_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             resourceParameters.Fields = "Invalid";
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, null);
+            var response = await _controller.GetCollections(resourceParameters, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
+        [Fact]
+        public async Task GetCollections_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            var collections = _builder.Build(2);
+            var pagedList = PagedList<Collection>.Create(collections,
+                resourceParameters.Page, resourceParameters.PageSize);
+            resourceParameters.Fields = "Type";
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .ReturnsAsync(pagedList);
+
+            //Act
+            var response = await _controller.GetCollections(resourceParameters, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCollections_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCollections_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
+            //Arrange
+            var collections = _builder.Build(2);
+            var pagedList = PagedList<Collection>.Create(collections, 
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .ReturnsAsync(pagedList);
+
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType);
+            var response = await _controller.GetCollections(resourceParameters, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCollections_ReturnsAllCollections_GivenNoMediaType()
-        {
-            //Act
-            var response = _controller.GetCollections(resourceParameters, null) as OkObjectResult;
-            var collections = response.Value as List<CollectionDto>;
-
-            //Assert
-            Assert.NotNull(collections);
-            Assert.Equal(6, collections.Count);
-        }
-
-        [Fact]
-        public void GetCollections_ReturnsAllCollections_GivenJsonMediaType()
+        public async Task GetCollections_ReturnsAllCollections_GivenAnyMediaType()
         {
             //Arrange
-            string mediaType = "application/json";
+            var collections = _builder.Build(2);
+            var pagedList = PagedList<Collection>.Create(collections,
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
-            var collections = response.Value as List<ExpandoObject>;
+            var response = await _controller.GetCollections(resourceParameters, null) as OkObjectResult;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(collections);
-            Assert.Equal(6, collections.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
-        public void GetCollections_ReturnsAllCollections_GivenHateoasMediaType()
+        public async Task GetCollections_ReturnsAllCollections_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
+            var collections = _builder.Build(2);
+            var pagedList = PagedList<Collection>.Create(collections,
+                resourceParameters.Page, resourceParameters.PageSize);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
-            var linkedCollection = response.Value as LinkedCollectionResource;
+            var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(linkedCollection);
-            Assert.Equal(6, linkedCollection.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
-        public void GetCollections_ReturnsCollections_GivenJsonMediaTypeAndPagingParameters()
+        public async Task GetCollections_ReturnsCollections_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json";
-            resourceParameters.PageSize = 2;
+            var collections = _builder.Build(4);
+            var pagedList = PagedList<Collection>.Create(collections, 1, 2);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
-            var collections = response.Value as List<ExpandoObject>;
+            var response = await _controller.GetCollections(resourceParameters, null) as OkObjectResult;
+            var result = response.Value as List<ExpandoObject>;
 
             //Assert
-            Assert.NotNull(collections);
-            Assert.Equal(2, collections.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
-        public void GetCollections_ReturnsCollections_GivenHateoasMediaTypeAndPagingParameters()
+        public async Task GetCollections_ReturnsCollections_GivenHateoasMediaTypeAndPagingParameters()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
-            resourceParameters.PageSize = 2;
+            var collections = _builder.Build(4);
+            var pagedList = PagedList<Collection>.Create(collections, 1, 2);
+
+            _mockCollectionService
+                .Setup(c => c.FindCollections(resourceParameters))
+                .ReturnsAsync(pagedList);
 
             //Act
-            var response = _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
-            var collections = response.Value as LinkedCollectionResource;
+            var response = await _controller.GetCollections(resourceParameters, mediaType) as OkObjectResult;
+            var result = response.Value as LinkedCollectionResource;
 
             //Assert
-            Assert.NotNull(collections);
-            Assert.Equal(2, collections.Value.Count());
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Value.Count());
         }
 
         [Fact]
-        public void GetCollection_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
+        public async Task GetCollection_ReturnsBadRequestResponse_GivenInvalidFieldsParameter()
         {
             //Arrange
             string fields = "Invalid";
 
             //Act
-            var response = _controller.GetCollection(Guid.Empty, fields, null);
+            var response = await _controller.GetCollection(Guid.Empty, fields, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void GetCollection_ReturnsNotFoundResponse_GivenInvalidId()
+        public async Task GetCollection_ReturnsNotFoundResponse_GivenInvalidId()
         {
-            //Arrange
-            Guid id = new Guid("76efa0d4-2ec6-4dbb-80fa-a689fd5fe884");
-
             //Act
-            var response = _controller.GetCollection(id, null, null);
+            var response = await _controller.GetCollection(Guid.Empty, null, null);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
+        [Fact]
+        public async Task GetCollection_ReturnsBadRequestObjectResponse_GivenFieldParameterWithNoId()
+        {
+            //Arrange
+            string mediaType = "application/json+hateoas";
+            Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            var collection = _builder.WithId(id).WithType("Coin").Build();
+            resourceParameters.Fields = "Type";
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .ReturnsAsync(collection);
+
+            //Act
+            var response = await _controller.GetCollection(id, resourceParameters.Fields, mediaType);
+
+            //Assert
+            Assert.IsType<BadRequestObjectResult>(response);
+        }
+
         [Theory]
         [InlineData(null)]
-        [InlineData("application/json")]
         [InlineData("application/json+hateoas")]
-        public void GetCollection_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
+        public async Task GetCollection_ReturnsOkResponse_GivenAnyMediaType(string mediaType)
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            var collection = _builder.Build();
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .ReturnsAsync(collection);
 
             //Act
-            var response = _controller.GetCollection(id, null, mediaType);
+            var response = await _controller.GetCollection(id, resourceParameters.Fields, mediaType);
 
             //Assert
             Assert.IsType<OkObjectResult>(response);
         }
 
         [Fact]
-        public void GetCollection_ReturnsCollection_GivenNoMediaType()
-        {
-            //Arrange
-            Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
-
-            //Act
-            var response = _controller.GetCollection(id, null, null) as OkObjectResult;
-            var collection = response.Value as CollectionDto;
-
-            //Assert
-            Assert.NotNull(collection);
-            Assert.Equal(id, collection.Id);
-            Assert.Equal("Coin", collection.Type);
-        }
-
-        [Fact]
-        public void GetCollection_ReturnsCollection_GivenJsonMediaType()
+        public async Task GetCollection_ReturnsCollection_GivenAnyMediaType()
         {
             //Arrange
             string mediaType = "application/json";
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            var collection = _builder.WithId(id).WithType("Coin").Build();
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .ReturnsAsync(collection);
 
             //Act
-            var response = _controller.GetCollection(id, null, mediaType) as OkObjectResult;
-            dynamic collection = response.Value as ExpandoObject;
+            var response = await _controller.GetCollection(id, null, null) as OkObjectResult;
+            dynamic result = response.Value as ExpandoObject;
 
             //Assert
-            Assert.NotNull(collection);
-            Assert.Equal(id, collection.Id);
-            Assert.Equal("Coin", collection.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Coin", result.Type);
         }
 
         [Fact]
-        public void GetCollection_ReturnsCollection_GivenHateoasMediaType()
+        public async Task GetCollection_ReturnsCollection_GivenHateoasMediaType()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            var collection = _builder.WithId(id).WithType("Coin").Build();
+
+            _mockCollectionService
+                .Setup(c => c.FindCollectionById(id))
+                .ReturnsAsync(collection);
 
             //Act
-            var response = _controller.GetCollection(id, null, mediaType) as OkObjectResult;
-            dynamic collection = response.Value as IDictionary<string, object>;
+            var response = await _controller.GetCollection(id, resourceParameters.Fields, mediaType) as OkObjectResult;
+            dynamic result = response.Value as IDictionary<string, object>;
 
             //Assert
-            Assert.NotNull(collection);
-            Assert.Equal(id, collection.Id);
-            Assert.Equal("Coin", collection.Type);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
+            Assert.Equal("Coin", result.Type);
         }
 
         [Fact]
-        public void CreateCollection_ReturnsBadRequestResponse_GivenNoCollection()
+        public async Task CreateCollection_ReturnsBadRequestResponse_GivenNoCollection()
         {
             //Act
-            var response = _controller.CreateCollection(null, null);
+            var response = await _controller.CreateCollection(null, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void CreateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
+        public async Task CreateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
         {
             //Arrange
-            CollectionCreationDto collection = new CollectionCreationDto();
+            var collection = _builder.BuildCreationDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.CreateCollection(collection, null);
+            var response = await _controller.CreateCollection(collection, null);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void CreateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
+        public async Task CreateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
         {
             //Arrange
-            CollectionCreationDto collection = new CollectionCreationDto
-            {
-                UserId = new Guid("e47d5063-7734-48ae-b088-0e4dca54a821")
-            };
+            Guid userId = new Guid("e47d5063-7734-48ae-b088-0e4dca54a821");
+            var collection = _builder.WithUserId(userId).BuildCreationDto();
+            _mockUserService.Setup(u => u.FindUserById(It.IsAny<Guid>())).ReturnsAsync(null as User);
 
             //Act
-            var response = _controller.CreateCollection(null, null);
+            var response = await _controller.CreateCollection(collection, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+            _mockUserService.Verify(u => u.FindUserById(userId));
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData("application/json+hateoas")]
-        public void CreateCollection_ReturnsCreatedResponse_GivenValidCollection(string mediaType)
+        public async Task CreateCollection_ReturnsCreatedResponse_GivenValidCollection(string mediaType)
         {
             //Arrange
-            CollectionCreationDto collection = new CollectionCreationDto
-            {
-                Type = "Banknote",
-                UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
-            };
+            Guid userId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+            var collection = _builder.WithType("Banknote").WithUserId(userId).BuildCreationDto();
+            _mockUserService.Setup(u => u.FindUserById(userId)).ReturnsAsync(new User());
 
             //Act
-            var response = _controller.CreateCollection(collection, mediaType);
+            var response = await _controller.CreateCollection(collection, mediaType);
 
             //Assert
             Assert.IsType<CreatedAtRouteResult>(response);
         }
 
         [Fact]
-        public void CreateCollection_CreatesNewCollection_GivenAnyMediaTypeAndValidCollection()
+        public async Task CreateCollection_CreatesNewCollection_GivenAnyMediaTypeAndValidCollection()
         {
             //Arrange
             Guid userId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-            CollectionCreationDto collection = new CollectionCreationDto
-            {
-                Type = "Banknote",
-                UserId = userId
-            };
+            var collection = _builder.WithType("Banknote").WithUserId(userId).BuildCreationDto();
+            _mockUserService.Setup(u => u.FindUserById(userId)).Returns(Task.FromResult(new User()));
 
             //Act
-            var response = _controller.CreateCollection(collection, null) as CreatedAtRouteResult;
+            var response = await _controller.CreateCollection(collection, null) as CreatedAtRouteResult;
             var returnedCollection = response.Value as CollectionDto;
 
             //Assert
@@ -313,19 +378,16 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void CreateCollection_CreatesNewCollection_GivenHateoasMediaTypeAndValidCollection()
+        public async Task CreateCollection_CreatesNewCollection_GivenHateoasMediaTypeAndValidCollection()
         {
             //Arrange
             string mediaType = "application/json+hateoas";
             Guid userId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
-            CollectionCreationDto collection = new CollectionCreationDto
-            {
-                Type = "Banknote",
-                UserId = userId
-            };
+            var collection = _builder.WithType("Banknote").WithUserId(userId).BuildCreationDto();
+            _mockUserService.Setup(u => u.FindUserById(userId)).Returns(Task.FromResult(new User()));
 
             //Act
-            var response = _controller.CreateCollection(collection, mediaType) as CreatedAtRouteResult;
+            var response = await _controller.CreateCollection(collection, mediaType) as CreatedAtRouteResult;
             dynamic returnedCollection = response.Value as IDictionary<string, object>;
 
             //Assert
@@ -335,260 +397,266 @@ namespace Recollectable.Tests.Controllers
         }
 
         [Fact]
-        public void BlockCollectionCreation_ReturnsConflictResponse_GivenExistingId()
+        public async Task BlockCollectionCreation_ReturnsConflictResponse_GivenExistingId()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+            _mockCollectionService.Setup(c => c.CollectionExists(It.IsAny<Guid>())).ReturnsAsync(true);
 
             //Act
-            var response = _controller.BlockCollectionCreation(id) as StatusCodeResult;
+            var response = await _controller.BlockCollectionCreation(id) as StatusCodeResult;
 
             //Assert
             Assert.Equal(StatusCodes.Status409Conflict, response.StatusCode);
+            _mockCollectionService.Verify(c => c.CollectionExists(id));
         }
 
         [Fact]
-        public void BlockCollectionCreation_ReturnsNotFoundResponse_GivenUnexistingId()
+        public async Task BlockCollectionCreation_ReturnsNotFoundResponse_GivenUnexistingId()
         {
-            //Arrange
-            Guid id = new Guid("514d80af-7748-46ed-99cd-a71f6d58315a");
-
             //Act
-            var response = _controller.BlockCollectionCreation(id);
+            var response = await _controller.BlockCollectionCreation(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsBadRequestResponse_GivenNoCollection()
+        public async Task UpdateCollection_ReturnsBadRequestResponse_GivenNoCollection()
         {
             //Act
-            var response = _controller.UpdateCollection(Guid.Empty, null);
+            var response = await _controller.UpdateCollection(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
+        public async Task UpdateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
         {
             //Arrange
-            CollectionUpdateDto collection = new CollectionUpdateDto();
+            var collection = _builder.BuildUpdateDto();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.UpdateCollection(Guid.Empty, collection);
+            var response = await _controller.UpdateCollection(Guid.Empty, collection);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
+        public async Task UpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
         {
             //Arrange
             Guid userId = new Guid("4512e2d5-779f-4423-b117-903f85990d4a");
-            CollectionUpdateDto collection = new CollectionUpdateDto
-            {
-                Type = "Banknote",
-                UserId = userId
-            };
+            var collection = _builder.WithType("Banknote").WithUserId(userId).BuildUpdateDto();
+            _mockUserService.Setup(u => u.UserExists(It.IsAny<Guid>())).ReturnsAsync(false);
 
             //Act
-            var response = _controller.UpdateCollection(Guid.Empty, collection);
+            var response = await _controller.UpdateCollection(Guid.Empty, collection);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+            _mockUserService.Verify(u => u.UserExists(userId));
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
+        public async Task UpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
         {
             //Arrange
-            Guid id = new Guid("e69bed8a-1b96-4d74-bff6-4c2894dd7872");
-            CollectionUpdateDto collection = new CollectionUpdateDto
-            {
-                Type = "Banknote",
-                UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
-            };
+            var collection = _builder.WithType("Banknote").BuildUpdateDto();
 
             //Act
-            var response = _controller.UpdateCollection(id, collection);
+            var response = await _controller.UpdateCollection(Guid.Empty, collection);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_ReturnsNoContentResponse_GivenValidCollection()
+        public async Task UpdateCollection_ReturnsNoContentResponse_GivenValidCollection()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
-            CollectionUpdateDto collection = new CollectionUpdateDto
-            {
-                Type = "Banknote",
-                UserId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1")
-            };
+            var collection = _builder.WithType("Banknote").BuildUpdateDto();
+            var retrievedCollection = _builder.Build();
+
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).ReturnsAsync(retrievedCollection);
 
             //Act
-            var response = _controller.UpdateCollection(id, collection);
+            var response = await _controller.UpdateCollection(id, collection);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void UpdateCollection_UpdatesExistingCollection_GivenValidCollection()
+        public async Task UpdateCollection_UpdatesExistingCollection_GivenValidCollection()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
-            Guid userId = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158");
-            CollectionUpdateDto country = new CollectionUpdateDto
-            {
-                Type = "Banknote",
-                UserId = userId
-            };
+            var collection = _builder.WithType("Banknote").BuildUpdateDto();
+            var retrievedCollection = _builder.WithId(id).Build();
+
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).Returns(Task.FromResult(retrievedCollection));
+            _mockCollectionService.Setup(c => c.UpdateCollection(It.IsAny<Collection>()));
 
             //Act
-            var response = _controller.UpdateCollection(id, country);
+            var response = await _controller.UpdateCollection(id, collection);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CollectionRepository.GetById(id));
-            Assert.Equal("Banknote", _unitOfWork.CollectionRepository.GetById(id).Type);
-            Assert.Equal(userId, _unitOfWork.CollectionRepository.GetById(id).UserId);
+            _mockCollectionService.Verify(c => c.UpdateCollection(retrievedCollection));
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsBadRequestResponse_GivenNoPatchDocument()
+        public async Task PartiallyUpdateCollection_ReturnsBadRequestResponse_GivenNoPatchDocument()
         {
             //Act
-            var response = _controller.PartiallyUpdateCollection(Guid.Empty, null);
+            var response = await _controller.PartiallyUpdateCollection(Guid.Empty, null);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
+        public async Task PartiallyUpdateCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
         {
             //Arrange
-            Guid id = new Guid("9f8925ae-1bbe-49f1-98d9-193f69a7fc5c");
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(Guid.Empty, patchDoc);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
+        public async Task PartiallyUpdateCollection_ReturnsUnprocessableEntityObjectResponse_GivenInvalidCollection()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
+
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).ReturnsAsync(collection);
+
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
             _controller.ModelState.AddModelError("Type", "Required");
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
             Assert.IsType<UnprocessableEntityObjectResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
+        public async Task PartiallyUpdateCollection_ReturnsBadRequestResponse_GivenInvalidUserId()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
             Guid userId = new Guid("01156051-42e2-45f7-9a7e-58100d5d8c35");
+
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).ReturnsAsync(collection);
+            _mockUserService.Setup(u => u.UserExists(It.IsAny<Guid>())).ReturnsAsync(false);
+
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
             patchDoc.Replace(c => c.Type, "Banknote");
             patchDoc.Replace(c => c.UserId, userId);
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
             Assert.IsType<BadRequestResult>(response);
+            _mockUserService.Verify(u => u.UserExists(userId));
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_ReturnsNoContentResponse_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCollection_ReturnsNoContentResponse_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
             Guid userId = new Guid("4a9522da-66f9-4dfb-88b8-f92b950d1df1");
+
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).ReturnsAsync(collection);
+
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
             patchDoc.Replace(c => c.Type, "Banknote");
             patchDoc.Replace(c => c.UserId, userId);
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void PartiallyUpdateCollection_UpdatesExistingCollection_GivenValidPatchDocument()
+        public async Task PartiallyUpdateCollection_UpdatesExistingCollection_GivenValidPatchDocument()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
             Guid userId = new Guid("2e795c80-8c60-4d18-bd10-ca5832ab4158");
+
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).ReturnsAsync(collection);
+
             JsonPatchDocument<CollectionUpdateDto> patchDoc = new JsonPatchDocument<CollectionUpdateDto>();
             patchDoc.Replace(c => c.Type, "Banknote");
             patchDoc.Replace(c => c.UserId, userId);
 
             //Act
-            var response = _controller.PartiallyUpdateCollection(id, patchDoc);
+            var response = await _controller.PartiallyUpdateCollection(id, patchDoc);
 
             //Assert
-            Assert.NotNull(_unitOfWork.CollectionRepository.GetById(id));
-            Assert.Equal("Banknote", _unitOfWork.CollectionRepository.GetById(id).Type);
-            Assert.Equal(userId, _unitOfWork.CollectionRepository.GetById(id).UserId);
+            _mockCollectionService.Verify(c => c.UpdateCollection(collection));
         }
 
         [Fact]
-        public void DeleteCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
+        public async Task DeleteCollection_ReturnsNotFoundResponse_GivenInvalidCollectionId()
         {
-            //Arrange
-            Guid id = new Guid("02aef0b1-fef7-4e37-975a-0df8607c8efb");
-
             //Act
-            var response = _controller.DeleteCollection(id);
+            var response = await _controller.DeleteCollection(Guid.Empty);
 
             //Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void DeleteCollection_ReturnsNoContentResponse_GivenValidCollectionId()
+        public async Task DeleteCollection_ReturnsNoContentResponse_GivenValidCollectionId()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).ReturnsAsync(collection);
+
             //Act
-            var response = _controller.DeleteCollection(id);
+            var response = await _controller.DeleteCollection(id);
 
             //Assert
             Assert.IsType<NoContentResult>(response);
         }
 
         [Fact]
-        public void DeleteCollection_RemovesCollectionFromDatabase()
+        public async Task DeleteCollection_RemovesCollectionFromDatabase()
         {
             //Arrange
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
 
+            var collection = _builder.Build();
+            _mockCollectionService.Setup(c => c.FindCollectionById(id)).ReturnsAsync(collection);
+            _mockCollectionService.Setup(c => c.RemoveCollection(It.IsAny<Collection>()));
+
             //Act
-            _controller.DeleteCollection(id);
+            await _controller.DeleteCollection(id);
 
             //Assert
-            Assert.Equal(5, _unitOfWork.CollectionRepository.Get(resourceParameters).Count());
-            Assert.Null(_unitOfWork.CollectionRepository.GetById(id));
+            _mockCollectionService.Verify(c => c.RemoveCollection(collection));
         }
     }
 }
