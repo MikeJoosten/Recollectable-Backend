@@ -56,7 +56,6 @@ namespace Recollectable.API
             Configuration = configuration;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc(options => {
@@ -111,10 +110,9 @@ namespace Recollectable.API
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._!" +
                     "àèìòùáéíóúäëïöüâêîôûãõßñç";
 
-                //TODO Improve Lockout features
-                /*options.Lockout.AllowedForNewUsers = true;
-                options.Lockout.MaxFailedAccessAttempts = 35;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);*/
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 25;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(120);
             })
             .AddEntityFrameworkStores<RecollectableContext>()
             .AddDefaultTokenProviders()
@@ -216,8 +214,8 @@ namespace Recollectable.API
                     new RateLimitRule()
                     {
                         Endpoint = "*",
-                        Limit = 1000000000,
-                        Period = "1s"
+                        Limit = 300,
+                        Period = "900s"
                     }
                 };
             });
@@ -263,7 +261,6 @@ namespace Recollectable.API
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env,
             ILoggerFactory loggerFactory, RecollectableContext recollectableContext)
         {
