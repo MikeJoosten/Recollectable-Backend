@@ -375,8 +375,10 @@ namespace Recollectable.API.Controllers
             var resetUrl = Url.Action("ResetPassword", "Users", new { token, email },
                 protocol: HttpContext.Request.Scheme);
 
-            //TODO Activate Mailing Service
-            //_emailService.Send("Recipient's Email", "Reset Password", resetUrl);
+            //TODO Activate Mailing Service + Edit appsettings.json - Different link
+            //var resetPasswordModel = new AccountEmailViewModel(resetUrl, null);
+            //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/ResetPasswordEmail.cshtml", resetPasswordModel);
+            //await _emailService.Send(email, "Reset password", body, MailType.Reset);
 
             return NoContent();
         }
@@ -506,6 +508,12 @@ namespace Recollectable.API.Controllers
             }
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            //TODO Activate Mailing Service + Edit appsettings.json
+            //var validatedAccountModel = new AccountEmailViewModel(null, user.UserName);
+            //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/WelcomeAccountEmail.cshtml", validatedAccountModel);
+            //await _emailService.Send(email, "Welcome to Recollectable", body, MailType.Welcome);
+
             return NoContent();
         }
 

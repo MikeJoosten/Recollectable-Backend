@@ -62,8 +62,10 @@ namespace Recollectable.Infrastructure.Email
                     ContentId = "Follow"
                 };
 
-                bannerResource.ContentType.Name = "recollectable.png";
-                twitterResource.ContentType.Name = "twitter.png";
+                bannerResource.ContentType.Name = "Recollectable.png";
+                twitterResource.ContentType.Name = "Twitter.png";
+                facebookResource.ContentType.Name = "Facebook.png";
+                linkedInResource.ContentType.Name = "LinkedIn.png";
 
                 htmlView.LinkedResources.Add(bannerResource);
                 htmlView.LinkedResources.Add(facebookResource);
