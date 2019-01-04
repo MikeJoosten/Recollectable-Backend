@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Recollectable.API.Controllers;
+using Recollectable.API.Interfaces;
 using Recollectable.API.Models.Users;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
@@ -29,6 +30,7 @@ namespace Recollectable.Tests.Controllers
         private readonly Mock<IUserStore<User>> _mockUserStore;
         private readonly Mock<IEmailService> _mockEmailService;
         private readonly Mock<ITokenFactory> _mockTokenFactory;
+        private readonly Mock<IRazorViewToStringRenderer> _mockRazorViewRenderer;
         private readonly UsersResourceParameters resourceParameters;
         private readonly UserTestBuilder _builder;
 
@@ -50,8 +52,10 @@ namespace Recollectable.Tests.Controllers
             _mockUserService = new Mock<IUserService>();
             _mockUserService.Setup(u => u.Save()).Returns(Task.FromResult(true));
 
+            _mockRazorViewRenderer = new Mock<IRazorViewToStringRenderer>();
+
             _controller = new UsersController(_mockUserService.Object, _mockUserManager.Object, 
-                _mockTokenFactory.Object, _mockEmailService.Object, _mapper);
+                _mockTokenFactory.Object, _mockEmailService.Object, _mapper, _mockRazorViewRenderer.Object);
             SetupTestController(_controller);
             SetupAuthentication(_controller);
 

@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2042
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28407.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recollectable.Tests", "Recollectable.Tests\Recollectable.Tests.csproj", "{5AC9C61E-C382-4DAB-B534-7E206611DF63}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recollectable.API", "Recollectable.API\Recollectable.API.csproj", "{783D0134-CB21-4F9E-840B-B16288A97812}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recollectable.Infrastructure", "Recollectable.Infrastructure\Recollectable.Infrastructure.csproj", "{ADA5AF8E-BA5C-4A37-99A8-74E30B00FFB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recollectable.Infrastructure", "Recollectable.Infrastructure\Recollectable.Infrastructure.csproj", "{ADA5AF8E-BA5C-4A37-99A8-74E30B00FFB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recollectable.Core", "Recollectable.Core\Recollectable.Core.csproj", "{7F99EC60-FFC3-4FE4-A143-178E7014B556}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recollectable.Core", "Recollectable.Core\Recollectable.Core.csproj", "{7F99EC60-FFC3-4FE4-A143-178E7014B556}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -157,7 +157,6 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCollections_ReturnsCollections_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
             var collections = _builder.Build(4);
             var pagedList = PagedList<Collection>.Create(collections, 1, 2);
 
@@ -262,7 +261,6 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCollection_ReturnsCollection_GivenAnyMediaType()
         {
             //Arrange
-            string mediaType = "application/json";
             Guid id = new Guid("03a6907d-4e93-4863-bdaf-1d05140dec12");
             var collection = _builder.WithId(id).WithType("Coin").Build();
 
