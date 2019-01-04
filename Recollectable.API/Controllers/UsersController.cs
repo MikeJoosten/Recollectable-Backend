@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Recollectable.API.Interfaces;
 using Recollectable.API.Models.Users;
+using Recollectable.API.ViewModels;
 using Recollectable.Core.Entities.ResourceParameters;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces;
@@ -36,15 +38,18 @@ namespace Recollectable.API.Controllers
         private ITokenFactory _tokenFactory;
         private IEmailService _emailService;
         private IMapper _mapper;
+        private IRazorViewToStringRenderer _razorViewRenderer;
 
         public UsersController(IUserService userService, UserManager<User> userManager, 
-            ITokenFactory tokenFactory, IEmailService emailService, IMapper mapper)
+            ITokenFactory tokenFactory, IEmailService emailService, IMapper mapper,
+            IRazorViewToStringRenderer razorViewRenderer)
         {
             _userService = userService;
             _userManager = userManager;
             _tokenFactory = tokenFactory;
             _emailService = emailService;
             _mapper = mapper;
+            _razorViewRenderer = razorViewRenderer;
         }
 
         /// <summary>
@@ -77,7 +82,8 @@ namespace Recollectable.API.Controllers
 
             if (mediaType == "application/json+hateoas")
             {
-                if (!string.IsNullOrEmpty(resourceParameters.Fields) && !resourceParameters.Fields.ToLowerInvariant().Contains("id"))
+                if (!string.IsNullOrEmpty(resourceParameters.Fields) &&
+                    !resourceParameters.Fields.ToLowerInvariant().Contains("id"))
                 {
                     return BadRequest("Field parameter 'id' is required");
                 }
@@ -257,8 +263,10 @@ namespace Recollectable.API.Controllers
             var confirmationUrl = Url.Action("ConfirmEmail", "Users", new { token, email = newUser.Email },
                 protocol: HttpContext.Request.Scheme);
 
-            //TODO Activate Mailing Service
-            //_emailService.Send("Recipient's Email", "Confirmation", confirmationurl);
+            //TODO Activate Mailing Service + Edit appsettings.json
+            //var confirmAccountModel = new AccountEmailViewModel(confirmationUrl, user.UserName);
+            //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/ConfirmAccountEmail.cshtml", confirmAccountModel);
+            //await _emailService.Send(user.Email, "Activate your account", body, MailType.Confirmation);
 
             var returnedUser = _mapper.Map<UserDto>(newUser);
 
@@ -367,8 +375,10 @@ namespace Recollectable.API.Controllers
             var resetUrl = Url.Action("ResetPassword", "Users", new { token, email },
                 protocol: HttpContext.Request.Scheme);
 
-            //TODO Activate Mailing Service
-            //_emailService.Send("Recipient's Email", "Reset Password", resetUrl);
+            //TODO Activate Mailing Service + Edit appsettings.json - Different link
+            //var resetPasswordModel = new AccountEmailViewModel(resetUrl, null);
+            //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/ResetPasswordEmail.cshtml", resetPasswordModel);
+            //await _emailService.Send(email, "Reset password", body, MailType.Reset);
 
             return NoContent();
         }
@@ -498,6 +508,12 @@ namespace Recollectable.API.Controllers
             }
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            //TODO Activate Mailing Service + Edit appsettings.json
+            //var validatedAccountModel = new AccountEmailViewModel(null, user.UserName);
+            //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/WelcomeAccountEmail.cshtml", validatedAccountModel);
+            //await _emailService.Send(email, "Welcome to Recollectable", body, MailType.Welcome);
+
             return NoContent();
         }
 

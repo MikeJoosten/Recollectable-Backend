@@ -19,14 +19,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using Recollectable.API.Filters;
+using Recollectable.API.Interfaces;
+using Recollectable.API.Services;
 using Recollectable.API.Validators.Collectables;
 using Recollectable.API.Validators.Collection;
 using Recollectable.API.Validators.Location;
 using Recollectable.API.Validators.Users;
 using Recollectable.Core.Comparers;
 using Recollectable.Core.Entities.Collectables;
-using Recollectable.Core.Entities.Collections;
-using Recollectable.Core.Entities.Locations;
 using Recollectable.Core.Entities.Users;
 using Recollectable.Core.Interfaces;
 using Recollectable.Core.Services;
@@ -35,7 +35,6 @@ using Recollectable.Core.Shared.Factories;
 using Recollectable.Core.Shared.Interfaces;
 using Recollectable.Core.Shared.Validators;
 using Recollectable.Infrastructure.Data;
-using Recollectable.Infrastructure.Data.Repositories;
 using Recollectable.Infrastructure.Email;
 using Recollectable.Infrastructure.Interfaces;
 using Swashbuckle.AspNetCore.Swagger;
@@ -182,6 +181,7 @@ namespace Recollectable.API
             services.AddScoped<ICountryService, CountryService>();
 
             // Configure Helper Classes
+            services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<ITokenFactory, TokenFactory>();
             services.AddSingleton<IEmailService, EmailService>();

@@ -285,7 +285,6 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCollectionCollectable_ReturnsCollectionCollectable_GivenAnyMediaType()
         {
             //Arrange
-            string mediaType = "application/json";
             Guid id = new Guid("355e785b-dd47-4fb7-b112-1fb34d189569");
             Guid collectionId = new Guid("46df9402-62e1-4ff6-9cb0-0955957ec789");
             var collectionCollectable = _builder.WithId(id).WithCountryName("Mexico").Build();

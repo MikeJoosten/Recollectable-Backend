@@ -110,7 +110,6 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCollectorValues_ReturnsAllCollectorValues_GivenAnyMediaType()
         {
             //Arrange
-            string mediaType = "application/json";
             var collectorValues = _builder.Build(2);
             var pagedList = PagedList<CollectorValue>.Create(collectorValues, 
                 resourceParameters.Page, resourceParameters.PageSize);
@@ -154,7 +153,6 @@ namespace Recollectable.Tests.Controllers
         public async Task GetCollectorValues_ReturnsCollectorValues_GivenAnyMediaTypeAndPagingParameters()
         {
             //Arrange
-            string mediaType = "application/json";
             var collectorValues = _builder.Build(4);
             var pagedList = PagedList<CollectorValue>.Create(collectorValues, 1, 2);
 

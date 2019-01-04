@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/selawik" type="text/css" />
+    <style type="text/css">
+        /* Client-Specific Styles */
+        body, table, td, a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+        }
+
+        /* Reset Styles */
+        img {
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        table {
+            border-collapse: collapse !important;
+        }
+
+        body {
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        /* iOS Blue Links */
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: none !important;
+            font-size: inherit !important;
+            font-family: inherit !important;
+            font-weight: inherit !important;
+            line-height: inherit !important;
+        }
+
+        /* Mobile Styles */
+        @@media screen and (max-width:600px) {
+            h1 {
+                font-size: 32px !important;
+                line-height: 32px !important;
+            }
+        }
+
+        /* Android Center Fix */
+        div[style*="margin: 16px 0;"] {
+            margin: 0 !important;
+        }
+    </style>
+</head>
+<body style="background-color: #323747;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <!-- LOGO -->
+        <tr>
+            <td align="center" style="padding: 0px 10px 0px 10px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
+                    <tr>
+                        <td align="center" valign="top" style="padding: 50px 20px 0px 20px;">
+                            <a href="www.google.com" target="_blank">
+                                <img src="cid:Banner" width="500" height="100" style="display: block; 
+                                width: 600px; max-width: 600px; min-width: 600px; color: #FFF;" />
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <!-- TITLE -->
+        <tr>
+            <td align="center" style="padding: 0px 10px 0px 10px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
+                    <tr>
+                        <td bgcolor="#FFF" align="left" valign="top" style="padding: 20px 18px 0px 20px;">
+                            <img src="cid:@ViewData["EmailTitle"]" width="485" height="38" style="display: block; 
+                            width: 485px; max-width: 485px; min-width: 485px; height: 38px;" />
+                            <hr style="height: 6px; border: none; color: #1D67BB; background-color: #1D67BB;" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <!-- MAIN BLOCK -->
+        <tr>
+            <td align="center" style="padding: 0px 10px 0px 10px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px">
+                    <tr>
+                        <td bgcolor="#FFF" align="left" style="padding: 5px 20px 10px 20px; color: #000;
+                        font-family: 'Segoe UI', 'Selawik', Arial, Helvetica, sans-serif; font-size: 16px; font-weight: 400;
+                        line-height: 24px;">
+                            @RenderBody()
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <!-- SOCIAL MEDIA -->
+        <tr>
+            <td align="center" style="padding: 0px 10px 0px 10px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px">
+                    <tr>
+                        <td bgcolor="#FFF" align="center" valign="top" style="padding: 0px 20px 15px 20px;">
+                            <img src="cid:Follow" width="170" height="30" style="display: block; 
+                            width: 170px; max-width: 170px; min-width: 170px; height: 30px;" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td bgcolor="#FFF" align="center" valign="top" style="padding: 0px 20px 15px 20px;">
+                            <a href="www.facebook.com" target="_blank" style="display: inline-block; margin-right: 12px">
+                                <img src="cid:Facebook" width="32" height="32"
+                                style="display: block; width: 32px; max-width: 32px; min-width: 32px;
+                                height: 32px;" />
+                            </a>
+                            <a href="www.twitter.com" target="_blank" style="display: inline-block; margin-right: 12px">
+                                <img src="cid:Twitter" width="32" height="32"
+                                style="display: block; width: 32px; max-width: 32px; min-width: 32px;
+                                height: 32px;" />
+                            </a>
+                            <a href="www.linkedin.com" target="_blank" style="display: inline-block;">
+                                <img src="cid:LinkedIn" width="45" height="45"
+                                style="display: block; width: 32px; max-width: 32px; min-width: 32px;
+                                height: 32px;" />
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <!-- COPYRIGHT -->
+        <tr>
+            <td align="center" style="padding: 0px 10px 0px 10px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px">
+                    <tr>
+                        <td bgcolor="#FFF" align="center" style="padding: 6px 20px 10px 20px; color: #5D5D5D;
+                        font-family: 'Segoe UI', 'Selawik', Arial, Helvetica, sans-serif; font-size: 10px; font-weight: 400;
+                        line-height: 14px;">
+                            Email sent by Recollectable
+                            <br />
+                            Copyright © 2019 Recollectable, All rights reserved
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <!-- FOOTER -->
+        <tr>
+            <td bgcolor="#323747" align="center" style="padding: 0px 0px 0px 10px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px">
+                    <tr>
+                        <td bgcolor="#323747" align="left" style="padding: 6px 0px 40px 0px; color: #929292;
+                        font-family: 'Segoe UI', 'Selawik', Arial, Helvetica, sans-serif; font-size: 12px; font-weight: 400;
+                        line-height: 20px;">
+                            <a href="www.google.com" target="_blank" style="color: #929292;">unsubscribe</a> from Recollectable mails
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
