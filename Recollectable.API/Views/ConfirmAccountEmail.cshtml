@@ -1,0 +1,18 @@
+﻿@using Recollectable.API.ViewModels
+@model AccountEmailViewModel
+
+@{ 
+    ViewData["EmailTitle"] = "Activate";
+}
+
+<p align="justify" style="margin: 0px;">
+    Hi @Model.UserName, we're delighted to see you joining Recollectable. You're just a click away
+    to complete your registration. To do so, simply click the button below.
+</p>
+@await  Html.PartialAsync("EmailButton", new EmailButtonViewModel("Confirm email address", Model.Url))
+<p style="margin: 0px;">
+    Kind regards
+</p>
+<p style="margin: 0px;">
+    The Recollectable Team
+</p>

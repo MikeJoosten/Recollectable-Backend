@@ -7,14 +7,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
+using Recollectable.API.Interfaces;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Recollectable.API.Helpers
+namespace Recollectable.API.Services
 {
-    public class RazorViewToStringRenderer
+    public class RazorViewToStringRenderer : IRazorViewToStringRenderer
     {
         private IRazorViewEngine _viewEngine;
         private ITempDataProvider _tempDataProvider;
