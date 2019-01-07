@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Serialization;
 using Recollectable.API.Filters;
 using Recollectable.API.Interfaces;
@@ -198,17 +199,10 @@ namespace Recollectable.API
             services.AddSingleton(mapper);
 
             // Configure HTTP Caching
-            services.AddHttpCacheHeaders(
-                (expirationModelOptions) => 
-                {
-                    expirationModelOptions.MaxAge = 1;
-                },
-                (validationModelOptions) =>
-                {
-                    validationModelOptions.MustRevalidate = true;
-                });
             services.AddResponseCaching();
             services.AddMemoryCache();
+
+            // Configure Rate Limit
             services.Configure<IpRateLimitOptions>((options) =>
             {
                 options.GeneralRules = new List<RateLimitRule>()
@@ -298,7 +292,23 @@ namespace Recollectable.API
             app.UseHttpsRedirection();
             app.UseIpRateLimiting();
             app.UseResponseCaching();
-            app.UseHttpCacheHeaders();
+
+            //TODO Provide Best Caching Solution
+            app.Use(async (context, next) =>
+            {
+                context.Response.GetTypedHeaders().CacheControl =
+                    new CacheControlHeaderValue()
+                    {
+                        Public = true,
+                        NoCache = true
+                    };
+
+                context.Response.Headers[HeaderNames.Vary] =
+                    new string[] { "Accept-Encoding" };
+
+                await next();
+            });
+
             app.UseCors("CorsPolicy");
             app.UseMvc();
         }
