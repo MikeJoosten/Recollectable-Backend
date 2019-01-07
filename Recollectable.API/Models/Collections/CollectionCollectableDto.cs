@@ -10,6 +10,6 @@ namespace Recollectable.API.Models.Collections
     {
         public Guid Id { get; set; }
         public Collectable Collectable { get; set; }
-        public string Condition { get; set; }
+        public Guid ConditionId { get; set; }
     }
 }

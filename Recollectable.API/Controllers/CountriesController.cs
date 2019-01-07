@@ -183,7 +183,6 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Creates a country
         /// </summary>
@@ -192,7 +191,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     POST /countries
         ///     {
-        ///         
+        ///         "name": "Cuba",
+        ///         "description": "A Caribbean island near the Florida coast"
         ///     }
         /// </remarks>
         /// <param name="country">Custom country</param>
@@ -273,7 +273,6 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Updates a country
         /// </summary>
@@ -282,7 +281,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PUT /countries/{id}
         ///     {
-        ///         
+        ///         "name": "Thailand",
+        ///         "description": "Previously known as Siam, this country is located in Southeast Asia"
         ///     }
         /// </remarks>
         /// <param name="id">Country ID</param>
@@ -333,7 +333,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Update specific fields of a country
         /// </summary>
@@ -342,7 +341,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PATCH /countries/{id}
         ///     [
-        ///	        
+        ///	        { "op": "replace", "path": "/name", "value": "Germany" },
+        ///	        { "op": "remove", "path": "/description" } 
         ///     ]
         /// </remarks>
         /// <param name="id">Country ID</param>

@@ -182,7 +182,6 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Creates a condition
         /// </summary>
@@ -191,7 +190,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     POST /conditions
         ///     {
-        ///         
+        ///         "grade": "AU54",
+        ///         "languageCode": "en-US"
         ///     }
         /// </remarks>
         /// <param name="condition">Custom condition</param>
@@ -266,7 +266,6 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Updates a condition
         /// </summary>
@@ -275,7 +274,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PUT /conditions/{id}
         ///     {
-        ///         
+        ///         "grade": "VF24",
+        ///         "languageCode": "en-US"
         ///     }
         /// </remarks>
         /// <param name="id">Condition ID</param>
@@ -320,7 +320,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Update specific fields of a condition
         /// </summary>
@@ -329,7 +328,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PATCH /conditions/{id}
         ///     [
-        ///	        
+        ///	        { "op": "replace", "path": "/grade", "value": "Very Fine" },
+        ///	        { "op": "remove", "path": "/grade" }
         ///     ]
         /// </remarks>
         /// <param name="id">Condition ID</param>
