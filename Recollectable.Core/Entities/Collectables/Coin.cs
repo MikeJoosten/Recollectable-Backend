@@ -3,7 +3,8 @@
     public class Coin : Currency
     {
         public int Mintage { get; set; }
-        public string Weight { get; set; }
+        public double Size { get; set; }
+        public double Weight { get; set; }
         public string Metal { get; set; }
         public string Note { get; set; }
         public string Subject { get; set; }

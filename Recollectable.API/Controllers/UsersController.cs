@@ -201,7 +201,6 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Creates a user
         /// </summary>
@@ -210,7 +209,11 @@ namespace Recollectable.API.Controllers
         /// 
         ///     POST /register
         ///     {
-        ///         
+        ///         "userName": "Kara",
+        ///         "firstName": "Kara",
+        ///         "lastName": "Eberle",
+        ///         "password": "password123",
+        ///         "email": "kara.eberle@gmail.com"
         ///     }
         /// </remarks>
         /// <param name="user">Custom user</param>
@@ -517,7 +520,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Updates a user
         /// </summary>
@@ -526,7 +528,11 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PUT /users/{id}
         ///     {
-        ///         
+        ///         "userName": "Gavin",
+        ///         "firstName": "Gavin",
+        ///         "lastName": "Free",
+        ///         "password": "password123",
+        ///         "email": "gavin.free@gmail.com"
         ///     }
         /// </remarks>
         /// <param name="id">User ID</param>
@@ -571,7 +577,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Update specific fields of a user
         /// </summary>
@@ -580,7 +585,10 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PATCH /users/{id}
         ///     [
-        ///	        
+        ///	        { "op": "replace", "path": "/userName", "value": "Alfredo" },
+        ///	        { "op": "copy", "from": "/firstName", "path": "/userName" },
+        ///	        { "op": "move", "from": "/lastName", "path": "/userName" },
+        ///	        { "op": "remove", "path": "/userName" }  
         ///     ]
         /// </remarks>
         /// <param name="id">User ID</param>

@@ -189,7 +189,6 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Creates a coin
         /// </summary>
@@ -198,7 +197,29 @@ namespace Recollectable.API.Controllers
         /// 
         ///     POST /coins
         ///     {
-        ///         
+        ///         "faceValue": 1,
+        ///         "type": "Dollar",
+        ///         "releaseDate": "1862",
+        ///         "mintage": 12090,
+        ///         "weight": 26.73,
+        ///         "size": 38.1,
+        ///         "metal": "0.9000 Silver, 0.7734 oz.",
+        ///         "reverseLegend": "UNITED STATES OF AMERICA",
+        ///         "designer": "Christian Gobrecht",
+        ///         "headOfState": "Abraham Lincoln",
+        ///         "countryId": "5626595c-a6b1-44ba-b60d-87b5b35fe208",
+        ///         "collectorValue": {
+        ///             "g4": 440,
+        ///             "vG8": 600,
+        ///             "f12": 850,
+        ///             "vF20": 945,
+        ///             "xF40": 1450,
+        ///             "aU50": 1650,
+        ///             "mS60": 3250,
+        ///             "mS63": 5750,
+        ///             "mS65": 90000,
+        ///             "pF65": 15700
+        ///         }
         ///     }
         /// </remarks>
         /// <param name="coin">Custom coin</param>
@@ -288,7 +309,6 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Updates a coin
         /// </summary>
@@ -297,7 +317,26 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PUT /coins/{id}
         ///     {
-        ///         
+        ///         "faceValue": 0.25,
+        ///         "type": "Dollar",
+        ///         "releaseDate": "1929",
+        ///         "mintage": 11140000,
+        ///         "weight": 6.25,
+        ///         "size": 24.3,
+        ///         "metal": "0.9000 Silver, 0.1808 oz.",
+        ///         "designer": "Hermon A. MacNeil",
+        ///         "headOfState": "Herbert Hoover",
+        ///         "countryId": "5626595c-a6b1-44ba-b60d-87b5b35fe208",
+        ///         "collectorValue": {
+        ///             "g4": 7.9,
+        ///             "vG8": 8.5,
+        ///             "f12": 9.6,
+        ///             "vF20": 12,
+        ///             "xF40": 28,
+        ///             "aU50": 72.5,
+        ///             "mS60": 125,
+        ///             "mS65": 465
+        ///         }
         ///     }
         /// </remarks>
         /// <param name="id">Coin ID</param>
@@ -358,7 +397,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Update specific fields of a coin
         /// </summary>
@@ -367,7 +405,10 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PATCH /coins/{id}
         ///     [
-        ///	        
+        ///	        { "op": "replace", "path": "/type", "value": "Pesos" },
+        ///	        { "op": "copy", "from": "/subject", "path": "/obverseDescription" },
+        ///	        { "op": "move", "from": "/reverseLegend", "path": "/reverseDescription" },
+        ///	        { "op": "remove", "path": "/note" }
         ///     ]
         /// </remarks>
         /// <param name="id">Coin ID</param>

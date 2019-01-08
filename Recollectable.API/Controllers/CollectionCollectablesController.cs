@@ -199,7 +199,6 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Creates a collectable
         /// </summary>
@@ -208,7 +207,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     POST /{collectionId}/collectables
         ///     {
-        ///         
+        ///         "collectableId": "db0c31f2-5707-4111-8cb5-87f9201e7941",
+        ///         "conditionId": "0853d1fe-a59f-4e5f-8e93-e31ec69fd732"
         ///     }
         /// </remarks>
         /// <param name="collectionId">Collection ID</param>
@@ -306,7 +306,6 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Updates a collectable
         /// </summary>
@@ -315,7 +314,9 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PUT /{collectionId}/collectables/{id}
         ///     {
-        ///         
+        ///         "collectableId": "14db50bc-7b1a-4b65-8d6f-bf5e3412c610",
+        ///         "collectionId": "84a3c9a9-f6e6-4b2f-b65d-1b82df56dc79",
+        ///         "conditionId": "b5ef8ac8-c2ce-4926-a66a-e5f66f7b0dcb"
         ///     }
         /// </remarks>
         /// <param name="collectionId">Collection ID</param>
@@ -386,7 +387,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Update specific fields of a collectable
         /// </summary>
@@ -395,7 +395,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PATCH /{collectionId}/collectables/{id}
         ///     [
-        ///	        
+        ///	        { "op": "replace", "path": "/collectionId", "value": "9e83160d-49e8-4c76-b264-709fb44b3b60" },
+        ///	        { "op": "remove", "path": "/conditionId" }
         ///     ]
         /// </remarks>
         /// <param name="collectionId">Collection ID</param>
