@@ -293,7 +293,6 @@ namespace Recollectable.API
             app.UseIpRateLimiting();
             app.UseResponseCaching();
 
-            //TODO Provide Best Caching Solution
             app.Use(async (context, next) =>
             {
                 context.Response.GetTypedHeaders().CacheControl =
