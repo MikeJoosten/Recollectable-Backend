@@ -186,7 +186,6 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Creates a collection
         /// </summary>
@@ -195,7 +194,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     POST /collections
         ///     {
-        ///         
+        ///         "type": "Coin",
+        ///         "userId": "e640b01f-9eb8-407f-a8f9-68197a7fe48e"
         ///     }
         /// </remarks>
         /// <param name="collection">Custom collection</param>
@@ -279,7 +279,6 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Updates a collection
         /// </summary>
@@ -288,7 +287,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PUT /collections/{id}
         ///     {
-        ///         
+        ///         "type": "Banknote",
+        ///         "userId": "2e795c80-8c60-4d18-bd10-ca5832ab4158"
         ///     }
         /// </remarks>
         /// <param name="id">Collection ID</param>
@@ -340,7 +340,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Update specific fields of a collection
         /// </summary>
@@ -349,7 +348,8 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PATCH /collections/{id}
         ///     [
-        ///	        
+        ///	        { "op": "replace", "path": "/userId", "value": "4a9522da-66f9-4dfb-88b8-f92b950d1df1" },
+        ///	        { "op": "remove", "path": "/type" }
         ///     ]
         /// </remarks>
         /// <param name="id">Collection ID</param>

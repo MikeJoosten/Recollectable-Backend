@@ -26,6 +26,7 @@ namespace Recollectable.Infrastructure.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(nullable: false),
                     UserName = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
                     Email = table.Column<string>(maxLength: 256, nullable: true),
@@ -40,7 +41,6 @@ namespace Recollectable.Infrastructure.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
-                    Id = table.Column<Guid>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true)
                 },
@@ -62,9 +62,12 @@ namespace Recollectable.Infrastructure.Migrations
                     AU50 = table.Column<double>(nullable: false),
                     MS60 = table.Column<double>(nullable: false),
                     MS63 = table.Column<double>(nullable: false),
+                    MS65 = table.Column<double>(nullable: false),
+                    MS70 = table.Column<double>(nullable: false),
                     PF60 = table.Column<double>(nullable: false),
                     PF63 = table.Column<double>(nullable: false),
-                    PF65 = table.Column<double>(nullable: false)
+                    PF65 = table.Column<double>(nullable: false),
+                    PF70 = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -233,18 +236,20 @@ namespace Recollectable.Infrastructure.Migrations
                     Discriminator = table.Column<string>(nullable: false),
                     FaceValue = table.Column<int>(nullable: true),
                     Type = table.Column<string>(nullable: true),
-                    Size = table.Column<string>(nullable: true),
                     Designer = table.Column<string>(nullable: true),
                     HeadOfState = table.Column<string>(nullable: true),
                     ObverseDescription = table.Column<string>(nullable: true),
                     ReverseDescription = table.Column<string>(nullable: true),
                     FrontImagePath = table.Column<string>(nullable: true),
                     BackImagePath = table.Column<string>(nullable: true),
+                    Length = table.Column<double>(nullable: true),
+                    Width = table.Column<double>(nullable: true),
                     Color = table.Column<string>(nullable: true),
                     Watermark = table.Column<string>(nullable: true),
                     Signature = table.Column<string>(nullable: true),
                     Mintage = table.Column<int>(nullable: true),
-                    Weight = table.Column<string>(nullable: true),
+                    Size = table.Column<double>(nullable: true),
+                    Weight = table.Column<double>(nullable: true),
                     Metal = table.Column<string>(nullable: true),
                     Note = table.Column<string>(nullable: true),
                     Subject = table.Column<string>(nullable: true),

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Serialization;
 using Recollectable.API.Filters;
 using Recollectable.API.Interfaces;
@@ -92,6 +93,9 @@ namespace Recollectable.API
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            // Setup Configuration
+            services.Configure<EmailConfiguration>(Configuration.GetSection("EmailConfiguration"));
+
             // Configure DbContext
             services.AddDbContext<RecollectableContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
@@ -101,13 +105,15 @@ namespace Recollectable.API
             {
                 options.Tokens.EmailConfirmationTokenProvider = "email_confirmation";
 
+                options.Password.RequireDigit = false;
+                options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredUniqueChars = 4;
                 options.Password.RequiredLength = 8;
 
                 options.User.RequireUniqueEmail = true;
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._!" +
-                    "àèìòùáéíóúäëïöüâêîôûãõßñç";
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ" +
+                "RSTUVWXYZ0123456789@-._!àèìòùáéíóúäëïöüâêîôûãõßñç";
 
                 options.Lockout.AllowedForNewUsers = true;
                 options.Lockout.MaxFailedAccessAttempts = 25;
@@ -186,7 +192,7 @@ namespace Recollectable.API
             services.AddSingleton<ITokenFactory, TokenFactory>();
             services.AddSingleton<IEmailService, EmailService>();
 
-            //Configure Comparers
+            // Configure Comparers
             services.AddSingleton<IEqualityComparer<Currency>, CurrencyComparer>();
 
             // Configure Auto Mapper
@@ -196,17 +202,10 @@ namespace Recollectable.API
             services.AddSingleton(mapper);
 
             // Configure HTTP Caching
-            services.AddHttpCacheHeaders(
-                (expirationModelOptions) => 
-                {
-                    expirationModelOptions.MaxAge = 1;
-                },
-                (validationModelOptions) =>
-                {
-                    validationModelOptions.MustRevalidate = true;
-                });
             services.AddResponseCaching();
             services.AddMemoryCache();
+
+            // Configure Rate Limit
             services.Configure<IpRateLimitOptions>((options) =>
             {
                 options.GeneralRules = new List<RateLimitRule>()
@@ -296,7 +295,22 @@ namespace Recollectable.API
             app.UseHttpsRedirection();
             app.UseIpRateLimiting();
             app.UseResponseCaching();
-            app.UseHttpCacheHeaders();
+
+            app.Use(async (context, next) =>
+            {
+                context.Response.GetTypedHeaders().CacheControl =
+                    new CacheControlHeaderValue()
+                    {
+                        Public = true,
+                        NoCache = true
+                    };
+
+                context.Response.Headers[HeaderNames.Vary] =
+                    new string[] { "Accept-Encoding" };
+
+                await next();
+            });
+
             app.UseCors("CorsPolicy");
             app.UseMvc();
         }

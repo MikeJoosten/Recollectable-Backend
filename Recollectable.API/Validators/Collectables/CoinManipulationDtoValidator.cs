@@ -35,12 +35,6 @@ namespace Recollectable.API.Validators.Collectables
             RuleFor(c => c.CountryId)
                 .NotEmpty().WithMessage("CountryId is a required field");
 
-            RuleFor(c => c.Weight)
-                .MaximumLength(25).WithMessage("Weight shouldn't contain more than 25 characters");
-
-            RuleFor(c => c.Size)
-                .MaximumLength(25).WithMessage("Size shouldn't contain more than 25 characters");
-
             RuleFor(c => c.Metal)
                 .MaximumLength(100).WithMessage("Metal shouldn't contain more than 100 characters");
 

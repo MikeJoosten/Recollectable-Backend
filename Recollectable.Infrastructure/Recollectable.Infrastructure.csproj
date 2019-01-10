@@ -5,24 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20180912201727_initial.cs" />
-    <Compile Remove="Migrations\20180912201810_seed.cs" />
-    <Compile Remove="Migrations\20181002084444_initial.cs" />
-    <Compile Remove="Migrations\20181002084507_seed.cs" />
-    <Compile Remove="Migrations\20181010134758_initial.cs" />
-    <Compile Remove="Migrations\20181010134915_seed.cs" />
-    <Compile Remove="Migrations\20181023094223_seed.cs" />
-    <Compile Remove="Migrations\20181026122735_seed.cs" />
-    <Compile Remove="Migrations\20181026140442_seed.cs" />
-    <Compile Remove="Migrations\20181027151238_seed.cs" />
-    <Compile Remove="Migrations\20181027171859_seed.cs" />
-    <Compile Remove="Migrations\20181027175000_seed.cs" />
-    <Compile Remove="Migrations\20181028205043_seed.cs" />
-    <Compile Remove="Migrations\20181029103155_initial.cs" />
-    <Compile Remove="Migrations\20181029104134_initial.cs" />
-    <Compile Remove="Migrations\20181029104156_seed.cs" />
-    <Compile Remove="Migrations\20181114105536_initial.cs" />
-    <Compile Remove="Migrations\20181114105831_seed.cs" />
+    <Compile Remove="Migrations\20190107075626_initial.cs" />
+    <Compile Remove="Migrations\20190107075626_initial.Designer.cs" />
+    <Compile Remove="Migrations\20190107075649_seed.cs" />
+    <Compile Remove="Migrations\20190107075649_seed.Designer.cs" />
+    <Compile Remove="Migrations\20190107081824_initial.cs" />
+    <Compile Remove="Migrations\20190107081824_initial.Designer.cs" />
+    <Compile Remove="Migrations\20190107082346_seed.cs" />
+    <Compile Remove="Migrations\20190107082346_seed.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +24,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="2.2.0" />
+    <PackageReference Include="Sendgrid" Version="9.10.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,11 +38,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Migrations\20181218155404_initial.Designer.cs">
-      <DependentUpon>20181218155404_initial.cs</DependentUpon>
+    <Compile Update="Migrations\20190107085546_initial.Designer.cs">
+      <DependentUpon>20190107085546_initial.cs</DependentUpon>
     </Compile>
-    <Compile Update="Migrations\20181218155426_seed.Designer.cs">
-      <DependentUpon>20181218155426_seed.cs</DependentUpon>
+    <Compile Update="Migrations\20190107085621_seed.Designer.cs">
+      <DependentUpon>20190107085621_seed.cs</DependentUpon>
     </Compile>
   </ItemGroup>
 
