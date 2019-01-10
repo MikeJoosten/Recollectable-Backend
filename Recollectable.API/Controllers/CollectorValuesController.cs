@@ -184,7 +184,6 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Creates a collector value
         /// </summary>
@@ -193,7 +192,16 @@ namespace Recollectable.API.Controllers
         /// 
         ///     POST /collector-values
         ///     {
-        ///         
+        ///         "g4": 440,
+        ///         "vG8": 600,
+        ///         "f12": 850,
+        ///         "vF20": 945,
+        ///         "xF40": 1450,
+        ///         "aU50": 1650,
+        ///         "mS60": 3250,
+        ///         "mS63": 5750,
+        ///         "mS65": 90000,
+        ///         "pF65": 15700
         ///     }
         /// </remarks>
         /// <param name="collectorValue">Custom collector value</param>
@@ -268,7 +276,6 @@ namespace Recollectable.API.Controllers
             return NotFound();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Updates a collector value
         /// </summary>
@@ -277,7 +284,14 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PUT /collector-values/{id}
         ///     {
-        ///         
+        ///         "g4": 7.9,
+        ///         "vG8": 8.5,
+        ///         "f12": 9.6,
+        ///         "vF20": 12,
+        ///         "xF40": 28,
+        ///         "aU50": 72.5,
+        ///         "mS60": 125,
+        ///         "mS65": 465
         ///     }
         /// </remarks>
         /// <param name="id">Collector value ID</param>
@@ -323,7 +337,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Update specific fields of a collector value
         /// </summary>
@@ -332,7 +345,10 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PATCH /collector-values/{id}
         ///     [
-        ///	        
+        ///	        { "op": "replace", "path": "/mS65", "value": 2850 },
+        ///	        { "op": "copy", "from": "/g4", "path": "/f12" },
+        ///	        { "op": "move", "from": "/xF40", "path": "/aU50" },
+        ///	        { "op": "remove", "path": "/pF65" }	        
         ///     ]
         /// </remarks>
         /// <param name="id">Collector value ID</param>

@@ -10,8 +10,11 @@
         public double? AU50 { get; set; }
         public double? MS60 { get; set; }
         public double? MS63 { get; set; }
+        public double? MS65 { get; set; }
+        public double? MS70 { get; set; }
         public double? PF60 { get; set; }
         public double? PF63 { get; set; }
         public double? PF65 { get; set; }
+        public double? PF70 { get; set; }
     }
 }

@@ -201,7 +201,6 @@ namespace Recollectable.API.Controllers
             }
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Creates a user
         /// </summary>
@@ -210,7 +209,11 @@ namespace Recollectable.API.Controllers
         /// 
         ///     POST /register
         ///     {
-        ///         
+        ///         "userName": "Kara",
+        ///         "firstName": "Kara",
+        ///         "lastName": "Eberle",
+        ///         "password": "password123",
+        ///         "email": "kara.eberle@gmail.com"
         ///     }
         /// </remarks>
         /// <param name="user">Custom user</param>
@@ -266,7 +269,7 @@ namespace Recollectable.API.Controllers
             //TODO Activate Mailing Service + Edit appsettings.json
             //var confirmAccountModel = new AccountEmailViewModel(confirmationUrl, user.UserName);
             //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/ConfirmAccountEmail.cshtml", confirmAccountModel);
-            //await _emailService.Send(user.Email, "Activate your account", body, MailType.Confirmation);
+            //await _emailService.SendAsync(user.Email, "Activate your account", body, MailType.Confirmation);
 
             var returnedUser = _mapper.Map<UserDto>(newUser);
 
@@ -378,7 +381,7 @@ namespace Recollectable.API.Controllers
             //TODO Activate Mailing Service + Edit appsettings.json - Different link
             //var resetPasswordModel = new AccountEmailViewModel(resetUrl, null);
             //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/ResetPasswordEmail.cshtml", resetPasswordModel);
-            //await _emailService.Send(email, "Reset password", body, MailType.Reset);
+            //await _emailService.SendAsync(email, "Reset password", body, MailType.Reset);
 
             return NoContent();
         }
@@ -512,12 +515,11 @@ namespace Recollectable.API.Controllers
             //TODO Activate Mailing Service + Edit appsettings.json
             //var validatedAccountModel = new AccountEmailViewModel(null, user.UserName);
             //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/WelcomeAccountEmail.cshtml", validatedAccountModel);
-            //await _emailService.Send(email, "Welcome to Recollectable", body, MailType.Welcome);
+            //await _emailService.SendAsync(email, "Welcome to Recollectable", body, MailType.Welcome);
 
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Updates a user
         /// </summary>
@@ -526,7 +528,11 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PUT /users/{id}
         ///     {
-        ///         
+        ///         "userName": "Gavin",
+        ///         "firstName": "Gavin",
+        ///         "lastName": "Free",
+        ///         "password": "password123",
+        ///         "email": "gavin.free@gmail.com"
         ///     }
         /// </remarks>
         /// <param name="id">User ID</param>
@@ -571,7 +577,6 @@ namespace Recollectable.API.Controllers
             return NoContent();
         }
 
-        //TODO Add Sample request
         /// <summary>
         /// Update specific fields of a user
         /// </summary>
@@ -580,7 +585,10 @@ namespace Recollectable.API.Controllers
         /// 
         ///     PATCH /users/{id}
         ///     [
-        ///	        
+        ///	        { "op": "replace", "path": "/userName", "value": "Alfredo" },
+        ///	        { "op": "copy", "from": "/firstName", "path": "/userName" },
+        ///	        { "op": "move", "from": "/lastName", "path": "/userName" },
+        ///	        { "op": "remove", "path": "/userName" }  
         ///     ]
         /// </remarks>
         /// <param name="id">User ID</param>
