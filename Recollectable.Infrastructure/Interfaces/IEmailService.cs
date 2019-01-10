@@ -5,6 +5,6 @@ namespace Recollectable.Infrastructure.Interfaces
 {
     public interface IEmailService
     {
-        Task Send(string recipient, string subject, string message, MailType type);
+        Task SendAsync(string email, string subject, string message, MailType type);
     }
 }
