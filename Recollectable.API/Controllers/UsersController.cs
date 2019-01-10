@@ -269,7 +269,7 @@ namespace Recollectable.API.Controllers
             //TODO Activate Mailing Service + Edit appsettings.json
             //var confirmAccountModel = new AccountEmailViewModel(confirmationUrl, user.UserName);
             //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/ConfirmAccountEmail.cshtml", confirmAccountModel);
-            //await _emailService.Send(user.Email, "Activate your account", body, MailType.Confirmation);
+            //await _emailService.SendAsync(user.Email, "Activate your account", body, MailType.Confirmation);
 
             var returnedUser = _mapper.Map<UserDto>(newUser);
 
@@ -381,7 +381,7 @@ namespace Recollectable.API.Controllers
             //TODO Activate Mailing Service + Edit appsettings.json - Different link
             //var resetPasswordModel = new AccountEmailViewModel(resetUrl, null);
             //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/ResetPasswordEmail.cshtml", resetPasswordModel);
-            //await _emailService.Send(email, "Reset password", body, MailType.Reset);
+            //await _emailService.SendAsync(email, "Reset password", body, MailType.Reset);
 
             return NoContent();
         }
@@ -515,7 +515,7 @@ namespace Recollectable.API.Controllers
             //TODO Activate Mailing Service + Edit appsettings.json
             //var validatedAccountModel = new AccountEmailViewModel(null, user.UserName);
             //var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/WelcomeAccountEmail.cshtml", validatedAccountModel);
-            //await _emailService.Send(email, "Welcome to Recollectable", body, MailType.Welcome);
+            //await _emailService.SendAsync(email, "Welcome to Recollectable", body, MailType.Welcome);
 
             return NoContent();
         }

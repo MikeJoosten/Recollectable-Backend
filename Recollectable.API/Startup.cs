@@ -93,6 +93,9 @@ namespace Recollectable.API
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            // Setup Configuration
+            services.Configure<EmailConfiguration>(Configuration.GetSection("EmailConfiguration"));
+
             // Configure DbContext
             services.AddDbContext<RecollectableContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("RecollectableConnection")));
@@ -109,8 +112,8 @@ namespace Recollectable.API
                 options.Password.RequiredLength = 8;
 
                 options.User.RequireUniqueEmail = true;
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._!" +
-                    "àèìòùáéíóúäëïöüâêîôûãõßñç";
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ" +
+                "RSTUVWXYZ0123456789@-._!àèìòùáéíóúäëïöüâêîôûãõßñç";
 
                 options.Lockout.AllowedForNewUsers = true;
                 options.Lockout.MaxFailedAccessAttempts = 25;
@@ -189,7 +192,7 @@ namespace Recollectable.API
             services.AddSingleton<ITokenFactory, TokenFactory>();
             services.AddSingleton<IEmailService, EmailService>();
 
-            //Configure Comparers
+            // Configure Comparers
             services.AddSingleton<IEqualityComparer<Currency>, CurrencyComparer>();
 
             // Configure Auto Mapper
