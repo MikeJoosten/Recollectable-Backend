@@ -10,17 +10,19 @@ namespace Recollectable.Core.Shared.Validators
     {
         private readonly PagedList<T> _items;
         private readonly IEqualityComparer<T> _comparer;
+        private IMapper _mapper;
 
-        public DuplicateValidator(PagedList<T> items, IEqualityComparer<T> comparer)
+        public DuplicateValidator(PagedList<T> items, IEqualityComparer<T> comparer, IMapper mapper)
             : base("Object must be unique")
         {
             _items = items;
             _comparer = comparer;
+            _mapper = mapper;
         }
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
-            var newItem = Mapper.Map<T>(context.PropertyValue);
+            var newItem = _mapper.Map<T>(context.PropertyValue);
             return _items.Contains(newItem, _comparer) ? false : true;
         }
     }
