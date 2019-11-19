@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using Recollectable.API.Models.Collectables;
 using Recollectable.Core.Comparers;
 using Recollectable.Core.Entities.ResourceParameters;
@@ -11,15 +12,17 @@ namespace Recollectable.API.Validators.Collectables
         where T : CoinManipulationDto
     {
         private readonly ICoinService _service;
+        private IMapper _mapper;
 
-        public CoinManipulationDtoValidator(ICoinService service)
+        public CoinManipulationDtoValidator(ICoinService service, IMapper mapper)
         {
             _service = service;
+            _mapper = mapper;
 
             var coins = _service.FindCoins(new CurrenciesResourceParameters()).Result;
 
             RuleFor(b => b)
-                .IsDuplicate(coins, new CurrencyComparer(), "Coin must be unique");
+                .IsDuplicate(coins, new CurrencyComparer(), _mapper, "Coin must be unique");
 
             RuleFor(c => c.FaceValue)
                 .NotEmpty().WithMessage("Face value is a required field");

@@ -1,10 +1,10 @@
-﻿using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
+﻿using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq;
 
 namespace Recollectable.API.Filters
 {
-    public class FromHeaderAttributeFilter : IOperationFilter
+    //TODO Fix Swagger Header Filter
+    /*public class FromHeaderAttributeFilter : IOperationFilter
     {
         public void Apply(Operation operation, OperationFilterContext context)
         {
@@ -15,5 +15,5 @@ namespace Recollectable.API.Filters
                 operation.Parameters.Remove(attribute);
             }
         }
-    }
+    }*/
 }

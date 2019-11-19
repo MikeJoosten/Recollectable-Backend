@@ -15,9 +15,11 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using Recollectable.API.Filters;
 using Recollectable.API.Interfaces;
@@ -58,13 +60,21 @@ namespace Recollectable.API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Setup Json Serializer
+            services.AddControllers()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ContractResolver =
+                    new CamelCasePropertyNamesContractResolver();
+            });
+
             services.AddMvc(options => {
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new CustomXmlFormatter());
                 options.InputFormatters.Add(new XmlSerializerInputFormatter(options));
 
                 var jsonOutputFormatter = options.OutputFormatters
-                    .OfType<JsonOutputFormatter>().FirstOrDefault();
+                    .OfType<NewtonsoftJsonOutputFormatter>().FirstOrDefault();
 
                 if (jsonOutputFormatter != null)
                 {
@@ -79,11 +89,6 @@ namespace Recollectable.API
 
                 options.Filters.Add(new AuthorizeFilter(policy));*/
             })
-            .AddJsonOptions(options =>
-            {
-                options.SerializerSettings.ContractResolver =
-                    new CamelCasePropertyNamesContractResolver();
-            })
             .AddFluentValidation(options => 
             {
                 options.RegisterValidatorsFromAssemblyContaining<CoinCreationDtoValidator>();
@@ -91,7 +96,7 @@ namespace Recollectable.API
                 options.RegisterValidatorsFromAssemblyContaining<CountryCreationDtoValidator>();
                 options.RegisterValidatorsFromAssemblyContaining<UserCreationDtoValidator>();
             })
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             // Setup Configuration
             services.Configure<EmailConfiguration>(Configuration.GetSection("EmailConfiguration"));
@@ -162,8 +167,9 @@ namespace Recollectable.API
                 };
             });
 
+            //TODO Activate CORS in .NET Core 3.0
             // Configure CORS Requests
-            services.AddCors(options =>
+            /*services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
                     builder => builder
@@ -171,7 +177,7 @@ namespace Recollectable.API
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials());
-            });
+            });*/
 
             // Configure Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -218,23 +224,26 @@ namespace Recollectable.API
                     }
                 };
             });
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 
+            //TODO Update Swagger Terms of Service
             // Configure Swagger
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new Info
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "Recollectable API",
                     Description = "Base API for collection management",
-                    TermsOfService = "None",
-                    Contact = new Contact
+                    //TermsOfService = new Uri("None"),
+                    Contact = new OpenApiContact
                     {
                         Name = "Mike Joosten",
                         Email = string.Empty,
-                        Url = "https://www.linkedin.com/in/mike-joosten/"
+                        Url = new Uri("https://www.linkedin.com/in/mike-joosten/")
                     }
                 });
 
@@ -246,8 +255,9 @@ namespace Recollectable.API
                 xmlPath = Path.Combine(AppContext.BaseDirectory.Replace("API", "Core"), xmlFile);
                 options.IncludeXmlComments(xmlPath);
 
-                options.DocumentFilter<HttpRequestsFilter>();
-                options.OperationFilter<FromHeaderAttributeFilter>();
+                //TODO Update Swagger Filter
+                //options.DocumentFilter<HttpRequestsFilter>();
+                //options.OperationFilter<FromHeaderAttributeFilter>();
             });
 
             // Configure Versioning
@@ -260,7 +270,7 @@ namespace Recollectable.API
             });
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env,
+        public void Configure(IApplicationBuilder app, IHostEnvironment env,
             ILoggerFactory loggerFactory, RecollectableContext recollectableContext)
         {
             if (env.IsDevelopment())
@@ -279,9 +289,6 @@ namespace Recollectable.API
                     });
                 });
             }
-
-            Mapper.Initialize(cfg =>
-                cfg.AddProfile<RecollectableMappingProfile>());
 
             recollectableContext.Database.Migrate();
 
@@ -311,8 +318,11 @@ namespace Recollectable.API
                 await next();
             });
 
-            app.UseCors("CorsPolicy");
-            app.UseMvc();
+            //TODO Activate CORS in .NET Core 3.0
+            //app.UseCors("CorsPolicy");
+
+            app.UseRouting();
+            app.UseEndpoints(builder => builder.MapControllers());
         }
     }
 }

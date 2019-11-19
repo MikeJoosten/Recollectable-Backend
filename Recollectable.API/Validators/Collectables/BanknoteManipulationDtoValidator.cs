@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using Recollectable.API.Models.Collectables;
 using Recollectable.Core.Entities.Collectables;
 using Recollectable.Core.Entities.ResourceParameters;
@@ -13,16 +14,18 @@ namespace Recollectable.API.Validators.Collectables
     {
         private readonly IBanknoteService _service;
         private readonly IEqualityComparer<Currency> _comparer;
+        private IMapper _mapper;
 
-        public BanknoteManipulationDtoValidator(IBanknoteService service, IEqualityComparer<Currency> comparer)
+        public BanknoteManipulationDtoValidator(IBanknoteService service, IEqualityComparer<Currency> comparer, IMapper mapper)
         {
             _service = service;
             _comparer = comparer;
+            _mapper = mapper;
 
             var banknotes = _service.FindBanknotes(new CurrenciesResourceParameters()).Result;
 
             RuleFor(b => b)
-                .IsDuplicate(banknotes, _comparer, "Banknote must be unique");
+                .IsDuplicate(banknotes, _comparer, _mapper, "Banknote must be unique");
 
             RuleFor(b => b.FaceValue)
                 .NotEmpty().WithMessage("Face value is a required field");
