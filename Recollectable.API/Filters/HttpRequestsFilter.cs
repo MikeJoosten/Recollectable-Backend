@@ -3,7 +3,8 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Recollectable.API.Filters
 {
-    public class HttpRequestsFilter : IDocumentFilter
+    //TODO Fix Swagger Http Request Filter
+    /*public class HttpRequestsFilter : IDocumentFilter
     {
         public void Apply(SwaggerDocument document, DocumentFilterContext context)
         {
@@ -13,5 +14,5 @@ namespace Recollectable.API.Filters
                 path.Options = null;
             }
         }
-    }
+    }*/
 }
